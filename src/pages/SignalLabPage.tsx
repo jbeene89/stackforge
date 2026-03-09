@@ -214,11 +214,11 @@ export default function SignalLabPage() {
 
           <ScrollArea className="flex-1 mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <AnimatePresence mode="popLayout">
+              <AnimatePresence mode="popLayout" initial={false}>
                 {filtered.map(p => {
                   const inCart = cart.includes(p.id);
                   return (
-                    <motion.div key={p.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+                    <motion.div key={p.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}
                       className={cn("border rounded-lg p-4 cursor-pointer transition-colors hover:bg-accent/10", selected?.id === p.id && "ring-2 ring-primary")}
                       onClick={() => setSelected(p)}
                     >
