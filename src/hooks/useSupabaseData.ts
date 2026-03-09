@@ -267,10 +267,17 @@ export function useCreateStack() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (stack: Partial<DbStack>) => {
+    mutationFn: async (stack: { name: string; description?: string; nodes?: any[]; edges?: any[]; tags?: string[] }) => {
       const { data, error } = await supabase
         .from("stacks")
-        .insert({ ...stack, user_id: user!.id })
+        .insert({
+          name: stack.name,
+          description: stack.description || "",
+          nodes: stack.nodes || [],
+          edges: stack.edges || [],
+          tags: stack.tags || [],
+          user_id: user!.id,
+        })
         .select()
         .single();
       if (error) throw error;
