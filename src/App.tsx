@@ -58,6 +58,7 @@ const App = () => (
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/lab" element={<LabPage />} />
               <Route path="/lab/slicer" element={<SlicerLabPage />} />
+              <Route path="/build-ai" element={<AIBuilderPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />
