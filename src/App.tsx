@@ -33,6 +33,7 @@ import DataPipelinesPage from "./pages/DataPipelinesPage";
 import SignalLabPage from "./pages/SignalLabPage";
 import RoboticsPage from "./pages/RoboticsPage";
 import ForgeAIPage from "./pages/ForgeAIPage";
+import EdgeTrainingPage from "./pages/EdgeTrainingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/signals" element={<SignalLabPage />} />
               <Route path="/robotics" element={<RoboticsPage />} />
               <Route path="/forge-ai" element={<ForgeAIPage />} />
+              <Route path="/edge-training" element={<EdgeTrainingPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />

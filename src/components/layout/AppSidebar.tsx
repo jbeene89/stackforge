@@ -19,6 +19,7 @@ import {
   Radio,
   Joystick,
   Wand2,
+  CircuitBoard,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -52,6 +53,7 @@ const mainItems = [
   { title: "Robotics", url: "/robotics", icon: Joystick },
   { title: "Game Engine", url: "/engine", icon: Gamepad2 },
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
+  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 
