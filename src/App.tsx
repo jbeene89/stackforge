@@ -34,6 +34,7 @@ import SignalLabPage from "./pages/SignalLabPage";
 import RoboticsPage from "./pages/RoboticsPage";
 import ForgeAIPage from "./pages/ForgeAIPage";
 import EdgeTrainingPage from "./pages/EdgeTrainingPage";
+import ExportStudioPage from "./pages/ExportStudioPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
