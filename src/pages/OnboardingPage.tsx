@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { 
   Globe, Smartphone, Brain, Layers, Wrench, Search, 
   ArrowRight, ArrowLeft, Check, Sparkles, Rocket,
@@ -10,6 +9,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCreateProject } from "@/hooks/useSupabaseData";
+import { toast } from "sonner";
 
 const buildTypes = [
   { id: "web", icon: Globe, label: "Web App", desc: "Dashboard, CRM, portal, admin panel", color: "text-primary", gradient: "from-primary to-forge-cyan" },
