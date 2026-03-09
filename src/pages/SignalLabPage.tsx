@@ -251,7 +251,7 @@ export default function SignalLabPage() {
       {/* Detail panel */}
       <AnimatePresence>
         {selected && (
-          <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 400, opacity: 1 }} exit={{ width: 0, opacity: 0 }} className="border-l bg-card overflow-hidden">
+          <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 380, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.25, ease: "easeInOut" }} className="border-l bg-card overflow-hidden shrink-0">
             <ScrollArea className="h-full">
               <div className="p-6 space-y-5">
                 <div className="flex items-start justify-between">
