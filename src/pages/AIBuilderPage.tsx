@@ -172,7 +172,8 @@ export default function AIBuilderPage() {
           <h1 className="text-lg font-bold">Build-a-AI</h1>
           <Badge className="bg-forge-cyan/15 text-forge-cyan border-forge-cyan/30 text-[10px]">Local-First</Badge>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
+          <ExportToDialog context="ai-builder" projectName="Build-a-AI" />
           {(["configure", "tune", "deploy"] as BuildStep[]).map((s) => (
             <StepIndicator key={s} step={s} current={currentStep} />
           ))}
