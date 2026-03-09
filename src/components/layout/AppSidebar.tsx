@@ -21,6 +21,7 @@ import {
   Wand2,
   CircuitBoard,
   ScrollText,
+  Flame,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
