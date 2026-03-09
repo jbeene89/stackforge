@@ -1,25 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import {
   Check, X, Zap, CreditCard, Receipt,
   TrendingUp, ArrowRight, Crown, Sparkles,
-  BarChart3, Clock, Hash, Coins
+  BarChart3, Clock, Hash, Coins, Loader2
 } from "lucide-react";
 
-// ------- PLANS DATA -------
+const TIERS = {
+  free: { name: "Free", product_id: null, price_id: null },
+  pro: { name: "Pro", product_id: "prod_U7A3IhHjYVeMSC", price_id: "price_1T8vjqEgO8H7yovMYr4AlVvr" },
+  team: { name: "Team", product_id: "prod_U7A4PumaFQmKPQ", price_id: "price_1T8vkaEgO8H7yovM9bBWWGwU" },
+};
 
 const plans = [
   {
-    name: "Free",
+    tier: "free" as const,
     monthlyPrice: 0,
-    yearlyPrice: 0,
     desc: "For personal projects and exploration.",
     features: [
       { text: "3 projects", included: true },
@@ -31,14 +35,11 @@ const plans = [
       { text: "Version history", included: false },
       { text: "Team collaboration", included: false },
     ],
-    cta: "Current Plan",
-    highlight: false,
     icon: Zap,
   },
   {
-    name: "Pro",
+    tier: "pro" as const,
     monthlyPrice: 29,
-    yearlyPrice: 290,
     desc: "For builders shipping real products.",
     features: [
       { text: "Unlimited projects", included: true },
@@ -50,15 +51,13 @@ const plans = [
       { text: "Version history", included: true },
       { text: "Team collaboration", included: false },
     ],
-    cta: "Upgrade to Pro",
-    highlight: true,
     icon: Crown,
     badge: "Most Popular",
+    highlight: true,
   },
   {
-    name: "Team",
+    tier: "team" as const,
     monthlyPrice: 79,
-    yearlyPrice: 790,
     desc: "For teams building together.",
     features: [
       { text: "Everything in Pro", included: true },
@@ -70,32 +69,74 @@ const plans = [
       { text: "Dedicated support", included: true },
       { text: "SSO integration", included: true },
     ],
-    cta: "Contact Sales",
-    highlight: false,
     icon: Sparkles,
   },
 ];
 
-const billingHistory = [
-  { id: "inv-1", date: "Mar 1, 2026", amount: "$29.00", status: "paid", plan: "Pro" },
-  { id: "inv-2", date: "Feb 1, 2026", amount: "$29.00", status: "paid", plan: "Pro" },
-  { id: "inv-3", date: "Jan 1, 2026", amount: "$29.00", status: "paid", plan: "Pro" },
-  { id: "inv-4", date: "Dec 1, 2025", amount: "$0.00", status: "free", plan: "Free" },
-  { id: "inv-5", date: "Nov 1, 2025", amount: "$0.00", status: "free", plan: "Free" },
-];
-
-const usageMetrics = [
-  { label: "Runs Used", current: 2847, limit: 5000, icon: Zap, color: "text-primary" },
-  { label: "Modules Created", current: 12, limit: null, icon: Hash, color: "text-forge-cyan" },
-  { label: "Stacks Built", current: 4, limit: null, icon: BarChart3, color: "text-forge-amber" },
-  { label: "API Calls", current: 15420, limit: 50000, icon: TrendingUp, color: "text-forge-emerald" },
-];
-
-// ------- MAIN PAGE -------
-
 export default function PricingPage() {
-  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
-  const currentPlan = "Pro";
+  const { user } = useAuth();
+  const [subscriptionData, setSubscriptionData] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+    subscription_end: string | null;
+  }>({ subscribed: false, product_id: null, subscription_end: null });
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("check-subscription");
+      if (!error && data) setSubscriptionData(data);
+    } catch {} finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) checkSubscription();
+    else setLoading(false);
+  }, [user]);
+
+  // Check for success param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      toast.success("Subscription activated! Welcome aboard.");
+      checkSubscription();
+      window.history.replaceState({}, "", "/pricing");
+    }
+  }, []);
+
+  const currentTier = subscriptionData.subscribed
+    ? Object.entries(TIERS).find(([, t]) => t.product_id === subscriptionData.product_id)?.[0] || "free"
+    : "free";
+
+  const handleCheckout = async (tier: string) => {
+    const priceId = TIERS[tier as keyof typeof TIERS]?.price_id;
+    if (!priceId) return;
+    setCheckingOut(tier);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setCheckingOut(null);
+    }
+  };
+
+  const handleManage = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to open portal");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,42 +151,28 @@ export default function PricingPage() {
           <TabsList className="glass w-fit">
             <TabsTrigger value="plans" className="text-xs gap-1.5"><Crown className="h-3 w-3" /> Plans</TabsTrigger>
             <TabsTrigger value="usage" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Usage</TabsTrigger>
-            <TabsTrigger value="billing" className="text-xs gap-1.5"><Receipt className="h-3 w-3" /> Billing History</TabsTrigger>
           </TabsList>
 
-          {/* Plans Tab */}
           <TabsContent value="plans">
-            {/* Billing toggle */}
-            <div className="flex items-center justify-center gap-3 mb-8">
-              <span className={cn("text-sm", billing === "monthly" ? "font-semibold" : "text-muted-foreground")}>Monthly</span>
-              <button
-                onClick={() => setBilling(billing === "monthly" ? "yearly" : "monthly")}
-                className={cn(
-                  "relative w-12 h-6 rounded-full transition-colors",
-                  billing === "yearly" ? "bg-primary" : "bg-secondary"
-                )}
-              >
-                <div className={cn(
-                  "absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform",
-                  billing === "yearly" ? "translate-x-6" : "translate-x-0.5"
-                )} />
-              </button>
-              <span className={cn("text-sm", billing === "yearly" ? "font-semibold" : "text-muted-foreground")}>
-                Yearly
-              </span>
-              {billing === "yearly" && (
-                <Badge className="bg-forge-emerald/15 text-forge-emerald text-[10px]">Save 17%</Badge>
-              )}
-            </div>
+            {subscriptionData.subscribed && (
+              <div className="glass rounded-xl p-4 mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Current plan: <span className="text-primary">{TIERS[currentTier as keyof typeof TIERS]?.name}</span></p>
+                  {subscriptionData.subscription_end && (
+                    <p className="text-xs text-muted-foreground">Renews {new Date(subscriptionData.subscription_end).toLocaleDateString()}</p>
+                  )}
+                </div>
+                <Button variant="outline" size="sm" onClick={handleManage}>Manage Subscription</Button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {plans.map((plan, idx) => {
-                const price = billing === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
-                const isCurrent = plan.name === currentPlan;
+                const isCurrent = plan.tier === currentTier;
                 const PlanIcon = plan.icon;
                 return (
                   <motion.div
-                    key={plan.name}
+                    key={plan.tier}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
@@ -168,26 +195,18 @@ export default function PricingPage() {
 
                     <div className="flex items-center gap-2 mb-1">
                       <PlanIcon className="h-4 w-4 text-primary" />
-                      <h3 className="text-lg font-bold">{plan.name}</h3>
+                      <h3 className="text-lg font-bold">{TIERS[plan.tier]?.name}</h3>
                     </div>
                     <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-4xl font-extrabold">${price}</span>
-                      {price > 0 && (
-                        <span className="text-muted-foreground text-sm">
-                          /{billing === "monthly" ? "mo" : "yr"}
-                        </span>
-                      )}
+                      <span className="text-4xl font-extrabold">${plan.monthlyPrice}</span>
+                      {plan.monthlyPrice > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
                     </div>
                     <p className="text-sm text-muted-foreground mb-6">{plan.desc}</p>
 
                     <ul className="space-y-2.5 mb-8 flex-1">
                       {plan.features.map((f) => (
                         <li key={f.text} className={cn("flex items-center gap-2 text-sm", !f.included && "text-muted-foreground/50")}>
-                          {f.included ? (
-                            <Check className="h-4 w-4 text-forge-emerald shrink-0" />
-                          ) : (
-                            <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />
-                          )}
+                          {f.included ? <Check className="h-4 w-4 text-forge-emerald shrink-0" /> : <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />}
                           {f.text}
                         </li>
                       ))}
@@ -196,9 +215,18 @@ export default function PricingPage() {
                     <Button
                       className={cn("w-full", plan.highlight && "gradient-primary text-primary-foreground")}
                       variant={plan.highlight ? "default" : "outline"}
-                      disabled={isCurrent}
+                      disabled={isCurrent || checkingOut === plan.tier || plan.tier === "free"}
+                      onClick={() => handleCheckout(plan.tier)}
                     >
-                      {isCurrent ? "Current Plan" : plan.cta}
+                      {checkingOut === plan.tier ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isCurrent ? (
+                        "Current Plan"
+                      ) : plan.tier === "free" ? (
+                        "Free Forever"
+                      ) : (
+                        <>Upgrade <ArrowRight className="ml-2 h-4 w-4" /></>
+                      )}
                     </Button>
                   </motion.div>
                 );
@@ -206,99 +234,13 @@ export default function PricingPage() {
             </div>
           </TabsContent>
 
-          {/* Usage Tab */}
           <TabsContent value="usage">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {usageMetrics.map((metric, i) => {
-                const Icon = metric.icon;
-                const pct = metric.limit ? (metric.current / metric.limit) * 100 : null;
-                return (
-                  <motion.div
-                    key={metric.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="glass rounded-xl p-5"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Icon className={cn("h-4 w-4", metric.color)} />
-                      <span className="text-sm font-semibold">{metric.label}</span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-2xl font-bold">{metric.current.toLocaleString()}</span>
-                      {metric.limit && (
-                        <span className="text-sm text-muted-foreground">/ {metric.limit.toLocaleString()}</span>
-                      )}
-                      {!metric.limit && (
-                        <Badge variant="outline" className="text-[10px]">Unlimited</Badge>
-                      )}
-                    </div>
-                    {pct !== null && (
-                      <div className="space-y-1">
-                        <Progress value={pct} className="h-2" />
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>{pct.toFixed(0)}% used</span>
-                          <span>{(metric.limit! - metric.current).toLocaleString()} remaining</span>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <div className="glass rounded-xl p-5">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                Billing Period
-              </h3>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Current period: Mar 1 – Mar 31, 2026</span>
-                <span className="text-muted-foreground">Resets in <span className="font-semibold text-foreground">22 days</span></span>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Billing History */}
-          <TabsContent value="billing">
-            <div className="glass rounded-xl overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                    <th className="p-4">Invoice</th>
-                    <th className="p-4">Date</th>
-                    <th className="p-4">Plan</th>
-                    <th className="p-4">Amount</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {billingHistory.map((inv) => (
-                    <tr key={inv.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
-                      <td className="p-4 font-mono text-xs">{inv.id}</td>
-                      <td className="p-4">{inv.date}</td>
-                      <td className="p-4"><Badge variant="outline" className="text-[10px]">{inv.plan}</Badge></td>
-                      <td className="p-4 font-semibold">{inv.amount}</td>
-                      <td className="p-4">
-                        <Badge className={cn(
-                          "text-[10px]",
-                          inv.status === "paid" ? "bg-forge-emerald/15 text-forge-emerald" : "bg-muted text-muted-foreground"
-                        )}>
-                          {inv.status}
-                        </Badge>
-                      </td>
-                      <td className="p-4">
-                        {inv.status === "paid" && (
-                          <Button variant="ghost" size="sm" className="text-[10px] h-6">
-                            <Receipt className="h-3 w-3 mr-1" /> Download
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="glass rounded-xl p-6 text-center text-muted-foreground">
+              <BarChart3 className="h-8 w-8 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Usage tracking will populate as you use the platform.</p>
+              <Button variant="outline" size="sm" className="mt-4" onClick={checkSubscription}>
+                <Zap className="h-3 w-3 mr-1" /> Refresh Status
+              </Button>
             </div>
           </TabsContent>
         </Tabs>
