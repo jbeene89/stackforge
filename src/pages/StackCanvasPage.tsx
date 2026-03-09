@@ -269,49 +269,57 @@ export default function StackCanvasPage() {
         </div>
 
         {/* Inspector */}
-        {selectedNode && (
-          <div className="w-[300px] border-l border-border bg-muted/30 flex flex-col">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Node Inspector</h3>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setSelectedNode(null)}><X className="h-3 w-3" /></Button>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Label</label>
-                  <div className="glass rounded-lg px-3 py-2 text-sm">{selectedNode.label}</div>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Type</label>
-                  <Badge className={cn("text-[10px]", nodeColors[selectedNode.type])}>{selectedNode.type}</Badge>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Position</label>
-                  <div className="text-xs font-mono text-muted-foreground">x: {Math.round(selectedNode.x)}, y: {Math.round(selectedNode.y)}</div>
-                </div>
-                {selectedNode.moduleId && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-muted-foreground">Linked Module</label>
-                    <div className="glass rounded-lg px-3 py-2 text-xs text-primary">{selectedNode.moduleId}</div>
-                  </div>
-                )}
-                <Separator />
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Incoming Edges</label>
-                  {stack.edges.filter((e) => e.target === selectedNode.id).map((e) => (
-                    <div key={e.id} className="text-xs glass rounded px-2 py-1">{nodes.find((n) => n.id === e.source)?.label} → here</div>
-                  ))}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Outgoing Edges</label>
-                  {stack.edges.filter((e) => e.source === selectedNode.id).map((e) => (
-                    <div key={e.id} className="text-xs glass rounded px-2 py-1">here → {nodes.find((n) => n.id === e.target)?.label}</div>
-                  ))}
-                </div>
+        <AnimatePresence>
+          {selectedNode && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 300, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="border-l border-border bg-muted/30 flex flex-col overflow-hidden"
+            >
+              <div className="px-4 py-3 border-b border-border flex items-center justify-between min-w-[300px]">
+                <h3 className="text-sm font-semibold">Node Inspector</h3>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setSelectedNode(null)}><X className="h-3 w-3" /></Button>
               </div>
-            </ScrollArea>
-          </div>
-        )}
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-3 min-w-[300px]">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Label</label>
+                    <div className="glass rounded-lg px-3 py-2 text-sm">{selectedNode.label}</div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Type</label>
+                    <Badge className={cn("text-[10px]", nodeColors[selectedNode.type])}>{selectedNode.type}</Badge>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Position</label>
+                    <div className="text-xs font-mono text-muted-foreground">x: {Math.round(selectedNode.x)}, y: {Math.round(selectedNode.y)}</div>
+                  </div>
+                  {selectedNode.moduleId && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Linked Module</label>
+                      <div className="glass rounded-lg px-3 py-2 text-xs text-primary">{selectedNode.moduleId}</div>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Incoming Edges</label>
+                    {stack.edges.filter((e) => e.target === selectedNode.id).map((e) => (
+                      <div key={e.id} className="text-xs glass rounded px-2 py-1">{nodes.find((n) => n.id === e.source)?.label} → here</div>
+                    ))}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Outgoing Edges</label>
+                    {stack.edges.filter((e) => e.source === selectedNode.id).map((e) => (
+                      <div key={e.id} className="text-xs glass rounded px-2 py-1">here → {nodes.find((n) => n.id === e.target)?.label}</div>
+                    ))}
+                  </div>
+                </div>
+              </ScrollArea>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
