@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Github, Mail, ArrowRight, Eye, EyeOff, Check, X } from "lucide-react";
+import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -169,16 +169,6 @@ export default function SignupPage() {
               </svg>
               Continue with Google
             </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-center gap-2"
-              onClick={() => handleSocialLogin("github")}
-            >
-              <Github className="h-4 w-4" />
-              Continue with GitHub
-            </Button>
-          </div>
-
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
