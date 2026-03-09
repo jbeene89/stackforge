@@ -300,12 +300,12 @@ export default function OnboardingPage() {
             </Button>
             <Button
               onClick={handleContinue}
-              disabled={!canContinue()}
+              disabled={!canContinue() || creating}
               className="gradient-primary text-primary-foreground px-8"
             >
               {step === 3 ? (
                 <>
-                  <Rocket className="h-4 w-4 mr-2" /> Create Project
+                  <Rocket className="h-4 w-4 mr-2" /> {creating ? "Creating…" : "Create Project"}
                 </>
               ) : (
                 <>
