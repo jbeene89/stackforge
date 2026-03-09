@@ -724,7 +724,7 @@ export default function EdgeTrainingPage() {
                                s.type === "depth-camera" ? <Camera className="h-4 w-4 text-purple-500" /> :
                                s.type === "tof" ? <Eye className="h-4 w-4 text-orange-500" /> :
                                s.type === "imu" ? <Activity className="h-4 w-4 text-green-500" /> :
-                               s.type === "gps" ? <Compass className="h-4 w-4 text-blue-500" /> :
+                               s.type === "gps" ? <Navigation className="h-4 w-4 text-blue-500" /> :
                                <Radio className="h-4 w-4 text-muted-foreground" />}
                             </div>
                             <div>
