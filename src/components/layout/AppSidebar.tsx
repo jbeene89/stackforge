@@ -12,6 +12,8 @@ import {
   Sun,
   Moon,
   Cpu,
+  Atom,
+  Gamepad2,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -38,6 +40,8 @@ const mainItems = [
   { title: "AI Modules", url: "/modules", icon: Brain },
   { title: "Stacks", url: "/stacks", icon: Layers },
   { title: "Build-a-AI", url: "/build-ai", icon: Cpu },
+  { title: "Solvers", url: "/solvers", icon: Atom },
+  { title: "Game Engine", url: "/engine", icon: Gamepad2 },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 
