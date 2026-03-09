@@ -14,6 +14,11 @@ import {
   Cpu,
   Atom,
   Gamepad2,
+  Box,
+  Workflow,
+  Radio,
+  Joystick,
+  Wand2,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
