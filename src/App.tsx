@@ -28,6 +28,11 @@ import AdminPage from "./pages/AdminPage";
 import AccountPage from "./pages/AccountPage";
 import SolverLibraryPage from "./pages/SolverLibraryPage";
 import GameEnginePage from "./pages/GameEnginePage";
+import ModelZooPage from "./pages/ModelZooPage";
+import DataPipelinesPage from "./pages/DataPipelinesPage";
+import SignalLabPage from "./pages/SignalLabPage";
+import RoboticsPage from "./pages/RoboticsPage";
+import ForgeAIPage from "./pages/ForgeAIPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +68,11 @@ const App = () => (
               <Route path="/build-ai" element={<AIBuilderPage />} />
               <Route path="/solvers" element={<SolverLibraryPage />} />
               <Route path="/engine" element={<GameEnginePage />} />
+              <Route path="/models" element={<ModelZooPage />} />
+              <Route path="/pipelines" element={<DataPipelinesPage />} />
+              <Route path="/signals" element={<SignalLabPage />} />
+              <Route path="/robotics" element={<RoboticsPage />} />
+              <Route path="/forge-ai" element={<ForgeAIPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />
