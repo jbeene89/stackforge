@@ -14,7 +14,7 @@ import {
   Plus, Sun, Moon, Search, FileText, Sparkles, Zap, Globe, Smartphone
 } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
-import { mockProjects, mockModules, mockStacks } from "@/data/mock-data";
+import { useProjects } from "@/hooks/useSupabaseData";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -24,6 +24,7 @@ interface CommandPaletteProps {
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { data: projects } = useProjects();
 
   const runCommand = (callback: () => void) => {
     onOpenChange(false);
@@ -42,15 +43,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             New Project
             <span className="ml-auto text-xs text-muted-foreground">⌘N</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/modules/new"))}>
+          <CommandItem onSelect={() => runCommand(() => navigate("/modules"))}>
             <Brain className="mr-2 h-4 w-4" />
             New AI Module
-            <span className="ml-auto text-xs text-muted-foreground">⌘⇧M</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate("/stacks/new"))}>
+          <CommandItem onSelect={() => runCommand(() => navigate("/stacks"))}>
             <Layers className="mr-2 h-4 w-4" />
             New Stack
-            <span className="ml-auto text-xs text-muted-foreground">⌘⇧S</span>
           </CommandItem>
         </CommandGroup>
 
@@ -87,24 +86,27 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           </CommandItem>
         </CommandGroup>
 
-        <CommandSeparator />
-
-        <CommandGroup heading="Recent Projects">
-          {mockProjects.slice(0, 4).map((project) => (
-            <CommandItem
-              key={project.id}
-              onSelect={() => runCommand(() => navigate(`/projects/${project.id}`))}
-            >
-              {project.type === "web" && <Globe className="mr-2 h-4 w-4 text-primary" />}
-              {project.type === "android" && <Smartphone className="mr-2 h-4 w-4 text-forge-cyan" />}
-              {project.type === "module" && <Brain className="mr-2 h-4 w-4 text-forge-amber" />}
-              {project.type === "stack" && <Layers className="mr-2 h-4 w-4 text-forge-rose" />}
-              {project.type === "hybrid" && <Sparkles className="mr-2 h-4 w-4 text-forge-emerald" />}
-              {project.name}
-              <span className="ml-auto text-xs text-muted-foreground capitalize">{project.type}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+        {projects && projects.length > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Recent Projects">
+              {projects.slice(0, 4).map((project) => (
+                <CommandItem
+                  key={project.id}
+                  onSelect={() => runCommand(() => navigate(`/projects/${project.id}`))}
+                >
+                  {project.type === "web" && <Globe className="mr-2 h-4 w-4 text-primary" />}
+                  {project.type === "android" && <Smartphone className="mr-2 h-4 w-4 text-forge-cyan" />}
+                  {project.type === "module" && <Brain className="mr-2 h-4 w-4 text-forge-amber" />}
+                  {project.type === "stack" && <Layers className="mr-2 h-4 w-4 text-forge-rose" />}
+                  {project.type === "hybrid" && <Sparkles className="mr-2 h-4 w-4 text-forge-emerald" />}
+                  {project.name}
+                  <span className="ml-auto text-xs text-muted-foreground capitalize">{project.type}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
 
         <CommandSeparator />
 

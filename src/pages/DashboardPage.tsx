@@ -9,7 +9,6 @@ import {
   Zap, BarChart3, GitBranch
 } from "lucide-react";
 import { useProjects, useModules, useStacks, useRuns } from "@/hooks/useSupabaseData";
-import { mockProjects, mockModules, mockStacks, mockRuns } from "@/data/mock-data";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -41,23 +40,12 @@ export default function DashboardPage() {
   const [promptValue, setPromptValue] = useState("");
   const navigate = useNavigate();
 
-  const { data: dbProjects } = useProjects();
-  const { data: dbModules } = useModules();
-  const { data: dbStacks } = useStacks();
-  const { data: dbRuns } = useRuns();
+  const { data: projects, isLoading: loadingProjects } = useProjects();
+  const { data: modules } = useModules();
+  const { data: stacks } = useStacks();
+  const { data: runs } = useRuns();
 
-  // Use real data if available, fall back to mock
-  const projects = dbProjects && dbProjects.length > 0 ? dbProjects.map(p => ({
-    ...p, createdAt: p.created_at, updatedAt: p.updated_at, versionCount: p.version_count,
-  })) : mockProjects;
-
-  const modules = dbModules && dbModules.length > 0 ? dbModules : mockModules;
-  const stacks = dbStacks && dbStacks.length > 0 ? dbStacks : mockStacks;
-  const runs = dbRuns && dbRuns.length > 0 ? dbRuns.map(r => ({
-    ...r, targetName: r.target_name, totalDurationMs: r.total_duration_ms, startedAt: r.started_at,
-  })) : mockRuns;
-
-  const filtered = projects.filter((p: any) => {
+  const filtered = (projects || []).filter((p) => {
     if (filter !== "all" && p.type !== filter) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
@@ -68,10 +56,10 @@ export default function DashboardPage() {
     if (promptValue.trim()) navigate("/onboarding");
   };
 
-  const deployedCount = projects.filter((p: any) => p.status === "deployed").length;
-  const totalModules = modules.length;
-  const totalStacks = stacks.length;
-  const lastRun = runs[0] as any;
+  const deployedCount = (projects || []).filter((p) => p.status === "deployed").length;
+  const totalModules = modules?.length || 0;
+  const totalStacks = stacks?.length || 0;
+  const lastRun = runs?.[0];
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -113,7 +101,7 @@ export default function DashboardPage() {
           { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald" },
           { label: "Modules", value: totalModules, icon: Brain, color: "text-forge-amber" },
           { label: "Stacks", value: totalStacks, icon: Layers, color: "text-forge-rose" },
-          { label: "Last Run", value: lastRun ? `${(lastRun.totalDurationMs / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status },
+          { label: "Last Run", value: lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status },
         ].map((m) => (
           <div key={m.label} className="glass rounded-lg px-4 py-3 flex items-center gap-3">
             <m.icon className={cn("h-4 w-4", m.color)} />
@@ -148,60 +136,69 @@ export default function DashboardPage() {
       </div>
 
       {/* Project Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((project: any, i: number) => {
-          const Icon = typeIcons[project.type as ProjectType] || Layers;
-          return (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
-            >
-              <Link
-                to={`/projects/${project.id}`}
-                className="glass rounded-xl p-5 hover:border-primary/30 transition-all group block"
+      {loadingProjects ? (
+        <div className="text-center py-16 text-muted-foreground text-sm">Loading…</div>
+      ) : filtered.length === 0 && !search ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <Plus className="h-8 w-8 mx-auto mb-2 opacity-40" />
+          <p className="text-sm">No projects yet. Create your first project to get started.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((project, i) => {
+            const Icon = typeIcons[project.type as ProjectType] || Layers;
+            return (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className={cn(
-                    "w-9 h-9 rounded-lg flex items-center justify-center",
-                    project.type === "web" && "bg-primary/10",
-                    project.type === "android" && "bg-forge-cyan/10",
-                    project.type === "module" && "bg-forge-amber/10",
-                    project.type === "stack" && "bg-forge-rose/10",
-                    project.type === "hybrid" && "bg-forge-emerald/10",
-                  )}>
-                    <Icon className={cn("h-4 w-4", typeColors[project.type as ProjectType] || "text-primary")} />
+                <Link
+                  to={`/projects/${project.id}`}
+                  className="glass rounded-xl p-5 hover:border-primary/30 transition-all group block"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center",
+                      project.type === "web" && "bg-primary/10",
+                      project.type === "android" && "bg-forge-cyan/10",
+                      project.type === "module" && "bg-forge-amber/10",
+                      project.type === "stack" && "bg-forge-rose/10",
+                      project.type === "hybrid" && "bg-forge-emerald/10",
+                    )}>
+                      <Icon className={cn("h-4 w-4", typeColors[project.type as ProjectType] || "text-primary")} />
+                    </div>
+                    <Badge variant="secondary" className={cn("text-[10px]", statusColors[project.status] || "")}>
+                      {project.status}
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className={cn("text-[10px]", statusColors[project.status] || "")}>
-                    {project.status}
-                  </Badge>
-                </div>
-                <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">{project.name}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>v{project.versionCount || project.version_count || 1}</span>
-                  <span>{new Date(project.updatedAt || project.updated_at).toLocaleDateString()}</span>
-                </div>
-              </Link>
-            </motion.div>
-          );
-        })}
+                  <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">{project.name}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span>v{project.version_count}</span>
+                    <span>{new Date(project.updated_at).toLocaleDateString()}</span>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
 
-        <motion.button
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: filtered.length * 0.04 }}
-          onClick={() => navigate("/onboarding")}
-          className="glass rounded-xl p-5 border-2 border-dashed border-border hover:border-primary/30 transition-all flex flex-col items-center justify-center min-h-[160px] group"
-        >
-          <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
-          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">New project</span>
-        </motion.button>
-      </div>
+          <motion.button
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: filtered.length * 0.04 }}
+            onClick={() => navigate("/onboarding")}
+            className="glass rounded-xl p-5 border-2 border-dashed border-border hover:border-primary/30 transition-all flex flex-col items-center justify-center min-h-[160px] group"
+          >
+            <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
+            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">New project</span>
+          </motion.button>
+        </div>
+      )}
 
       {/* Recent runs */}
-      {runs.length > 0 && (
+      {runs && runs.length > 0 && (
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold flex items-center gap-2">
@@ -212,16 +209,16 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="glass rounded-xl divide-y divide-border/50">
-            {runs.slice(0, 5).map((run: any) => (
+            {runs.slice(0, 5).map((run) => (
               <Link to="/runs" key={run.id} className="flex items-center gap-3 p-3 hover:bg-secondary/20 transition-colors">
                 <CheckCircle2 className={cn("h-4 w-4", run.status === "success" ? "text-forge-emerald" : "text-destructive")} />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium">{run.targetName || run.target_name}</span>
+                  <span className="text-sm font-medium">{run.target_name}</span>
                   <span className="text-xs text-muted-foreground ml-2">
-                    {(run.steps?.length || 0)} steps · {((run.totalDurationMs || run.total_duration_ms || 0) / 1000).toFixed(1)}s
+                    {(Array.isArray(run.steps) ? run.steps : []).length} steps · {(run.total_duration_ms / 1000).toFixed(1)}s
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground">{new Date(run.startedAt || run.started_at).toLocaleDateString()}</span>
+                <span className="text-xs text-muted-foreground">{new Date(run.started_at).toLocaleDateString()}</span>
               </Link>
             ))}
           </div>
