@@ -255,6 +255,7 @@ export default function GameEnginePage() {
             ))}
           </div>
           <Separator orientation="vertical" className="h-6" />
+          <ExportToDialog context="game-engine" projectName="Game Scene" />
           <Button
             variant={isPlaying ? "destructive" : "default"}
             size="sm"
