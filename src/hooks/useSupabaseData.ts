@@ -170,6 +170,22 @@ export function useDeleteProject() {
 }
 
 // Modules
+export function useModule(id: string) {
+  return useQuery({
+    queryKey: ["modules", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("modules")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return data as DbModule;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useModules() {
   return useQuery({
     queryKey: ["modules"],
@@ -249,6 +265,22 @@ export function useDeleteModule() {
 }
 
 // Stacks
+export function useStack(id: string) {
+  return useQuery({
+    queryKey: ["stacks", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stacks")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return data as DbStack;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useStacks() {
   return useQuery({
     queryKey: ["stacks"],
@@ -312,7 +344,23 @@ export function useUpdateStack() {
   });
 }
 
+export function useDeleteStack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("stacks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["stacks"] });
+      toast.success("Stack deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 // Runs
+
 export function useRuns() {
   return useQuery({
     queryKey: ["runs"],
