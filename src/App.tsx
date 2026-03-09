@@ -26,6 +26,8 @@ import AIBuilderPage from "./pages/AIBuilderPage";
 import RunsPage from "./pages/RunsPage";
 import AdminPage from "./pages/AdminPage";
 import AccountPage from "./pages/AccountPage";
+import SolverLibraryPage from "./pages/SolverLibraryPage";
+import GameEnginePage from "./pages/GameEnginePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
