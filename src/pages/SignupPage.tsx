@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, Github, Mail, ArrowRight, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = useMemo(() => ({
