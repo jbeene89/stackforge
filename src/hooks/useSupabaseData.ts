@@ -188,10 +188,17 @@ export function useCreateModule() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (mod: Partial<DbModule>) => {
+    mutationFn: async (mod: { name: string; type?: "specialist" | "slm" | "router" | "evaluator" | "critic" | "comparator" | "formatter" | "extractor" | "classifier" | "memory-filter" | "human-gate" | "synthesizer"; role?: string; system_prompt?: string; goal?: string }) => {
       const { data, error } = await supabase
         .from("modules")
-        .insert({ ...mod, user_id: user!.id })
+        .insert({
+          name: mod.name,
+          type: mod.type || "specialist",
+          role: mod.role || "",
+          system_prompt: mod.system_prompt || "",
+          goal: mod.goal || "",
+          user_id: user!.id,
+        })
         .select()
         .single();
       if (error) throw error;
