@@ -162,27 +162,46 @@ export default function StackCanvasPage() {
                 <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
                   <path d="M0,0 L8,4 L0,8 Z" fill="hsl(var(--muted-foreground))" opacity="0.5" />
                 </marker>
+                <filter id="glow-edge">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
               </defs>
-              {stack.edges.map((edge) => {
+              {stack.edges.map((edge, i) => {
                 const source = nodes.find((n) => n.id === edge.source);
                 const target = nodes.find((n) => n.id === edge.target);
                 if (!source || !target) return null;
                 const sx = source.x + 160, sy = source.y + 32;
                 const tx = target.x, ty = target.y + 32;
                 const mx = (sx + tx) / 2;
+                const d = `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
+                const isConnected = selectedNode && (edge.source === selectedNode.id || edge.target === selectedNode.id);
                 return (
                   <g key={edge.id}>
-                    <path
-                      d={`M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`}
-                      stroke="hsl(var(--border))"
-                      strokeWidth={2}
+                    <motion.path
+                      d={d}
+                      stroke={isConnected ? "hsl(var(--primary))" : "hsl(var(--border))"}
+                      strokeWidth={isConnected ? 2.5 : 2}
                       fill="none"
                       markerEnd="url(#arrowhead)"
+                      filter={isConnected ? "url(#glow-edge)" : undefined}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
                     />
                     {edge.label && (
-                      <text x={mx} y={Math.min(sy, ty) - 8} textAnchor="middle" className="fill-muted-foreground" fontSize={9} opacity={0.6}>
+                      <motion.text
+                        x={mx} y={Math.min(sy, ty) - 8}
+                        textAnchor="middle" className="fill-muted-foreground" fontSize={9}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.6 }}
+                        transition={{ delay: 0.5 + i * 0.1 }}
+                      >
                         {edge.label}
-                      </text>
+                      </motion.text>
                     )}
                   </g>
                 );
