@@ -22,6 +22,7 @@ import StackCanvasPage from "./pages/StackCanvasPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import LabPage from "./pages/LabPage";
 import SlicerLabPage from "./pages/SlicerLabPage";
+import AIBuilderPage from "./pages/AIBuilderPage";
 import RunsPage from "./pages/RunsPage";
 import AdminPage from "./pages/AdminPage";
 import AccountPage from "./pages/AccountPage";
