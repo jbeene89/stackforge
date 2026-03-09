@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { mockStacks } from "@/data/mock-data";
 import { Badge } from "@/components/ui/badge";
