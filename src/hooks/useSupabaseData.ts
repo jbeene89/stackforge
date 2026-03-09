@@ -332,10 +332,17 @@ export function useCreateRun() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (run: Partial<DbRun>) => {
+    mutationFn: async (run: { target_type: string; target_id: string; target_name: string; status?: "pending" | "running" | "success" | "failed" | "paused"; steps?: any[] }) => {
       const { data, error } = await supabase
         .from("runs")
-        .insert({ ...run, user_id: user!.id })
+        .insert({
+          target_type: run.target_type,
+          target_id: run.target_id,
+          target_name: run.target_name,
+          status: run.status || "pending",
+          steps: run.steps || [],
+          user_id: user!.id,
+        })
         .select()
         .single();
       if (error) throw error;
