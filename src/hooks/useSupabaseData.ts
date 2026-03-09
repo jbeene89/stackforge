@@ -215,7 +215,7 @@ export function useCreateModule() {
 export function useUpdateModule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<DbModule> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; role?: string; system_prompt?: string; goal?: string; type?: "specialist" | "slm" | "router" | "evaluator" | "critic" | "comparator" | "formatter" | "extractor" | "classifier" | "memory-filter" | "human-gate" | "synthesizer" }) => {
       const { data, error } = await supabase
         .from("modules")
         .update(updates)
