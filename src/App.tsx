@@ -74,6 +74,7 @@ const App = () => (
               <Route path="/signals" element={<SignalLabPage />} />
               <Route path="/robotics" element={<RoboticsPage />} />
               <Route path="/forge-ai" element={<ForgeAIPage />} />
+              <Route path="/edge-training" element={<EdgeTrainingPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />
