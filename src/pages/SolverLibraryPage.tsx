@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ExportToDialog } from "@/components/ExportToDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -389,13 +390,16 @@ export default function SolverLibraryPage() {
               <h1 className="text-2xl font-bold">Solver Library</h1>
               <Badge variant="outline" className="text-[10px]">{solverCatalog.length} solvers</Badge>
             </div>
-            {cart.size > 0 && (
-              <Button className="gradient-primary text-primary-foreground">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                {cart.size} in Project
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <ExportToDialog context="solvers" projectName="Solver" />
+              {cart.size > 0 && (
+                <Button className="gradient-primary text-primary-foreground">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  {cart.size} in Project
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Search + Domain filter */}

@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { ExportToDialog } from "@/components/ExportToDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -254,6 +255,7 @@ export default function GameEnginePage() {
             ))}
           </div>
           <Separator orientation="vertical" className="h-6" />
+          <ExportToDialog context="game-engine" projectName="Game Scene" />
           <Button
             variant={isPlaying ? "destructive" : "default"}
             size="sm"

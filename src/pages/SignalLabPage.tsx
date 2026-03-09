@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { ExportToDialog } from "@/components/ExportToDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -188,6 +189,7 @@ export default function SignalLabPage() {
               <p className="text-sm text-muted-foreground">{processorCatalog.length} DSP processors — filtering, spectral, modulation, detection & more</p>
             </div>
             <div className="flex items-center gap-2">
+              <ExportToDialog context="signals" projectName="Signal Lab" />
               <Badge variant="outline" className="gap-1"><ShoppingCart className="h-3 w-3" />{cart.length}</Badge>
               {cart.length > 0 && (
                 <Button size="sm" onClick={() => { toast.success(`${cart.length} processors deployed`); setCart([]); }}>
