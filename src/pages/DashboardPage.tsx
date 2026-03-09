@@ -8,6 +8,7 @@ import {
   Sparkles, ArrowRight, Star, Clock, CheckCircle2, AlertCircle,
   Zap, BarChart3, GitBranch
 } from "lucide-react";
+import { useProjects, useModules, useStacks, useRuns } from "@/hooks/useSupabaseData";
 import { mockProjects, mockModules, mockStacks, mockRuns } from "@/data/mock-data";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,23 @@ export default function DashboardPage() {
   const [promptValue, setPromptValue] = useState("");
   const navigate = useNavigate();
 
-  const filtered = mockProjects.filter((p) => {
+  const { data: dbProjects } = useProjects();
+  const { data: dbModules } = useModules();
+  const { data: dbStacks } = useStacks();
+  const { data: dbRuns } = useRuns();
+
+  // Use real data if available, fall back to mock
+  const projects = dbProjects && dbProjects.length > 0 ? dbProjects.map(p => ({
+    ...p, createdAt: p.created_at, updatedAt: p.updated_at, versionCount: p.version_count,
+  })) : mockProjects;
+
+  const modules = dbModules && dbModules.length > 0 ? dbModules : mockModules;
+  const stacks = dbStacks && dbStacks.length > 0 ? dbStacks : mockStacks;
+  const runs = dbRuns && dbRuns.length > 0 ? dbRuns.map(r => ({
+    ...r, targetName: r.target_name, totalDurationMs: r.total_duration_ms, startedAt: r.started_at,
+  })) : mockRuns;
+
+  const filtered = projects.filter((p: any) => {
     if (filter !== "all" && p.type !== filter) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
@@ -51,11 +68,10 @@ export default function DashboardPage() {
     if (promptValue.trim()) navigate("/onboarding");
   };
 
-  // Real metrics
-  const deployedCount = mockProjects.filter((p) => p.status === "deployed").length;
-  const totalModules = mockModules.length;
-  const totalStacks = mockStacks.length;
-  const lastRun = mockRuns[0];
+  const deployedCount = projects.filter((p: any) => p.status === "deployed").length;
+  const totalModules = modules.length;
+  const totalStacks = stacks.length;
+  const lastRun = runs[0] as any;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -91,7 +107,7 @@ export default function DashboardPage() {
         </div>
       </motion.form>
 
-      {/* Status bar — real metrics, not vanity */}
+      {/* Status bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald" },
@@ -133,8 +149,8 @@ export default function DashboardPage() {
 
       {/* Project Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((project, i) => {
-          const Icon = typeIcons[project.type];
+        {filtered.map((project: any, i: number) => {
+          const Icon = typeIcons[project.type as ProjectType] || Layers;
           return (
             <motion.div
               key={project.id}
@@ -155,17 +171,17 @@ export default function DashboardPage() {
                     project.type === "stack" && "bg-forge-rose/10",
                     project.type === "hybrid" && "bg-forge-emerald/10",
                   )}>
-                    <Icon className={cn("h-4 w-4", typeColors[project.type])} />
+                    <Icon className={cn("h-4 w-4", typeColors[project.type as ProjectType] || "text-primary")} />
                   </div>
-                  <Badge variant="secondary" className={cn("text-[10px]", statusColors[project.status])}>
+                  <Badge variant="secondary" className={cn("text-[10px]", statusColors[project.status] || "")}>
                     {project.status}
                   </Badge>
                 </div>
                 <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">{project.name}</h3>
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>v{project.versionCount}</span>
-                  <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
+                  <span>v{project.versionCount || project.version_count || 1}</span>
+                  <span>{new Date(project.updatedAt || project.updated_at).toLocaleDateString()}</span>
                 </div>
               </Link>
             </motion.div>
@@ -184,8 +200,8 @@ export default function DashboardPage() {
         </motion.button>
       </div>
 
-      {/* Recent runs — actionable, not fluff */}
-      {mockRuns.length > 0 && (
+      {/* Recent runs */}
+      {runs.length > 0 && (
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold flex items-center gap-2">
@@ -196,14 +212,16 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="glass rounded-xl divide-y divide-border/50">
-            {mockRuns.map((run) => (
+            {runs.slice(0, 5).map((run: any) => (
               <Link to="/runs" key={run.id} className="flex items-center gap-3 p-3 hover:bg-secondary/20 transition-colors">
                 <CheckCircle2 className={cn("h-4 w-4", run.status === "success" ? "text-forge-emerald" : "text-destructive")} />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium">{run.targetName}</span>
-                  <span className="text-xs text-muted-foreground ml-2">{run.steps.length} steps · {(run.totalDurationMs / 1000).toFixed(1)}s</span>
+                  <span className="text-sm font-medium">{run.targetName || run.target_name}</span>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    {(run.steps?.length || 0)} steps · {((run.totalDurationMs || run.total_duration_ms || 0) / 1000).toFixed(1)}s
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">{new Date(run.startedAt).toLocaleDateString()}</span>
+                <span className="text-xs text-muted-foreground">{new Date(run.startedAt || run.started_at).toLocaleDateString()}</span>
               </Link>
             ))}
           </div>

@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, Github, Mail, ArrowRight, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = useMemo(() => ({
@@ -72,16 +74,24 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const { signUp, signInWithGoogle } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    navigate("/onboarding");
+    try {
+      await signUp(email, password, name);
+    } catch (err: any) {
+      toast.error(err.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Signup with ${provider}`);
-    navigate("/onboarding");
+  const handleSocialLogin = async (provider: string) => {
+    if (provider === "google") {
+      await signInWithGoogle();
+    }
   };
 
   return (
