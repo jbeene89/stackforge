@@ -11,6 +11,7 @@ import {
   Sparkles,
   Sun,
   Moon,
+  Cpu,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
