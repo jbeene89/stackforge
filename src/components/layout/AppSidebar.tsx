@@ -20,6 +20,7 @@ import {
   Joystick,
   Wand2,
   CircuitBoard,
+  ScrollText,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
