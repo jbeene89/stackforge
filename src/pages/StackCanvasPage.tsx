@@ -209,29 +209,53 @@ export default function StackCanvasPage() {
             </svg>
 
             {/* Nodes */}
-            {nodes.map((node) => {
-              const Icon = nodeIcons[node.type] || Brain;
-              const isSelected = selectedNode?.id === node.id;
-              return (
-                <div
-                  key={node.id}
-                  data-node
-                  onMouseDown={(e) => handleNodeMouseDown(e, node)}
-                  className={cn(
-                    "absolute w-[160px] rounded-xl border-2 p-3 cursor-pointer transition-shadow select-none",
-                    nodeColors[node.type] || "border-border bg-card",
-                    isSelected && "ring-2 ring-primary shadow-lg"
-                  )}
-                  style={{ left: node.x, top: node.y }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Icon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="text-xs font-semibold truncate">{node.label}</span>
-                  </div>
-                  <span className="text-[10px] opacity-60">{node.type}</span>
-                </div>
-              );
-            })}
+            <AnimatePresence>
+              {nodes.map((node, i) => {
+                const Icon = nodeIcons[node.type] || Brain;
+                const isSelected = selectedNode?.id === node.id;
+                return (
+                  <motion.div
+                    key={node.id}
+                    data-node
+                    layout
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{
+                      scale: 1,
+                      opacity: 1,
+                      boxShadow: isSelected
+                        ? "0 0 20px 4px hsl(var(--primary) / 0.35), 0 0 40px 8px hsl(var(--primary) / 0.15)"
+                        : "0 0 0px 0px transparent",
+                    }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{
+                      scale: { type: "spring", stiffness: 400, damping: 25, delay: i * 0.05 },
+                      opacity: { duration: 0.2, delay: i * 0.05 },
+                      boxShadow: { duration: 0.3 },
+                    }}
+                    whileHover={{ scale: 1.05, transition: { duration: 0.15 } }}
+                    whileTap={{ scale: 0.97 }}
+                    onMouseDown={(e) => handleNodeMouseDown(e, node)}
+                    className={cn(
+                      "absolute w-[160px] rounded-xl border-2 p-3 cursor-pointer select-none",
+                      nodeColors[node.type] || "border-border bg-card",
+                      isSelected && "ring-2 ring-primary"
+                    )}
+                    style={{ left: node.x, top: node.y }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <motion.div
+                        animate={isSelected ? { rotate: [0, -10, 10, 0] } : {}}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                      </motion.div>
+                      <span className="text-xs font-semibold truncate">{node.label}</span>
+                    </div>
+                    <span className="text-[10px] opacity-60">{node.type}</span>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           {/* Add node dropdown */}
