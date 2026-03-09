@@ -57,6 +57,7 @@ const mainItems = [
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
+  { title: "Experimental", url: "/experimental", icon: Flame },
 ];
 
 const toolItems = [
