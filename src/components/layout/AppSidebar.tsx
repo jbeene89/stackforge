@@ -11,6 +11,7 @@ import {
   Sparkles,
   Sun,
   Moon,
+  Cpu,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -36,6 +37,7 @@ const mainItems = [
   { title: "Projects", url: "/projects", icon: FolderOpen },
   { title: "AI Modules", url: "/modules", icon: Brain },
   { title: "Stacks", url: "/stacks", icon: Layers },
+  { title: "Build-a-AI", url: "/build-ai", icon: Cpu },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 

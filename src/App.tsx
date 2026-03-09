@@ -22,6 +22,7 @@ import StackCanvasPage from "./pages/StackCanvasPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import LabPage from "./pages/LabPage";
 import SlicerLabPage from "./pages/SlicerLabPage";
+import AIBuilderPage from "./pages/AIBuilderPage";
 import RunsPage from "./pages/RunsPage";
 import AdminPage from "./pages/AdminPage";
 import AccountPage from "./pages/AccountPage";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/lab" element={<LabPage />} />
               <Route path="/lab/slicer" element={<SlicerLabPage />} />
+              <Route path="/build-ai" element={<AIBuilderPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />
