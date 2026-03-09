@@ -108,10 +108,17 @@ export function useCreateProject() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (project: Partial<DbProject>) => {
+    mutationFn: async (project: { name: string; description?: string; type?: DbProject["type"]; status?: DbProject["status"]; tags?: string[] }) => {
       const { data, error } = await supabase
         .from("projects")
-        .insert({ ...project, user_id: user!.id })
+        .insert({
+          name: project.name,
+          description: project.description || "",
+          type: project.type || "web",
+          status: project.status || "draft",
+          tags: project.tags || [],
+          user_id: user!.id,
+        })
         .select()
         .single();
       if (error) throw error;
