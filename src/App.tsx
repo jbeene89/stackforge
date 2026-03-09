@@ -68,6 +68,11 @@ const App = () => (
               <Route path="/build-ai" element={<AIBuilderPage />} />
               <Route path="/solvers" element={<SolverLibraryPage />} />
               <Route path="/engine" element={<GameEnginePage />} />
+              <Route path="/models" element={<ModelZooPage />} />
+              <Route path="/pipelines" element={<DataPipelinesPage />} />
+              <Route path="/signals" element={<SignalLabPage />} />
+              <Route path="/robotics" element={<RoboticsPage />} />
+              <Route path="/forge-ai" element={<ForgeAIPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />

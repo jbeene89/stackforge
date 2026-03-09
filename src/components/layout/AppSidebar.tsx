@@ -46,7 +46,12 @@ const mainItems = [
   { title: "Stacks", url: "/stacks", icon: Layers },
   { title: "Build-a-AI", url: "/build-ai", icon: Cpu },
   { title: "Solvers", url: "/solvers", icon: Atom },
+  { title: "Model Zoo", url: "/models", icon: Box },
+  { title: "Pipelines", url: "/pipelines", icon: Workflow },
+  { title: "Signal Lab", url: "/signals", icon: Radio },
+  { title: "Robotics", url: "/robotics", icon: Joystick },
   { title: "Game Engine", url: "/engine", icon: Gamepad2 },
+  { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 
