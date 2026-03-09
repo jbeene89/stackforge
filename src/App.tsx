@@ -28,6 +28,11 @@ import AdminPage from "./pages/AdminPage";
 import AccountPage from "./pages/AccountPage";
 import SolverLibraryPage from "./pages/SolverLibraryPage";
 import GameEnginePage from "./pages/GameEnginePage";
+import ModelZooPage from "./pages/ModelZooPage";
+import DataPipelinesPage from "./pages/DataPipelinesPage";
+import SignalLabPage from "./pages/SignalLabPage";
+import RoboticsPage from "./pages/RoboticsPage";
+import ForgeAIPage from "./pages/ForgeAIPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
