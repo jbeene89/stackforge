@@ -617,6 +617,7 @@ export default function EdgeTrainingPage() {
             Edge AI Trainer
           </h1>
           <p className="text-[10px] text-muted-foreground mt-1">Train & deploy AI on Raspberry Pi with full sensor fusion</p>
+          <div className="mt-2"><ExportToDialog context="edge-training" projectName="Edge AI" triggerSize="sm" /></div>
         </div>
         <Separator />
         <div className="p-2 space-y-1">
