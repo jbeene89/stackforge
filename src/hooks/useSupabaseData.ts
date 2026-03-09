@@ -135,7 +135,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<DbProject> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; description?: string; type?: DbProject["type"]; status?: DbProject["status"]; tags?: string[] }) => {
       const { data, error } = await supabase
         .from("projects")
         .update(updates)
@@ -143,7 +143,7 @@ export function useUpdateProject() {
         .select()
         .single();
       if (error) throw error;
-      return data;
+      return data as DbProject;
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["projects"] });
