@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { mockStacks } from "@/data/mock-data";
 import { Badge } from "@/components/ui/badge";
@@ -161,27 +162,46 @@ export default function StackCanvasPage() {
                 <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
                   <path d="M0,0 L8,4 L0,8 Z" fill="hsl(var(--muted-foreground))" opacity="0.5" />
                 </marker>
+                <filter id="glow-edge">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
               </defs>
-              {stack.edges.map((edge) => {
+              {stack.edges.map((edge, i) => {
                 const source = nodes.find((n) => n.id === edge.source);
                 const target = nodes.find((n) => n.id === edge.target);
                 if (!source || !target) return null;
                 const sx = source.x + 160, sy = source.y + 32;
                 const tx = target.x, ty = target.y + 32;
                 const mx = (sx + tx) / 2;
+                const d = `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
+                const isConnected = selectedNode && (edge.source === selectedNode.id || edge.target === selectedNode.id);
                 return (
                   <g key={edge.id}>
-                    <path
-                      d={`M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`}
-                      stroke="hsl(var(--border))"
-                      strokeWidth={2}
+                    <motion.path
+                      d={d}
+                      stroke={isConnected ? "hsl(var(--primary))" : "hsl(var(--border))"}
+                      strokeWidth={isConnected ? 2.5 : 2}
                       fill="none"
                       markerEnd="url(#arrowhead)"
+                      filter={isConnected ? "url(#glow-edge)" : undefined}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
                     />
                     {edge.label && (
-                      <text x={mx} y={Math.min(sy, ty) - 8} textAnchor="middle" className="fill-muted-foreground" fontSize={9} opacity={0.6}>
+                      <motion.text
+                        x={mx} y={Math.min(sy, ty) - 8}
+                        textAnchor="middle" className="fill-muted-foreground" fontSize={9}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.6 }}
+                        transition={{ delay: 0.5 + i * 0.1 }}
+                      >
                         {edge.label}
-                      </text>
+                      </motion.text>
                     )}
                   </g>
                 );
@@ -189,29 +209,53 @@ export default function StackCanvasPage() {
             </svg>
 
             {/* Nodes */}
-            {nodes.map((node) => {
-              const Icon = nodeIcons[node.type] || Brain;
-              const isSelected = selectedNode?.id === node.id;
-              return (
-                <div
-                  key={node.id}
-                  data-node
-                  onMouseDown={(e) => handleNodeMouseDown(e, node)}
-                  className={cn(
-                    "absolute w-[160px] rounded-xl border-2 p-3 cursor-pointer transition-shadow select-none",
-                    nodeColors[node.type] || "border-border bg-card",
-                    isSelected && "ring-2 ring-primary shadow-lg"
-                  )}
-                  style={{ left: node.x, top: node.y }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Icon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="text-xs font-semibold truncate">{node.label}</span>
-                  </div>
-                  <span className="text-[10px] opacity-60">{node.type}</span>
-                </div>
-              );
-            })}
+            <AnimatePresence>
+              {nodes.map((node, i) => {
+                const Icon = nodeIcons[node.type] || Brain;
+                const isSelected = selectedNode?.id === node.id;
+                return (
+                  <motion.div
+                    key={node.id}
+                    data-node
+                    layout
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{
+                      scale: 1,
+                      opacity: 1,
+                      boxShadow: isSelected
+                        ? "0 0 20px 4px hsl(var(--primary) / 0.35), 0 0 40px 8px hsl(var(--primary) / 0.15)"
+                        : "0 0 0px 0px transparent",
+                    }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{
+                      scale: { type: "spring", stiffness: 400, damping: 25, delay: i * 0.05 },
+                      opacity: { duration: 0.2, delay: i * 0.05 },
+                      boxShadow: { duration: 0.3 },
+                    }}
+                    whileHover={{ scale: 1.05, transition: { duration: 0.15 } }}
+                    whileTap={{ scale: 0.97 }}
+                    onMouseDown={(e) => handleNodeMouseDown(e, node)}
+                    className={cn(
+                      "absolute w-[160px] rounded-xl border-2 p-3 cursor-pointer select-none",
+                      nodeColors[node.type] || "border-border bg-card",
+                      isSelected && "ring-2 ring-primary"
+                    )}
+                    style={{ left: node.x, top: node.y }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <motion.div
+                        animate={isSelected ? { rotate: [0, -10, 10, 0] } : {}}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                      </motion.div>
+                      <span className="text-xs font-semibold truncate">{node.label}</span>
+                    </div>
+                    <span className="text-[10px] opacity-60">{node.type}</span>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           {/* Add node dropdown */}
@@ -225,49 +269,57 @@ export default function StackCanvasPage() {
         </div>
 
         {/* Inspector */}
-        {selectedNode && (
-          <div className="w-[300px] border-l border-border bg-muted/30 flex flex-col">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Node Inspector</h3>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setSelectedNode(null)}><X className="h-3 w-3" /></Button>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Label</label>
-                  <div className="glass rounded-lg px-3 py-2 text-sm">{selectedNode.label}</div>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Type</label>
-                  <Badge className={cn("text-[10px]", nodeColors[selectedNode.type])}>{selectedNode.type}</Badge>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Position</label>
-                  <div className="text-xs font-mono text-muted-foreground">x: {Math.round(selectedNode.x)}, y: {Math.round(selectedNode.y)}</div>
-                </div>
-                {selectedNode.moduleId && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-muted-foreground">Linked Module</label>
-                    <div className="glass rounded-lg px-3 py-2 text-xs text-primary">{selectedNode.moduleId}</div>
-                  </div>
-                )}
-                <Separator />
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Incoming Edges</label>
-                  {stack.edges.filter((e) => e.target === selectedNode.id).map((e) => (
-                    <div key={e.id} className="text-xs glass rounded px-2 py-1">{nodes.find((n) => n.id === e.source)?.label} → here</div>
-                  ))}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Outgoing Edges</label>
-                  {stack.edges.filter((e) => e.source === selectedNode.id).map((e) => (
-                    <div key={e.id} className="text-xs glass rounded px-2 py-1">here → {nodes.find((n) => n.id === e.target)?.label}</div>
-                  ))}
-                </div>
+        <AnimatePresence>
+          {selectedNode && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 300, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="border-l border-border bg-muted/30 flex flex-col overflow-hidden"
+            >
+              <div className="px-4 py-3 border-b border-border flex items-center justify-between min-w-[300px]">
+                <h3 className="text-sm font-semibold">Node Inspector</h3>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setSelectedNode(null)}><X className="h-3 w-3" /></Button>
               </div>
-            </ScrollArea>
-          </div>
-        )}
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-3 min-w-[300px]">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Label</label>
+                    <div className="glass rounded-lg px-3 py-2 text-sm">{selectedNode.label}</div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Type</label>
+                    <Badge className={cn("text-[10px]", nodeColors[selectedNode.type])}>{selectedNode.type}</Badge>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Position</label>
+                    <div className="text-xs font-mono text-muted-foreground">x: {Math.round(selectedNode.x)}, y: {Math.round(selectedNode.y)}</div>
+                  </div>
+                  {selectedNode.moduleId && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-muted-foreground">Linked Module</label>
+                      <div className="glass rounded-lg px-3 py-2 text-xs text-primary">{selectedNode.moduleId}</div>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Incoming Edges</label>
+                    {stack.edges.filter((e) => e.target === selectedNode.id).map((e) => (
+                      <div key={e.id} className="text-xs glass rounded px-2 py-1">{nodes.find((n) => n.id === e.source)?.label} → here</div>
+                    ))}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">Outgoing Edges</label>
+                    {stack.edges.filter((e) => e.source === selectedNode.id).map((e) => (
+                      <div key={e.id} className="text-xs glass rounded px-2 py-1">here → {nodes.find((n) => n.id === e.target)?.label}</div>
+                    ))}
+                  </div>
+                </div>
+              </ScrollArea>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
