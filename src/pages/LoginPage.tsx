@@ -112,16 +112,6 @@ export default function LoginPage() {
               </svg>
               Continue with Google
             </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-center gap-2"
-              onClick={() => handleSocialLogin("github")}
-            >
-              <Github className="h-4 w-4" />
-              Continue with GitHub
-            </Button>
-          </div>
-
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
