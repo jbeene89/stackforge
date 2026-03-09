@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { 
   Globe, Smartphone, Brain, Layers, Wrench, Search, 
   ArrowRight, ArrowLeft, Check, Sparkles, Rocket,
@@ -10,6 +9,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCreateProject } from "@/hooks/useSupabaseData";
+import { toast } from "sonner";
 
 const buildTypes = [
   { id: "web", icon: Globe, label: "Web App", desc: "Dashboard, CRM, portal, admin panel", color: "text-primary", gradient: "from-primary to-forge-cyan" },
@@ -71,7 +72,19 @@ export default function OnboardingPage() {
   const [experience, setExperience] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
+  const createProject = useCreateProject();
+
+  // Map onboarding types to valid DB enum types
+  const typeMap: Record<string, "web" | "android" | "module" | "stack" | "hybrid"> = {
+    web: "web",
+    android: "android",
+    module: "module",
+    stack: "stack",
+    tool: "web",
+    research: "hybrid",
+  };
 
   const canContinue = () => {
     if (step === 1) return buildType !== null;
@@ -80,11 +93,24 @@ export default function OnboardingPage() {
     return false;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      navigate("/dashboard");
+      setCreating(true);
+      try {
+        await createProject.mutateAsync({
+          name: projectName.trim(),
+          type: typeMap[buildType || "web"] || "web",
+          description: selectedTemplate ? `Based on ${selectedTemplate} template` : "",
+          tags: buildType ? [buildType] : [],
+        });
+        navigate("/projects");
+      } catch (e: any) {
+        toast.error(e.message || "Failed to create project");
+      } finally {
+        setCreating(false);
+      }
     }
   };
 
@@ -274,12 +300,12 @@ export default function OnboardingPage() {
             </Button>
             <Button
               onClick={handleContinue}
-              disabled={!canContinue()}
+              disabled={!canContinue() || creating}
               className="gradient-primary text-primary-foreground px-8"
             >
               {step === 3 ? (
                 <>
-                  <Rocket className="h-4 w-4 mr-2" /> Create Project
+                  <Rocket className="h-4 w-4 mr-2" /> {creating ? "Creating…" : "Create Project"}
                 </>
               ) : (
                 <>
