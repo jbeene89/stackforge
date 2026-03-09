@@ -72,7 +72,19 @@ export default function OnboardingPage() {
   const [experience, setExperience] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
+  const createProject = useCreateProject();
+
+  // Map onboarding types to valid DB enum types
+  const typeMap: Record<string, "web" | "android" | "module" | "stack" | "hybrid"> = {
+    web: "web",
+    android: "android",
+    module: "module",
+    stack: "stack",
+    tool: "web",
+    research: "hybrid",
+  };
 
   const canContinue = () => {
     if (step === 1) return buildType !== null;
@@ -81,11 +93,24 @@ export default function OnboardingPage() {
     return false;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      navigate("/dashboard");
+      setCreating(true);
+      try {
+        await createProject.mutateAsync({
+          name: projectName.trim(),
+          type: typeMap[buildType || "web"] || "web",
+          description: selectedTemplate ? `Based on ${selectedTemplate} template` : "",
+          tags: buildType ? [buildType] : [],
+        });
+        navigate("/projects");
+      } catch (e: any) {
+        toast.error(e.message || "Failed to create project");
+      } finally {
+        setCreating(false);
+      }
     }
   };
 
