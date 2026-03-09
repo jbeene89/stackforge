@@ -14,7 +14,243 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      modules: {
+        Row: {
+          allowed_inputs: string[] | null
+          constraints: string[] | null
+          created_at: string
+          deterministic_mode: boolean
+          expected_outputs: string[] | null
+          goal: string | null
+          guardrails: string[] | null
+          id: string
+          max_tokens: number
+          memory_enabled: boolean
+          model: string | null
+          name: string
+          output_format: string | null
+          provider: string | null
+          role: string | null
+          slm_mode: boolean
+          system_prompt: string | null
+          tags: string[] | null
+          task_boundaries: string | null
+          temperature: number
+          tone: string | null
+          tool_access_enabled: boolean
+          type: Database["public"]["Enums"]["module_type"]
+          updated_at: string
+          user_id: string
+          version_count: number
+        }
+        Insert: {
+          allowed_inputs?: string[] | null
+          constraints?: string[] | null
+          created_at?: string
+          deterministic_mode?: boolean
+          expected_outputs?: string[] | null
+          goal?: string | null
+          guardrails?: string[] | null
+          id?: string
+          max_tokens?: number
+          memory_enabled?: boolean
+          model?: string | null
+          name: string
+          output_format?: string | null
+          provider?: string | null
+          role?: string | null
+          slm_mode?: boolean
+          system_prompt?: string | null
+          tags?: string[] | null
+          task_boundaries?: string | null
+          temperature?: number
+          tone?: string | null
+          tool_access_enabled?: boolean
+          type?: Database["public"]["Enums"]["module_type"]
+          updated_at?: string
+          user_id: string
+          version_count?: number
+        }
+        Update: {
+          allowed_inputs?: string[] | null
+          constraints?: string[] | null
+          created_at?: string
+          deterministic_mode?: boolean
+          expected_outputs?: string[] | null
+          goal?: string | null
+          guardrails?: string[] | null
+          id?: string
+          max_tokens?: number
+          memory_enabled?: boolean
+          model?: string | null
+          name?: string
+          output_format?: string | null
+          provider?: string | null
+          role?: string | null
+          slm_mode?: boolean
+          system_prompt?: string | null
+          tags?: string[] | null
+          task_boundaries?: string | null
+          temperature?: number
+          tone?: string | null
+          tool_access_enabled?: boolean
+          type?: Database["public"]["Enums"]["module_type"]
+          updated_at?: string
+          user_id?: string
+          version_count?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["project_status"]
+          tags: string[] | null
+          type: Database["public"]["Enums"]["project_type"]
+          updated_at: string
+          user_id: string
+          version_count: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["project_status"]
+          tags?: string[] | null
+          type?: Database["public"]["Enums"]["project_type"]
+          updated_at?: string
+          user_id: string
+          version_count?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["project_status"]
+          tags?: string[] | null
+          type?: Database["public"]["Enums"]["project_type"]
+          updated_at?: string
+          user_id?: string
+          version_count?: number
+        }
+        Relationships: []
+      }
+      runs: {
+        Row: {
+          completed_at: string | null
+          id: string
+          started_at: string
+          status: Database["public"]["Enums"]["run_status"]
+          steps: Json
+          target_id: string
+          target_name: string
+          target_type: string
+          total_duration_ms: number
+          user_id: string
+          version: number
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["run_status"]
+          steps?: Json
+          target_id: string
+          target_name: string
+          target_type: string
+          total_duration_ms?: number
+          user_id: string
+          version?: number
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["run_status"]
+          steps?: Json
+          target_id?: string
+          target_name?: string
+          target_type?: string
+          total_duration_ms?: number
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      stacks: {
+        Row: {
+          created_at: string
+          description: string | null
+          edges: Json
+          id: string
+          name: string
+          nodes: Json
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+          version_count: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          edges?: Json
+          id?: string
+          name: string
+          nodes?: Json
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+          version_count?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          edges?: Json
+          id?: string
+          name?: string
+          nodes?: Json
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+          version_count?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +259,22 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      module_type:
+        | "specialist"
+        | "slm"
+        | "router"
+        | "evaluator"
+        | "critic"
+        | "comparator"
+        | "formatter"
+        | "extractor"
+        | "classifier"
+        | "memory-filter"
+        | "human-gate"
+        | "synthesizer"
+      project_status: "draft" | "building" | "testing" | "deployed" | "archived"
+      project_type: "web" | "android" | "module" | "stack" | "hybrid"
+      run_status: "pending" | "running" | "success" | "failed" | "paused"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +401,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      module_type: [
+        "specialist",
+        "slm",
+        "router",
+        "evaluator",
+        "critic",
+        "comparator",
+        "formatter",
+        "extractor",
+        "classifier",
+        "memory-filter",
+        "human-gate",
+        "synthesizer",
+      ],
+      project_status: ["draft", "building", "testing", "deployed", "archived"],
+      project_type: ["web", "android", "module", "stack", "hybrid"],
+      run_status: ["pending", "running", "success", "failed", "paused"],
+    },
   },
 } as const
