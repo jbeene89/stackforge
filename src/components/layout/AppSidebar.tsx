@@ -22,9 +22,11 @@ import {
   CircuitBoard,
   ScrollText,
   Flame,
+  LogOut,
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
+import { useAuth } from "@/hooks/useAuth";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
