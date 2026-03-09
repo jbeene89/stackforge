@@ -249,6 +249,22 @@ export function useDeleteModule() {
 }
 
 // Stacks
+export function useStack(id: string) {
+  return useQuery({
+    queryKey: ["stacks", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stacks")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return data as DbStack;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useStacks() {
   return useQuery({
     queryKey: ["stacks"],
