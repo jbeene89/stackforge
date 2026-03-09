@@ -12,6 +12,8 @@ import {
   Sun,
   Moon,
   Cpu,
+  Atom,
+  Gamepad2,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
