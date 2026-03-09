@@ -20,6 +20,7 @@ import {
   Joystick,
   Wand2,
   CircuitBoard,
+  ScrollText,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -58,6 +59,7 @@ const mainItems = [
 ];
 
 const toolItems = [
+  { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
   { title: "Runs", url: "/runs", icon: Activity },
 ];
