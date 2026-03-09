@@ -16,8 +16,10 @@ import { toast } from "sonner";
 import {
   Cpu, Wifi, Battery, Thermometer, HardDrive, MemoryStick,
   Camera, Radio, Scan, Eye, Layers, Play, Square, RotateCcw,
-  Download, Upload, CheckCircle2, AlertTriangle, Activity,
-  Settings, ChevronRight, Zap, Box, Code2, Terminal,
+  Download, Upload, CheckCircle2, AlertTriangle, Activity, X,
+  Settings, ChevronRight, Zap, Box, Code2, Terminal, Navigation,
+  Gauge, Clock, ArrowRight, Sparkles, Loader2, Copy,
+  MonitorSpeaker, CircuitBoard, Usb
   Gauge, Clock, ArrowRight, Sparkles, Loader2, Copy,
   MonitorSpeaker, CircuitBoard, Usb
 } from "lucide-react";
