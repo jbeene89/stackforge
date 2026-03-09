@@ -170,6 +170,22 @@ export function useDeleteProject() {
 }
 
 // Modules
+export function useModule(id: string) {
+  return useQuery({
+    queryKey: ["modules", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("modules")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return data as DbModule;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useModules() {
   return useQuery({
     queryKey: ["modules"],
