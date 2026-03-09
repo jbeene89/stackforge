@@ -35,6 +35,7 @@ import RoboticsPage from "./pages/RoboticsPage";
 import ForgeAIPage from "./pages/ForgeAIPage";
 import EdgeTrainingPage from "./pages/EdgeTrainingPage";
 import ExportStudioPage from "./pages/ExportStudioPage";
+import ExperimentalPage from "./pages/ExperimentalPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/forge-ai" element={<ForgeAIPage />} />
               <Route path="/edge-training" element={<EdgeTrainingPage />} />
               <Route path="/export" element={<ExportStudioPage />} />
+              <Route path="/experimental" element={<ExperimentalPage />} />
               <Route path="/runs" element={<RunsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/account" element={<AccountPage />} />
