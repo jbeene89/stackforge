@@ -20,10 +20,7 @@ import {
   Settings, ChevronRight, Zap, Box, Code2, Terminal, Navigation,
   Gauge, Clock, ArrowRight, Sparkles, Loader2, Copy,
   MonitorSpeaker, CircuitBoard, Usb
-  Gauge, Clock, ArrowRight, Sparkles, Loader2, Copy,
-  MonitorSpeaker, CircuitBoard, Usb
 } from "lucide-react";
-
 // ── Hardware Profiles ──────────────────────────────────────
 interface PiProfile {
   id: string;
