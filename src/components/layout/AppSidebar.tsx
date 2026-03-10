@@ -23,6 +23,7 @@ import {
   ScrollText,
   Flame,
   LogOut,
+  Store,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { useLocation, useNavigate } from "react-router-dom";
