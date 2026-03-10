@@ -14,9 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   Play, Save, RotateCcw, Send,
-  Sparkles, Shield, Zap, Brain, Clock
+  Sparkles, Shield, Zap, Brain, Clock, MessageSquare
 } from "lucide-react";
 import { useModule, useUpdateModule, useCreateRun, streamAI } from "@/hooks/useSupabaseData";
+import DiscussionThread from "@/components/DiscussionThread";
 
 export default function ModuleBuilderPage() {
   const { id } = useParams();
@@ -104,6 +105,7 @@ export default function ModuleBuilderPage() {
           <span className="text-xs text-muted-foreground">v{mod.version_count}</span>
         </div>
         <div className="flex items-center gap-2">
+          <DiscussionThread targetType="module" targetId={mod.id} targetName={mod.name} />
           <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleSave} disabled={updateModule.isPending}>
             <Save className="h-4 w-4 mr-1" /> {updateModule.isPending ? "Saving…" : "Save"}
           </Button>

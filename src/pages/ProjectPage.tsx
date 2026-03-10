@@ -11,8 +11,9 @@ import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks
 import { toast } from "sonner";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
-  Smartphone, Trash2, Save, CheckCircle2
+  Smartphone, Trash2, Save, CheckCircle2, MessageSquare
 } from "lucide-react";
+import DiscussionThread from "@/components/DiscussionThread";
 import { cn } from "@/lib/utils";
 
 export default function ProjectPage() {
@@ -87,6 +88,7 @@ export default function ProjectPage() {
         <TabsList className="mx-6 mt-2 glass w-fit">
           <TabsTrigger value="preview"><Eye className="h-3 w-3 mr-1" /> Preview</TabsTrigger>
           <TabsTrigger value="runs"><Activity className="h-3 w-3 mr-1" /> Runs ({projectRuns.length})</TabsTrigger>
+         <TabsTrigger value="discussion"><MessageSquare className="h-3 w-3 mr-1" /> Discussion</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-3 w-3 mr-1" /> Settings</TabsTrigger>
         </TabsList>
 
@@ -138,6 +140,12 @@ export default function ProjectPage() {
               </div>
             </ScrollArea>
           )}
+        </TabsContent>
+
+        <TabsContent value="discussion" className="flex-1 m-0 mt-2 px-6 pb-4">
+          <div className="max-w-2xl">
+            <DiscussionThread targetType="project" targetId={project.id} targetName={project.name} />
+          </div>
         </TabsContent>
 
         <TabsContent value="settings" className="flex-1 m-0 mt-2 px-6 pb-4">

@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Plus, ZoomIn, ZoomOut, Maximize2, Play, Save,
-  Brain, Shield, Zap, GitBranch, ArrowRight
+  Brain, Shield, Zap, GitBranch, ArrowRight, MessageSquare
 } from "lucide-react";
 import { useStack, useUpdateStack } from "@/hooks/useSupabaseData";
 import type { StackNode, StackEdge } from "@/types";
+import DiscussionThread from "@/components/DiscussionThread";
 
 const nodeColors: Record<string, string> = {
   classifier: "border-forge-cyan bg-forge-cyan/10 text-forge-cyan",
@@ -150,6 +151,7 @@ export default function StackCanvasPage() {
           <Badge variant="outline" className="text-[10px]">{edges.length} edges</Badge>
         </div>
         <div className="flex items-center gap-2">
+          <DiscussionThread targetType="stack" targetId={stack.id} targetName={stack.name} />
           <Button variant="ghost" size="sm" className="text-forge-emerald"><Play className="h-4 w-4 mr-1" /> Run</Button>
           <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleSave} disabled={updateStack.isPending}>
             <Save className="h-4 w-4 mr-1" /> {updateStack.isPending ? "Saving…" : "Save"}
