@@ -604,7 +604,7 @@ void setup() {
         pinMode(ECHO_PINS[i], INPUT);
     }
     
-    Serial.println("StackForge sensor array initialized");
+    Serial.println("SoupyForge sensor array initialized");
 }
 
 float readUltrasonic(int idx) {
