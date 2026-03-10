@@ -561,7 +561,7 @@ class SoupyForgeInferenceNode(Node):
 
 def main():
     rclpy.init()
-    node = StackForgeInferenceNode()
+    node = SoupyForgeInferenceNode()
     rclpy.spin(node)
     rclpy.shutdown()
 
