@@ -197,7 +197,7 @@ const solverTargets: ExportTarget[] = [
     "from scipy.integrate import solve_ivp\\n",
     "import matplotlib.pyplot as plt\\n",
     "\\n",
-    "# Solver parameters (from StackForge config)\\n",
+    "# Solver parameters (from SoupyForge config)\\n",
     "dt = 0.001\\n",
     "t_end = 10.0\\n",
     "initial_state = [0.0, 1.0, 0.0, 0.0]\\n"
