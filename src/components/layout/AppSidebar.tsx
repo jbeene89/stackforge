@@ -24,6 +24,7 @@ import {
   Flame,
   LogOut,
 } from "lucide-react";
+import { CreditsBadge } from "@/components/CreditsBadge";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
@@ -175,6 +176,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-1">
+        <CreditsBadge collapsed={collapsed} />
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "sm"}
