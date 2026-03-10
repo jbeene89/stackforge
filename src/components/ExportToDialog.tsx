@@ -268,9 +268,9 @@ sgtitle('SoupyForge Solver Results');`
 import com.comsol.model.*;
 import com.comsol.model.util.*;
 
-public class StackForgeSolver {
+public class SoupyForgeSolver {
     public static Model run() {
-        Model model = ModelUtil.create("StackForge_Export");
+        Model model = ModelUtil.create("SoupyForge_Export");
         
         model.param().set("dt", "0.001[s]");
         model.param().set("t_end", "10[s]");
