@@ -14,6 +14,7 @@ import {
 import { useStack, useUpdateStack } from "@/hooks/useSupabaseData";
 import type { StackNode, StackEdge } from "@/types";
 import DiscussionThread from "@/components/DiscussionThread";
+import PublishToMarketplace from "@/components/PublishToMarketplace";
 
 const nodeColors: Record<string, string> = {
   classifier: "border-forge-cyan bg-forge-cyan/10 text-forge-cyan",
