@@ -105,7 +105,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">9. Limitation of Liability</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              To the maximum extent permitted by law, StackForge AI shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.
+              To the maximum extent permitted by law, SoupyForge shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.
             </p>
           </section>
 
