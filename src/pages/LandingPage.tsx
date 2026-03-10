@@ -340,7 +340,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-10">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Architecture principles</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2">How StackForge thinks about AI systems.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">How SoupyForge thinks about AI systems.</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             {architecturePoints.map((p, i) => (
