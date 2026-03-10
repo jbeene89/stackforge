@@ -213,12 +213,12 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center relative">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-4 sm:mb-6 text-balance">
-              Build <span className="gradient-text">specialist AI systems</span>,
+              Cook up <span className="gradient-text">specialist AI systems</span>,
               <br className="hidden md:block" /> not chatbots
             </h1>
             <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed text-balance">
-              Design narrow-purpose AI modules. Wire them into multi-step pipelines.
-              Generate Android apps for the field. Test and trace every step.
+              Brew narrow-purpose AI modules. Stir them into multi-step pipelines.
+              Serve Android apps for the field. Taste-test every step.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
               <Link to="/signup" className="w-full sm:w-auto">
