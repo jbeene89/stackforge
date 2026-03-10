@@ -883,7 +883,7 @@ with DAG(
     description: "Export pipeline as Docker Compose stack with all services, volumes, and networking.",
     formats: ["docker-compose.yml", "Dockerfile", ".env"],
     setupSteps: ["docker compose up -d", "docker compose logs -f", "docker compose ps"],
-    exportCode: `# docker-compose.yml — Auto-generated from StackForge
+    exportCode: `# docker-compose.yml — Auto-generated from SoupyForge
 version: '3.9'
 services:
   pipeline:
