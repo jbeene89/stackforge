@@ -723,10 +723,10 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
       
-    stackforge_controller:
+    soupyforge_controller:
       type: forward_command_controller/ForwardCommandController
       
-stackforge_controller:
+soupyforge_controller:
   ros__parameters:
     joints: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
     interface_name: effort
