@@ -407,9 +407,9 @@ TEMPLATE """{{ if .System }}<|system|>
     formats: [".json preset", "GGUF config"],
     setupSteps: ["Download LM Studio from lmstudio.ai", "File → Import Preset", "Load the matching GGUF model", "Start chatting or use the API server"],
     exportCode: `{
-  "name": "StackForge AI Export",
+   "name": "SoupyForge Export",
   "model": "phi-3-mini-4k-instruct.Q4_K_M.gguf",
-  "systemPrompt": "You are a specialized AI assistant built with StackForge AI. Respond with structured JSON. Never fabricate data.",
+  "systemPrompt": "You are a specialized AI assistant built with SoupyForge. Respond with structured JSON. Never fabricate data.",
   "parameters": {
     "temperature": 0.3,
     "topP": 0.9,
