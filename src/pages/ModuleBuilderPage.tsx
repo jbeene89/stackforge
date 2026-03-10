@@ -14,9 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   Play, Save, RotateCcw, Send,
-  Sparkles, Shield, Zap, Brain, Clock
+  Sparkles, Shield, Zap, Brain, Clock, MessageSquare
 } from "lucide-react";
 import { useModule, useUpdateModule, useCreateRun, streamAI } from "@/hooks/useSupabaseData";
+import DiscussionThread from "@/components/DiscussionThread";
 
 export default function ModuleBuilderPage() {
   const { id } = useParams();
