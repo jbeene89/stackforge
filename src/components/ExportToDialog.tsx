@@ -731,7 +731,7 @@ soupyforge_controller:
     joints: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
     interface_name: effort
     
-    # PID gains from StackForge tuning
+    # PID gains from SoupyForge tuning
     gains:
       joint_1: {p: 10.0, i: 0.1, d: 1.0}
       joint_2: {p: 10.0, i: 0.1, d: 1.0}
