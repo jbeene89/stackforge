@@ -114,7 +114,7 @@ void ASoupyForgeSceneLoader::BeginPlay() {
     exportCode: `# Godot 4 — Auto-generated Scene (scene.tscn)
 [gd_scene load_steps=5 format=3]
 
-[node name="StackForgeScene" type="Node3D"]
+[node name="SoupyForgeScene" type="Node3D"]
 
 [node name="GroundPlane" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
