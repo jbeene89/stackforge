@@ -815,7 +815,7 @@ OUTPUT="output.wav"
 
 sox "$INPUT" "$OUTPUT" \\
   highpass 80 \\               # DC removal
-  lowpass 4000 \\              # Anti-alias filter (from StackForge)
+  lowpass 4000 \\              # Anti-alias filter (from SoupyForge)
   sinc -n 127 1000 \\          # FIR bandpass
   compand 0.3,1 6:-70,-60,-20 \\  # Dynamic range compression
   norm -1 \\                   # Normalize to -1dB
