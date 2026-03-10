@@ -33,6 +33,7 @@ export default function ProjectPage() {
   const [initialized, setInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [streamProgress, setStreamProgress] = useState(0);
 
   if (isLoading) {
     return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
