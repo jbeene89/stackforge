@@ -209,6 +209,10 @@ export default function AccountPage() {
 
       <Separator />
 
+      <ReferralSection />
+
+      <Separator />
+
       <div className="glass rounded-xl p-6 space-y-4">
         <h2 className="font-semibold">Session</h2>
         <p className="text-sm text-muted-foreground">
