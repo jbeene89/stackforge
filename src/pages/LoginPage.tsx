@@ -76,7 +76,7 @@ export default function LoginPage() {
                 </div>
               ))}
             </div>
-            <span className="text-white/70 text-sm">12,000+ builders trust StackForge</span>
+            <span className="text-white/70 text-sm">12,000+ builders trust SoupyForge</span>
           </div>
         </motion.div>
         <div className="relative text-white/50 text-sm">
