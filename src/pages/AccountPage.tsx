@@ -106,7 +106,10 @@ export default function AccountPage() {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in max-w-2xl">
-      <h1 className="text-2xl font-bold">Account Settings</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-bold">Account Settings</h1>
+        {credits && <TierBadge tier={credits.tier} size="md" />}
+      </div>
 
       <div className="glass rounded-xl p-6 space-y-4">
         <h2 className="font-semibold">Profile</h2>
