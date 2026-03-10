@@ -3,6 +3,7 @@ import { Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TierBadge } from "@/components/TierBadge";
 
 export function CreditsBadge({ collapsed = false }: { collapsed?: boolean }) {
   const { data: credits } = useCredits();
