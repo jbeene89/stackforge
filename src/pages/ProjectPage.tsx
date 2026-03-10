@@ -140,9 +140,9 @@ export default function ProjectPage() {
         </TabsList>
 
         <TabsContent value="preview" className="flex-1 m-0 mt-2 px-6 pb-4">
-          <div className="glass rounded-xl h-full flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <div className="glass-strong rounded-xl p-8 mx-auto max-w-2xl">
+          <div className="glass rounded-xl h-full flex items-center justify-center overflow-auto">
+            <div className="text-center space-y-2 w-full max-w-2xl p-4">
+              <div className="glass-strong rounded-xl p-8 mx-auto">
                 <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
                   <div className="w-2.5 h-2.5 rounded-full bg-forge-rose" />
                   <div className="w-2.5 h-2.5 rounded-full bg-forge-amber" />
@@ -150,13 +150,19 @@ export default function ProjectPage() {
                   <span className="text-[10px] text-muted-foreground ml-2">{project.name}</span>
                 </div>
                 <div className="text-left space-y-3">
-                  <p className="text-sm text-muted-foreground">{project.description || "No description yet."}</p>
+                  {previewContent ? (
+                    <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">{previewContent}</pre>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">{project.description || "No description yet."}</p>
+                  )}
                   <div className="flex gap-1.5 flex-wrap">
                     {(project.tags || []).map((t) => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">Use the prompt bar above to iterate on this project</p>
+              <p className="text-xs text-muted-foreground">
+                {previewContent ? "AI-generated response shown above" : "Use the prompt bar above to iterate on this project"}
+              </p>
             </div>
           </div>
         </TabsContent>
