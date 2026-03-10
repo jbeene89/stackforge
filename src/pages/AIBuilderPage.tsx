@@ -260,10 +260,10 @@ export default function AIBuilderPage() {
                         >
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-mono font-semibold">{q.label}</span>
-                            <Badge variant="outline" className="text-[9px]">~{(parseFloat(model.params) * q.sizeMultiplier).toFixed(1)}GB</Badge>
+                            <Badge variant="outline" className="text-xs">~{(parseFloat(model.params) * q.sizeMultiplier).toFixed(1)}GB</Badge>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">{q.desc}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">Quality loss: <span className="text-foreground">{q.qualityLoss}</span></p>
+                          <p className="text-xs text-muted-foreground">{q.desc}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Quality loss: <span className="text-foreground">{q.qualityLoss}</span></p>
                         </button>
                       ))}
                     </div>
