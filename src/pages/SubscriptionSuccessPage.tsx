@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { TierBadge } from "@/components/TierBadge";
 import { useCredits } from "@/hooks/useCredits";
-import { useAuth } from "@/hooks/useAuth";
 import { CheckCircle2, ArrowRight, Sparkles, Coins } from "lucide-react";
 
 const confettiColors = [
