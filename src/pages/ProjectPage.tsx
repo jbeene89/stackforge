@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks/useSupabaseData";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
   Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
@@ -32,6 +33,7 @@ export default function ProjectPage() {
   const [initialized, setInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [streamProgress, setStreamProgress] = useState(0);
 
   if (isLoading) {
     return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
@@ -61,42 +63,73 @@ export default function ProjectPage() {
   const handleSendPrompt = async () => {
     if (!prompt.trim() || isProcessing) return;
     setIsProcessing(true);
+    setStreamProgress(0);
+    setPreviewContent("");
     try {
-      const response = await supabase.functions.invoke("ai-generate", {
-        body: {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/ai-generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || supabaseKey}`,
+          "apikey": supabaseKey,
+        },
+        body: JSON.stringify({
           messages: [
             { role: "user", content: `For a ${project.type} project called "${project.name}": ${prompt}` },
           ],
           mode: "code",
-        },
+        }),
       });
 
-      if (response.error) throw response.error;
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || `Error ${response.status}`);
+      }
 
-      // The edge function returns a streaming response, parse SSE
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response stream");
+
+      const decoder = new TextDecoder();
       let fullText = "";
-      if (typeof response.data === "string") {
-        // Parse SSE text
-        const lines = response.data.split("\n");
+      let chunksReceived = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        chunksReceived++;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
         for (const line of lines) {
           if (line.startsWith("data: ") && line !== "data: [DONE]") {
             try {
               const json = JSON.parse(line.slice(6));
               const content = json.choices?.[0]?.delta?.content;
-              if (content) fullText += content;
-            } catch { /* skip unparseable lines */ }
+              if (content) {
+                fullText += content;
+                setPreviewContent(fullText);
+              }
+            } catch { /* skip */ }
           }
         }
-      } else if (response.data?.choices) {
-        fullText = response.data.choices[0]?.message?.content || "";
+
+        // Progress: ramp up quickly at first, then slow down asymptotically toward 95%
+        const progress = Math.min(95, 100 * (1 - Math.exp(-chunksReceived / 8)));
+        setStreamProgress(Math.round(progress));
       }
 
-      if (!fullText) fullText = "Prompt received! Your project has been updated.";
-      setPreviewContent(fullText);
+      setStreamProgress(100);
+      if (!fullText) setPreviewContent("Prompt received! Your project has been updated.");
       toast.success("Prompt processed successfully");
       setPrompt("");
     } catch (e: any) {
       toast.error(e.message || "Failed to process prompt");
+      setStreamProgress(0);
     } finally {
       setIsProcessing(false);
     }
@@ -134,6 +167,12 @@ export default function ProjectPage() {
             {updateProject.isPending ? "Deploying…" : "Deploy"}
           </Button>
         </div>
+        {isProcessing && (
+          <div className="mt-2 flex items-center gap-3">
+            <Progress value={streamProgress} className="h-2 flex-1" />
+            <span className="text-xs text-muted-foreground w-10 text-right">{streamProgress}%</span>
+          </div>
+        )}
       </div>
 
       {/* Prompt bar */}
