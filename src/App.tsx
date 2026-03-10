@@ -42,6 +42,7 @@ import ExportStudioPage from "./pages/ExportStudioPage";
 import ExperimentalPage from "./pages/ExperimentalPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
+import MarketplacePage from "./pages/MarketplacePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
