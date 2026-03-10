@@ -52,7 +52,7 @@ function TypewriterDemo() {
           <div className="w-2.5 h-2.5 rounded-full bg-forge-amber/50" />
           <div className="w-2.5 h-2.5 rounded-full bg-forge-emerald/50" />
         </div>
-        <span className="text-[10px] text-muted-foreground ml-2 font-mono">stackforge prompt</span>
+        <span className="text-[10px] text-muted-foreground ml-2 font-mono">soupyforge prompt</span>
       </div>
       <div className="font-mono text-xs sm:text-sm text-foreground min-h-[24px]">
         <span className="text-primary">❯ </span>
