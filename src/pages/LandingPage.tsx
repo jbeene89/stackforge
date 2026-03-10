@@ -241,8 +241,8 @@ export default function LandingPage() {
       <section className="py-8 sm:py-10 px-4 sm:px-6 border-y border-border bg-secondary/20">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">StackForge is not a wrapper around ChatGPT.</span>{" "}
-            It's a modular AI development environment where every component has a defined role, explicit boundaries, and traceable behavior.
+            <span className="font-semibold text-foreground">SoupyForge is not a wrapper around ChatGPT.</span>{" "}
+            It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
           </p>
         </div>
       </section>
