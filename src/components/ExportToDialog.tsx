@@ -225,8 +225,8 @@ const solverTargets: ExportTarget[] = [
     description: "Export as .m script or Simulink .slx model with ODE solver configuration and plotting.",
     formats: [".m", ".slx", ".mat"],
     setupSteps: ["Open MATLAB R2024+", "Run exported .m script", "Or open .slx for Simulink block diagram", "Adjust parameters in workspace"],
-    exportCode: `% StackForge Solver Export — MATLAB
-% Auto-generated from StackForge AI
+    exportCode: `% SoupyForge Solver Export — MATLAB
+% Auto-generated from SoupyForge
 
 clear; clc; close all;
 
