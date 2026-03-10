@@ -6,41 +6,41 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 250 75% 57%;
+    --background: 30 25% 97%;
+    --foreground: 20 30% 11%;
+    --card: 30 20% 100%;
+    --card-foreground: 20 30% 11%;
+    --popover: 30 20% 100%;
+    --popover-foreground: 20 30% 11%;
+    --primary: 24 85% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 93%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 220 15% 93%;
-    --muted-foreground: 220 10% 46%;
-    --accent: 180 65% 45%;
+    --secondary: 30 15% 93%;
+    --secondary-foreground: 20 30% 11%;
+    --muted: 30 15% 93%;
+    --muted-foreground: 20 10% 46%;
+    --accent: 160 55% 42%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 250 75% 57%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 24 85% 55%;
     --radius: 0.75rem;
 
-    --forge-glow: 250 75% 57%;
-    --forge-cyan: 180 65% 45%;
+    --forge-glow: 24 85% 55%;
+    --forge-cyan: 180 55% 42%;
     --forge-amber: 38 92% 50%;
     --forge-rose: 350 80% 55%;
-    --forge-emerald: 160 65% 45%;
+    --forge-emerald: 145 60% 42%;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 250 75% 57%;
+    --sidebar-background: 30 20% 99%;
+    --sidebar-foreground: 20 30% 11%;
+    --sidebar-primary: 24 85% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 95%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 15% 90%;
-    --sidebar-ring: 250 75% 57%;
+    --sidebar-accent: 30 15% 95%;
+    --sidebar-accent-foreground: 20 30% 11%;
+    --sidebar-border: 30 15% 90%;
+    --sidebar-ring: 24 85% 55%;
   }
 
   .dark {
