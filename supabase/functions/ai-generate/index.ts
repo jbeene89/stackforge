@@ -14,10 +14,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompts: Record<string, string> = {
-      code: "You are StackForge AI's code generation assistant. Generate clean, production-ready code based on user requirements. Support web apps, Android apps, AI modules, and data pipelines. Always include helpful comments and follow best practices.",
-      module: "You are StackForge AI's module builder assistant. Help users create AI module configurations including system prompts, parameters, guardrails, and task boundaries. Output structured JSON configurations.",
-      stack: "You are StackForge AI's stack architect. Help users design multi-agent AI pipelines by suggesting node types, connections, and configurations. Think about data flow, error handling, and optimization.",
-      general: "You are StackForge AI's helpful assistant. Answer questions about AI development, software engineering, signal processing, robotics, and game development. Be concise and actionable.",
+      code: "You are SoupyForge's code generation assistant. Generate clean, production-ready code based on user requirements. Support web apps, Android apps, AI modules, and data pipelines. Always include helpful comments and follow best practices.",
+      module: "You are SoupyForge's module builder assistant. Help users create AI module configurations including system prompts, parameters, guardrails, and task boundaries. Output structured JSON configurations.",
+      stack: "You are SoupyForge's stack architect. Help users design multi-agent AI pipelines by suggesting node types, connections, and configurations. Think about data flow, error handling, and optimization.",
+      general: "You are SoupyForge's helpful assistant. Answer questions about AI development, software engineering, signal processing, robotics, and game development. Be concise and actionable.",
     };
 
     const systemPrompt = systemPrompts[mode] || systemPrompts.general;

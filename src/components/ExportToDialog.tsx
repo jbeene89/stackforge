@@ -466,7 +466,7 @@ print(f"✓ Uploaded to https://huggingface.co/{HF_REPO}")`
     description: "Export quantized ONNX model with optimized graph for cross-platform inference.",
     formats: [".onnx", "config.json", "tokenizer.json"],
     setupSteps: ["pip install onnxruntime optimum", "python export_onnx.py", "Copy model.onnx to target device", "Run with onnxruntime in any language"],
-    exportCode: `# export_onnx.py — Auto-generated from StackForge
+    exportCode: `# export_onnx.py — Auto-generated from SoupyForge
 from optimum.onnxruntime import ORTModelForCausalLM
 from transformers import AutoTokenizer
 
