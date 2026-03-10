@@ -900,7 +900,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: stackforge
+      POSTGRES_DB: soupyforge
       POSTGRES_PASSWORD: \${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
