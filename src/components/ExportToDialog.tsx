@@ -840,7 +840,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
 
 default_args = {
-    'owner': 'stackforge',
+    'owner': 'soupyforge',
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
     'email_on_failure': True,
