@@ -14,6 +14,7 @@ import {
   Smartphone, Trash2, Save, CheckCircle2, MessageSquare
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
+import PublishToMarketplace from "@/components/PublishToMarketplace";
 import { cn } from "@/lib/utils";
 
 export default function ProjectPage() {
