@@ -191,7 +191,7 @@ const solverTargets: ExportTarget[] = [
     setupSteps: ["pip install jupyter numpy scipy matplotlib", "jupyter notebook", "Open exported .ipynb", "Run All Cells"],
     exportCode: `{
  "cells": [
-  {"cell_type": "markdown", "source": ["# StackForge Solver Export\\n", "Auto-generated notebook"]},
+  {"cell_type": "markdown", "source": ["# SoupyForge Solver Export\\n", "Auto-generated notebook"]},
   {"cell_type": "code", "source": [
     "import numpy as np\\n",
     "from scipy.integrate import solve_ivp\\n",
