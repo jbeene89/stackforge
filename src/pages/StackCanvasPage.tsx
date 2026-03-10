@@ -14,6 +14,7 @@ import {
 import { useStack, useUpdateStack } from "@/hooks/useSupabaseData";
 import type { StackNode, StackEdge } from "@/types";
 import DiscussionThread from "@/components/DiscussionThread";
+import PublishToMarketplace from "@/components/PublishToMarketplace";
 
 const nodeColors: Record<string, string> = {
   classifier: "border-forge-cyan bg-forge-cyan/10 text-forge-cyan",
@@ -151,6 +152,12 @@ export default function StackCanvasPage() {
           <Badge variant="outline" className="text-[10px]">{edges.length} edges</Badge>
         </div>
         <div className="flex items-center gap-2">
+          <PublishToMarketplace
+            type="stack"
+            sourceId={stack.id}
+            sourceName={stack.name}
+            templateData={{ name: stack.name, description: stack.description, nodes: stack.nodes, edges: stack.edges }}
+          />
           <DiscussionThread targetType="stack" targetId={stack.id} targetName={stack.name} />
           <Button variant="ghost" size="sm" className="text-forge-emerald"><Play className="h-4 w-4 mr-1" /> Run</Button>
           <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleSave} disabled={updateStack.isPending}>

@@ -23,6 +23,7 @@ import {
   ScrollText,
   Flame,
   LogOut,
+  Store,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -60,6 +61,7 @@ const mainItems = [
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
+  { title: "Marketplace", url: "/marketplace", icon: Store },
   { title: "Experimental", url: "/experimental", icon: Flame },
 ];
 

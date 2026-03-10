@@ -14,6 +14,7 @@ import {
   Smartphone, Trash2, Save, CheckCircle2, MessageSquare
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
+import PublishToMarketplace from "@/components/PublishToMarketplace";
 import { cn } from "@/lib/utils";
 
 export default function ProjectPage() {
@@ -66,6 +67,12 @@ export default function ProjectPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">v{project.version_count}</span>
+          <PublishToMarketplace
+            type="project"
+            sourceId={project.id}
+            sourceName={project.name}
+            templateData={{ name: project.name, description: project.description, type: project.type, tags: project.tags }}
+          />
           <Button size="sm" className="gradient-primary text-primary-foreground">Deploy</Button>
         </div>
       </div>

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useModule, useUpdateModule, useCreateRun, streamAI } from "@/hooks/useSupabaseData";
 import DiscussionThread from "@/components/DiscussionThread";
+import PublishToMarketplace from "@/components/PublishToMarketplace";
 
 export default function ModuleBuilderPage() {
   const { id } = useParams();
@@ -105,6 +106,12 @@ export default function ModuleBuilderPage() {
           <span className="text-xs text-muted-foreground">v{mod.version_count}</span>
         </div>
         <div className="flex items-center gap-2">
+          <PublishToMarketplace
+            type="module"
+            sourceId={mod.id}
+            sourceName={mod.name}
+            templateData={{ name: mod.name, role: mod.role, type: mod.type, system_prompt: mod.system_prompt, goal: mod.goal, temperature: mod.temperature, max_tokens: mod.max_tokens }}
+          />
           <DiscussionThread targetType="module" targetId={mod.id} targetName={mod.name} />
           <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleSave} disabled={updateModule.isPending}>
             <Save className="h-4 w-4 mr-1" /> {updateModule.isPending ? "Saving…" : "Save"}

@@ -85,6 +85,57 @@ export type Database = {
           },
         ]
       }
+      marketplace_templates: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string
+          downloads: number
+          id: string
+          name: string
+          price_credits: number
+          source_id: string | null
+          status: string
+          tags: string[] | null
+          template_data: Json
+          tier: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string
+          downloads?: number
+          id?: string
+          name: string
+          price_credits?: number
+          source_id?: string | null
+          status?: string
+          tags?: string[] | null
+          template_data?: Json
+          tier?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string
+          downloads?: number
+          id?: string
+          name?: string
+          price_credits?: number
+          source_id?: string | null
+          status?: string
+          tags?: string[] | null
+          template_data?: Json
+          tier?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           allowed_inputs: string[] | null
@@ -241,6 +292,57 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_earnings: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_id: string
+          source_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_id: string
+          source_type?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_id?: string
+          source_type?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_id: string
+          revenue_share_pct: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_id: string
+          revenue_share_pct?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_id?: string
+          revenue_share_pct?: number
+        }
+        Relationships: []
+      }
       runs: {
         Row: {
           completed_at: string | null
@@ -321,6 +423,38 @@ export type Database = {
           version_count?: number
         }
         Relationships: []
+      }
+      template_purchases: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          credits_paid: number
+          id: string
+          template_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          credits_paid: number
+          id?: string
+          template_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          credits_paid?: number
+          id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_purchases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_api_keys: {
         Row: {
