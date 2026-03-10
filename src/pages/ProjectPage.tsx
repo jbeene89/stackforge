@@ -104,7 +104,7 @@ export default function ProjectPage() {
 
   const handleDeploy = () => {
     updateProject.mutate(
-      { id: project.id, status: "deployed" as any },
+      { id: project.id, status: "deployed" },
       {
         onSuccess: () => toast.success(`${project.name} marked as deployed!`),
         onError: () => toast.error("Failed to deploy"),
