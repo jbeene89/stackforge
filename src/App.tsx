@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 import LandingPage from "./pages/LandingPage";
 import PricingPage from "./pages/PricingPage";
