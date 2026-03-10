@@ -573,7 +573,7 @@ if __name__ == '__main__':
     description: "Export sensor reading code as Arduino sketch with I2C/SPI/UART driver integration.",
     formats: [".ino", "platformio.ini", "lib/"],
     setupSteps: ["Open Arduino IDE or PlatformIO", "File → Open exported sketch", "Select board (ESP32/Arduino Mega)", "Upload to device"],
-    exportCode: `// Arduino Sketch — Auto-generated from StackForge Edge AI
+    exportCode: `// Arduino Sketch — Auto-generated from SoupyForge Edge AI
 #include <Wire.h>
 #include <Adafruit_BNO08x.h>
 
