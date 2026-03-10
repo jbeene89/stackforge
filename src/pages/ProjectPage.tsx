@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useParams, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks
 import { toast } from "sonner";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
-  Smartphone, Trash2, Save, CheckCircle2, MessageSquare
+  Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
 import PublishToMarketplace from "@/components/PublishToMarketplace";
@@ -29,6 +30,8 @@ export default function ProjectPage() {
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [initialized, setInitialized] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [previewContent, setPreviewContent] = useState<string | null>(null);
 
   if (isLoading) {
     return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
@@ -55,6 +58,60 @@ export default function ProjectPage() {
     deleteProject.mutate(project.id, { onSuccess: () => navigate("/projects") });
   };
 
+  const handleSendPrompt = async () => {
+    if (!prompt.trim() || isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const response = await supabase.functions.invoke("ai-generate", {
+        body: {
+          messages: [
+            { role: "user", content: `For a ${project.type} project called "${project.name}": ${prompt}` },
+          ],
+          mode: "code",
+        },
+      });
+
+      if (response.error) throw response.error;
+
+      // The edge function returns a streaming response, parse SSE
+      let fullText = "";
+      if (typeof response.data === "string") {
+        // Parse SSE text
+        const lines = response.data.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ") && line !== "data: [DONE]") {
+            try {
+              const json = JSON.parse(line.slice(6));
+              const content = json.choices?.[0]?.delta?.content;
+              if (content) fullText += content;
+            } catch { /* skip unparseable lines */ }
+          }
+        }
+      } else if (response.data?.choices) {
+        fullText = response.data.choices[0]?.message?.content || "";
+      }
+
+      if (!fullText) fullText = "Prompt received! Your project has been updated.";
+      setPreviewContent(fullText);
+      toast.success("Prompt processed successfully");
+      setPrompt("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to process prompt");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeploy = () => {
+    updateProject.mutate(
+      { id: project.id, status: "deployed" },
+      {
+        onSuccess: () => toast.success(`${project.name} marked as deployed!`),
+        onError: () => toast.error("Failed to deploy"),
+      }
+    );
+  };
+
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
       {/* Header */}
@@ -73,7 +130,9 @@ export default function ProjectPage() {
             sourceName={project.name}
             templateData={{ name: project.name, description: project.description, type: project.type, tags: project.tags }}
           />
-          <Button size="sm" className="gradient-primary text-primary-foreground">Deploy</Button>
+          <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleDeploy} disabled={updateProject.isPending}>
+            {updateProject.isPending ? "Deploying…" : "Deploy"}
+          </Button>
         </div>
       </div>
 
@@ -85,8 +144,11 @@ export default function ProjectPage() {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={isAndroid ? "Describe the screen or feature you want to build..." : "Describe what you want to build or change..."}
             className="h-9 text-sm"
+            onKeyDown={(e) => { if (e.key === "Enter") handleSendPrompt(); }}
           />
-          <Button size="sm" className="gradient-primary text-primary-foreground px-4"><Send className="h-4 w-4" /></Button>
+          <Button size="sm" className="gradient-primary text-primary-foreground px-4" onClick={handleSendPrompt} disabled={isProcessing || !prompt.trim()}>
+            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
 
@@ -100,9 +162,9 @@ export default function ProjectPage() {
         </TabsList>
 
         <TabsContent value="preview" className="flex-1 m-0 mt-2 px-6 pb-4">
-          <div className="glass rounded-xl h-full flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <div className="glass-strong rounded-xl p-8 mx-auto max-w-2xl">
+          <div className="glass rounded-xl h-full flex items-center justify-center overflow-auto">
+            <div className="text-center space-y-2 w-full max-w-2xl p-4">
+              <div className="glass-strong rounded-xl p-8 mx-auto">
                 <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
                   <div className="w-2.5 h-2.5 rounded-full bg-forge-rose" />
                   <div className="w-2.5 h-2.5 rounded-full bg-forge-amber" />
@@ -110,13 +172,19 @@ export default function ProjectPage() {
                   <span className="text-[10px] text-muted-foreground ml-2">{project.name}</span>
                 </div>
                 <div className="text-left space-y-3">
-                  <p className="text-sm text-muted-foreground">{project.description || "No description yet."}</p>
+                  {previewContent ? (
+                    <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">{previewContent}</pre>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">{project.description || "No description yet."}</p>
+                  )}
                   <div className="flex gap-1.5 flex-wrap">
                     {(project.tags || []).map((t) => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">Use the prompt bar above to iterate on this project</p>
+              <p className="text-xs text-muted-foreground">
+                {previewContent ? "AI-generated response shown above" : "Use the prompt bar above to iterate on this project"}
+              </p>
             </div>
           </div>
         </TabsContent>
