@@ -12,12 +12,29 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Cpu, HardDrive, Gauge, Download, Play, RotateCcw,
   Send, CheckCircle2, AlertTriangle, Sparkles, Box,
   Smartphone, Monitor, Server, Zap, Brain, Shield,
-  FileJson, Terminal, Clock, ChevronRight
+  FileJson, Terminal, Clock, ChevronRight, Info
 } from "lucide-react";
+
+// ── Hover help tips ─────────────────────────────────────────
+function HelpTip({ tip }: { tip: string }) {
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="h-3.5 w-3.5 text-muted-foreground/60 hover:text-primary cursor-help inline-block ml-1 shrink-0" />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[280px] text-xs leading-relaxed">
+          {tip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 // ── Local model catalog ─────────────────────────────────────
 const LOCAL_MODELS = [
@@ -43,6 +60,13 @@ const DEPLOY_TARGETS = [
   { id: "edge", label: "Edge Server", icon: Server, desc: "Self-hosted API via vLLM or TGI", requirements: "GPU recommended, 16GB+ RAM" },
   { id: "browser", label: "In-Browser (WebLLM)", icon: Box, desc: "WebGPU-powered, no server needed", requirements: "Chrome 113+, 4GB+ VRAM" },
 ] as const;
+
+// Format tooltips
+const FORMAT_TIPS: Record<string, string> = {
+  GGUF: "A file format for AI models. Think of it like a .zip for AI brains — it's how the model gets saved to your computer.",
+  ONNX: "A universal AI format that works across different platforms, like a PDF for AI models.",
+  MLX: "Apple's format optimized for Mac chips (M1/M2/M3). Runs fastest on Apple hardware.",
+};
 
 type BuildStep = "configure" | "tune" | "deploy";
 
@@ -81,19 +105,64 @@ function ModelCard({
       <div className="flex items-start justify-between mb-2">
         <div>
           <h4 className="text-sm font-semibold">{model.name}</h4>
-          <p className="text-[10px] text-muted-foreground">{model.family}</p>
+          <p className="text-xs text-muted-foreground">{model.family}</p>
         </div>
-        <Badge variant="outline" className="text-[10px]">{model.params}</Badge>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div><Badge variant="outline" className="text-xs cursor-help">{model.params}</Badge></div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[240px] text-xs">
+              "{model.params}" means this model has {model.params} parameters — the "brain cells" of the AI. More = smarter but needs more computer power.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <p className="text-xs text-muted-foreground mb-3">{model.description}</p>
-      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1"><HardDrive className="h-3 w-3" /> {model.ramMin}–{model.ramRec}GB</span>
-        <span className="flex items-center gap-1"><Gauge className="h-3 w-3" /> {model.speed}</span>
-        <span className="flex items-center gap-1"><Sparkles className="h-3 w-3" /> {model.quality}</span>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center gap-1 cursor-help"><HardDrive className="h-3 w-3" /> {model.ramMin}–{model.ramRec}GB</span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[240px] text-xs">
+              RAM is your computer's short-term memory. This model needs {model.ramMin}–{model.ramRec}GB free. Check your computer's "About" page to see how much you have.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center gap-1 cursor-help"><Gauge className="h-3 w-3" /> {model.speed}</span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[220px] text-xs">
+              How quickly the AI responds. "Very fast" = near-instant, "moderate" = a few seconds per answer.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center gap-1 cursor-help"><Sparkles className="h-3 w-3" /> {model.quality}</span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[220px] text-xs">
+              How accurate and smart the AI's answers are. "High" = great answers, "basic" = simple tasks only.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div className="flex gap-1 mt-2">
         {model.formats.map((f) => (
-          <Badge key={f} variant="secondary" className="text-[9px] px-1.5 py-0">{f}</Badge>
+          <TooltipProvider key={f} delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div><Badge variant="secondary" className="text-[10px] px-1.5 py-0 cursor-help">{f}</Badge></div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[240px] text-xs">
+                {FORMAT_TIPS[f] || `${f} is a file format this model supports.`}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ))}
       </div>
     </button>
@@ -171,7 +240,16 @@ export default function AIBuilderPage() {
         <div className="flex items-center gap-3">
           <Brain className="h-5 w-5 text-forge-amber" />
           <h1 className="text-lg font-bold">Build-a-AI</h1>
-          <Badge className="bg-forge-cyan/15 text-forge-cyan border-forge-cyan/30 text-[10px]">Local-First</Badge>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div><Badge className="bg-forge-cyan/15 text-forge-cyan border-forge-cyan/30 text-[10px] cursor-help">Local-First</Badge></div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[260px] text-xs">
+                "Local-First" means the AI runs on YOUR device — your data never leaves your computer. No internet needed, no cloud fees, total privacy.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="flex items-center gap-3">
           <ExportToDialog context="ai-builder" projectName="Build-a-AI" />
@@ -199,19 +277,20 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Sparkles className="h-3 w-3" /> Identity
+                      <HelpTip tip="Give your AI a name and personality. This is like naming a new team member and describing their job." />
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs">AI Name</Label>
+                        <Label className="text-xs flex items-center">AI Name <HelpTip tip="A friendly name for your AI, like 'ScopeBot' or 'InvoiceHelper'. Just for your reference." /></Label>
                         <Input value={aiName} onChange={(e) => setAiName(e.target.value)} placeholder="e.g. ScopeBot" className="h-8 text-sm" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs">Role</Label>
+                        <Label className="text-xs flex items-center">Role <HelpTip tip="What job does this AI do? e.g. 'Classifies invoices' or 'Answers customer questions'. This helps you remember its purpose." /></Label>
                         <Input value={aiRole} onChange={(e) => setAiRole(e.target.value)} placeholder="e.g. Invoice classifier" className="h-8 text-sm" />
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs">System Prompt</Label>
+                      <Label className="text-xs flex items-center">System Prompt <HelpTip tip="Instructions that tell the AI how to behave — like a job description. For example: 'You are a helpful assistant that classifies construction documents.' The AI follows these rules for every conversation." /></Label>
                       <Textarea
                         value={systemPrompt}
                         onChange={(e) => setSystemPrompt(e.target.value)}
@@ -228,6 +307,7 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Cpu className="h-3 w-3" /> Base Model
+                      <HelpTip tip="Choose which AI brain to use. Smaller models (1–3B) are faster and use less memory. Larger models (7B+) are smarter but need a beefier computer. Pick based on your device and how complex your tasks are." />
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       {LOCAL_MODELS.map((m) => (
@@ -247,6 +327,7 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Zap className="h-3 w-3" /> Quantization
+                      <HelpTip tip="Quantization is like compressing a photo — it shrinks the AI model so it fits on your device. Lower numbers (4-bit) = smaller file, slightly less accurate. Higher numbers (16-bit) = full quality but much bigger file. For most people, Q4_K_M is the sweet spot." />
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       {QUANT_OPTIONS.map((q) => (
@@ -261,10 +342,25 @@ export default function AIBuilderPage() {
                         >
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-mono font-semibold">{q.label}</span>
-                            <Badge variant="outline" className="text-xs">~{(parseFloat(model.params) * q.sizeMultiplier).toFixed(1)}GB</Badge>
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div><Badge variant="outline" className="text-xs cursor-help">~{(parseFloat(model.params) * q.sizeMultiplier).toFixed(1)}GB</Badge></div>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-[220px] text-xs">
+                                  This is how much space the model will take on your hard drive — like downloading a {(parseFloat(model.params) * q.sizeMultiplier).toFixed(1)}GB file.
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                           <p className="text-xs text-muted-foreground">{q.desc}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Quality loss: <span className="text-foreground">{q.qualityLoss}</span></p>
+                          <p className="text-xs text-muted-foreground mt-1">Quality loss: <span className="text-foreground">{q.qualityLoss}</span>
+                            <HelpTip tip={
+                              q.qualityLoss === "none" ? "No quality loss — the AI performs at full accuracy, identical to the original." :
+                              q.qualityLoss === "negligible" ? "Almost no difference from full quality. You probably won't notice any change." :
+                              "Very slight reduction in accuracy. For most tasks, the answers are just as good."
+                            } />
+                          </p>
                         </button>
                       ))}
                     </div>
@@ -280,17 +376,27 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Gauge className="h-3 w-3" /> Inference Settings
+                      <HelpTip tip="These settings control how the AI thinks and responds. Don't worry — the defaults work great for most use cases. Only tweak if you know what you're doing!" />
                     </h3>
                     <div className="space-y-2">
-                      <div className="flex justify-between"><Label className="text-xs">Temperature</Label><span className="text-xs font-mono text-muted-foreground">{temperature}</span></div>
+                      <div className="flex justify-between items-center">
+                        <Label className="text-xs flex items-center">Temperature <HelpTip tip="Controls how creative vs. predictable the AI is. Low (0.0–0.3) = focused, consistent answers. High (0.7–1.0) = more creative, varied answers. For business tasks, keep it low." /></Label>
+                        <span className="text-xs font-mono text-muted-foreground">{temperature}</span>
+                      </div>
                       <Slider value={[temperature]} onValueChange={([v]) => setTemperature(v)} max={1} step={0.05} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between"><Label className="text-xs">Max Tokens</Label><span className="text-xs font-mono text-muted-foreground">{maxTokens}</span></div>
+                      <div className="flex justify-between items-center">
+                        <Label className="text-xs flex items-center">Max Tokens <HelpTip tip="The maximum length of the AI's response. 1 token ≈ ¾ of a word. 1024 tokens ≈ about 750 words, which is plenty for most answers." /></Label>
+                        <span className="text-xs font-mono text-muted-foreground">{maxTokens}</span>
+                      </div>
                       <Slider value={[maxTokens]} onValueChange={([v]) => setMaxTokens(v)} min={128} max={4096} step={128} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between"><Label className="text-xs">Context Window</Label><span className="text-xs font-mono text-muted-foreground">{contextWindow}</span></div>
+                      <div className="flex justify-between items-center">
+                        <Label className="text-xs flex items-center">Context Window <HelpTip tip="How much text the AI can 'remember' in one conversation. Think of it as short-term memory. Bigger = can handle longer documents, but uses more RAM." /></Label>
+                        <span className="text-xs font-mono text-muted-foreground">{contextWindow}</span>
+                      </div>
                       <Slider value={[contextWindow]} onValueChange={([v]) => setContextWindow(v)} min={1024} max={32768} step={1024} />
                     </div>
                   </section>
@@ -300,14 +406,15 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Shield className="h-3 w-3" /> Behavior Flags
+                      <HelpTip tip="These toggles change how the AI behaves. They're like 'modes' — turn them on or off depending on what you need." />
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { label: "Deterministic Mode", checked: deterministic, onChange: setDeterministic },
-                        { label: "Structured Output (JSON)", checked: structuredOutput, onChange: setStructuredOutput },
+                        { label: "Deterministic Mode", checked: deterministic, onChange: setDeterministic, tip: "When ON, the AI gives the same answer every time for the same question. Great for consistency. When OFF, answers may vary slightly each time." },
+                        { label: "Structured Output (JSON)", checked: structuredOutput, onChange: setStructuredOutput, tip: "When ON, the AI formats answers as JSON — a structured data format that apps can read. When OFF, answers come as plain text." },
                       ].map((flag) => (
                         <div key={flag.label} className="flex items-center justify-between glass rounded-lg px-3 py-2">
-                          <Label className="text-xs">{flag.label}</Label>
+                          <Label className="text-xs flex items-center">{flag.label} <HelpTip tip={flag.tip} /></Label>
                           <Switch checked={flag.checked} onCheckedChange={flag.onChange} className="scale-75" />
                         </div>
                       ))}
@@ -320,26 +427,27 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <HardDrive className="h-3 w-3" /> Hardware Requirements
+                      <HelpTip tip="This shows what your computer needs to run this AI. Check if your device meets these specs before downloading." />
                     </h3>
                     <div className="glass rounded-xl p-4 space-y-3">
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
                           <p className="text-lg font-bold text-foreground">{estimatedSize}<span className="text-xs text-muted-foreground ml-0.5">GB</span></p>
-                          <p className="text-[10px] text-muted-foreground">Model Size</p>
+                          <p className="text-xs text-muted-foreground flex items-center justify-center">Model Size <HelpTip tip="How much hard drive space the AI model file takes up. Similar to downloading a large app or game." /></p>
                         </div>
                         <div>
                           <p className="text-lg font-bold text-foreground">{model.ramRec}<span className="text-xs text-muted-foreground ml-0.5">GB</span></p>
-                          <p className="text-[10px] text-muted-foreground">RAM Recommended</p>
+                          <p className="text-xs text-muted-foreground flex items-center justify-center">RAM Needed <HelpTip tip="RAM is your computer's working memory (not storage). To check yours: Mac → Apple menu → About This Mac. Windows → Right-click Start → System." /></p>
                         </div>
                         <div>
                           <p className="text-lg font-bold text-foreground capitalize">{model.speed}</p>
-                          <p className="text-[10px] text-muted-foreground">Inference Speed</p>
+                          <p className="text-xs text-muted-foreground flex items-center justify-center">Speed <HelpTip tip="How fast the AI will respond on typical hardware. 'Fast' = under 1 second, 'Moderate' = 2–5 seconds per response." /></p>
                         </div>
                       </div>
                       {parseFloat(estimatedSize) > 4 && (
                         <div className="flex items-start gap-2 rounded-lg px-3 py-2 bg-forge-amber/10 border border-forge-amber/20">
                           <AlertTriangle className="h-3.5 w-3.5 text-forge-amber shrink-0 mt-0.5" />
-                          <span className="text-[11px]">This configuration may be slow on devices with less than {model.ramRec}GB RAM. Consider Q4_K_M quantization for smaller footprint.</span>
+                          <span className="text-xs">This configuration may be slow on devices with less than {model.ramRec}GB RAM. Consider Q4_K_M quantization for smaller footprint.</span>
                         </div>
                       )}
                     </div>
@@ -355,24 +463,33 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Monitor className="h-3 w-3" /> Deploy Target
+                      <HelpTip tip="Where do you want to run your AI? Pick the option that matches your device. 'Desktop' is the easiest for beginners." />
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {DEPLOY_TARGETS.map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => setDeployTarget(t.id)}
-                          className={`text-left rounded-xl p-4 border transition-all ${
-                            deployTarget === t.id
-                              ? "border-primary bg-primary/5 glow-primary"
-                              : "border-border hover:border-primary/40"
-                          }`}
-                        >
-                          <t.icon className={`h-5 w-5 mb-2 ${deployTarget === t.id ? "text-primary" : "text-muted-foreground"}`} />
-                          <h4 className="text-sm font-semibold">{t.label}</h4>
-                          <p className="text-[10px] text-muted-foreground mt-1">{t.desc}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1 font-mono">{t.requirements}</p>
-                        </button>
-                      ))}
+                      {DEPLOY_TARGETS.map((t) => {
+                        const targetTips: Record<string, string> = {
+                          android: "Run the AI directly on your Android phone or tablet. Your data stays on-device — no internet needed after setup.",
+                          desktop: "The easiest option! Run AI on your Windows, Mac, or Linux computer using a simple app called Ollama.",
+                          edge: "For advanced users: run the AI on your own server so multiple people or apps can use it over a network.",
+                          browser: "Experimental: runs AI right in your Chrome browser tab using your graphics card. No installs needed, but requires a modern GPU.",
+                        };
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => setDeployTarget(t.id)}
+                            className={`text-left rounded-xl p-4 border transition-all ${
+                              deployTarget === t.id
+                                ? "border-primary bg-primary/5 glow-primary"
+                                : "border-border hover:border-primary/40"
+                            }`}
+                          >
+                            <t.icon className={`h-5 w-5 mb-2 ${deployTarget === t.id ? "text-primary" : "text-muted-foreground"}`} />
+                            <h4 className="text-sm font-semibold flex items-center">{t.label} <HelpTip tip={targetTips[t.id]} /></h4>
+                            <p className="text-xs text-muted-foreground mt-1">{t.desc}</p>
+                            <p className="text-xs text-muted-foreground mt-1 font-mono">{t.requirements}</p>
+                          </button>
+                        );
+                      })}
                     </div>
                   </section>
 
@@ -382,6 +499,7 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <FileJson className="h-3 w-3" /> Export Configuration
+                      <HelpTip tip="A summary of all your choices. You can export this as a config file or copy a ready-to-use command." />
                     </h3>
                     <div className="glass rounded-xl p-4 space-y-3">
                       <div className="space-y-1 text-xs">
@@ -394,12 +512,30 @@ export default function AIBuilderPage() {
                       </div>
                       <Separator />
                       <div className="flex gap-2">
-                        <Button size="sm" className="flex-1 gradient-primary text-primary-foreground">
-                          <Download className="h-3.5 w-3.5 mr-1.5" /> Export GGUF Config
-                        </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
-                          <Terminal className="h-3.5 w-3.5 mr-1.5" /> Copy Ollama Command
-                        </Button>
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" className="flex-1 gradient-primary text-primary-foreground">
+                                <Download className="h-3.5 w-3.5 mr-1.5" /> Export GGUF Config
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[240px] text-xs">
+                              Downloads a settings file that tells tools like Ollama exactly how to set up your AI. Like a recipe card for your AI configuration.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" variant="outline" className="flex-1">
+                                <Terminal className="h-3.5 w-3.5 mr-1.5" /> Copy Ollama Command
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[240px] text-xs">
+                              Copies a ready-to-paste command for Ollama. Just open Terminal (Mac) or Command Prompt (Windows) and paste it.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   </section>
@@ -410,6 +546,7 @@ export default function AIBuilderPage() {
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Terminal className="h-3 w-3" /> Quick Start
+                      <HelpTip tip="Step-by-step commands to get your AI running. Click each one to copy it, then paste it where indicated. Hover over any command to see beginner-friendly instructions." />
                     </h3>
                     <div className="space-y-2">
                       {deployTarget === "desktop" && (
@@ -451,16 +588,17 @@ export default function AIBuilderPage() {
           <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <h2 className="text-sm font-semibold flex items-center gap-2">
               <Play className="h-3.5 w-3.5 text-forge-emerald" /> Simulated Local Test
+              <HelpTip tip="This panel lets you test how your AI would respond — it's a simulation, not the real model. Use it to preview behavior before deploying." />
             </h2>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Cpu className="h-3 w-3" />
               <span>{model.name}</span>
-              <Badge variant="outline" className="text-[9px]">{quantization}</Badge>
+              <Badge variant="outline" className="text-xs">{quantization}</Badge>
             </div>
           </div>
 
           <div className="p-4 space-y-2 flex-shrink-0">
-            <Label className="text-xs">Test Prompt</Label>
+            <Label className="text-xs flex items-center">Test Prompt <HelpTip tip="Type a question or instruction here to see how the AI would respond. Try things like 'Classify this invoice' or 'Extract items from this list'." /></Label>
             <Textarea
               value={testInput}
               onChange={(e) => setTestInput(e.target.value)}
@@ -488,10 +626,19 @@ export default function AIBuilderPage() {
             <div className="px-4 py-2 flex items-center justify-between">
               <Label className="text-xs">Output</Label>
               {testOutput && (
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   <span>~280ms</span>
-                  <Badge variant="outline" className="text-[10px] text-forge-emerald border-forge-emerald/30">local</Badge>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div><Badge variant="outline" className="text-xs text-forge-emerald border-forge-emerald/30 cursor-help">local</Badge></div>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[220px] text-xs">
+                        This ran entirely on your device — no data was sent to the cloud. 280ms means it took about a quarter of a second.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               )}
             </div>
@@ -502,13 +649,13 @@ export default function AIBuilderPage() {
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <RotateCcw className="h-8 w-8 animate-spin mb-3 text-primary" />
                   <p className="text-sm">Simulating local inference...</p>
-                  <p className="text-[10px]">{model.name} · {quantization}</p>
+                  <p className="text-xs">{model.name} · {quantization}</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Cpu className="h-8 w-8 mb-3 animate-glow-pulse" />
                   <p className="text-sm">No output yet</p>
-                  <p className="text-[10px]">Run a test to simulate local inference</p>
+                  <p className="text-xs">Run a test to simulate local inference</p>
                 </div>
               )}
             </ScrollArea>
@@ -519,15 +666,15 @@ export default function AIBuilderPage() {
             <div className="glass rounded-lg p-3 grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-xs font-bold">{estimatedSize}GB</p>
-                <p className="text-[9px] text-muted-foreground">Disk</p>
+                <p className="text-xs text-muted-foreground">Disk</p>
               </div>
               <div>
                 <p className="text-xs font-bold">{model.ramMin}–{model.ramRec}GB</p>
-                <p className="text-[9px] text-muted-foreground">RAM</p>
+                <p className="text-xs text-muted-foreground">RAM</p>
               </div>
               <div>
                 <p className="text-xs font-bold capitalize">{model.speed}</p>
-                <p className="text-[9px] text-muted-foreground">Speed</p>
+                <p className="text-xs text-muted-foreground">Speed</p>
               </div>
             </div>
           </div>
@@ -556,7 +703,6 @@ function CodeBlock({ label, code }: { label: string; code: string }) {
   const tip = STEP_TIPS[label];
 
   const handleClick = () => {
-    // For "Install Ollama", open the website directly
     if (label === "Install Ollama") {
       window.open("https://ollama.com/download", "_blank");
       toast.success("Opened ollama.com in your browser");
@@ -587,7 +733,6 @@ function CodeBlock({ label, code }: { label: string; code: string }) {
         <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed text-foreground">{code}</pre>
       </button>
 
-      {/* Hover tooltip with step-by-step */}
       {showTip && tip && (
         <div className="absolute left-0 right-0 top-full mt-1 z-50 glass-strong rounded-xl p-3 shadow-lg border border-primary/20 animate-fade-in">
           <p className="text-xs font-semibold text-primary mb-1.5 flex items-center gap-1.5">
