@@ -808,7 +808,7 @@ if __name__ == '__main__':
     formats: [".txt macro", "sox_pipeline.sh"],
     setupSteps: ["Open Audacity", "Tools → Apply Macro", "Select exported macro", "Process audio files"],
     exportCode: `#!/bin/bash
-# SoX Pipeline — Auto-generated from StackForge Signal Lab
+# SoX Pipeline — Auto-generated from SoupyForge Signal Lab
 
 INPUT="input.wav"
 OUTPUT="output.wav"
