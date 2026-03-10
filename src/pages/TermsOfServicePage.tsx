@@ -23,7 +23,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              By accessing or using StackForge AI ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. We reserve the right to modify these terms at any time; continued use constitutes acceptance.
+              By accessing or using SoupyForge ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. We reserve the right to modify these terms at any time; continued use constitutes acceptance.
             </p>
           </section>
 
