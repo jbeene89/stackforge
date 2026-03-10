@@ -142,6 +142,12 @@ export default function ProjectPage() {
           )}
         </TabsContent>
 
+        <TabsContent value="discussion" className="flex-1 m-0 mt-2 px-6 pb-4">
+          <div className="max-w-2xl">
+            <DiscussionThread targetType="project" targetId={project.id} targetName={project.name} />
+          </div>
+        </TabsContent>
+
         <TabsContent value="settings" className="flex-1 m-0 mt-2 px-6 pb-4">
           <div className="glass rounded-xl p-6 max-w-2xl space-y-4">
             <h2 className="font-semibold">Project Settings</h2>
