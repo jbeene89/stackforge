@@ -745,9 +745,9 @@ soupyforge_controller:
     description: "Export as Isaac Sim USD scene with physics materials and RL training config.",
     formats: [".usd", ".yaml", "Python extension"],
     setupSteps: ["Open Isaac Sim from Omniverse Launcher", "File → Open USD", "Load RL config", "Start training"],
-    exportCode: `# Isaac Sim task config — Auto-generated from StackForge
+    exportCode: `# Isaac Sim task config — Auto-generated from SoupyForge
 task:
-  name: StackForgeRobot
+  name: SoupyForgeRobot
   physics_engine: physx
   env:
     numEnvs: 4096
