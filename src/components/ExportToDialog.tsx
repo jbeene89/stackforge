@@ -783,7 +783,7 @@ class SoupyForgeFlowgraph(gr.top_block):
         # Source
         self.source = blocks.file_source(gr.sizeof_float, "input.raw", True)
         
-        # Butterworth LPF (from StackForge config)
+        # Butterworth LPF (from SoupyForge config)
         self.lpf = filter.iir_filter_ffd(
             filter.firdes.low_pass(1, sample_rate, 1000, 100),
             [1.0])
