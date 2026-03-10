@@ -428,7 +428,7 @@ TEMPLATE """{{ if .System }}<|system|>
     description: "Export as HF model card, tokenizer config, and adapter weights for Hub upload.",
     formats: ["model_card.md", "config.json", "adapter_config.json"],
     setupSteps: ["pip install huggingface_hub transformers", "huggingface-cli login", "python upload_to_hub.py", "Model card auto-populated on Hub"],
-    exportCode: `# upload_to_hub.py — Auto-generated from StackForge
+    exportCode: `# upload_to_hub.py — Auto-generated from SoupyForge
 from huggingface_hub import HfApi, create_repo
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
