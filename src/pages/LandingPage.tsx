@@ -473,8 +473,8 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border text-xs sm:text-sm text-muted-foreground">
             <span>© 2026 StackForge AI. All rights reserved.</span>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
               <a href="#" className="hover:text-foreground transition-colors">Status</a>
             </div>
           </div>
