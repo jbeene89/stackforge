@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
             </ul>
             <p className="text-sm text-muted-foreground mt-2">
-              To exercise these rights, contact us at <span className="text-primary">privacy@stackforge.ai</span>.
+              To exercise these rights, contact us at <span className="text-primary">privacy@soupyforge.ai</span>.
             </p>
           </section>
 

@@ -940,7 +940,7 @@ interface ExportToDialogProps {
   triggerSize?: "default" | "sm" | "icon";
 }
 
-export function ExportToDialog({ context, projectName = "StackForge Project", triggerLabel = "Export To…", triggerVariant = "outline", triggerSize = "sm" }: ExportToDialogProps) {
+export function ExportToDialog({ context, projectName = "SoupyForge Project", triggerLabel = "Export To…", triggerVariant = "outline", triggerSize = "sm" }: ExportToDialogProps) {
   const [selected, setSelected] = useState<ExportTarget | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState<string[]>([]);
