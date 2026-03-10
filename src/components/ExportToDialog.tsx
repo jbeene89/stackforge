@@ -847,7 +847,7 @@ default_args = {
 }
 
 with DAG(
-    'stackforge_pipeline',
+    'soupyforge_pipeline',
     default_args=default_args,
     schedule_interval='@hourly',
     start_date=datetime(2024, 1, 1),
