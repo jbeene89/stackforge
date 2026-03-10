@@ -44,6 +44,7 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import MarketplacePage from "./pages/MarketplacePage";
 import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/install" element={<InstallPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
 
               {/* Protected app routes */}
