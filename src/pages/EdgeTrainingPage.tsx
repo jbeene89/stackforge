@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { ExportToDialog } from "@/components/ExportToDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -535,8 +537,9 @@ const trainingTasks: TrainTask[] = [
 type PageStep = "hardware" | "sensors" | "training" | "deploy";
 
 export default function EdgeTrainingPage() {
+  const { hasAccess, featureName, requiredTier, userTier } = useFeatureGate("edge-training");
   const [step, setStep] = useState<PageStep>("hardware");
-  const [selectedPi, setSelectedPi] = useState<PiProfile>(piProfiles[3]); // Default Pi 5 8GB
+  const [selectedPi, setSelectedPi] = useState<PiProfile>(piProfiles[3]);
   const [selectedSensors, setSelectedSensors] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<TrainTask | null>(null);
   const [viewSensor, setViewSensor] = useState<Sensor | null>(null);
@@ -547,6 +550,10 @@ export default function EdgeTrainingPage() {
   const [batchSize, setBatchSize] = useState(16);
   const [learningRate, setLearningRate] = useState(0.001);
   const [quantize, setQuantize] = useState(true);
+
+  if (!hasAccess) {
+    return <UpgradePrompt featureName={featureName} requiredTier={requiredTier} currentTier={userTier} />;
+  }
 
   const steps: { key: PageStep; label: string; icon: any }[] = [
     { key: "hardware", label: "1. Hardware", icon: CircuitBoard },
