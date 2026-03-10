@@ -833,7 +833,7 @@ const pipelineTargets: ExportTarget[] = [
     description: "Export as Airflow DAG with operators, dependencies, and schedule configuration.",
     formats: [".py DAG", "connections.json"],
     setupSteps: ["Copy DAG to $AIRFLOW_HOME/dags/", "airflow db migrate", "airflow dags list", "Enable DAG in UI"],
-    exportCode: `# Airflow DAG — Auto-generated from StackForge Pipelines
+    exportCode: `# Airflow DAG — Auto-generated from SoupyForge Pipelines
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
