@@ -643,7 +643,7 @@ void loop() {
     description: "Export optimized TFLite model with metadata, label map, and benchmark config for Pi deployment.",
     formats: [".tflite", "metadata.json", "labels.txt"],
     setupSteps: ["pip install tflite-runtime", "Copy .tflite to target device", "Run benchmark: python benchmark.py", "Integrate into inference pipeline"],
-    exportCode: `# TFLite Deployment — Auto-generated from StackForge
+    exportCode: `# TFLite Deployment — Auto-generated from SoupyForge
 import tflite_runtime.interpreter as tflite
 import numpy as np
 import time
