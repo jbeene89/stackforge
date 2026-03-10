@@ -499,8 +499,8 @@ const edgeTrainingTargets: ExportTarget[] = [
     id: "ros2", name: "ROS 2 (Humble/Iron)", icon: "🤖",
     description: "Export as ROS 2 package with sensor nodes, TF2 transforms, and inference service.",
     formats: ["ROS 2 package", "launch.py", "CMakeLists.txt"],
-    setupSteps: ["source /opt/ros/humble/setup.bash", "colcon build --packages-select stackforge_pkg", "ros2 launch stackforge_pkg inference.launch.py", "ros2 topic echo /detections"],
-    exportCode: `# ROS 2 Node — Auto-generated from StackForge Edge AI
+    setupSteps: ["source /opt/ros/humble/setup.bash", "colcon build --packages-select soupyforge_pkg", "ros2 launch soupyforge_pkg inference.launch.py", "ros2 topic echo /detections"],
+    exportCode: `# ROS 2 Node — Auto-generated from SoupyForge Edge AI
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan, Image, Imu
