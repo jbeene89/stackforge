@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Key, Plus, Trash2, Eye, EyeOff, Shield } from "lucide-react";
 import ReferralSection from "@/components/ReferralSection";
+import { TierBadge } from "@/components/TierBadge";
+import { useCredits } from "@/hooks/useCredits";
 
 interface ApiKey {
   id: string;
