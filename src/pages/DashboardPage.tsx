@@ -46,6 +46,7 @@ export default function DashboardPage() {
   const { data: modules } = useModules();
   const { data: stacks } = useStacks();
   const { data: runs } = useRuns();
+  const { data: credits } = useCredits();
 
   const filtered = (projects || []).filter((p) => {
     if (filter !== "all" && p.type !== filter) return false;
