@@ -1,4 +1,4 @@
-# StackForge AI — Local Development Guide
+# SoupyForge — Local Development Guide
 
 ## 🚀 Quick Start (Web)
 
