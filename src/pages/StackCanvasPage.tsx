@@ -151,6 +151,7 @@ export default function StackCanvasPage() {
           <Badge variant="outline" className="text-[10px]">{edges.length} edges</Badge>
         </div>
         <div className="flex items-center gap-2">
+          <DiscussionThread targetType="stack" targetId={stack.id} targetName={stack.name} />
           <Button variant="ghost" size="sm" className="text-forge-emerald"><Play className="h-4 w-4 mr-1" /> Run</Button>
           <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleSave} disabled={updateStack.isPending}>
             <Save className="h-4 w-4 mr-1" /> {updateStack.isPending ? "Saving…" : "Save"}
