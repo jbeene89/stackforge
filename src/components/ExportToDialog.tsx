@@ -318,7 +318,7 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# ── Parameters (from StackForge config) ──
+# ── Parameters (from SoupyForge config) ──
 config = {
     "dt": 0.001,
     "t_end": 10.0,
