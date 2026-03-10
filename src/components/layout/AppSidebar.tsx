@@ -176,6 +176,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-1">
+        <CreditsBadge collapsed={collapsed} />
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "sm"}
