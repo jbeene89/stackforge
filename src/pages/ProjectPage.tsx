@@ -108,7 +108,9 @@ export default function ProjectPage() {
             sourceName={project.name}
             templateData={{ name: project.name, description: project.description, type: project.type, tags: project.tags }}
           />
-          <Button size="sm" className="gradient-primary text-primary-foreground">Deploy</Button>
+          <Button size="sm" className="gradient-primary text-primary-foreground" onClick={handleDeploy} disabled={updateProject.isPending}>
+            {updateProject.isPending ? "Deploying…" : "Deploy"}
+          </Button>
         </div>
       </div>
 
