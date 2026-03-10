@@ -375,7 +375,7 @@ PARAMETER stop "<|end|>"
 PARAMETER stop "<|user|>"
 
 SYSTEM """
-You are a specialized AI assistant built with StackForge AI.
+You are a specialized AI assistant built with SoupyForge.
 
 Role: Classification and extraction specialist.
 Behavior: Respond only with structured JSON output.
