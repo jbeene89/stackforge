@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Key, Plus, Trash2, Eye, EyeOff, Shield } from "lucide-react";
 import ReferralSection from "@/components/ReferralSection";
+import { TierBadge } from "@/components/TierBadge";
+import { useCredits } from "@/hooks/useCredits";
 
 interface ApiKey {
   id: string;
@@ -34,6 +36,7 @@ export default function AccountPage() {
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
   const navigate = useNavigate();
+  const { data: credits } = useCredits();
 
   const [name, setName] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -103,7 +106,10 @@ export default function AccountPage() {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in max-w-2xl">
-      <h1 className="text-2xl font-bold">Account Settings</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-bold">Account Settings</h1>
+        {credits && <TierBadge tier={credits.tier} size="md" />}
+      </div>
 
       <div className="glass rounded-xl p-6 space-y-4">
         <h2 className="font-semibold">Profile</h2>

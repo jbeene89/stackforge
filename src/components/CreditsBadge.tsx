@@ -3,6 +3,7 @@ import { Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TierBadge } from "@/components/TierBadge";
 
 export function CreditsBadge({ collapsed = false }: { collapsed?: boolean }) {
   const { data: credits } = useCredits();
@@ -34,7 +35,7 @@ export function CreditsBadge({ collapsed = false }: { collapsed?: boolean }) {
         <div className="flex-1 text-left">
           <div className="flex items-center justify-between">
             <span>{credits.credits_balance} credits</span>
-            <span className="text-[10px] opacity-60 capitalize">{credits.tier}</span>
+            <TierBadge tier={credits.tier} size="sm" showFlair={true} />
           </div>
           <div className="h-1 w-full bg-muted rounded-full mt-1 overflow-hidden">
             <div
