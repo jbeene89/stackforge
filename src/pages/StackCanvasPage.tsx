@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Plus, ZoomIn, ZoomOut, Maximize2, Play, Save,
-  Brain, Shield, Zap, GitBranch, ArrowRight
+  Brain, Shield, Zap, GitBranch, ArrowRight, MessageSquare
 } from "lucide-react";
 import { useStack, useUpdateStack } from "@/hooks/useSupabaseData";
 import type { StackNode, StackEdge } from "@/types";
+import DiscussionThread from "@/components/DiscussionThread";
 
 const nodeColors: Record<string, string> = {
   classifier: "border-forge-cyan bg-forge-cyan/10 text-forge-cyan",
