@@ -441,7 +441,7 @@ export default function LandingPage() {
                 </div>
                 <span className="text-base font-bold">Soupy<span className="text-primary">Forge</span></span>
               </Link>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">The modular AI development environment for specialist systems.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">The modular AI development kitchen for specialist systems.</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
               <div>
