@@ -439,7 +439,7 @@ export default function LandingPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold">StackForge <span className="text-primary">AI</span></span>
+                <span className="text-base font-bold">Soupy<span className="text-primary">Forge</span></span>
               </Link>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">The modular AI development environment for specialist systems.</p>
             </div>
