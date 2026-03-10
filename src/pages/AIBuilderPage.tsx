@@ -537,30 +537,65 @@ export default function AIBuilderPage() {
   );
 }
 
+const STEP_TIPS: Record<string, string> = {
+  "Install Ollama": "1. This will open ollama.com in your browser\n2. Click the big 'Download' button\n3. Run the installer like any other app\n4. Ollama will appear in your system tray when ready",
+  "Pull Model": "1. Open Terminal (Mac: Spotlight → type 'Terminal') or Command Prompt (Windows: Start → type 'cmd')\n2. Paste this command and press Enter\n3. Wait for the download to finish — it may take a few minutes",
+  "Run": "1. Open Terminal or Command Prompt (same as above)\n2. Paste this command and press Enter\n3. Your AI will start! Type messages and press Enter to chat",
+  "API Access": "1. Open Terminal or Command Prompt\n2. Paste this command and press Enter\n3. You'll see a JSON response — that means your AI is working as an API",
+  "1. Add llama.cpp dependency": "1. Open your Android project in Android Studio\n2. Open the file called 'build.gradle'\n3. Find the 'dependencies' section\n4. Paste this line inside it and click 'Sync'",
+  "2. Load model": "1. Add this code in your app's main activity file\n2. It loads the AI model so your app can use it",
+  "3. Run inference": "1. Add this code where you want the AI to respond\n2. The result will contain the AI's answer",
+  "Docker": "1. Install Docker Desktop from docker.com\n2. Open Terminal or Command Prompt\n3. Paste this command and press Enter\n4. Your AI server will start on port 8080",
+  "Install WebLLM": "1. Open Terminal in your project folder\n2. Paste this command and press Enter\n3. This installs the library that runs AI in your browser",
+  "Load in browser": "1. Add this code to your JavaScript/TypeScript file\n2. The AI model will download and run directly in the browser\n3. No server needed — it uses your GPU",
+};
+
 function CodeBlock({ label, code }: { label: string; code: string }) {
   const [copied, setCopied] = useState(false);
+  const [showTip, setShowTip] = useState(false);
+  const tip = STEP_TIPS[label];
 
-  const handleCopy = () => {
+  const handleClick = () => {
+    // For "Install Ollama", open the website directly
+    if (label === "Install Ollama") {
+      window.open("https://ollama.com/download", "_blank");
+      toast.success("Opened ollama.com in your browser");
+      return;
+    }
     navigator.clipboard.writeText(code);
     setCopied(true);
-    toast.success(`Copied "${label}" command to clipboard`);
+    toast.success(`Command copied! ${label.includes("Terminal") || label.includes("Docker") || label.includes("Pull") || label.includes("Run") || label.includes("API") ? "Open your Terminal and paste it there." : "Paste it in your code editor."}`);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <button
-      onClick={handleCopy}
-      className="w-full text-left group space-y-1.5 rounded-xl border border-border hover:border-primary/40 bg-card/50 hover:bg-primary/5 p-3 transition-all"
-    >
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-          <Terminal className="h-3 w-3" /> {label}
-        </p>
-        <span className="text-[10px] font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-          {copied ? <><CheckCircle2 className="h-3 w-3" /> Copied</> : "Click to copy"}
-        </span>
-      </div>
-      <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed text-foreground">{code}</pre>
-    </button>
+    <div className="relative">
+      <button
+        onClick={handleClick}
+        onMouseEnter={() => setShowTip(true)}
+        onMouseLeave={() => setShowTip(false)}
+        className="w-full text-left group space-y-1.5 rounded-xl border border-border hover:border-primary/40 bg-card/50 hover:bg-primary/5 p-3 transition-all"
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <Terminal className="h-3 w-3" /> {label}
+          </p>
+          <span className="text-[10px] font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+            {copied ? <><CheckCircle2 className="h-3 w-3" /> Copied</> : label === "Install Ollama" ? "Click to open download page" : "Click to copy"}
+          </span>
+        </div>
+        <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed text-foreground">{code}</pre>
+      </button>
+
+      {/* Hover tooltip with step-by-step */}
+      {showTip && tip && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 glass-strong rounded-xl p-3 shadow-lg border border-primary/20 animate-fade-in">
+          <p className="text-xs font-semibold text-primary mb-1.5 flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3" /> How to do this
+          </p>
+          <div className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{tip}</div>
+        </div>
+      )}
+    </div>
   );
 }
