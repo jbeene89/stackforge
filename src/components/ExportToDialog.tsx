@@ -145,7 +145,7 @@ light_energy = 1.2`
     description: "Export as standalone Three.js scene or R3F JSX component with Cannon.js physics.",
     formats: [".jsx", ".glTF", "JSON scene"],
     setupSteps: ["npx create-react-app my-scene --template typescript", "npm install three @react-three/fiber @react-three/cannon", "Paste exported component into src/", "npm start"],
-    exportCode: `// React Three Fiber — Auto-generated from StackForge
+    exportCode: `// React Three Fiber — Auto-generated from SoupyForge
 import { Canvas } from '@react-three/fiber';
 import { Physics, useBox, usePlane, useSphere } from '@react-three/cannon';
 import { OrbitControls, Environment } from '@react-three/drei';
