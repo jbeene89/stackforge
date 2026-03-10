@@ -509,9 +509,9 @@ from vision_msgs.msg import Detection3DArray, Detection3D
 import numpy as np
 import tflite_runtime.interpreter as tflite
 
-class StackForgeInferenceNode(Node):
+class SoupyForgeInferenceNode(Node):
     def __init__(self):
-        super().__init__('stackforge_inference')
+        super().__init__('soupyforge_inference')
         
         # Load TFLite model
         self.interpreter = tflite.Interpreter(
