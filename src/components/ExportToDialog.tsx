@@ -72,12 +72,12 @@ public class SceneLoader : MonoBehaviour {
     id: "unreal", name: "Unreal Engine 5", icon: "⚡",
     description: "Export as Unreal DataTable + Blueprint actors with physics presets, materials, and AI behavior trees.",
     formats: [".uasset", "Blueprints", "DataTable CSV"],
-    setupSteps: ["Open Unreal Editor → New Blank project", "Import DataTable CSV via Content Browser", "Run 'StackForge Scene Importer' editor utility", "Actors spawn with physics & AI components"],
+    setupSteps: ["Open Unreal Editor → New Blank project", "Import DataTable CSV via Content Browser", "Run 'SoupyForge Scene Importer' editor utility", "Actors spawn with physics & AI components"],
     exportCode: `// Unreal C++ — Auto-generated Actor Spawner
-#include "StackForgeSceneLoader.h"
+#include "SoupyForgeSceneLoader.h"
 #include "Engine/World.h"
 
-void AStackForgeSceneLoader::BeginPlay() {
+void ASoupyForgeSceneLoader::BeginPlay() {
     Super::BeginPlay();
     
     // Ground Plane
