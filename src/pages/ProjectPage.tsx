@@ -11,8 +11,9 @@ import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks
 import { toast } from "sonner";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
-  Smartphone, Trash2, Save, CheckCircle2
+  Smartphone, Trash2, Save, CheckCircle2, MessageSquare
 } from "lucide-react";
+import DiscussionThread from "@/components/DiscussionThread";
 import { cn } from "@/lib/utils";
 
 export default function ProjectPage() {
