@@ -167,6 +167,12 @@ export default function ProjectPage() {
             {updateProject.isPending ? "Deploying…" : "Deploy"}
           </Button>
         </div>
+        {isProcessing && (
+          <div className="mt-2 flex items-center gap-3">
+            <Progress value={streamProgress} className="h-2 flex-1" />
+            <span className="text-xs text-muted-foreground w-10 text-right">{streamProgress}%</span>
+          </div>
+        )}
       </div>
 
       {/* Prompt bar */}
