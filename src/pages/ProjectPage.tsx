@@ -12,7 +12,7 @@ import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks
 import { toast } from "sonner";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
-  Smartphone, Trash2, Save, CheckCircle2, MessageSquare
+  Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
 import PublishToMarketplace from "@/components/PublishToMarketplace";
