@@ -538,9 +538,9 @@ export default function AIBuilderPage() {
 
 function CodeBlock({ label, code }: { label: string; code: string }) {
   return (
-    <div className="space-y-1">
-      <p className="text-[10px] text-muted-foreground font-medium">{label}</p>
-      <pre className="text-[11px] font-mono bg-card rounded-lg p-2.5 border border-border whitespace-pre-wrap">{code}</pre>
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">{label}</p>
+      <pre className="text-sm font-mono bg-card rounded-lg p-3 border border-border whitespace-pre-wrap leading-relaxed">{code}</pre>
     </div>
   );
 }
