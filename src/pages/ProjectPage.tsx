@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks/useSupabaseData";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
   Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
