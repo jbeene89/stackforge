@@ -776,9 +776,9 @@ const signalTargets: ExportTarget[] = [
 from gnuradio import gr, blocks, filter, analog, fft
 import numpy as np
 
-class StackForgeFlowgraph(gr.top_block):
+class SoupyForgeFlowgraph(gr.top_block):
     def __init__(self, sample_rate=48000):
-        gr.top_block.__init__(self, "StackForge Signal Chain")
+        gr.top_block.__init__(self, "SoupyForge Signal Chain")
         
         # Source
         self.source = blocks.file_source(gr.sizeof_float, "input.raw", True)
