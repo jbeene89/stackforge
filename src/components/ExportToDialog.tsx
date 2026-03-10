@@ -29,8 +29,8 @@ const gameEngineTargets: ExportTarget[] = [
     id: "unity", name: "Unity", icon: "🎮",
     description: "Export scene as Unity package with GameObjects, materials, physics settings, and AI scripts.",
     formats: [".unitypackage", "C# scripts", "Prefabs"],
-    setupSteps: ["Open Unity Hub → New 3D project", "Assets → Import Package → Custom Package", "Select exported .unitypackage", "Scene auto-populates from StackForge layout"],
-    exportCode: `// Unity C# — Auto-generated from StackForge Scene
+    setupSteps: ["Open Unity Hub → New 3D project", "Assets → Import Package → Custom Package", "Select exported .unitypackage", "Scene auto-populates from SoupyForge layout"],
+    exportCode: `// Unity C# — Auto-generated from SoupyForge Scene
 using UnityEngine;
 
 public class SceneLoader : MonoBehaviour {
