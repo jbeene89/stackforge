@@ -538,10 +538,29 @@ export default function AIBuilderPage() {
 }
 
 function CodeBlock({ label, code }: { label: string; code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    toast.success(`Copied "${label}" command to clipboard`);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="space-y-1.5">
-      <p className="text-xs text-muted-foreground font-medium">{label}</p>
-      <pre className="text-sm font-mono bg-card rounded-lg p-3 border border-border whitespace-pre-wrap leading-relaxed">{code}</pre>
-    </div>
+    <button
+      onClick={handleCopy}
+      className="w-full text-left group space-y-1.5 rounded-xl border border-border hover:border-primary/40 bg-card/50 hover:bg-primary/5 p-3 transition-all"
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+          <Terminal className="h-3 w-3" /> {label}
+        </p>
+        <span className="text-[10px] font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          {copied ? <><CheckCircle2 className="h-3 w-3" /> Copied</> : "Click to copy"}
+        </span>
+      </div>
+      <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed text-foreground">{code}</pre>
+    </button>
   );
 }
