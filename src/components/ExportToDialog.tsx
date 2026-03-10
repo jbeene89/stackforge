@@ -532,7 +532,7 @@ class SoupyForgeInferenceNode(Node):
         self.pose_pub = self.create_publisher(
             PoseStamped, '/estimated_pose', 10)
         
-        self.get_logger().info('StackForge Inference Node started')
+        self.get_logger().info('SoupyForge Inference Node started')
     
     def lidar_callback(self, msg: LaserScan):
         ranges = np.array(msg.ranges, dtype=np.float32)
