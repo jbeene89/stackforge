@@ -9,6 +9,8 @@ import {
   Zap, BarChart3, GitBranch
 } from "lucide-react";
 import { useProjects, useModules, useStacks, useRuns } from "@/hooks/useSupabaseData";
+import { useCredits } from "@/hooks/useCredits";
+import { TierBadge } from "@/components/TierBadge";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
