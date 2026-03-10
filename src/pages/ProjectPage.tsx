@@ -122,8 +122,11 @@ export default function ProjectPage() {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={isAndroid ? "Describe the screen or feature you want to build..." : "Describe what you want to build or change..."}
             className="h-9 text-sm"
+            onKeyDown={(e) => { if (e.key === "Enter") handleSendPrompt(); }}
           />
-          <Button size="sm" className="gradient-primary text-primary-foreground px-4"><Send className="h-4 w-4" /></Button>
+          <Button size="sm" className="gradient-primary text-primary-foreground px-4" onClick={handleSendPrompt} disabled={isProcessing || !prompt.trim()}>
+            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
 
