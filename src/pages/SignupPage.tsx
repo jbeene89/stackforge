@@ -110,7 +110,7 @@ export default function SignupPage() {
             <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">StackForge AI</span>
+            <span className="text-xl font-bold text-white">SoupyForge</span>
           </Link>
         </div>
         <motion.div
@@ -137,7 +137,7 @@ export default function SignupPage() {
           </div>
         </motion.div>
         <div className="relative text-white/50 text-sm">
-          © 2026 StackForge AI
+          © 2026 SoupyForge
         </div>
       </div>
 
@@ -157,7 +157,7 @@ export default function SignupPage() {
           </div>
           <div className="lg:text-left text-center">
             <h1 className="text-2xl font-bold">Create your account</h1>
-            <p className="text-sm text-muted-foreground mt-1">Start building with StackForge AI</p>
+            <p className="text-sm text-muted-foreground mt-1">Start building with SoupyForge</p>
           </div>
 
           {/* Social Signup */}

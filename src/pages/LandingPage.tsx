@@ -52,7 +52,7 @@ function TypewriterDemo() {
           <div className="w-2.5 h-2.5 rounded-full bg-forge-amber/50" />
           <div className="w-2.5 h-2.5 rounded-full bg-forge-emerald/50" />
         </div>
-        <span className="text-[10px] text-muted-foreground ml-2 font-mono">stackforge prompt</span>
+        <span className="text-[10px] text-muted-foreground ml-2 font-mono">soupyforge prompt</span>
       </div>
       <div className="font-mono text-xs sm:text-sm text-foreground min-h-[24px]">
         <span className="text-primary">❯ </span>
@@ -194,7 +194,7 @@ export default function LandingPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-base font-bold">StackForge <span className="text-primary">AI</span></span>
+            <span className="text-base font-bold">Soupy<span className="text-primary">Forge</span></span>
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
@@ -213,12 +213,12 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center relative">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-4 sm:mb-6 text-balance">
-              Build <span className="gradient-text">specialist AI systems</span>,
+              Cook up <span className="gradient-text">specialist AI systems</span>,
               <br className="hidden md:block" /> not chatbots
             </h1>
             <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed text-balance">
-              Design narrow-purpose AI modules. Wire them into multi-step pipelines.
-              Generate Android apps for the field. Test and trace every step.
+              Brew narrow-purpose AI modules. Stir them into multi-step pipelines.
+              Serve Android apps for the field. Taste-test every step.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
               <Link to="/signup" className="w-full sm:w-auto">
@@ -241,8 +241,8 @@ export default function LandingPage() {
       <section className="py-8 sm:py-10 px-4 sm:px-6 border-y border-border bg-secondary/20">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">StackForge is not a wrapper around ChatGPT.</span>{" "}
-            It's a modular AI development environment where every component has a defined role, explicit boundaries, and traceable behavior.
+            <span className="font-semibold text-foreground">SoupyForge is not a wrapper around ChatGPT.</span>{" "}
+            It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
           </p>
         </div>
       </section>
@@ -251,7 +251,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <Badge variant="outline" className="text-[10px] mb-4">What makes StackForge different</Badge>
+            <Badge variant="outline" className="text-[10px] mb-4">What makes SoupyForge different</Badge>
             <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-balance">Three things we do that nobody else does</h2>
           </motion.div>
 
@@ -340,7 +340,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-10">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Architecture principles</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2">How StackForge thinks about AI systems.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">How SoupyForge thinks about AI systems.</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             {architecturePoints.map((p, i) => (
@@ -439,9 +439,9 @@ export default function LandingPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold">StackForge <span className="text-primary">AI</span></span>
+                <span className="text-base font-bold">Soupy<span className="text-primary">Forge</span></span>
               </Link>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">The modular AI development environment for specialist systems.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">The modular AI development kitchen for specialist systems.</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
               <div>
@@ -471,7 +471,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border text-xs sm:text-sm text-muted-foreground">
-            <span>© 2026 StackForge AI. All rights reserved.</span>
+            <span>© 2026 SoupyForge. All rights reserved.</span>
             <div className="flex gap-6">
               <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
               <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>

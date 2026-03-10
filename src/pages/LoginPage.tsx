@@ -51,7 +51,7 @@ export default function LoginPage() {
             <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">StackForge AI</span>
+            <span className="text-xl font-bold text-white">SoupyForge</span>
           </Link>
         </div>
         <motion.div
@@ -76,11 +76,11 @@ export default function LoginPage() {
                 </div>
               ))}
             </div>
-            <span className="text-white/70 text-sm">12,000+ builders trust StackForge</span>
+            <span className="text-white/70 text-sm">12,000+ builders trust SoupyForge</span>
           </div>
         </motion.div>
         <div className="relative text-white/50 text-sm">
-          © 2026 StackForge AI
+          © 2026 SoupyForge
         </div>
       </div>
 

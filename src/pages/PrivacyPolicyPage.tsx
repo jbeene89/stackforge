@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">3. AI-Generated Content</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              StackForge AI processes your prompts and inputs through third-party AI models to generate outputs. Your inputs may be sent to AI model providers for processing. We do not use your inputs or outputs to train AI models. AI-generated content is provided "as-is" and may contain errors or inaccuracies.
+              SoupyForge processes your prompts and inputs through third-party AI models to generate outputs. Your inputs may be sent to AI model providers for processing. We do not use your inputs or outputs to train AI models. AI-generated content is provided "as-is" and may contain errors or inaccuracies.
             </p>
           </section>
 
@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
             </ul>
             <p className="text-sm text-muted-foreground mt-2">
-              To exercise these rights, contact us at <span className="text-primary">privacy@stackforge.ai</span>.
+              To exercise these rights, contact us at <span className="text-primary">privacy@soupyforge.ai</span>.
             </p>
           </section>
 

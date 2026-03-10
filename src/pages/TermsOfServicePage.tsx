@@ -23,7 +23,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              By accessing or using StackForge AI ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. We reserve the right to modify these terms at any time; continued use constitutes acceptance.
+              By accessing or using SoupyForge ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. We reserve the right to modify these terms at any time; continued use constitutes acceptance.
             </p>
           </section>
 
@@ -105,7 +105,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">9. Limitation of Liability</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              To the maximum extent permitted by law, StackForge AI shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.
+              To the maximum extent permitted by law, SoupyForge shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.
             </p>
           </section>
 
@@ -123,7 +123,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">11. Governing Law</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              These Terms are governed by the laws of the jurisdiction in which StackForge AI operates, without regard to conflict of law principles. Any disputes shall be resolved through binding arbitration.
+              These Terms are governed by the laws of the jurisdiction in which SoupyForge operates, without regard to conflict of law principles. Any disputes shall be resolved through binding arbitration.
             </p>
           </section>
         </div>
