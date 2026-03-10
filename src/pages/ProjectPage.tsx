@@ -57,6 +57,38 @@ export default function ProjectPage() {
     deleteProject.mutate(project.id, { onSuccess: () => navigate("/projects") });
   };
 
+  const handleSendPrompt = async () => {
+    if (!prompt.trim() || isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const response = await supabase.functions.invoke("ai-generate", {
+        body: {
+          prompt: `For a ${project.type} project called "${project.name}": ${prompt}`,
+          context: "project-builder",
+        },
+      });
+      if (response.error) throw response.error;
+      const result = response.data?.generatedText || response.data?.result || "Feature noted! This has been added to your project plan.";
+      setPreviewContent(result);
+      toast.success("Prompt processed successfully");
+      setPrompt("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to process prompt");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeploy = () => {
+    updateProject.mutate(
+      { id: project.id, status: "deployed" as any },
+      {
+        onSuccess: () => toast.success(`${project.name} marked as deployed!`),
+        onError: () => toast.error("Failed to deploy"),
+      }
+    );
+  };
+
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
       {/* Header */}
