@@ -101,10 +101,15 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function RoboticsPage() {
+  const { hasAccess, featureName, requiredTier, userTier } = useFeatureGate("robotics");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [cart, setCart] = useState<string[]>([]);
   const [selected, setSelected] = useState<Controller | null>(null);
+
+  if (!hasAccess) {
+    return <UpgradePrompt featureName={featureName} requiredTier={requiredTier} currentTier={userTier} />;
+  }
 
   const filtered = controllerCatalog.filter(c => {
     const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()) || c.tags.some(t => t.includes(search.toLowerCase()));

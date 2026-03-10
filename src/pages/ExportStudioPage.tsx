@@ -48,9 +48,14 @@ const exportFormats: FormatConfig[] = [
 ];
 
 export default function ExportStudioPage() {
+  const { hasAccess, featureName, requiredTier, userTier } = useFeatureGate("export");
   const { data: projects } = useProjects();
   const { data: modules } = useModules();
   const { data: stacks } = useStacks();
+
+  if (!hasAccess) {
+    return <UpgradePrompt featureName={featureName} requiredTier={requiredTier} currentTier={userTier} />;
+  }
 
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat | null>(null);
   const [selectedSource, setSelectedSource] = useState<string>("");
