@@ -445,7 +445,7 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype="auto",
 )
 
-# Apply StackForge config
+# Apply SoupyForge config
 generation_config = {
     "temperature": 0.3,
     "top_p": 0.9,
