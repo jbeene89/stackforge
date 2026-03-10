@@ -852,7 +852,7 @@ with DAG(
     schedule_interval='@hourly',
     start_date=datetime(2024, 1, 1),
     catchup=False,
-    tags=['stackforge', 'etl'],
+    tags=['soupyforge', 'etl'],
 ) as dag:
 
     extract = PythonOperator(
