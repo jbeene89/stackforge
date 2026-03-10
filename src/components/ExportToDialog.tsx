@@ -310,7 +310,7 @@ public class SoupyForgeSolver {
     formats: [".py", "requirements.txt"],
     setupSteps: ["pip install numpy scipy matplotlib", "python solver_export.py", "Results saved to output/"],
     exportCode: `#!/usr/bin/env python3
-"""StackForge Solver Export — Standalone Python"""
+"""SoupyForge Solver Export — Standalone Python"""
 
 import numpy as np
 from scipy.integrate import solve_ivp
