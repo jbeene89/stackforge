@@ -77,6 +77,7 @@ const App = () => (
                 <Route path="/stacks" element={<StacksPage />} />
                 <Route path="/stacks/:id" element={<StackCanvasPage />} />
                 <Route path="/templates" element={<TemplatesPage />} />
+                <Route path="/marketplace" element={<MarketplacePage />} />
                 <Route path="/lab" element={<LabPage />} />
                 <Route path="/lab/slicer" element={<SlicerLabPage />} />
                 <Route path="/build-ai" element={<AIBuilderPage />} />
