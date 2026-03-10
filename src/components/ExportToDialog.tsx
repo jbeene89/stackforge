@@ -889,7 +889,7 @@ services:
   pipeline:
     build: .
     environment:
-      - PIPELINE_ID=stackforge_export
+      - PIPELINE_ID=soupyforge_export
       - BATCH_SIZE=1000
     volumes:
       - ./data:/app/data
