@@ -50,8 +50,7 @@ function ConfettiPiece({ index }: { index: number }) {
 export default function SubscriptionSuccessPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
-  const { data: credits, refetch } = useCredits(user?.id);
+  const { data: credits, refetch } = useCredits();
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
