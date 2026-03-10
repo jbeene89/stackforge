@@ -251,7 +251,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <Badge variant="outline" className="text-[10px] mb-4">What makes StackForge different</Badge>
+            <Badge variant="outline" className="text-[10px] mb-4">What makes SoupyForge different</Badge>
             <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-balance">Three things we do that nobody else does</h2>
           </motion.div>
 
