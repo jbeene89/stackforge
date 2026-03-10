@@ -157,7 +157,7 @@ export default function SignupPage() {
           </div>
           <div className="lg:text-left text-center">
             <h1 className="text-2xl font-bold">Create your account</h1>
-            <p className="text-sm text-muted-foreground mt-1">Start building with StackForge AI</p>
+            <p className="text-sm text-muted-foreground mt-1">Start building with SoupyForge</p>
           </div>
 
           {/* Social Signup */}

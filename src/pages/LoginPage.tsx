@@ -80,7 +80,7 @@ export default function LoginPage() {
           </div>
         </motion.div>
         <div className="relative text-white/50 text-sm">
-          © 2026 StackForge AI
+          © 2026 SoupyForge
         </div>
       </div>
 

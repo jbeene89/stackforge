@@ -101,7 +101,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <span className="text-base font-bold tracking-tight">
-              StackForge <span className="text-primary">AI</span>
+              Soupy<span className="text-primary">Forge</span>
             </span>
           )}
         </NavLink>
