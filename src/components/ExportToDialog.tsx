@@ -432,8 +432,8 @@ TEMPLATE """{{ if .System }}<|system|>
 from huggingface_hub import HfApi, create_repo
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Config from StackForge Build-a-AI
-MODEL_NAME = "stackforge-phi3-specialist"
+# Config from SoupyForge Build-a-AI
+MODEL_NAME = "soupyforge-phi3-specialist"
 BASE_MODEL = "microsoft/phi-3-mini-4k-instruct"
 HF_REPO = f"your-org/{MODEL_NAME}"
 
