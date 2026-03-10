@@ -68,6 +68,7 @@ const App = () => (
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/install" element={<InstallPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
 
               {/* Protected app routes */}
