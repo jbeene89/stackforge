@@ -799,7 +799,7 @@ class SoupyForgeFlowgraph(gr.top_block):
         self.connect(self.lpf, self.sink)
 
 if __name__ == '__main__':
-    fg = StackForgeFlowgraph()
+    fg = SoupyForgeFlowgraph()
     fg.run()`
   },
   {
