@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useModule, useUpdateModule, useCreateRun, streamAI } from "@/hooks/useSupabaseData";
 import DiscussionThread from "@/components/DiscussionThread";
+import PublishToMarketplace from "@/components/PublishToMarketplace";
 
 export default function ModuleBuilderPage() {
   const { id } = useParams();
