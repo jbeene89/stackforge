@@ -257,7 +257,7 @@ subplot(1,2,2);
 plot(t, y(:,3), 'LineWidth', 1.5, 'Color', [0.85 0.33 0.1]); grid on;
 xlabel('Time (s)'); ylabel('\\theta(t)'); title('Angle');
 
-sgtitle('StackForge Solver Results');`
+sgtitle('SoupyForge Solver Results');`
   },
   {
     id: "comsol", name: "COMSOL Multiphysics", icon: "🔬",
