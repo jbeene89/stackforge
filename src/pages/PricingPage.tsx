@@ -232,10 +232,17 @@ export default function PricingPage() {
                     <p className="text-sm text-muted-foreground mb-6">{plan.desc}</p>
 
                     <ul className="space-y-2.5 mb-8 flex-1">
-                      {plan.features.map((f) => (
+                      {plan.features.map((f: any) => (
                         <li key={f.text} className={cn("flex items-center gap-2 text-sm", !f.included && "text-muted-foreground/50")}>
-                          {f.included ? <Check className="h-4 w-4 text-forge-emerald shrink-0" /> : <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />}
+                          {f.included ? (
+                            <Check className="h-4 w-4 text-forge-emerald shrink-0" />
+                          ) : f.locked ? (
+                            <Lock className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                          ) : (
+                            <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                          )}
                           {f.text}
+                          {f.locked && !f.included && <Badge variant="outline" className="text-[9px] px-1.5 py-0 ml-auto opacity-60">Upgrade</Badge>}
                         </li>
                       ))}
                     </ul>
