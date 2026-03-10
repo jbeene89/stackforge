@@ -10,7 +10,7 @@ import { useCredits, useCreditTransactions } from "@/hooks/useCredits";
 import { toast } from "sonner";
 import {
   Check, X, Zap, CreditCard, ArrowRight, Crown, Sparkles,
-  BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift,
+  BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock,
 } from "lucide-react";
 
 const TIERS = {
@@ -40,8 +40,9 @@ const plans = [
       { text: "3 projects", included: true },
       { text: "5 AI modules", included: true },
       { text: "Community support", included: true },
-      { text: "Export code & configs", included: false },
-      { text: "Version history", included: false },
+      { text: "Export Studio", included: false, locked: true },
+      { text: "Robotics Controllers", included: false, locked: true },
+      { text: "Edge Training", included: false, locked: true },
     ],
     icon: Zap,
   },
@@ -54,8 +55,10 @@ const plans = [
       { text: "500 credits/month", included: true },
       { text: "Unlimited projects", included: true },
       { text: "Unlimited modules", included: true },
-      { text: "Export code & configs", included: true },
+      { text: "Export Studio", included: true },
       { text: "Version history", included: true },
+      { text: "Robotics Controllers", included: false, locked: true },
+      { text: "Edge Training", included: false, locked: true },
       { text: "Priority support", included: true },
     ],
     icon: Crown,
@@ -70,9 +73,9 @@ const plans = [
     features: [
       { text: "2,000 credits/month", included: true },
       { text: "Everything in Builder", included: true },
+      { text: "Robotics Controllers", included: true },
+      { text: "Edge Training", included: true },
       { text: "5 team members", included: true },
-      { text: "Shared workspace", included: true },
-      { text: "Audit logs", included: true },
       { text: "Dedicated support", included: true },
     ],
     icon: Sparkles,
@@ -229,10 +232,17 @@ export default function PricingPage() {
                     <p className="text-sm text-muted-foreground mb-6">{plan.desc}</p>
 
                     <ul className="space-y-2.5 mb-8 flex-1">
-                      {plan.features.map((f) => (
+                      {plan.features.map((f: any) => (
                         <li key={f.text} className={cn("flex items-center gap-2 text-sm", !f.included && "text-muted-foreground/50")}>
-                          {f.included ? <Check className="h-4 w-4 text-forge-emerald shrink-0" /> : <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />}
+                          {f.included ? (
+                            <Check className="h-4 w-4 text-forge-emerald shrink-0" />
+                          ) : f.locked ? (
+                            <Lock className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                          ) : (
+                            <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                          )}
                           {f.text}
+                          {f.locked && !f.included && <Badge variant="outline" className="text-[9px] px-1.5 py-0 ml-auto opacity-60">Upgrade</Badge>}
                         </li>
                       ))}
                     </ul>
