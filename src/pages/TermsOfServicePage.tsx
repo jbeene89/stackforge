@@ -123,7 +123,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">11. Governing Law</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              These Terms are governed by the laws of the jurisdiction in which StackForge AI operates, without regard to conflict of law principles. Any disputes shall be resolved through binding arbitration.
+              These Terms are governed by the laws of the jurisdiction in which SoupyForge operates, without regard to conflict of law principles. Any disputes shall be resolved through binding arbitration.
             </p>
           </section>
         </div>

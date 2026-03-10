@@ -1,4 +1,4 @@
-// StackForge AI — Core Data Models
+// SoupyForge — Core Data Models
 
 export type ProjectType = "web" | "android" | "module" | "stack" | "hybrid";
 export type ProjectStatus = "draft" | "building" | "testing" | "deployed" | "archived";
