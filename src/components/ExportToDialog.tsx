@@ -362,7 +362,7 @@ const aiBuilderTargets: ExportTarget[] = [
     description: "Export as Ollama Modelfile with system prompt, parameters, and template for local deployment.",
     formats: ["Modelfile", "GGUF config"],
     setupSteps: ["curl -fsSL https://ollama.com/install.sh | sh", "ollama create mymodel -f Modelfile", "ollama run mymodel"],
-    exportCode: `# Ollama Modelfile — Auto-generated from StackForge Build-a-AI
+    exportCode: `# Ollama Modelfile — Auto-generated from SoupyForge Build-a-AI
 FROM phi3:mini
 
 PARAMETER temperature 0.3
