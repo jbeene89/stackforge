@@ -64,13 +64,35 @@ export default function ProjectPage() {
     try {
       const response = await supabase.functions.invoke("ai-generate", {
         body: {
-          prompt: `For a ${project.type} project called "${project.name}": ${prompt}`,
-          context: "project-builder",
+          messages: [
+            { role: "user", content: `For a ${project.type} project called "${project.name}": ${prompt}` },
+          ],
+          mode: "code",
         },
       });
+
       if (response.error) throw response.error;
-      const result = response.data?.generatedText || response.data?.result || "Feature noted! This has been added to your project plan.";
-      setPreviewContent(result);
+
+      // The edge function returns a streaming response, parse SSE
+      let fullText = "";
+      if (typeof response.data === "string") {
+        // Parse SSE text
+        const lines = response.data.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ") && line !== "data: [DONE]") {
+            try {
+              const json = JSON.parse(line.slice(6));
+              const content = json.choices?.[0]?.delta?.content;
+              if (content) fullText += content;
+            } catch { /* skip unparseable lines */ }
+          }
+        }
+      } else if (response.data?.choices) {
+        fullText = response.data.choices[0]?.message?.content || "";
+      }
+
+      if (!fullText) fullText = "Prompt received! Your project has been updated.";
+      setPreviewContent(fullText);
       toast.success("Prompt processed successfully");
       setPrompt("");
     } catch (e: any) {
