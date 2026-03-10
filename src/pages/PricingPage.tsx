@@ -73,9 +73,9 @@ const plans = [
     features: [
       { text: "2,000 credits/month", included: true },
       { text: "Everything in Builder", included: true },
+      { text: "Robotics Controllers", included: true },
+      { text: "Edge Training", included: true },
       { text: "5 team members", included: true },
-      { text: "Shared workspace", included: true },
-      { text: "Audit logs", included: true },
       { text: "Dedicated support", included: true },
     ],
     icon: Sparkles,
