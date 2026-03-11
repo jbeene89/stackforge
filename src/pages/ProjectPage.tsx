@@ -128,7 +128,14 @@ export default function ProjectPage() {
       }
 
       setStreamProgress(100);
-      if (!fullText) setPreviewContent("Prompt received! Your project has been updated.");
+      const userContent = prompt;
+      const aiContent = fullText || "Prompt received! Your project has been updated.";
+      if (!fullText) setPreviewContent(aiContent);
+      
+      // Save both messages to chat history
+      addMessage.mutate({ project_id: project.id, role: "user", content: userContent });
+      addMessage.mutate({ project_id: project.id, role: "assistant", content: aiContent });
+      
       toast.success("Prompt processed successfully");
       setPrompt("");
     } catch (e: any) {
