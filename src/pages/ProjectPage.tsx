@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks/useSupabaseData";
+import { useProject, useUpdateProject, useDeleteProject, useRuns, useProjectMessages, useAddProjectMessage, useClearProjectMessages } from "@/hooks/useSupabaseData";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import {
