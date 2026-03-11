@@ -25,6 +25,9 @@ export default function ProjectPage() {
   const navigate = useNavigate();
   const { data: project, isLoading } = useProject(id || "");
   const { data: runs } = useRuns();
+  const { data: chatMessages, isLoading: chatLoading } = useProjectMessages(id || "");
+  const addMessage = useAddProjectMessage();
+  const clearMessages = useClearProjectMessages();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
