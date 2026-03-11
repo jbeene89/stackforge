@@ -503,3 +503,71 @@ export async function streamAI({
   }
   onDone();
 }
+
+// Project Messages (Chat History)
+export interface DbProjectMessage {
+  id: string;
+  project_id: string;
+  user_id: string;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+export function useProjectMessages(projectId: string) {
+  return useQuery({
+    queryKey: ["project_messages", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_messages")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data as DbProjectMessage[];
+    },
+    enabled: !!projectId,
+  });
+}
+
+export function useAddProjectMessage() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (msg: { project_id: string; role: "user" | "assistant"; content: string }) => {
+      const { data, error } = await supabase
+        .from("project_messages")
+        .insert({
+          project_id: msg.project_id,
+          role: msg.role,
+          content: msg.content,
+          user_id: user!.id,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as DbProjectMessage;
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["project_messages", data.project_id] });
+    },
+  });
+}
+
+export function useClearProjectMessages() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (projectId: string) => {
+      const { error } = await supabase
+        .from("project_messages")
+        .delete()
+        .eq("project_id", projectId);
+      if (error) throw error;
+    },
+    onSuccess: (_, projectId) => {
+      qc.invalidateQueries({ queryKey: ["project_messages", projectId] });
+      toast.success("Chat history cleared");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
