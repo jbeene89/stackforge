@@ -207,7 +207,8 @@ export default function ProjectPage() {
         <TabsList className="mx-6 mt-2 glass w-fit">
           <TabsTrigger value="preview"><Eye className="h-3 w-3 mr-1" /> Preview</TabsTrigger>
           <TabsTrigger value="runs"><Activity className="h-3 w-3 mr-1" /> Runs ({projectRuns.length})</TabsTrigger>
-         <TabsTrigger value="discussion"><MessageSquare className="h-3 w-3 mr-1" /> Discussion</TabsTrigger>
+          <TabsTrigger value="chat"><MessageSquare className="h-3 w-3 mr-1" /> Chat ({chatMessages?.length || 0})</TabsTrigger>
+          <TabsTrigger value="discussion"><MessageSquare className="h-3 w-3 mr-1" /> Discussion</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-3 w-3 mr-1" /> Settings</TabsTrigger>
         </TabsList>
 
