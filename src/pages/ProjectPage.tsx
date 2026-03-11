@@ -16,6 +16,7 @@ import {
   Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
+import ChatHistory from "@/components/ChatHistory";
 import PublishToMarketplace from "@/components/PublishToMarketplace";
 import { cn } from "@/lib/utils";
 
