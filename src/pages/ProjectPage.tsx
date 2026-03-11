@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProject, useUpdateProject, useDeleteProject, useRuns } from "@/hooks/useSupabaseData";
+import { useProject, useUpdateProject, useDeleteProject, useRuns, useProjectMessages, useAddProjectMessage, useClearProjectMessages } from "@/hooks/useSupabaseData";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -16,6 +16,7 @@ import {
   Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
+import ChatHistory from "@/components/ChatHistory";
 import PublishToMarketplace from "@/components/PublishToMarketplace";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,9 @@ export default function ProjectPage() {
   const navigate = useNavigate();
   const { data: project, isLoading } = useProject(id || "");
   const { data: runs } = useRuns();
+  const { data: chatMessages, isLoading: chatLoading } = useProjectMessages(id || "");
+  const addMessage = useAddProjectMessage();
+  const clearMessages = useClearProjectMessages();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
@@ -124,7 +128,14 @@ export default function ProjectPage() {
       }
 
       setStreamProgress(100);
-      if (!fullText) setPreviewContent("Prompt received! Your project has been updated.");
+      const userContent = prompt;
+      const aiContent = fullText || "Prompt received! Your project has been updated.";
+      if (!fullText) setPreviewContent(aiContent);
+      
+      // Save both messages to chat history
+      addMessage.mutate({ project_id: project.id, role: "user", content: userContent });
+      addMessage.mutate({ project_id: project.id, role: "assistant", content: aiContent });
+      
       toast.success("Prompt processed successfully");
       setPrompt("");
     } catch (e: any) {
@@ -196,7 +207,8 @@ export default function ProjectPage() {
         <TabsList className="mx-6 mt-2 glass w-fit">
           <TabsTrigger value="preview"><Eye className="h-3 w-3 mr-1" /> Preview</TabsTrigger>
           <TabsTrigger value="runs"><Activity className="h-3 w-3 mr-1" /> Runs ({projectRuns.length})</TabsTrigger>
-         <TabsTrigger value="discussion"><MessageSquare className="h-3 w-3 mr-1" /> Discussion</TabsTrigger>
+          <TabsTrigger value="chat"><MessageSquare className="h-3 w-3 mr-1" /> Chat ({chatMessages?.length || 0})</TabsTrigger>
+          <TabsTrigger value="discussion"><MessageSquare className="h-3 w-3 mr-1" /> Discussion</TabsTrigger>
           <TabsTrigger value="settings"><Settings className="h-3 w-3 mr-1" /> Settings</TabsTrigger>
         </TabsList>
 
@@ -254,6 +266,16 @@ export default function ProjectPage() {
               </div>
             </ScrollArea>
           )}
+        </TabsContent>
+
+        <TabsContent value="chat" className="flex-1 m-0 mt-2 px-6 pb-4">
+          <div className="glass rounded-xl p-4 h-full">
+            <ChatHistory
+              messages={chatMessages || []}
+              isLoading={chatLoading}
+              onClear={() => clearMessages.mutate(project.id)}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="discussion" className="flex-1 m-0 mt-2 px-6 pb-4">
