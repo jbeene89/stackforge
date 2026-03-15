@@ -524,30 +524,21 @@ def check_hardware():
         return "cpu"
 
 def train_with_unsloth():
+    """GPU path — uses Unsloth for fast LoRA fine-tuning."""
     from unsloth import FastLanguageModel
     from trl import SFTTrainer
     from transformers import TrainingArguments
     from datasets import Dataset
-    import torch
 
     hw = check_hardware()
-    use_4bit = hw == "gpu" and not USE_CPU_ONLY
-    dtype = None  # auto
-
-    if USE_CPU_ONLY or hw == "cpu":
-        print("\\n🖥️  CPU-only mode: using float32, no quantization")
-        os.environ["CUDA_VISIBLE_DEVICES"] = ""
-        use_4bit = False
-        dtype = torch.float32
+    use_4bit = hw == "gpu"
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=BASE_MODEL,
         max_seq_length=HYPERPARAMS["max_seq_length"],
         load_in_4bit=use_4bit,
-        dtype=dtype,
     )
 
-    # Add perspective tokens so the model learns cognitive mode switches
     tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
     model.resize_token_embeddings(len(tokenizer))
 
@@ -568,8 +559,83 @@ def train_with_unsloth():
 
     dataset = Dataset.from_list(formatted)
 
-    fp16 = hw == "gpu" and not USE_CPU_ONLY
-    no_cuda = USE_CPU_ONLY or hw == "cpu"
+    trainer = SFTTrainer(
+        model=model,
+        tokenizer=tokenizer,
+        train_dataset=dataset,
+        dataset_text_field="text",
+        max_seq_length=HYPERPARAMS["max_seq_length"],
+        args=TrainingArguments(
+            output_dir=OUTPUT_DIR,
+            num_train_epochs=HYPERPARAMS["epochs"],
+            per_device_train_batch_size=HYPERPARAMS["batch_size"],
+            learning_rate=HYPERPARAMS["learning_rate"],
+            warmup_steps=HYPERPARAMS["warmup_steps"],
+            logging_steps=1,
+            save_strategy="epoch",
+            fp16=True,
+            gradient_accumulation_steps=${cpuOffload ? 4 : 1},
+        ),
+    )
+
+    print("\\n🔥 Starting GPU training with Unsloth...")
+    trainer.train()
+    model.save_pretrained(f"{OUTPUT_DIR}/lora")
+    print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
+
+    try:
+        model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
+        print(f"✅ GGUF model saved to {OUTPUT_DIR}/gguf")
+        print(f"   Run with: ollama create mymodel -f {OUTPUT_DIR}/gguf/Modelfile")
+    except Exception as e:
+        print(f"⚠️  GGUF export skipped: {e}")
+
+
+def train_cpu_fallback():
+    """CPU path — uses transformers + PEFT directly (no Unsloth needed)."""
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+    from peft import LoraConfig, get_peft_model, TaskType
+    from trl import SFTTrainer
+    from datasets import Dataset
+
+    print("\\n🖥️  CPU-only mode: using transformers + PEFT (no Unsloth)")
+    print("   This will be slower but works without a GPU.\\n")
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model = AutoModelForCausalLM.from_pretrained(
+        BASE_MODEL,
+        torch_dtype=torch.float32,
+        device_map="cpu",
+        trust_remote_code=True,
+    )
+
+    tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
+    model.resize_token_embeddings(len(tokenizer))
+
+    lora_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        r=HYPERPARAMS["lora_rank"],
+        lora_alpha=HYPERPARAMS["lora_alpha"],
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        lora_dropout=0.05,
+    )
+    model = get_peft_model(model, lora_config)
+    model.print_trainable_parameters()
+
+    raw = load_dataset(DATASET_FILE)
+    formatted = []
+    for sample in raw:
+        msgs = sample["messages"]
+        text = tokenizer.apply_chat_template(msgs, tokenize=False, add_generation_prompt=False)
+        formatted.append({"text": text})
+
+    dataset = Dataset.from_list(formatted)
 
     trainer = SFTTrainer(
         model=model,
@@ -585,27 +651,22 @@ def train_with_unsloth():
             warmup_steps=HYPERPARAMS["warmup_steps"],
             logging_steps=1,
             save_strategy="epoch",
-            fp16=fp16,
-            no_cuda=no_cuda,
-            gradient_accumulation_steps=${isCpuOnly ? 8 : cpuOffload ? 4 : 1},
+            fp16=False,
+            no_cuda=True,
+            gradient_accumulation_steps=8,
             dataloader_num_workers=0,
         ),
     )
 
-    print("\\n🔥 Starting training with Five Perspective Pipeline tokens...")
-    print(f"   Batch size: {HYPERPARAMS['batch_size']} (x${isCpuOnly ? 8 : cpuOffload ? 4 : 1} gradient accumulation)")
+    print("\\n🔥 Starting CPU training with Five Perspective Pipeline tokens...")
+    print(f"   Batch size: {HYPERPARAMS['batch_size']} (x8 gradient accumulation)")
     trainer.train()
 
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
+    tokenizer.save_pretrained(f"{OUTPUT_DIR}/lora")
     print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
+    print(f"   To merge: use peft merge_and_unload() then export to GGUF manually")
 
-    try:
-        model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
-        print(f"✅ GGUF model saved to {OUTPUT_DIR}/gguf")
-        print(f"   Run with: ollama create mymodel -f {OUTPUT_DIR}/gguf/Modelfile")
-    except Exception as e:
-        print(f"⚠️  GGUF export skipped (install llama.cpp for this): {e}")
-        print(f"   Your LoRA adapter is still saved at {OUTPUT_DIR}/lora")
 
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
@@ -618,8 +679,10 @@ if __name__ == "__main__":
     print(f"   Seq Length: {HYPERPARAMS['max_seq_length']}")
     print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
     print()
-    check_hardware()
+    hw = check_hardware()
     print()
-    train_with_unsloth()
-`;
-}
+
+    if USE_CPU_ONLY or hw == "cpu":
+        train_cpu_fallback()
+    else:
+        train_with_unsloth()
