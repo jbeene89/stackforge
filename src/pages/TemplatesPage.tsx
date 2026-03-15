@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockTemplates } from "@/data/mock-data";
+import { useCreateProject } from "@/hooks/useSupabaseData";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
