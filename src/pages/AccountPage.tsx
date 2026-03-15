@@ -40,6 +40,7 @@ export default function AccountPage() {
   const updateProfile = useUpdateProfile();
   const navigate = useNavigate();
   const { data: credits } = useCredits();
+  const spriteSettings = useSpriteSettings();
 
   const [name, setName] = useState("");
   const [initialized, setInitialized] = useState(false);
