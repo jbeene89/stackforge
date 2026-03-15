@@ -964,7 +964,7 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
     const jobName = `${dataset.name.toLowerCase().replace(/\s+/g, "-")}-training`;
     const job: TrainingJob = {
       id: "", user_id: "", dataset_id: dataset.id, name: jobName, base_model: baseModel, method: "lora",
-      hyperparameters: { epochs, learning_rate: lr, batch_size: batchSize, lora_rank: loraRank },
+      hyperparameters: { epochs, learning_rate: lr, batch_size: batchSize, lora_rank: loraRank, max_seq_length: maxSeqLen, cpu_offload: cpuOffload, gradient_checkpointing: gradientCheckpoint, hw_profile: hwProfile },
       status: "draft", metrics: {}, created_at: "", updated_at: ""
     };
 
