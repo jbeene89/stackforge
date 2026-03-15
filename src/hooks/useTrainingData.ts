@@ -528,10 +528,10 @@ def check_hardware():
     if torch.cuda.is_available():
         gpu_name = torch.cuda.get_device_name(0)
         vram = torch.cuda.get_device_properties(0).total_mem / 1e9
-        print(f"  GPU: {gpu_name} ({vram:.1f} GB VRAM)")
-        return "gpu"
+        print(f"  NVIDIA CUDA GPU: {gpu_name} ({vram:.1f} GB VRAM)")
+        return "cuda"
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        print("  GPU: Apple Silicon (MPS)")
+        print("  Apple Silicon detected (MPS) — using CPU fallback path")
         return "mps"
     else:
         import psutil
@@ -540,14 +540,21 @@ def check_hardware():
         return "cpu"
 
 def train_with_unsloth():
-    """GPU path — uses Unsloth for fast LoRA fine-tuning."""
-    from unsloth import FastLanguageModel
+    """NVIDIA CUDA path — uses Unsloth for fast LoRA fine-tuning."""
+    try:
+        from unsloth import FastLanguageModel
+    except Exception as e:
+        print(f"⚠️  Unsloth unavailable ({e})")
+        print("   Falling back to CPU-compatible training path.\n")
+        train_cpu_fallback()
+        return
+
     from trl import SFTTrainer
     from transformers import TrainingArguments
     from datasets import Dataset
 
     hw = check_hardware()
-    use_4bit = hw == "gpu"
+    use_4bit = hw == "cuda"
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=BASE_MODEL,
