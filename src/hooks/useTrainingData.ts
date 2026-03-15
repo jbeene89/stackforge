@@ -686,3 +686,5 @@ if __name__ == "__main__":
         train_cpu_fallback()
     else:
         train_with_unsloth()
+`;
+}
