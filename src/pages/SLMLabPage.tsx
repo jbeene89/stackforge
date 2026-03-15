@@ -1575,7 +1575,7 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
     setGradientCheckpoint(d.gradientCheckpoint);
     // Auto-select best model for the profile
     if (profile === "cpu_only" || profile === "low_vram") {
-      setBaseModel("llama-3.2-1b");
+      setBaseModel("qwen2.5-1.5b");
     } else if (profile === "mid_vram") {
       setBaseModel("qwen2.5-1.5b");
     }
