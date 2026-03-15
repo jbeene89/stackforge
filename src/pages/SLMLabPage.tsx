@@ -24,7 +24,7 @@ import {
   CheckCircle2, Circle, ArrowRight, ArrowLeft, Package,
   Zap, BookOpen, ChevronRight, ChevronDown, Info, ThumbsUp, ThumbsDown,
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
-  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp
+  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi
 } from "lucide-react";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
@@ -602,13 +602,18 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
   const [mode, setMode] = useState<"scrape" | "import" | "manual">("import");
+  const [offloadPerspective, setOffloadPerspective] = useState<string>("");
+  const [showOffloadSetup, setShowOffloadSetup] = useState(false);
   const scrape = useScrapeForTraining();
   const createSample = useCreateSample();
   const { data: samples } = useSamples(dataset.id);
 
+  const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
+  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
   const handleScrape = () => {
     if (!url.trim()) return;
-    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain });
+    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined });
     setUrl("");
   };
 
@@ -724,6 +729,117 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           </CardContent>
         </Card>
       )}
+
+      {/* Device Offload Panel */}
+      <Collapsible open={showOffloadSetup} onOpenChange={setShowOffloadSetup}>
+        <CollapsibleTrigger asChild>
+          <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full">
+            <Tablet className="h-3.5 w-3.5" />
+            <span>Offload a perspective to a secondary device (tablet)</span>
+            <ChevronRight className={`h-3.5 w-3.5 ml-auto transition-transform ${showOffloadSetup ? "rotate-90" : ""}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <Card className="mt-2 border-dashed">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Wifi className="h-4 w-4 text-primary" /> Distributed Pipeline
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Offload one perspective to a tablet or secondary machine running Ollama locally. The job gets queued and your tablet picks it up automatically.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs">Which perspective to offload?</Label>
+                <Select value={offloadPerspective} onValueChange={setOffloadPerspective}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="None — run all 5 in the cloud" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None (all cloud)</SelectItem>
+                    {(["builder", "red_team", "systems", "frame_breaker", "empath"] as const).map(k => {
+                      const cfg = PERSPECTIVE_CONFIG[k];
+                      return <SelectItem key={k} value={k}>{cfg.label}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {offloadPerspective && (
+                <div className="space-y-3">
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                    <p className="text-xs font-medium">Setup on your tablet:</p>
+                    <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                      <li>Install Ollama: <code className="text-[10px] bg-muted px-1 rounded">curl -fsSL https://ollama.com/install.sh | sh</code></li>
+                      <li>Pull a model: <code className="text-[10px] bg-muted px-1 rounded">ollama pull llama3.2:1b</code></li>
+                      <li>Run the worker script below</li>
+                    </ol>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Worker endpoint (for your tablet script):</Label>
+                    <div className="flex gap-1.5">
+                      <Input value={workerUrl} readOnly className="text-[10px] font-mono h-8" />
+                      <Button variant="outline" size="sm" className="h-8 px-2 shrink-0" onClick={() => {
+                        navigator.clipboard.writeText(workerUrl);
+                        toast.success("URL copied!");
+                      }}>
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Quick worker script:</Label>
+                    <div className="bg-muted rounded-lg p-3 overflow-x-auto">
+                      <pre className="text-[10px] font-mono text-muted-foreground whitespace-pre">{`#!/bin/bash
+# Save as tablet_worker.sh, then: chmod +x tablet_worker.sh && ./tablet_worker.sh
+API="${workerUrl}"
+KEY="${anonKey}"
+MODEL="llama3.2:1b"
+
+while true; do
+  R=$(curl -s "$API?action=poll" -H "apikey: $KEY")
+  JID=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['id'] if j.get('job') else '')" 2>/dev/null)
+  [ -z "$JID" ] && sleep 5 && continue
+  
+  P=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['perspective'])")
+  echo "⚡ Processing: $P"
+  
+  SP=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['system_prompt'])")
+  CT=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['input_content'])")
+  RES=$(echo "$SP\n\n$CT" | ollama run $MODEL 2>/dev/null)
+  
+  if [ -n "$RES" ]; then
+    curl -s -X POST "$API?action=submit" -H "apikey: $KEY" \\
+      -H "Content-Type: application/json" \\
+      -d "{\\"job_id\\": \\"$JID\\", \\"result\\": $(echo "$RES" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")}"
+    echo "  ✅ Done"
+  else
+    curl -s -X POST "$API?action=submit" -H "apikey: $KEY" \\
+      -H "Content-Type: application/json" -d "{\\"job_id\\": \\"$JID\\", \\"error\\": \\"failed\\"}"
+    echo "  ❌ Failed"
+  fi
+done`}</pre>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                      const script = `#!/bin/bash\nAPI="${workerUrl}"\nKEY="${anonKey}"\nMODEL="llama3.2:1b"\n\nwhile true; do\n  R=$(curl -s "$API?action=poll" -H "apikey: $KEY")\n  JID=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['id'] if j.get('job') else '')" 2>/dev/null)\n  [ -z "$JID" ] && sleep 5 && continue\n  P=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['perspective'])")\n  echo "Processing: $P"\n  SP=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['system_prompt'])")\n  CT=$(echo "$R" | python3 -c "import sys,json; j=json.load(sys.stdin); print(j['job']['input_content'])")\n  RES=$(echo "$SP\\n\\n$CT" | ollama run $MODEL 2>/dev/null)\n  if [ -n "$RES" ]; then\n    curl -s -X POST "$API?action=submit" -H "apikey: $KEY" -H "Content-Type: application/json" -d "{\\"job_id\\": \\"$JID\\", \\"result\\": $(echo "$RES" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")}"\n  else\n    curl -s -X POST "$API?action=submit" -H "apikey: $KEY" -H "Content-Type: application/json" -d "{\\"job_id\\": \\"$JID\\", \\"error\\": \\"failed\\"}"\n  fi\ndone`;
+                      const blob = new Blob([script], { type: "application/x-sh" });
+                      const u = URL.createObjectURL(blob);
+                      const a = document.createElement("a"); a.href = u; a.download = "tablet_worker.sh"; a.click();
+                      URL.revokeObjectURL(u);
+                      toast.success("Worker script downloaded!");
+                    }}>
+                      <Download className="h-3.5 w-3.5 mr-1.5" /> Download tablet_worker.sh
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       <div className="flex justify-end">
         <Button onClick={onNext} disabled={sampleCount === 0} size="lg" className="gradient-primary text-primary-foreground">

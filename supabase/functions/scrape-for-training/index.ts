@@ -56,7 +56,7 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { url, dataset_id, domain_hint } = await req.json();
+    const { url, dataset_id, domain_hint, offload_perspective } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
 
     // Step 1: Fetch webpage
@@ -85,11 +85,35 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Step 2: Run all 5 perspectives in parallel
+    // Step 2: Run perspectives — offload one to tablet if configured
     const contentPrompt = `Domain: ${domain_hint || "general"}\n\nContent:\n${pageContent}`;
+    const batchId = crypto.randomUUID();
 
+    // If a perspective is offloaded, create a job for it and run the rest inline
+    const offloadKey = offload_perspective && PERSPECTIVES[offload_perspective as keyof typeof PERSPECTIVES] ? offload_perspective : null;
+
+    if (offloadKey) {
+      // Insert the offloaded job into the queue
+      const serviceSupabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      await serviceSupabase.from("perspective_jobs").insert({
+        dataset_id,
+        user_id: user.id,
+        perspective: offloadKey,
+        input_content: contentPrompt,
+        domain_hint: domain_hint || "general",
+        source_url: url,
+        batch_id: batchId,
+        status: "pending",
+      });
+    }
+
+    // Run the non-offloaded perspectives in parallel
+    const inlinePerspectives = Object.entries(PERSPECTIVES).filter(([key]) => key !== offloadKey);
     const perspectiveResults = await Promise.all(
-      Object.entries(PERSPECTIVES).map(async ([key, prompt]) => {
+      inlinePerspectives.map(async ([key, prompt]) => {
         const result = await callAI(LOVABLE_API_KEY, prompt, contentPrompt);
         return [key, result] as [string, string];
       })
@@ -173,6 +197,7 @@ Original content domain: ${domain_hint || "general"}
     if (!pairs || !pairs.length) throw new Error("No training pairs extracted");
 
     // Step 4: Insert samples with all perspective fields
+    // If a perspective was offloaded, mark that field as awaiting tablet
     const samples = pairs.map((p: any) => ({
       dataset_id,
       user_id: user.id,
@@ -180,13 +205,13 @@ Original content domain: ${domain_hint || "general"}
       output: p.response,
       source_url: url,
       quality_score: p.quality || 3,
-      status: "pending",
-      builder: perspectives.builder,
-      red_team: perspectives.red_team,
-      systems: perspectives.systems,
-      frame_breaker: perspectives.frame_breaker,
-      empath: perspectives.empath,
-      synthesis: p.synthesis,
+      status: offloadKey ? "pending_offload" : "pending",
+      builder: perspectives.builder || null,
+      red_team: perspectives.red_team || null,
+      systems: perspectives.systems || null,
+      frame_breaker: perspectives.frame_breaker || null,
+      empath: perspectives.empath || null,
+      synthesis: offloadKey ? null : p.synthesis,
     }));
 
     const { error: insertErr } = await supabase.from("dataset_samples").insert(samples);
@@ -207,6 +232,8 @@ Original content domain: ${domain_hint || "general"}
       success: true,
       extracted: pairs.length,
       perspectives: Object.keys(perspectives),
+      offloaded: offloadKey || null,
+      batch_id: offloadKey ? batchId : null,
       samples: pairs.map((p: any) => ({ instruction: p.instruction.slice(0, 80), quality: p.quality })),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
