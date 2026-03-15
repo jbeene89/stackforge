@@ -553,6 +553,7 @@ def train_with_unsloth():
         model_name=BASE_MODEL,
         max_seq_length=HYPERPARAMS["max_seq_length"],
         load_in_4bit=use_4bit,
+        token=HF_TOKEN,
     )
 
     tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
