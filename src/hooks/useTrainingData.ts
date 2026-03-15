@@ -701,9 +701,12 @@ if __name__ == "__main__":
     hw = check_hardware()
     print()
 
-    if USE_CPU_ONLY or hw == "cpu":
+    if USE_CPU_ONLY:
         train_cpu_fallback()
-    else:
+    elif hw == "cuda":
         train_with_unsloth()
+    else:
+        print("⚠️  Non-NVIDIA environment detected — using CPU fallback path.\n")
+        train_cpu_fallback()
 `;
 }
