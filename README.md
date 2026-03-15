@@ -1,73 +1,111 @@
-# Welcome to your Lovable project
+# SoupyForge
 
-## Project info
+**AI-Powered Development Platform** — Build, test, and deploy AI modules, multi-agent stacks, web apps, and Android apps from a single workspace.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🌐 **Live**: [stackforge.lovable.app](https://stackforge.lovable.app)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## What is SoupyForge?
 
-**Use Lovable**
+SoupyForge is a full-stack AI development platform that lets you design AI agents, chain them into multi-agent pipelines, and ship production-ready applications — all from your browser.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Key Features
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🧠 AI Module Builder
+Create configurable AI agents with system prompts, guardrails, task boundaries, temperature controls, and model selection. Supports 12 module types: specialist, SLM, router, evaluator, critic, comparator, formatter, extractor, classifier, memory-filter, human-gate, and synthesizer.
 
-**Use your preferred IDE**
+### 🔗 Stack Canvas
+Design multi-agent pipelines visually. Connect modules with conditional edges, parallel branches, and data routing to build complex AI workflows.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🚀 Projects
+Full project lifecycle management — create web apps, Android apps, AI modules, stacks, and hybrid projects. Each project includes an AI-powered prompt interface with real-time streaming progress and persistent chat history.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🧪 Lab & Slicer Lab
+Experiment with AI modules and stacks in an interactive testing environment. Run test cases, inspect step-by-step execution, and compare outputs.
 
-Follow these steps:
+### 🏪 Marketplace
+Publish and discover community-built templates. Buy and sell modules, stacks, and project templates using the built-in credit system.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 📦 Export Studio
+Export your work to external platforms including Unity, Unreal Engine, ROS 2, Arduino, and Python with auto-generated, domain-specific code.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 🤖 Forge AI Assistant
+Context-aware AI chat for code generation, module configuration, stack architecture, and general development assistance.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 📊 Additional Tools
+- **Model Zoo** — Browse and compare AI models
+- **Data Pipelines** — Visual data flow management
+- **Signal Lab** — Signal processing workspace
+- **Robotics** — Robotics integration tools
+- **Edge Training** — On-device model training
+- **Solver Library** — Pre-built optimization solvers
+- **Game Engine** — Game development workspace
+- **Runs** — Execution history and audit logs
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 · TypeScript · Vite · Tailwind CSS |
+| UI | shadcn/ui · Radix Primitives · Framer Motion |
+| Backend | Lovable Cloud (Supabase) · Edge Functions |
+| Auth | Email/password with email verification · Google OAuth |
+| AI | Gemini Flash via Lovable AI Gateway |
+| Payments | Stripe (3-tier: Free / Builder $29 / Pro $79) |
+| Mobile | Capacitor (Android/iOS) · PWA |
+| Fonts | Space Grotesk · JetBrains Mono |
+
+---
+
+## Architecture
+
+```
+src/
+├── components/       # Shared UI components + layout
+├── hooks/            # Auth, credits, feature gates, data hooks
+├── pages/            # All route pages
+├── providers/        # Theme provider
+├── types/            # Core TypeScript models
+├── integrations/     # Supabase client & types
+└── data/             # Mock data for development
+
+supabase/
+└── functions/        # Edge functions (ai-generate, deduct-credits, stripe-webhook, etc.)
+```
+
+### Database Tables
+`projects` · `modules` · `stacks` · `runs` · `profiles` · `user_credits` · `credit_transactions` · `marketplace_templates` · `template_purchases` · `discussions` · `project_messages` · `referrals` · `referral_earnings` · `user_api_keys`
+
+All tables use Row Level Security (RLS) for data isolation.
+
+---
+
+## Credit System
+
+| Tier | Monthly Credits | Price |
+|------|----------------|-------|
+| Free | 50 | $0 |
+| Builder | 500 | $29/mo |
+| Pro | 2,000 | $79/mo |
+
+Credits are consumed per AI generation, with costs varying by model (1–10 credits per call).
+
+---
+
+## Local Development
+
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+See [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) for native mobile builds (Capacitor), desktop builds (Electron), and PWA installation instructions.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Proprietary — All rights reserved.
