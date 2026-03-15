@@ -31,6 +31,7 @@ import {
   useSamples, useCreateSample, useUpdateSample, useDeleteSample,
   useScrapeForTraining, useProcessChatExport, useTrainingJobs, useCreateTrainingJob,
   useStartInterview, useInterviewRespond, useFinishInterview,
+  useHFSearch, useHFPreview, useHFImport,
   exportDatasetAsJsonl, generateTrainingScript,
   type TrainingDataset, type DatasetSample, type TrainingJob,
 } from "@/hooks/useTrainingData";
