@@ -24,7 +24,7 @@ import {
   CheckCircle2, Circle, ArrowRight, ArrowLeft, Package,
   Zap, BookOpen, ChevronRight, ChevronDown, Info, ThumbsUp, ThumbsDown,
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
-  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp
+  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi
 } from "lucide-react";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
