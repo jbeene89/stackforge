@@ -326,6 +326,65 @@ export type Database = {
         }
         Relationships: []
       }
+      perspective_jobs: {
+        Row: {
+          batch_id: string
+          completed_at: string | null
+          created_at: string
+          dataset_id: string
+          domain_hint: string | null
+          error_message: string | null
+          id: string
+          input_content: string
+          perspective: string
+          result: string | null
+          source_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_id?: string
+          completed_at?: string | null
+          created_at?: string
+          dataset_id: string
+          domain_hint?: string | null
+          error_message?: string | null
+          id?: string
+          input_content: string
+          perspective: string
+          result?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_id?: string
+          completed_at?: string | null
+          created_at?: string
+          dataset_id?: string
+          domain_hint?: string | null
+          error_message?: string | null
+          id?: string
+          input_content?: string
+          perspective?: string
+          result?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perspective_jobs_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "training_datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
