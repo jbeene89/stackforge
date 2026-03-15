@@ -717,6 +717,45 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
       {mode === "import" ? (
         <ImportChatsPanel dataset={dataset} />
+      ) : mode === "file" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" /> Upload a Text File
+            </CardTitle>
+            <CardDescription>
+              Upload any .txt, .md, .csv, or .log file. Its contents will be run through the Five Perspective Pipeline to extract training pairs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Button onClick={() => fileUploadRef.current?.click()} variant="outline" className="flex-1">
+                <Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}
+              </Button>
+              <input ref={fileUploadRef} type="file" accept=".txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
+            </div>
+            {fileName && (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <FileText className="h-4 w-4" /> {fileName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{Math.round(fileText.length / 1000)}k characters loaded</p>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{fileText.slice(0, 500)}{fileText.length > 500 ? "…" : ""}</p>
+                </div>
+                <Button onClick={handleProcessFile} disabled={fileProcessing} className="w-full">
+                  {fileProcessing ? (
+                    <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Process Through Pipeline</>
+                  )}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ) : mode === "scrape" ? (
         <Card>
           <CardHeader>
