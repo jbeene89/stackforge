@@ -8,9 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { streamAI } from "@/hooks/useSupabaseData";
 import {
   Send, RotateCcw, Box, Layers, Thermometer, Gauge,
-  Shield, Zap, ChevronDown, AlertTriangle, CheckCircle2, Clock
+  Shield, Zap, ChevronDown, AlertTriangle, CheckCircle2, Clock,
+  Loader2
 } from "lucide-react";
 
 // Simulated slicer output profiles
