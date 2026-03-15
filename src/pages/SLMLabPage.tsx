@@ -378,12 +378,230 @@ function Step1CreateDataset({ onCreated }: { onCreated: (id: string) => void }) 
   );
 }
 
+// ── Import Chats Sub-component ──
+function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
+  const [provider, setProvider] = useState<Provider>("openai");
+  const [parsedConvos, setParsedConvos] = useState<ParsedConversation[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [processing, setProcessing] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0, currentTitle: "" });
+  const [results, setResults] = useState<{ title: string; pairs: number; error?: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const processExport = useProcessChatExport();
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const raw = JSON.parse(ev.target?.result as string);
+        const convos = parseExport(provider, raw);
+        if (convos.length === 0) {
+          toast.error("No conversations found. Make sure you selected the right provider and file format.");
+          return;
+        }
+        setParsedConvos(convos);
+        setSelectedIds(new Set(convos.map((_, i) => i)));
+        setResults([]);
+        toast.success(`Found ${convos.length} conversations!`);
+      } catch {
+        toast.error("Could not parse file. Make sure it's a valid JSON export.");
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const toggleConvo = (idx: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
+
+  const selectAll = () => setSelectedIds(new Set(parsedConvos.map((_, i) => i)));
+  const deselectAll = () => setSelectedIds(new Set());
+
+  const processSelected = async () => {
+    const selected = parsedConvos.filter((_, i) => selectedIds.has(i));
+    if (selected.length === 0) return;
+
+    setProcessing(true);
+    setResults([]);
+    setProgress({ current: 0, total: selected.length, currentTitle: "" });
+
+    const newResults: typeof results = [];
+
+    for (let i = 0; i < selected.length; i++) {
+      const conv = selected[i];
+      setProgress({ current: i + 1, total: selected.length, currentTitle: conv.title });
+
+      try {
+        const data = await processExport.mutateAsync({
+          conversation_text: conv.text,
+          dataset_id: dataset.id,
+          domain_hint: dataset.domain,
+          provider,
+          conversation_title: conv.title,
+        });
+        newResults.push({ title: conv.title, pairs: data.extracted });
+      } catch (err: any) {
+        newResults.push({ title: conv.title, pairs: 0, error: err.message });
+        // If rate limited, wait 5s before continuing
+        if (err.message?.includes("Rate limit")) {
+          await new Promise(r => setTimeout(r, 5000));
+        }
+      }
+      setResults([...newResults]);
+    }
+
+    setProcessing(false);
+    const totalPairs = newResults.reduce((sum, r) => sum + r.pairs, 0);
+    toast.success(`Done! Extracted ${totalPairs} training pairs from ${newResults.filter(r => r.pairs > 0).length} conversations`);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Provider selection */}
+      <div className="space-y-2">
+        <Label>Which AI did you export from?</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {(Object.entries(PROVIDER_INFO) as [Provider, typeof PROVIDER_INFO[Provider]][]).map(([key, info]) => (
+            <button key={key} onClick={() => { setProvider(key); setParsedConvos([]); setResults([]); }}
+              className={`text-left rounded-lg px-4 py-3 border transition-all ${
+                provider === key ? "border-primary bg-primary/10 ring-1 ring-primary/30" : "border-border hover:border-primary/30 hover:bg-muted/50"
+              }`}>
+              <p className="text-sm font-medium">{info.emoji} {info.label}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{info.exportGuide}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* File upload */}
+      <Card>
+        <CardContent className="py-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <FileUp className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Upload your {PROVIDER_INFO[provider].label} export</p>
+              <p className="text-[10px] text-muted-foreground">Expected: {PROVIDER_INFO[provider].acceptedFiles}</p>
+            </div>
+            <Button onClick={() => fileInputRef.current?.click()} variant="outline" size="sm">
+              <Upload className="h-3.5 w-3.5 mr-1.5" /> Choose File
+            </Button>
+            <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileUpload} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Parsed conversations list */}
+      {parsedConvos.length > 0 && !processing && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">{parsedConvos.length} conversations found</p>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" className="text-xs h-7" onClick={selectAll}>Select All</Button>
+              <Button variant="ghost" size="sm" className="text-xs h-7" onClick={deselectAll}>Deselect All</Button>
+            </div>
+          </div>
+          <ScrollArea className="h-[280px]">
+            <div className="space-y-1.5">
+              {parsedConvos.map((conv, i) => (
+                <button key={i} onClick={() => toggleConvo(i)}
+                  className={`w-full text-left rounded-lg px-3 py-2.5 border transition-all flex items-center gap-3 ${
+                    selectedIds.has(i) ? "border-primary/40 bg-primary/5" : "border-border/50 opacity-50"
+                  }`}>
+                  <div className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 ${
+                    selectedIds.has(i) ? "bg-primary border-primary" : "border-muted-foreground/30"
+                  }`}>
+                    {selectedIds.has(i) && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate">{conv.title}</p>
+                    <p className="text-[10px] text-muted-foreground">{conv.messageCount} messages · {Math.round(conv.text.length / 1000)}k chars</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+          <Button onClick={processSelected} disabled={selectedIds.size === 0} className="w-full gradient-primary text-primary-foreground h-11">
+            <Sparkles className="h-4 w-4 mr-2" /> Process {selectedIds.size} Conversations Through 5-Perspective Pipeline
+          </Button>
+        </div>
+      )}
+
+      {/* Processing progress */}
+      {processing && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="py-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Processing conversations…</p>
+              <span className="text-xs text-muted-foreground">{progress.current}/{progress.total}</span>
+            </div>
+            <Progress value={(progress.current / progress.total) * 100} className="h-2" />
+            <div className="flex items-center gap-2">
+              <RotateCcw className="h-3 w-3 animate-spin text-primary" />
+              <p className="text-xs text-muted-foreground truncate">"{progress.currentTitle}" — running 5 perspectives…</p>
+            </div>
+            <div className="grid grid-cols-5 gap-1">
+              {(["builder", "red_team", "systems", "frame_breaker", "empath"] as const).map(k => {
+                const cfg = PERSPECTIVE_CONFIG[k];
+                const Icon = cfg.icon;
+                return (
+                  <div key={k} className={`${cfg.bg} rounded-md px-2 py-1.5 flex items-center justify-center gap-1 animate-pulse`}>
+                    <Icon className={`h-3 w-3 ${cfg.color}`} />
+                    <span className={`text-[9px] font-bold ${cfg.color}`}>{cfg.label.split(" ")[0]}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Results */}
+      {results.length > 0 && !processing && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Import Complete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {results.map((r, i) => (
+              <div key={i} className={`flex items-center justify-between text-xs px-2 py-1.5 rounded ${r.error ? "bg-forge-rose/5" : "bg-forge-emerald/5"}`}>
+                <span className="truncate flex-1">{r.title}</span>
+                {r.error ? (
+                  <span className="text-forge-rose shrink-0 ml-2">⚠ {r.error.slice(0, 40)}</span>
+                ) : (
+                  <Badge variant="outline" className="text-[9px] text-forge-emerald border-forge-emerald/30 shrink-0 ml-2">
+                    +{r.pairs} pairs
+                  </Badge>
+                )}
+              </div>
+            ))}
+            <p className="text-xs text-muted-foreground pt-2">
+              Total: {results.reduce((s, r) => s + r.pairs, 0)} training pairs extracted
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // ── Step 2: Add Training Data ──
 function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: () => void }) {
   const [url, setUrl] = useState("");
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
-  const [mode, setMode] = useState<"scrape" | "manual">("scrape");
+  const [mode, setMode] = useState<"scrape" | "import" | "manual">("import");
   const scrape = useScrapeForTraining();
   const createSample = useCreateSample();
   const { data: samples } = useSamples(dataset.id);
@@ -412,7 +630,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         </div>
         <h2 className="text-xl font-bold">Add Training Data to "{dataset.name}"</h2>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Scrape websites with the <strong className="text-foreground">Five Perspective Pipeline</strong> — every URL gets analyzed by 5 AI perspectives simultaneously.
+          Import your AI chat history, scrape websites, or add examples manually — all processed through the <strong className="text-foreground">Five Perspective Pipeline</strong>.
         </p>
       </div>
 
@@ -434,15 +652,20 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
       {/* Mode toggle */}
       <div className="flex gap-2">
+        <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="flex-1">
+          <Upload className="h-4 w-4 mr-2" /> Import AI Chats
+        </Button>
         <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="flex-1">
-          <Globe className="h-4 w-4 mr-2" /> 5-Perspective Scrape
+          <Globe className="h-4 w-4 mr-2" /> Scrape URL
         </Button>
         <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")} className="flex-1">
-          <Plus className="h-4 w-4 mr-2" /> Type Manually
+          <Plus className="h-4 w-4 mr-2" /> Manual
         </Button>
       </div>
 
-      {mode === "scrape" ? (
+      {mode === "import" ? (
+        <ImportChatsPanel dataset={dataset} />
+      ) : mode === "scrape" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
