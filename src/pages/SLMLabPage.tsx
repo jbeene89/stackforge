@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -24,16 +24,17 @@ import {
   CheckCircle2, Circle, ArrowRight, ArrowLeft, Package,
   Zap, BookOpen, ChevronRight, ChevronDown, Info, ThumbsUp, ThumbsDown,
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
-  Shield, Lightbulb, Heart, Layers, Wrench
+  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp
 } from "lucide-react";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
   useSamples, useCreateSample, useUpdateSample, useDeleteSample,
-  useScrapeForTraining, useTrainingJobs, useCreateTrainingJob,
+  useScrapeForTraining, useProcessChatExport, useTrainingJobs, useCreateTrainingJob,
   useStartInterview, useInterviewRespond, useFinishInterview,
   exportDatasetAsJsonl, generateTrainingScript,
   type TrainingDataset, type DatasetSample, type TrainingJob,
 } from "@/hooks/useTrainingData";
+import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } from "@/lib/chatExportParsers";
 
 // ── Perspective config ──
 const PERSPECTIVE_CONFIG = {
