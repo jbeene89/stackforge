@@ -441,6 +441,16 @@ export function exportDatasetAsJsonl(samples: DatasetSample[], datasetName: stri
   URL.revokeObjectURL(url);
 }
 
+// Map short model IDs to valid Hugging Face Hub repo identifiers
+const HF_MODEL_MAP: Record<string, string> = {
+  "llama-3.2-1b": "meta-llama/Llama-3.2-1B",
+  "llama-3.2-3b": "meta-llama/Llama-3.2-3B",
+  "qwen2.5-1.5b": "Qwen/Qwen2.5-1.5B",
+  "gemma-2-2b": "google/gemma-2-2b",
+  "phi-3-mini": "microsoft/phi-3-mini-4k-instruct",
+  "mistral-7b": "mistralai/Mistral-7B-v0.3",
+};
+
 // Generate Python training script
 export function generateTrainingScript(job: TrainingJob, dataset: TrainingDataset): string {
   const hp = job.hyperparameters || {};
@@ -449,11 +459,12 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
   const hwProfile = hp.hw_profile || "cpu_only";
   const maxSeqLen = hp.max_seq_length || 1024;
   const isCpuOnly = hwProfile === "cpu_only";
+  const hfModelId = HF_MODEL_MAP[job.base_model] || job.base_model;
 
   return `#!/usr/bin/env python3
 """
 SoupyForge Local Training Script — Five Perspective Pipeline
-Model: ${job.base_model}
+Model: ${hfModelId}
 Method: ${job.method}
 Dataset: ${dataset.name}
 Hardware Profile: ${hwProfile}
@@ -470,7 +481,7 @@ with just RAM (16GB+ recommended). No GPU required.
 import json, os, sys
 from pathlib import Path
 
-BASE_MODEL = "${job.base_model}"
+BASE_MODEL = "${hfModelId}"
 DATASET_FILE = "${dataset.name.toLowerCase().replace(/\s+/g, "-")}-dataset.jsonl"
 OUTPUT_DIR = "./output/${job.name.toLowerCase().replace(/\s+/g, "-")}"
 
