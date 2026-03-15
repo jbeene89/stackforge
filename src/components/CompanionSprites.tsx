@@ -459,6 +459,7 @@ export function CompanionSprites() {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: credits } = useCredits();
+  const { visible, sizeMultiplier, spellsEnabled } = useSpriteSettings();
 
   const [state, setState] = useState<SpriteState>({
     clicked: false, scrollVelocity: 0, mouseX: 0, mouseY: 0,
@@ -468,8 +469,11 @@ export function CompanionSprites() {
   const [bubbleContent, setBubbleContent] = useState("");
   const [tipIndex, setTipIndex] = useState<Record<string, number>>({});
   const [rapidClicks, setRapidClicks] = useState(0);
+  const [spellEffects, setSpellEffects] = useState<SpellEffect[]>([]);
+  const [hitSprites, setHitSprites] = useState<Set<string>>(new Set());
   const rapidClickTimer = useRef<ReturnType<typeof setTimeout>>();
   const framebreakerTimer = useRef<ReturnType<typeof setTimeout>>();
+  const spellTimer = useRef<ReturnType<typeof setTimeout>>();
   const lastScrollY = useRef(0);
   const lastScrollTime = useRef(Date.now());
   const velocityRef = useRef(0);
@@ -479,39 +483,101 @@ export function CompanionSprites() {
   const creditData = useMemo(() => {
     if (!credits) return null;
     const pct = credits.monthly_allowance > 0 ? (credits.credits_balance / credits.monthly_allowance) * 100 : 0;
-    return {
-      balance: credits.credits_balance,
-      tier: credits.tier,
-      isLow: pct < 20,
-    };
+    return { balance: credits.credits_balance, tier: credits.tier, isLow: pct < 20 };
   }, [credits]);
 
   // Get page tips
   const getPageTips = () => {
     const path = location.pathname;
-    // Match exact or find parent
     const match = PAGE_TIPS[path] || PAGE_TIPS[Object.keys(PAGE_TIPS).find(k => k !== "/" && path.startsWith(k)) || ""];
     return match;
   };
 
+  // ─── SPELL COMBAT SYSTEM ───
+  const castSpell = useCallback(() => {
+    if (!spellsEnabled || !visible) return;
+
+    const casterIdx = Math.floor(Math.random() * SPRITES.length);
+    let targetIdx = Math.floor(Math.random() * SPRITES.length);
+    while (targetIdx === casterIdx) targetIdx = Math.floor(Math.random() * SPRITES.length);
+
+    const caster = SPRITES[casterIdx];
+    const target = SPRITES[targetIdx];
+    const spellType = SPELL_TYPES[Math.floor(Math.random() * SPELL_TYPES.length)];
+
+    // Show taunt bubble on caster
+    const tauntLines = SPELL_TAUNT_LINES[caster.id] || SPELL_TAUNT_LINES.mochi;
+    setActiveSpriteId(caster.id);
+    setBubbleMode("framebreaker");
+    setBubbleContent(tauntLines[Math.floor(Math.random() * tauntLines.length)]);
+
+    // Launch spell projectile after taunt
+    setTimeout(() => {
+      const fromX = (caster.baseX / 100) * window.innerWidth;
+      const fromY = (caster.baseY / 100) * window.innerHeight;
+      const toX = (target.baseX / 100) * window.innerWidth;
+      const toY = (target.baseY / 100) * window.innerHeight;
+
+      const effect: SpellEffect = {
+        id: `spell-${Date.now()}`,
+        fromX, fromY, toX, toY,
+        type: spellType,
+        startTime: Date.now(),
+        duration: 1200 + Math.random() * 600,
+      };
+
+      setSpellEffects(prev => [...prev, effect]);
+
+      // Hit reaction on target
+      setTimeout(() => {
+        setHitSprites(prev => new Set(prev).add(target.id));
+        setTimeout(() => setHitSprites(prev => {
+          const next = new Set(prev);
+          next.delete(target.id);
+          return next;
+        }), 500);
+
+        // Target reacts with hit line
+        const hitLines = SPELL_HIT_LINES[target.id] || SPELL_HIT_LINES.mochi;
+        setActiveSpriteId(target.id);
+        setBubbleMode("framebreaker");
+        setBubbleContent(hitLines[Math.floor(Math.random() * hitLines.length)]);
+      }, effect.duration * 0.75);
+    }, 800);
+  }, [spellsEnabled, visible]);
+
+  // Schedule random spell combats
+  useEffect(() => {
+    if (!spellsEnabled || !visible) return;
+
+    const scheduleSpell = () => {
+      const delay = 15000 + Math.random() * 25000; // 15-40 seconds
+      spellTimer.current = setTimeout(() => {
+        castSpell();
+        scheduleSpell();
+      }, delay);
+    };
+    scheduleSpell();
+    return () => clearTimeout(spellTimer.current);
+  }, [spellsEnabled, visible, castSpell]);
+
+  const handleSpellDone = useCallback((id: string) => {
+    setSpellEffects(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   // Handle sprite click
   const handleSpriteClick = (spriteId: string) => {
-    // If already showing bubble for this sprite, dismiss
     if (activeSpriteId === spriteId && bubbleMode) {
       dismissBubble();
       return;
     }
 
-    const sprite = SPRITES.find(s => s.id === spriteId)!;
-
-    // Track rapid clicks for framebreaker
     setRapidClicks(prev => {
       const next = prev + 1;
       clearTimeout(rapidClickTimer.current);
       rapidClickTimer.current = setTimeout(() => setRapidClicks(0), 1500);
 
       if (next >= 5) {
-        // FRAMEBREAKER! 🎉
         setActiveSpriteId(spriteId);
         setBubbleMode("framebreaker");
         setBubbleContent(FRAMEBREAKER_MESSAGES[Math.floor(Math.random() * FRAMEBREAKER_MESSAGES.length)]);
@@ -521,9 +587,7 @@ export function CompanionSprites() {
       return next;
     });
 
-    // Determine what to show based on which sprite
     if (spriteId === "mochi") {
-      // Contextual tips
       const pageTips = getPageTips();
       if (pageTips) {
         const key = location.pathname;
@@ -536,9 +600,7 @@ export function CompanionSprites() {
         setBubbleMode("tip");
       }
     } else if (spriteId === "ember") {
-      // Alternate between credit status and nav shortcuts
       if (bubbleMode === "nav" && activeSpriteId === "ember") {
-        // Show credits
         if (creditData) {
           const msg = creditData.isLow
             ? `⚠️ Only ${creditData.balance} credits left! Consider upgrading.`
@@ -554,7 +616,6 @@ export function CompanionSprites() {
         setBubbleMode("nav");
       }
     } else if (spriteId === "wisp") {
-      // AI gateway
       setBubbleContent("Need help? I can connect you to Forge AI — your code generation assistant! 🧙");
       setBubbleMode("ai-hint");
     }
@@ -582,11 +643,9 @@ export function CompanionSprites() {
   }, [bubbleMode, bubbleContent]);
 
   // Dismiss on route change
-  useEffect(() => {
-    dismissBubble();
-  }, [location.pathname]);
+  useEffect(() => { dismissBubble(); }, [location.pathname]);
 
-  // Framebreaker: random unprompted message after idle
+  // Framebreaker idle messages
   useEffect(() => {
     const scheduleFramebreaker = () => {
       clearTimeout(framebreakerTimer.current);
@@ -597,18 +656,17 @@ export function CompanionSprites() {
           setBubbleMode("framebreaker");
           setBubbleContent(FRAMEBREAKER_MESSAGES[Math.floor(Math.random() * FRAMEBREAKER_MESSAGES.length)]);
         }
-      }, 45000 + Math.random() * 30000); // 45-75 seconds
+      }, 45000 + Math.random() * 30000);
     };
     scheduleFramebreaker();
     return () => clearTimeout(framebreakerTimer.current);
   }, [location.pathname, bubbleMode]);
 
-  // Credit low auto-alert (once per session per page)
+  // Credit low auto-alert
   const alertedPages = useRef(new Set<string>());
   useEffect(() => {
     if (creditData?.isLow && !alertedPages.current.has(location.pathname) && !bubbleMode) {
       alertedPages.current.add(location.pathname);
-      // Delay so it doesn't pop immediately
       const t = setTimeout(() => {
         setActiveSpriteId("ember");
         setBubbleMode("credit");
@@ -660,8 +718,11 @@ export function CompanionSprites() {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
+  if (!visible) return null;
+
   return (
     <>
+      <SpellCanvas effects={spellEffects} onEffectDone={handleSpellDone} />
       {SPRITES.map((sprite) => (
         <CompanionSprite
           key={sprite.id}
@@ -673,6 +734,8 @@ export function CompanionSprites() {
           onDismiss={dismissBubble}
           bubbleContent={activeSpriteId === sprite.id ? bubbleContent : ""}
           creditData={creditData}
+          sizeMultiplier={sizeMultiplier}
+          isHit={hitSprites.has(sprite.id)}
         />
       ))}
     </>
