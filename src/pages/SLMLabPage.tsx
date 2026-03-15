@@ -601,12 +601,17 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [url, setUrl] = useState("");
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
-  const [mode, setMode] = useState<"scrape" | "import" | "manual">("import");
+  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
+  const [fileText, setFileText] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [fileProcessing, setFileProcessing] = useState(false);
   const scrape = useScrapeForTraining();
   const createSample = useCreateSample();
+  const processExport = useProcessChatExport();
   const { data: samples } = useSamples(dataset.id);
+  const fileUploadRef = useRef<HTMLInputElement>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -615,6 +620,45 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     if (!url.trim()) return;
     scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined });
     setUrl("");
+  };
+
+  const handleRawFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      if (text.length < 50) {
+        toast.error("File too short — need at least 50 characters of content.");
+        return;
+      }
+      setFileText(text);
+      setFileName(file.name);
+      toast.success(`Loaded "${file.name}" (${Math.round(text.length / 1000)}k chars)`);
+    };
+    reader.readAsText(file);
+    if (fileUploadRef.current) fileUploadRef.current.value = "";
+  };
+
+  const handleProcessFile = async () => {
+    if (!fileText.trim()) return;
+    setFileProcessing(true);
+    try {
+      const data = await processExport.mutateAsync({
+        conversation_text: fileText,
+        dataset_id: dataset.id,
+        domain_hint: dataset.domain,
+        provider: "file-upload",
+        conversation_title: fileName || "Uploaded File",
+      });
+      toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
+      setFileText("");
+      setFileName("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process file");
+    } finally {
+      setFileProcessing(false);
+    }
   };
 
   const handleAddManual = () => {
@@ -656,12 +700,15 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </Card>
 
       {/* Mode toggle */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="flex-1">
           <Upload className="h-4 w-4 mr-2" /> Import AI Chats
         </Button>
         <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="flex-1">
           <Globe className="h-4 w-4 mr-2" /> Scrape URL
+        </Button>
+        <Button variant={mode === "file" ? "default" : "outline"} onClick={() => setMode("file")} className="flex-1">
+          <FileText className="h-4 w-4 mr-2" /> Upload File
         </Button>
         <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")} className="flex-1">
           <Plus className="h-4 w-4 mr-2" /> Manual
@@ -670,6 +717,45 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
       {mode === "import" ? (
         <ImportChatsPanel dataset={dataset} />
+      ) : mode === "file" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" /> Upload a Text File
+            </CardTitle>
+            <CardDescription>
+              Upload any .txt, .md, .csv, or .log file. Its contents will be run through the Five Perspective Pipeline to extract training pairs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Button onClick={() => fileUploadRef.current?.click()} variant="outline" className="flex-1">
+                <Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}
+              </Button>
+              <input ref={fileUploadRef} type="file" accept=".txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
+            </div>
+            {fileName && (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <FileText className="h-4 w-4" /> {fileName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{Math.round(fileText.length / 1000)}k characters loaded</p>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
+                  <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{fileText.slice(0, 500)}{fileText.length > 500 ? "…" : ""}</p>
+                </div>
+                <Button onClick={handleProcessFile} disabled={fileProcessing} className="w-full">
+                  {fileProcessing ? (
+                    <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Process Through Pipeline</>
+                  )}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ) : mode === "scrape" ? (
         <Card>
           <CardHeader>

@@ -14,7 +14,9 @@ const PERSPECTIVES = {
   empath: `You are an empathetic analyst. Read this conversation and identify the human element. What was the person really trying to solve emotionally? What frustration or curiosity drove them? Where does the technical answer ignore the human reality?`,
 };
 
-const SYNTHESIS_PROMPT = `You have received five perspectives on the same conversation from Builder, Red Team, Systems, Frame Breaker, and Empath. Find the answer that NONE of the five saw on their own — the emergent insight that only exists because all five collided. Focus on capturing the UNIQUE way this person thinks and solves problems. This is about distilling their cognitive fingerprint into training data that sparks creative, multi-dimensional thinking in an SLM.`;
+const SYNTHESIS_PROMPT = `You have received five perspectives on the same conversation from Builder, Red Team, Systems, Frame Breaker, and Empath. Find the answers that NONE of the five saw on their own — the emergent insights that only exist because all five collided. Focus on capturing the UNIQUE way this person thinks and solves problems. This is about distilling their cognitive fingerprint into training data that sparks creative, multi-dimensional thinking in an SLM.
+
+IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect of the conversation — different thinking patterns, problem-solving approaches, insights, or topics discussed. Do NOT return just one pair. Aim for comprehensive coverage.`;
 
 async function callAI(apiKey: string, systemPrompt: string, content: string): Promise<string> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -118,7 +120,7 @@ Domain: ${domain_hint || "general"}
           type: "function",
           function: {
             name: "create_training_pairs",
-            description: "Create training pairs that capture the unique thinking patterns from this conversation",
+            description: "Create 5-10 diverse training pairs that capture unique thinking patterns. Each pair should cover a different aspect.",
             parameters: {
               type: "object",
               properties: {

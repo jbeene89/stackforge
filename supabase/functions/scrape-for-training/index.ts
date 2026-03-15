@@ -14,7 +14,9 @@ const PERSPECTIVES = {
   empath: `You are an empathetic analyst. Read this content and identify who the humans are on the receiving end of this knowledge. What are they afraid of? What do they need to feel before they can hear the answer? Where does this content ignore the human element entirely? What emotional reality is missing from the technical answer?`,
 };
 
-const SYNTHESIS_PROMPT = `You have received five perspectives on the same content from Builder, Red Team, Systems, Frame Breaker, and Empath. Your job is not to summarize them or pick the best one. Find the answer that NONE of the five perspectives saw on their own. The emergent insight that only exists because all five collided.`;
+const SYNTHESIS_PROMPT = `You have received five perspectives on the same content from Builder, Red Team, Systems, Frame Breaker, and Empath. Your job is not to summarize them or pick the best one. Find the answers that NONE of the five perspectives saw on their own. The emergent insights that only exist because all five collided.
+
+IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect, angle, or topic from the content. Do NOT return just one pair. Aim for comprehensive coverage — different questions, different depths, different angles.`;
 
 async function callAI(apiKey: string, systemPrompt: string, content: string): Promise<string> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -160,7 +162,7 @@ Original content domain: ${domain_hint || "general"}
           type: "function",
           function: {
             name: "create_training_pairs",
-            description: "Create training pairs from the five-perspective analysis",
+            description: "Create 5-10 diverse training pairs from the five-perspective analysis. Each pair should cover a different topic or angle.",
             parameters: {
               type: "object",
               properties: {
