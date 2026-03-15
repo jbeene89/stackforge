@@ -254,7 +254,6 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
     });
   };
 
-  const [showTopics, setShowTopics] = useState(false);
 
   // Chat interface
   return (
