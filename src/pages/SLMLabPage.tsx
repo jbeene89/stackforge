@@ -708,6 +708,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="flex-1">
           <Upload className="h-4 w-4 mr-2" /> Import AI Chats
         </Button>
+        <Button variant={mode === "huggingface" ? "default" : "outline"} onClick={() => setMode("huggingface")} className="flex-1">
+          <Database className="h-4 w-4 mr-2" /> Hugging Face
+        </Button>
         <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="flex-1">
           <Globe className="h-4 w-4 mr-2" /> Scrape URL
         </Button>
