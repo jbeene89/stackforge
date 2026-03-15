@@ -545,7 +545,7 @@ def train_with_unsloth():
         from unsloth import FastLanguageModel
     except Exception as e:
         print(f"⚠️  Unsloth unavailable ({e})")
-        print("   Falling back to CPU-compatible training path.\\n")
+        print("   Falling back to CPU-compatible training path.")
         train_cpu_fallback()
         return
 
