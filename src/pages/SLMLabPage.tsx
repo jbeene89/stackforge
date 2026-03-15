@@ -222,6 +222,38 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
     );
   }
 
+  const TOPIC_SUGGESTIONS = [
+    "Let's talk about failures and what you learned",
+    "Tell me about your decision-making process",
+    "How do you handle situations with incomplete information?",
+    "What's your approach to training or mentoring others?",
+    "Let's switch to a completely different area of your expertise",
+    "Tell me about the tools or systems you've built",
+  ];
+
+  const handleTopicSteer = (topic: string) => {
+    if (!interviewId || respond.isPending) return;
+    const steerMsg = `[TOPIC SHIFT] The user wants to talk about: ${topic}. Ask a focused, curious question about this new topic.`;
+    const newTranscript = [...transcript, { role: "user", content: `I'd like to talk about: ${topic}` }];
+    setTranscript(newTranscript);
+    setExchangeCount(prev => prev + 1);
+
+    respond.mutate({
+      interview_id: interviewId,
+      dataset_id: datasetId,
+      message: steerMsg,
+      transcript: transcript,
+      domain_hint: domain,
+    }, {
+      onSuccess: (data) => {
+        setTranscript(prev => [...prev, { role: "assistant", content: data.follow_up }]);
+        if (data.pair_created) setPairsCreated(prev => prev + 1);
+      }
+    });
+  };
+
+  const [showTopics, setShowTopics] = useState(false);
+
   // Chat interface
   return (
     <div className="h-full flex flex-col">
@@ -237,6 +269,15 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs"
+            onClick={() => setShowTopics(!showTopics)}
+          >
+            <ArrowRight className="h-3 w-3 mr-1" />
+            {showTopics ? "Hide Topics" : "Change Topic"}
+          </Button>
           <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={onSkip}>
             Skip Interview
           </Button>
@@ -248,6 +289,34 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
           )}
         </div>
       </div>
+
+      {/* Topic suggestions bar */}
+      <AnimatePresence>
+        {showTopics && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }} 
+            animate={{ height: "auto", opacity: 1 }} 
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-b border-border/50"
+          >
+            <div className="px-4 py-3 flex gap-2 flex-wrap">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider self-center mr-1">Steer to:</span>
+              {TOPIC_SUGGESTIONS.map((topic) => (
+                <Button
+                  key={topic}
+                  variant="outline"
+                  size="sm"
+                  className="text-[11px] h-7"
+                  disabled={respond.isPending}
+                  onClick={() => { handleTopicSteer(topic); setShowTopics(false); }}
+                >
+                  {topic}
+                </Button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-auto px-4 py-6 space-y-4">

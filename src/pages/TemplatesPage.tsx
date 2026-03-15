@@ -5,14 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { mockTemplates } from "@/data/mock-data";
+import { useMarketplaceTemplates } from "@/hooks/useMarketplace";
 import { useCreateProject } from "@/hooks/useSupabaseData";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Globe, Smartphone, Brain, Layers, Search, Star,
   TrendingUp, Plus, ArrowRight, Sparkles, Eye,
-  CheckCircle2, X, Rocket, Copy, Heart
+  CheckCircle2, X, Rocket, Copy, Heart, Loader2
 } from "lucide-react";
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -31,79 +31,26 @@ const categoryColors: Record<string, string> = {
 
 const tabs = ["all", "web", "android", "module", "stack"] as const;
 
-interface TemplatePreview {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  tags: string[];
-  popularity: number;
-  features: string[];
-  includes: string[];
-}
-
-const templateDetails: Record<string, { features: string[]; includes: string[] }> = {
-  "tpl-1": {
-    features: ["Lead pipeline management", "Contact database", "Activity timeline", "Email integration", "Custom fields"],
-    includes: ["5 pre-built views", "Dashboard widgets", "CSV import/export"],
-  },
-  "tpl-2": {
-    features: ["Line-item cost breakdown", "Material calculator", "Proposal PDF export", "Client portal link"],
-    includes: ["Rate table templates", "3 proposal styles", "Tax calculator"],
-  },
-  "tpl-3": {
-    features: ["User management CRUD", "Data tables with sorting", "Analytics charts", "Role-based views"],
-    includes: ["Admin dashboard", "Audit log viewer", "Settings panel"],
-  },
-  "tpl-4": {
-    features: ["Photo capture with annotation", "GPS location tagging", "Offline mode with sync", "Checklist templates"],
-    includes: ["10 inspection templates", "Photo gallery", "Report generator"],
-  },
-  "tpl-5": {
-    features: ["Barcode scanning", "Stock level alerts", "Batch operations", "Location tracking"],
-    includes: ["Warehouse layout view", "Low stock dashboard", "History log"],
-  },
-  "tpl-6": {
-    features: ["Multi-document ingestion", "Key findings extraction", "Citation tracking", "Summary levels"],
-    includes: ["Academic paper parser", "Patent analyzer", "Custom prompt builder"],
-  },
-  "tpl-7": {
-    features: ["Clause-by-clause analysis", "Risk severity scoring", "Industry compliance checks", "Comparison mode"],
-    includes: ["Legal term glossary", "Risk matrix template", "Compliance checklist"],
-  },
-  "tpl-8": {
-    features: ["5-node pipeline", "Intake → Scope → Cost → Risk → Proposal", "Configurable per node", "Parallel branches"],
-    includes: ["Rate tables", "Risk templates", "Proposal formatter"],
-  },
-  "tpl-9": {
-    features: ["Research aggregation", "Fact verification", "Source ranking", "Draft composition"],
-    includes: ["Source credibility scorer", "Citation formatter", "Style guide"],
-  },
-  "tpl-10": {
-    features: ["Project status tracker", "Document sharing", "Messaging system", "Invoice viewer"],
-    includes: ["Client dashboard", "File manager", "Notification system"],
-  },
-};
-
 export default function TemplatesPage() {
   const navigate = useNavigate();
   const createProject = useCreateProject();
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"popularity" | "name">("popularity");
+  const [sortBy, setSortBy] = useState<"downloads" | "name">("downloads");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(["tpl-1", "tpl-8"]));
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState<string | null>(null);
 
-  const filtered = mockTemplates
-    .filter((t) => filter === "all" || t.category === filter)
+  const { data: templates, isLoading } = useMarketplaceTemplates(filter === "all" ? undefined : filter);
+
+  const filtered = (templates || [])
     .filter((t) =>
       t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.description.toLowerCase().includes(search.toLowerCase()) ||
-      t.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
+      (t.tags || []).some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
     )
     .sort((a, b) =>
-      sortBy === "popularity" ? b.popularity - a.popularity : a.name.localeCompare(b.name)
+      sortBy === "downloads" ? b.downloads - a.downloads : a.name.localeCompare(b.name)
     );
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
@@ -116,26 +63,24 @@ export default function TemplatesPage() {
     });
   };
 
-  const createFromTemplate = (tplId: string, tplName: string) => {
-    const tpl = mockTemplates.find(t => t.id === tplId);
-    if (!tpl) return;
-    setCreating(tplId);
-    const projectType = tpl.category === "web" ? "web" as const
-      : tpl.category === "android" ? "android" as const
-      : tpl.category === "module" ? "module" as const
+  const createFromTemplate = (tpl: typeof filtered[0]) => {
+    setCreating(tpl.id);
+    const projectType = tpl.type === "web" ? "web" as const
+      : tpl.type === "android" ? "android" as const
+      : tpl.type === "module" ? "module" as const
       : "stack" as const;
     createProject.mutate(
       {
-        name: tplName,
+        name: tpl.name,
         description: tpl.description,
         type: projectType,
-        tags: tpl.tags,
+        tags: tpl.tags || [],
       },
       {
         onSuccess: (data) => {
           setCreating(null);
           setSelectedTemplate(null);
-          toast.success(`Project created from "${tplName}"`, {
+          toast.success(`Project created from "${tpl.name}"`, {
             description: "Redirecting to your new project…",
           });
           navigate(`/projects/${data.id}`);
@@ -148,8 +93,7 @@ export default function TemplatesPage() {
     );
   };
 
-  const selected = mockTemplates.find((t) => t.id === selectedTemplate);
-  const details = selectedTemplate ? templateDetails[selectedTemplate] : null;
+  const selected = filtered.find((t) => t.id === selectedTemplate);
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] animate-fade-in">
@@ -160,7 +104,7 @@ export default function TemplatesPage() {
             <div className="flex items-center gap-3">
               <Sparkles className="h-5 w-5 text-primary" />
               <h1 className="text-2xl font-bold">Templates Gallery</h1>
-              <Badge variant="outline" className="text-[10px]">{mockTemplates.length} templates</Badge>
+              <Badge variant="outline" className="text-[10px]">{filtered.length} templates</Badge>
             </div>
           </div>
 
@@ -195,8 +139,8 @@ export default function TemplatesPage() {
             </div>
             <div className="flex gap-1 p-1 rounded-lg bg-secondary/50 ml-auto">
               <button
-                onClick={() => setSortBy("popularity")}
-                className={cn("px-2.5 py-1.5 text-[10px] rounded-md transition-colors flex items-center gap-1", sortBy === "popularity" ? "bg-background shadow-sm" : "text-muted-foreground")}
+                onClick={() => setSortBy("downloads")}
+                className={cn("px-2.5 py-1.5 text-[10px] rounded-md transition-colors flex items-center gap-1", sortBy === "downloads" ? "bg-background shadow-sm" : "text-muted-foreground")}
               >
                 <TrendingUp className="h-3 w-3" /> Popular
               </button>
@@ -212,66 +156,72 @@ export default function TemplatesPage() {
 
         {/* Grid */}
         <ScrollArea className="flex-1 px-6 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filtered.map((tpl, i) => {
-                const Icon = categoryIcons[tpl.category];
-                const isActive = selectedTemplate === tpl.id;
-                const isFav = favorites.has(tpl.id);
-                return (
-                  <motion.div
-                    key={tpl.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: i * 0.03 }}
-                    whileHover={{ y: -2 }}
-                    onClick={() => setSelectedTemplate(isActive ? null : tpl.id)}
-                    className={cn(
-                      "glass rounded-xl p-5 cursor-pointer transition-all group relative",
-                      isActive ? "ring-2 ring-primary glow-primary" : "hover:border-primary/30"
-                    )}
-                  >
-                    {/* Favorite */}
-                    <button
-                      onClick={(e) => toggleFavorite(tpl.id, e)}
-                      className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <AnimatePresence mode="popLayout">
+                {filtered.map((tpl, i) => {
+                  const Icon = categoryIcons[tpl.type] || Brain;
+                  const isActive = selectedTemplate === tpl.id;
+                  const isFav = favorites.has(tpl.id);
+                  return (
+                    <motion.div
+                      key={tpl.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: i * 0.03 }}
+                      whileHover={{ y: -2 }}
+                      onClick={() => setSelectedTemplate(isActive ? null : tpl.id)}
+                      className={cn(
+                        "glass rounded-xl p-5 cursor-pointer transition-all group relative",
+                        isActive ? "ring-2 ring-primary glow-primary" : "hover:border-primary/30"
+                      )}
                     >
-                      <Heart className={cn("h-4 w-4", isFav ? "fill-forge-rose text-forge-rose" : "text-muted-foreground")} />
-                    </button>
+                      {/* Favorite */}
+                      <button
+                        onClick={(e) => toggleFavorite(tpl.id, e)}
+                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Heart className={cn("h-4 w-4", isFav ? "fill-forge-rose text-forge-rose" : "text-muted-foreground")} />
+                      </button>
 
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", categoryColors[tpl.category])}>
-                        <Icon className="h-4 w-4" />
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", categoryColors[tpl.type] || "bg-muted")}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm">{tpl.name}</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm">{tpl.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-1 flex-wrap">
-                        {tpl.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-[9px] px-1.5 py-0">{tag}</Badge>
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-1 flex-wrap">
+                          {(tpl.tags || []).slice(0, 3).map((tag) => (
+                            <Badge key={tag} variant="outline" className="text-[9px] px-1.5 py-0">{tag}</Badge>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <Star className="h-3 w-3 fill-forge-amber text-forge-amber" />
+                          {tpl.downloads}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <Star className="h-3 w-3 fill-forge-amber text-forge-amber" />
-                        {tpl.popularity}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          )}
 
-          {filtered.length === 0 && (
+          {!isLoading && filtered.length === 0 && (
             <div className="text-center py-20 text-muted-foreground">
               <Search className="h-8 w-8 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No templates match your search.</p>
+              <p className="text-sm">No templates found. Publish one from your modules or stacks!</p>
             </div>
           )}
         </ScrollArea>
@@ -279,7 +229,7 @@ export default function TemplatesPage() {
 
       {/* Detail panel */}
       <AnimatePresence>
-        {selected && details && (
+        {selected && (
           <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 380, opacity: 1 }}
@@ -299,81 +249,51 @@ export default function TemplatesPage() {
                 <div className="p-5 space-y-5">
                   {/* Header */}
                   <div className="flex items-start gap-3">
-                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", categoryColors[selected.category])}>
-                      {(() => { const Icon = categoryIcons[selected.category]; return <Icon className="h-5 w-5" />; })()}
+                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", categoryColors[selected.type] || "bg-muted")}>
+                      {(() => { const Icon = categoryIcons[selected.type] || Brain; return <Icon className="h-5 w-5" />; })()}
                     </div>
                     <div>
                       <h2 className="font-bold text-lg">{selected.name}</h2>
-                      <Badge className={cn("text-[10px] capitalize mt-1", categoryColors[selected.category])}>{selected.category}</Badge>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className={cn("text-[10px] capitalize", categoryColors[selected.type] || "bg-muted")}>{selected.type}</Badge>
+                        <Badge variant="outline" className="text-[10px]">{selected.price_credits} credits</Badge>
+                      </div>
                     </div>
                   </div>
 
                   <p className="text-sm text-muted-foreground">{selected.description}</p>
 
-                  {/* Popularity */}
+                  {/* Stats */}
                   <div className="glass rounded-lg p-3 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Popularity Score</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-1.5 rounded-full bg-secondary overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full bg-forge-amber"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${selected.popularity}%` }}
-                          transition={{ duration: 0.8 }}
-                        />
-                      </div>
-                      <span className="text-xs font-bold">{selected.popularity}%</span>
-                    </div>
+                    <span className="text-xs text-muted-foreground">Downloads</span>
+                    <span className="text-xs font-bold">{selected.downloads}</span>
                   </div>
 
-                  {/* Features */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Features</h4>
-                    <div className="space-y-1.5">
-                      {details.features.map((f, i) => (
-                        <motion.div
-                          key={f}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald shrink-0" />
-                          {f}
-                        </motion.div>
-                      ))}
+                  {selected.creator_name && (
+                    <div className="glass rounded-lg p-3 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Created by</span>
+                      <span className="text-xs font-medium">{selected.creator_name}</span>
                     </div>
-                  </div>
-
-                  {/* Includes */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Includes</h4>
-                    <div className="space-y-1.5">
-                      {details.includes.map((item) => (
-                        <div key={item} className="flex items-center gap-2 text-sm">
-                          <Copy className="h-3 w-3 text-primary shrink-0" />
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  )}
 
                   {/* Tags */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tags</h4>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {selected.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-[10px]">{tag}</Badge>
-                      ))}
+                  {(selected.tags || []).length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tags</h4>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {selected.tags.map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-[10px]">{tag}</Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Create button */}
                   <div className="pt-2 space-y-2">
                     <Button
                       className="w-full gradient-primary text-primary-foreground"
                       disabled={creating === selected.id}
-                      onClick={() => createFromTemplate(selected.id, selected.name)}
+                      onClick={() => createFromTemplate(selected)}
                     >
                       {creating === selected.id ? (
                         <><Rocket className="h-4 w-4 mr-2 animate-bounce" /> Creating project…</>
