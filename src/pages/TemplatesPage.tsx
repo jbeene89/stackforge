@@ -86,6 +86,8 @@ const templateDetails: Record<string, { features: string[]; includes: string[] }
 };
 
 export default function TemplatesPage() {
+  const navigate = useNavigate();
+  const createProject = useCreateProject();
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"popularity" | "name">("popularity");
