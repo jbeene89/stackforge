@@ -86,6 +86,7 @@ const exampleInputs = [
   "Waterproof enclosure for outdoor electronics. PETG, needs to be airtight. Will be exposed to sun and rain.",
 ];
 
+// Default fallback profile if AI parsing fails
 function matchProfile(input: string) {
   const lower = input.toLowerCase();
   if (lower.includes("strong") || lower.includes("structural") || lower.includes("bracket") || lower.includes("mount") || lower.includes("load"))
@@ -93,6 +94,37 @@ function matchProfile(input: string) {
   if (lower.includes("fast") || lower.includes("quick") || lower.includes("prototype") || lower.includes("draft"))
     return slicerProfiles[1];
   return slicerProfiles[2];
+}
+
+function parseAISlicerResponse(raw: string): typeof slicerProfiles[0] | null {
+  try {
+    // Try to extract JSON from the response
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    const parsed = JSON.parse(jsonMatch[0]);
+    
+    // Validate structure
+    if (parsed.config && parsed.rationale) {
+      return {
+        trigger: "ai",
+        config: {
+          quality: parsed.config.quality || slicerProfiles[2].config.quality,
+          shell: parsed.config.shell || slicerProfiles[2].config.shell,
+          infill: parsed.config.infill || slicerProfiles[2].config.infill,
+          speed: parsed.config.speed || slicerProfiles[2].config.speed,
+          temperature: parsed.config.temperature || slicerProfiles[2].config.temperature,
+          support: parsed.config.support || slicerProfiles[2].config.support,
+          adhesion: parsed.config.adhesion || slicerProfiles[2].config.adhesion,
+          cooling: parsed.config.cooling || slicerProfiles[2].config.cooling,
+        },
+        rationale: Array.isArray(parsed.rationale) ? parsed.rationale : [],
+        warnings: Array.isArray(parsed.warnings) ? parsed.warnings : [],
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function ParamGroup({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
