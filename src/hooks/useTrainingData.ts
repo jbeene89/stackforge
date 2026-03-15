@@ -217,6 +217,40 @@ export function useScrapeForTraining() {
   });
 }
 
+// Process chat export conversation
+export function useProcessChatExport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { conversation_text: string; dataset_id: string; domain_hint?: string; provider: string; conversation_title?: string }) => {
+      const { data, error } = await supabase.functions.invoke("process-chat-export", { body: params });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data, vars) => {
+      qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
+      qc.invalidateQueries({ queryKey: ["training-datasets"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { url: string; dataset_id: string; domain_hint?: string }) => {
+      const { data, error } = await supabase.functions.invoke("scrape-for-training", { body: params });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data, vars) => {
+      qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
+      qc.invalidateQueries({ queryKey: ["training-datasets"] });
+      toast.success(`Extracted ${data.extracted} five-perspective training pairs`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 // Founder Interview
 export function useStartInterview() {
   return useMutation({
