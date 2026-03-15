@@ -120,7 +120,7 @@ Domain: ${domain_hint || "general"}
           type: "function",
           function: {
             name: "create_training_pairs",
-            description: "Create training pairs that capture the unique thinking patterns from this conversation",
+            description: "Create 5-10 diverse training pairs that capture unique thinking patterns. Each pair should cover a different aspect.",
             parameters: {
               type: "object",
               properties: {

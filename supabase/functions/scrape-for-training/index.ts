@@ -162,7 +162,7 @@ Original content domain: ${domain_hint || "general"}
           type: "function",
           function: {
             name: "create_training_pairs",
-            description: "Create training pairs from the five-perspective analysis",
+            description: "Create 5-10 diverse training pairs from the five-perspective analysis. Each pair should cover a different topic or angle.",
             parameters: {
               type: "object",
               properties: {
