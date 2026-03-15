@@ -74,6 +74,7 @@ export function AppLayout() {
           </main>
         </div>
       </div>
+      <CompanionSprites />
       <CommandPalette open={open} onOpenChange={setOpen} />
     </SidebarProvider>
   );
