@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
