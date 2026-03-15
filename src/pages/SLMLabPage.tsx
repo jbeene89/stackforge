@@ -601,7 +601,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [url, setUrl] = useState("");
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
-  const [mode, setMode] = useState<"scrape" | "import" | "manual">("import");
+  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
   const scrape = useScrapeForTraining();
