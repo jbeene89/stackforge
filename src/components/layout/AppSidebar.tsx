@@ -95,23 +95,24 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-3">
-        <NavLink to="/" className="flex items-center gap-2 px-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
+        <NavLink to="/" className="flex items-center gap-2.5 px-1">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary glow-primary">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
           {!collapsed && (
-            <span className="text-base font-bold tracking-tight">
-              Soupy<span className="text-primary">Forge</span>
+            <span className="text-base font-bold font-display tracking-wider">
+              Soupy<span className="gradient-text">Forge</span>
             </span>
           )}
         </NavLink>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      {/* FFX-style divider */}
+      <div className="mx-3 ffx-divider" />
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Main</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -123,7 +124,7 @@ export function AppSidebar() {
                   >
                     <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="font-semibold">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -133,7 +134,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Tools</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {toolItems.map((item) => (
@@ -145,7 +146,7 @@ export function AppSidebar() {
                   >
                     <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="font-semibold">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -155,7 +156,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>System</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">System</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {adminItems.map((item) => (
@@ -167,7 +168,7 @@ export function AppSidebar() {
                   >
                     <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="font-semibold">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -183,7 +184,7 @@ export function AppSidebar() {
           variant="ghost"
           size={collapsed ? "icon" : "sm"}
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 font-semibold"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           {!collapsed && <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>}
@@ -192,7 +193,7 @@ export function AppSidebar() {
           variant="ghost"
           size={collapsed ? "icon" : "sm"}
           onClick={handleSignOut}
-          className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+          className="w-full justify-start gap-2 text-destructive hover:text-destructive font-semibold"
         >
           <LogOut className="h-4 w-4" />
           {!collapsed && <span>Sign Out</span>}

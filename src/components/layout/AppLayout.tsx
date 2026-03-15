@@ -28,12 +28,12 @@ export function AppLayout() {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center border-b border-border px-3 sm:px-4 glass-strong">
+          <header className="h-12 flex items-center border-b px-3 sm:px-4 glass-strong" style={{ borderColor: 'hsl(var(--primary) / 0.1)' }}>
             <SidebarTrigger className="mr-2 sm:mr-4" />
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 max-w-md justify-start text-muted-foreground font-normal h-8"
+              className="flex-1 max-w-md justify-start text-muted-foreground font-medium h-8 border-primary/10 hover:border-primary/30"
               onClick={() => setOpen(true)}
             >
               <Search className="h-3.5 w-3.5 mr-2" />
@@ -48,21 +48,21 @@ export function AppLayout() {
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                   <Avatar className="h-7 w-7">
                     {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-                    <AvatarFallback className="text-xs bg-primary/10 text-primary">{initials}</AvatarFallback>
+                    <AvatarFallback className="text-xs bg-primary/15 text-primary font-bold">{initials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48 glass-strong">
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium truncate">{displayName}</p>
+                  <p className="text-sm font-bold truncate">{displayName}</p>
                   <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/account")}>
+                <DropdownMenuItem onClick={() => navigate("/account")} className="font-semibold">
                   <Settings className="h-4 w-4 mr-2" /> Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive font-semibold">
                   <LogOut className="h-4 w-4 mr-2" /> Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
