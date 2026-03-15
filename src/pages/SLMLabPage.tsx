@@ -604,9 +604,14 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
+  const [fileText, setFileText] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [fileProcessing, setFileProcessing] = useState(false);
   const scrape = useScrapeForTraining();
   const createSample = useCreateSample();
+  const processExport = useProcessChatExport();
   const { data: samples } = useSamples(dataset.id);
+  const fileUploadRef = useRef<HTMLInputElement>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -615,6 +620,45 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     if (!url.trim()) return;
     scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined });
     setUrl("");
+  };
+
+  const handleRawFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      if (text.length < 50) {
+        toast.error("File too short — need at least 50 characters of content.");
+        return;
+      }
+      setFileText(text);
+      setFileName(file.name);
+      toast.success(`Loaded "${file.name}" (${Math.round(text.length / 1000)}k chars)`);
+    };
+    reader.readAsText(file);
+    if (fileUploadRef.current) fileUploadRef.current.value = "";
+  };
+
+  const handleProcessFile = async () => {
+    if (!fileText.trim()) return;
+    setFileProcessing(true);
+    try {
+      const data = await processExport.mutateAsync({
+        conversation_text: fileText,
+        dataset_id: dataset.id,
+        domain_hint: dataset.domain,
+        provider: "file-upload",
+        conversation_title: fileName || "Uploaded File",
+      });
+      toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
+      setFileText("");
+      setFileName("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process file");
+    } finally {
+      setFileProcessing(false);
+    }
   };
 
   const handleAddManual = () => {
