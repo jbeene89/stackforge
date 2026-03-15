@@ -46,36 +46,54 @@ export type Database = {
       }
       dataset_samples: {
         Row: {
+          builder: string | null
           created_at: string
           dataset_id: string
+          empath: string | null
+          frame_breaker: string | null
           id: string
           input: string
           output: string
           quality_score: number
+          red_team: string | null
           source_url: string | null
           status: string
+          synthesis: string | null
+          systems: string | null
           user_id: string
         }
         Insert: {
+          builder?: string | null
           created_at?: string
           dataset_id: string
+          empath?: string | null
+          frame_breaker?: string | null
           id?: string
           input: string
           output: string
           quality_score?: number
+          red_team?: string | null
           source_url?: string | null
           status?: string
+          synthesis?: string | null
+          systems?: string | null
           user_id: string
         }
         Update: {
+          builder?: string | null
           created_at?: string
           dataset_id?: string
+          empath?: string | null
+          frame_breaker?: string | null
           id?: string
           input?: string
           output?: string
           quality_score?: number
+          red_team?: string | null
           source_url?: string | null
           status?: string
+          synthesis?: string | null
+          systems?: string | null
           user_id?: string
         }
         Relationships: [
@@ -125,6 +143,47 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_interviews: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          id: string
+          pairs_extracted: number
+          status: string
+          transcript: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          id?: string
+          pairs_extracted?: number
+          status?: string
+          transcript?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          id?: string
+          pairs_extracted?: number
+          status?: string
+          transcript?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_interviews_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "training_datasets"
             referencedColumns: ["id"]
           },
         ]
