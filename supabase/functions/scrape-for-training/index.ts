@@ -197,6 +197,7 @@ Original content domain: ${domain_hint || "general"}
     if (!pairs || !pairs.length) throw new Error("No training pairs extracted");
 
     // Step 4: Insert samples with all perspective fields
+    // If a perspective was offloaded, mark that field as awaiting tablet
     const samples = pairs.map((p: any) => ({
       dataset_id,
       user_id: user.id,
@@ -204,13 +205,13 @@ Original content domain: ${domain_hint || "general"}
       output: p.response,
       source_url: url,
       quality_score: p.quality || 3,
-      status: "pending",
-      builder: perspectives.builder,
-      red_team: perspectives.red_team,
-      systems: perspectives.systems,
-      frame_breaker: perspectives.frame_breaker,
-      empath: perspectives.empath,
-      synthesis: p.synthesis,
+      status: offloadKey ? "pending_offload" : "pending",
+      builder: perspectives.builder || null,
+      red_team: perspectives.red_team || null,
+      systems: perspectives.systems || null,
+      frame_breaker: perspectives.frame_breaker || null,
+      empath: perspectives.empath || null,
+      synthesis: offloadKey ? null : p.synthesis,
     }));
 
     const { error: insertErr } = await supabase.from("dataset_samples").insert(samples);
@@ -231,6 +232,8 @@ Original content domain: ${domain_hint || "general"}
       success: true,
       extracted: pairs.length,
       perspectives: Object.keys(perspectives),
+      offloaded: offloadKey || null,
+      batch_id: offloadKey ? batchId : null,
       samples: pairs.map((p: any) => ({ instruction: p.instruction.slice(0, 80), quality: p.quality })),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
