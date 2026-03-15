@@ -371,19 +371,30 @@ export function exportDatasetAsJsonl(samples: DatasetSample[], datasetName: stri
 // Generate Python training script
 export function generateTrainingScript(job: TrainingJob, dataset: TrainingDataset): string {
   const hp = job.hyperparameters || {};
+  const cpuOffload = hp.cpu_offload ?? false;
+  const gradientCheckpointing = hp.gradient_checkpointing ?? true;
+  const hwProfile = hp.hw_profile || "cpu_only";
+  const maxSeqLen = hp.max_seq_length || 1024;
+  const isCpuOnly = hwProfile === "cpu_only";
+
   return `#!/usr/bin/env python3
 """
 SoupyForge Local Training Script — Five Perspective Pipeline
 Model: ${job.base_model}
 Method: ${job.method}
 Dataset: ${dataset.name}
+Hardware Profile: ${hwProfile}
 Generated: ${new Date().toISOString()}
 
 Prerequisites:
   pip install unsloth transformers datasets torch trl
+${isCpuOnly ? `
+NOTE: CPU-only mode detected. Training will be slower but will work
+with just RAM (16GB+ recommended). No GPU required.
+` : ""}
 """
 
-import json
+import json, os, sys
 from pathlib import Path
 
 BASE_MODEL = "${job.base_model}"
@@ -393,12 +404,17 @@ OUTPUT_DIR = "./output/${job.name.toLowerCase().replace(/\s+/g, "-")}"
 HYPERPARAMS = {
     "epochs": ${hp.epochs || 3},
     "learning_rate": ${hp.learning_rate || 0.0002},
-    "batch_size": ${hp.batch_size || 4},
-    "lora_rank": ${hp.lora_rank || 16},
-    "lora_alpha": ${(hp.lora_rank || 16) * 2},
+    "batch_size": ${hp.batch_size || 1},
+    "lora_rank": ${hp.lora_rank || 8},
+    "lora_alpha": ${(hp.lora_rank || 8) * 2},
     "warmup_steps": 10,
-    "max_seq_length": 2048,
+    "max_seq_length": ${maxSeqLen},
+    "gradient_checkpointing": ${gradientCheckpointing ? "True" : "False"},
+    "cpu_offload": ${cpuOffload ? "True" : "False"},
 }
+
+# Hardware profile: ${hwProfile}
+USE_CPU_ONLY = ${isCpuOnly ? "True" : "False"}
 
 # Special tokens for five-perspective thinking
 SPECIAL_TOKENS = [
@@ -418,16 +434,44 @@ def load_dataset(path):
     print(f"Loaded {len(samples)} training samples")
     return samples
 
+def check_hardware():
+    import torch
+    if torch.cuda.is_available():
+        gpu_name = torch.cuda.get_device_name(0)
+        vram = torch.cuda.get_device_properties(0).total_mem / 1e9
+        print(f"  GPU: {gpu_name} ({vram:.1f} GB VRAM)")
+        return "gpu"
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        print("  GPU: Apple Silicon (MPS)")
+        return "mps"
+    else:
+        import psutil
+        ram = psutil.virtual_memory().total / 1e9
+        print(f"  CPU mode — {ram:.0f} GB RAM available")
+        return "cpu"
+
 def train_with_unsloth():
     from unsloth import FastLanguageModel
     from trl import SFTTrainer
     from transformers import TrainingArguments
     from datasets import Dataset
+    import torch
+
+    hw = check_hardware()
+    use_4bit = hw == "gpu" and not USE_CPU_ONLY
+    dtype = None  # auto
+
+    if USE_CPU_ONLY or hw == "cpu":
+        print("\\n🖥️  CPU-only mode: using float32, no quantization")
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+        use_4bit = False
+        dtype = torch.float32
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=BASE_MODEL,
         max_seq_length=HYPERPARAMS["max_seq_length"],
-        load_in_4bit=True,
+        load_in_4bit=use_4bit,
+        dtype=dtype,
     )
 
     # Add perspective tokens so the model learns cognitive mode switches
@@ -439,6 +483,7 @@ def train_with_unsloth():
         r=HYPERPARAMS["lora_rank"],
         lora_alpha=HYPERPARAMS["lora_alpha"],
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
     )
 
     raw = load_dataset(DATASET_FILE)
@@ -449,6 +494,9 @@ def train_with_unsloth():
         formatted.append({"text": text})
 
     dataset = Dataset.from_list(formatted)
+
+    fp16 = hw == "gpu" and not USE_CPU_ONLY
+    no_cuda = USE_CPU_ONLY or hw == "cpu"
 
     trainer = SFTTrainer(
         model=model,
@@ -462,29 +510,42 @@ def train_with_unsloth():
             per_device_train_batch_size=HYPERPARAMS["batch_size"],
             learning_rate=HYPERPARAMS["learning_rate"],
             warmup_steps=HYPERPARAMS["warmup_steps"],
-            logging_steps=5,
+            logging_steps=1,
             save_strategy="epoch",
-            fp16=True,
+            fp16=fp16,
+            no_cuda=no_cuda,
+            gradient_accumulation_steps=${isCpuOnly ? 8 : cpuOffload ? 4 : 1},
+            dataloader_num_workers=0,
         ),
     )
 
     print("\\n🔥 Starting training with Five Perspective Pipeline tokens...")
+    print(f"   Batch size: {HYPERPARAMS['batch_size']} (x${isCpuOnly ? 8 : cpuOffload ? 4 : 1} gradient accumulation)")
     trainer.train()
 
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
 
-    model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
-    print(f"✅ GGUF model saved to {OUTPUT_DIR}/gguf")
+    try:
+        model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
+        print(f"✅ GGUF model saved to {OUTPUT_DIR}/gguf")
+        print(f"   Run with: ollama create mymodel -f {OUTPUT_DIR}/gguf/Modelfile")
+    except Exception as e:
+        print(f"⚠️  GGUF export skipped (install llama.cpp for this): {e}")
+        print(f"   Your LoRA adapter is still saved at {OUTPUT_DIR}/lora")
 
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     print(f"🧠 SoupyForge Local Trainer — Five Perspective Pipeline")
     print(f"   Model: {BASE_MODEL}")
     print(f"   Method: ${job.method}")
+    print(f"   Hardware: ${hwProfile}")
     print(f"   Epochs: {HYPERPARAMS['epochs']}")
     print(f"   Learning Rate: {HYPERPARAMS['learning_rate']}")
+    print(f"   Seq Length: {HYPERPARAMS['max_seq_length']}")
     print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
+    print()
+    check_hardware()
     print()
     train_with_unsloth()
 `;
