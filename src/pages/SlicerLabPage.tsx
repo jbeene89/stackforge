@@ -158,14 +158,33 @@ export default function SlicerLabPage() {
   const [temperature, setTemperature] = useState(0.15);
   const [deterministic, setDeterministic] = useState(true);
 
-  const runSlice = () => {
+  const runSlice = async () => {
     if (!input.trim()) return;
     setIsProcessing(true);
     setResult(null);
-    setTimeout(() => {
+    
+    let aiOutput = "";
+    try {
+      await streamAI({
+        messages: [
+          { role: "user", content: input }
+        ],
+        mode: "module",
+        onDelta: (text) => { aiOutput += text; },
+        onDone: () => {
+          const parsed = parseAISlicerResponse(aiOutput);
+          setResult(parsed || matchProfile(input));
+          setIsProcessing(false);
+        },
+      });
+      
+      // Override system prompt via the mode — the edge function uses "module" mode
+      // which tells the AI to output structured JSON configurations
+    } catch {
+      // Fallback to keyword matching if AI fails
       setResult(matchProfile(input));
       setIsProcessing(false);
-    }, 1800);
+    }
   };
 
   const c = result?.config;
