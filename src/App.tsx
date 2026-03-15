@@ -46,6 +46,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import MarketplacePage from "./pages/MarketplacePage";
 import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
 import InstallPage from "./pages/InstallPage";
+import SLMLabPage from "./pages/SLMLabPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -97,6 +98,7 @@ const App = () => (
                 <Route path="/edge-training" element={<EdgeTrainingPage />} />
                 <Route path="/export" element={<ExportStudioPage />} />
                 <Route path="/experimental" element={<ExperimentalPage />} />
+                <Route path="/slm-lab" element={<SLMLabPage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/account" element={<AccountPage />} />

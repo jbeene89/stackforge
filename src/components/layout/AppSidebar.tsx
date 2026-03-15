@@ -60,6 +60,7 @@ const mainItems = [
   { title: "Game Engine", url: "/engine", icon: Gamepad2 },
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard },
+  { title: "SLM Lab", url: "/slm-lab", icon: Sparkles },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
   { title: "Marketplace", url: "/marketplace", icon: Store },
   { title: "Experimental", url: "/experimental", icon: Flame },
