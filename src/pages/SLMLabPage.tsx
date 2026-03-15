@@ -137,6 +137,7 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
   const [pairsCreated, setPairsCreated] = useState(0);
   const [finished, setFinished] = useState(false);
   const [summary, setSummary] = useState<{ pairs_extracted: number; syntheses: Array<{ topic: string; insight: string }> } | null>(null);
+  const [showTopics, setShowTopics] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const startInterview = useStartInterview();
