@@ -26,6 +26,12 @@ export interface DatasetSample {
   quality_score: number;
   status: string;
   created_at: string;
+  builder: string;
+  red_team: string;
+  systems: string;
+  frame_breaker: string;
+  empath: string;
+  synthesis: string;
 }
 
 export interface TrainingJob {
@@ -38,6 +44,17 @@ export interface TrainingJob {
   hyperparameters: Record<string, any>;
   status: string;
   metrics: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FounderInterview {
+  id: string;
+  user_id: string;
+  dataset_id: string;
+  transcript: Array<{ role: string; content: string }>;
+  pairs_extracted: number;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -186,9 +203,7 @@ export function useScrapeForTraining() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { url: string; dataset_id: string; domain_hint?: string }) => {
-      const { data, error } = await supabase.functions.invoke("scrape-for-training", {
-        body: params,
-      });
+      const { data, error } = await supabase.functions.invoke("scrape-for-training", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       return data;
@@ -196,7 +211,65 @@ export function useScrapeForTraining() {
     onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
-      toast.success(`Extracted ${data.extracted} training pairs`);
+      toast.success(`Extracted ${data.extracted} five-perspective training pairs`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// Founder Interview
+export function useStartInterview() {
+  return useMutation({
+    mutationFn: async (params: { dataset_id: string }) => {
+      const { data, error } = await supabase.functions.invoke("founder-interview", {
+        body: { action: "start", ...params },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { interview_id: string; question: string };
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useInterviewRespond() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: {
+      interview_id: string;
+      dataset_id: string;
+      message: string;
+      transcript: Array<{ role: string; content: string }>;
+      domain_hint?: string;
+    }) => {
+      const { data, error } = await supabase.functions.invoke("founder-interview", {
+        body: { action: "respond", ...params },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { follow_up: string; pair_created: boolean };
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useFinishInterview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { interview_id: string; dataset_id: string }) => {
+      const { data, error } = await supabase.functions.invoke("founder-interview", {
+        body: { action: "finish", ...params },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { pairs_extracted: number; exchanges: number; syntheses: Array<{ topic: string; insight: string }> };
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
+      qc.invalidateQueries({ queryKey: ["training-datasets"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -238,16 +311,33 @@ export function useCreateTrainingJob() {
   });
 }
 
-// Export dataset as JSONL
+// Export dataset as JSONL with perspective tokens
 export function exportDatasetAsJsonl(samples: DatasetSample[], datasetName: string) {
   const lines = samples
     .filter(s => s.status === "approved")
-    .map(s => JSON.stringify({
-      messages: [
-        { role: "user", content: s.input },
-        { role: "assistant", content: s.output },
-      ]
-    }));
+    .map(s => {
+      let assistantContent = "";
+      
+      if (s.builder || s.red_team || s.systems || s.frame_breaker || s.empath || s.synthesis) {
+        assistantContent = [
+          s.builder ? `<BUILDER>${s.builder}</BUILDER>` : "",
+          s.red_team ? `<RED_TEAM>${s.red_team}</RED_TEAM>` : "",
+          s.systems ? `<SYSTEMS>${s.systems}</SYSTEMS>` : "",
+          s.frame_breaker ? `<FRAME_BREAKER>${s.frame_breaker}</FRAME_BREAKER>` : "",
+          s.empath ? `<EMPATH>${s.empath}</EMPATH>` : "",
+          s.synthesis ? `<SYNTHESIS>${s.synthesis}</SYNTHESIS>` : "",
+        ].filter(Boolean).join("\n\n");
+      } else {
+        assistantContent = s.output;
+      }
+
+      return JSON.stringify({
+        messages: [
+          { role: "user", content: s.input },
+          { role: "assistant", content: assistantContent },
+        ]
+      });
+    });
   
   const blob = new Blob([lines.join("\n")], { type: "application/jsonl" });
   const url = URL.createObjectURL(blob);
@@ -263,22 +353,19 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
   const hp = job.hyperparameters || {};
   return `#!/usr/bin/env python3
 """
-SoupyForge Local Training Script
+SoupyForge Local Training Script — Five Perspective Pipeline
 Model: ${job.base_model}
 Method: ${job.method}
 Dataset: ${dataset.name}
 Generated: ${new Date().toISOString()}
 
 Prerequisites:
-  pip install unsloth transformers datasets torch
-  # or for llama.cpp:
-  pip install llama-cpp-python
+  pip install unsloth transformers datasets torch trl
 """
 
 import json
 from pathlib import Path
 
-# === Configuration ===
 BASE_MODEL = "${job.base_model}"
 DATASET_FILE = "${dataset.name.toLowerCase().replace(/\s+/g, "-")}-dataset.jsonl"
 OUTPUT_DIR = "./output/${job.name.toLowerCase().replace(/\s+/g, "-")}"
@@ -293,8 +380,17 @@ HYPERPARAMS = {
     "max_seq_length": 2048,
 }
 
+# Special tokens for five-perspective thinking
+SPECIAL_TOKENS = [
+    "<BUILDER>", "</BUILDER>",
+    "<RED_TEAM>", "</RED_TEAM>",
+    "<SYSTEMS>", "</SYSTEMS>",
+    "<FRAME_BREAKER>", "</FRAME_BREAKER>",
+    "<EMPATH>", "</EMPATH>",
+    "<SYNTHESIS>", "</SYNTHESIS>",
+]
+
 def load_dataset(path):
-    """Load JSONL dataset exported from SoupyForge."""
     samples = []
     with open(path, "r") as f:
         for line in f:
@@ -303,7 +399,6 @@ def load_dataset(path):
     return samples
 
 def train_with_unsloth():
-    """Fine-tune using Unsloth (4x faster LoRA training)."""
     from unsloth import FastLanguageModel
     from trl import SFTTrainer
     from transformers import TrainingArguments
@@ -315,6 +410,10 @@ def train_with_unsloth():
         load_in_4bit=True,
     )
 
+    # Add perspective tokens so the model learns cognitive mode switches
+    tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
+    model.resize_token_embeddings(len(tokenizer))
+
     model = FastLanguageModel.get_peft_model(
         model,
         r=HYPERPARAMS["lora_rank"],
@@ -322,7 +421,6 @@ def train_with_unsloth():
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
     )
 
-    # Load and format data
     raw = load_dataset(DATASET_FILE)
     formatted = []
     for sample in raw:
@@ -350,24 +448,23 @@ def train_with_unsloth():
         ),
     )
 
-    print("\\n🔥 Starting training...")
+    print("\\n🔥 Starting training with Five Perspective Pipeline tokens...")
     trainer.train()
 
-    # Save in multiple formats
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
 
-    # Export to GGUF for llama.cpp
     model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
     print(f"✅ GGUF model saved to {OUTPUT_DIR}/gguf")
 
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-    print(f"🧠 SoupyForge Local Trainer")
+    print(f"🧠 SoupyForge Local Trainer — Five Perspective Pipeline")
     print(f"   Model: {BASE_MODEL}")
     print(f"   Method: ${job.method}")
     print(f"   Epochs: {HYPERPARAMS['epochs']}")
     print(f"   Learning Rate: {HYPERPARAMS['learning_rate']}")
+    print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
     print()
     train_with_unsloth()
 `;

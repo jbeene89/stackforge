@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.scrape-for-training]
 verify_jwt = false
+
+[functions.founder-interview]
+verify_jwt = false
