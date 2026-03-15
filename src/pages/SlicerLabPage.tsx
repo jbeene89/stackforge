@@ -8,9 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { streamAI } from "@/hooks/useSupabaseData";
 import {
   Send, RotateCcw, Box, Layers, Thermometer, Gauge,
-  Shield, Zap, ChevronDown, AlertTriangle, CheckCircle2, Clock
+  Shield, Zap, ChevronDown, AlertTriangle, CheckCircle2, Clock,
+  Loader2
 } from "lucide-react";
 
 // Simulated slicer output profiles
@@ -84,6 +86,7 @@ const exampleInputs = [
   "Waterproof enclosure for outdoor electronics. PETG, needs to be airtight. Will be exposed to sun and rain.",
 ];
 
+// Default fallback profile if AI parsing fails
 function matchProfile(input: string) {
   const lower = input.toLowerCase();
   if (lower.includes("strong") || lower.includes("structural") || lower.includes("bracket") || lower.includes("mount") || lower.includes("load"))
@@ -91,6 +94,37 @@ function matchProfile(input: string) {
   if (lower.includes("fast") || lower.includes("quick") || lower.includes("prototype") || lower.includes("draft"))
     return slicerProfiles[1];
   return slicerProfiles[2];
+}
+
+function parseAISlicerResponse(raw: string): typeof slicerProfiles[0] | null {
+  try {
+    // Try to extract JSON from the response
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    const parsed = JSON.parse(jsonMatch[0]);
+    
+    // Validate structure
+    if (parsed.config && parsed.rationale) {
+      return {
+        trigger: "ai",
+        config: {
+          quality: parsed.config.quality || slicerProfiles[2].config.quality,
+          shell: parsed.config.shell || slicerProfiles[2].config.shell,
+          infill: parsed.config.infill || slicerProfiles[2].config.infill,
+          speed: parsed.config.speed || slicerProfiles[2].config.speed,
+          temperature: parsed.config.temperature || slicerProfiles[2].config.temperature,
+          support: parsed.config.support || slicerProfiles[2].config.support,
+          adhesion: parsed.config.adhesion || slicerProfiles[2].config.adhesion,
+          cooling: parsed.config.cooling || slicerProfiles[2].config.cooling,
+        },
+        rationale: Array.isArray(parsed.rationale) ? parsed.rationale : [],
+        warnings: Array.isArray(parsed.warnings) ? parsed.warnings : [],
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function ParamGroup({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
@@ -124,14 +158,50 @@ export default function SlicerLabPage() {
   const [temperature, setTemperature] = useState(0.15);
   const [deterministic, setDeterministic] = useState(true);
 
-  const runSlice = () => {
+  const runSlice = async () => {
     if (!input.trim()) return;
     setIsProcessing(true);
     setResult(null);
-    setTimeout(() => {
+    
+    let aiOutput = "";
+    const slicerSystemPrompt = `You are a 3D printing slicer configuration AI. Given a description of a print job, output a JSON object with this exact structure:
+{
+  "config": {
+    "quality": { "layerHeight": number, "lineWidth": number, "initialLayerHeight": number },
+    "shell": { "wallCount": number, "topLayers": number, "bottomLayers": number },
+    "infill": { "density": number, "pattern": "gyroid"|"cubic"|"lines"|"triangles", "gradual": boolean },
+    "speed": { "printSpeed": number, "wallSpeed": number, "infillSpeed": number, "travelSpeed": number },
+    "temperature": { "nozzle": number, "bed": number, "nozzleInitial": number, "bedInitial": number },
+    "support": { "enabled": boolean, "type": "tree"|"normal"|"none", "angle": number },
+    "adhesion": { "type": "brim"|"raft"|"skirt"|"none", "brimWidth": number },
+    "cooling": { "fanSpeed": number, "minLayerTime": number, "liftHead": boolean }
+  },
+  "rationale": ["reason1", "reason2", ...],
+  "warnings": ["warning1", ...] // empty array if none
+}
+Output ONLY the JSON, no markdown, no explanation outside the JSON.`;
+    try {
+      await streamAI({
+        messages: [
+          { role: "system", content: slicerSystemPrompt },
+          { role: "user", content: input }
+        ],
+        mode: "general",
+        onDelta: (text) => { aiOutput += text; },
+        onDone: () => {
+          const parsed = parseAISlicerResponse(aiOutput);
+          setResult(parsed || matchProfile(input));
+          setIsProcessing(false);
+        },
+      });
+      
+      // Override system prompt via the mode — the edge function uses "module" mode
+      // which tells the AI to output structured JSON configurations
+    } catch {
+      // Fallback to keyword matching if AI fails
       setResult(matchProfile(input));
       setIsProcessing(false);
-    }, 1800);
+    }
   };
 
   const c = result?.config;

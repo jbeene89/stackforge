@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockTemplates } from "@/data/mock-data";
+import { useCreateProject } from "@/hooks/useSupabaseData";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
@@ -84,6 +86,8 @@ const templateDetails: Record<string, { features: string[]; includes: string[] }
 };
 
 export default function TemplatesPage() {
+  const navigate = useNavigate();
+  const createProject = useCreateProject();
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"popularity" | "name">("popularity");
@@ -113,14 +117,35 @@ export default function TemplatesPage() {
   };
 
   const createFromTemplate = (tplId: string, tplName: string) => {
+    const tpl = mockTemplates.find(t => t.id === tplId);
+    if (!tpl) return;
     setCreating(tplId);
-    setTimeout(() => {
-      setCreating(null);
-      setSelectedTemplate(null);
-      toast.success(`Project created from "${tplName}"`, {
-        description: "Your new project is ready in the Projects page.",
-      });
-    }, 1500);
+    const projectType = tpl.category === "web" ? "web" as const
+      : tpl.category === "android" ? "android" as const
+      : tpl.category === "module" ? "module" as const
+      : "stack" as const;
+    createProject.mutate(
+      {
+        name: tplName,
+        description: tpl.description,
+        type: projectType,
+        tags: tpl.tags,
+      },
+      {
+        onSuccess: (data) => {
+          setCreating(null);
+          setSelectedTemplate(null);
+          toast.success(`Project created from "${tplName}"`, {
+            description: "Redirecting to your new project…",
+          });
+          navigate(`/projects/${data.id}`);
+        },
+        onError: () => {
+          setCreating(null);
+          toast.error("Failed to create project from template");
+        },
+      }
+    );
   };
 
   const selected = mockTemplates.find((t) => t.id === selectedTemplate);
