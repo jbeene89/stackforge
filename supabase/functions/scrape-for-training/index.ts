@@ -6,11 +6,44 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const PERSPECTIVES = {
+  builder: `You are a construction-minded analyst. Read this content and extract only what WORKS. What is practical, proven, and buildable. Output structured knowledge a builder would immediately use. No theory. No hedging. What works and why.`,
+  red_team: `You are an adversarial analyst. Read this content and find every flaw, assumption, failure mode, and edge case. What breaks under pressure? What did the author get overconfident about? What fails at the edges that nobody mentions? Be ruthless.`,
+  systems: `You are a systems analyst. Read this content and find hidden patterns, second order effects, and emergent properties. What connects to what? What causes what downstream? What does this content affect that it doesn't mention? Find the invisible structure.`,
+  frame_breaker: `You are a paradigm challenger. Read this content and question every assumption. What if the premise is wrong? What would someone from a completely unrelated field see here that insiders miss? What is the unconventional read that turns out to be more correct than the conventional one?`,
+  empath: `You are an empathetic analyst. Read this content and identify who the humans are on the receiving end of this knowledge. What are they afraid of? What do they need to feel before they can hear the answer? Where does this content ignore the human element entirely? What emotional reality is missing from the technical answer?`,
+};
+
+const SYNTHESIS_PROMPT = `You have received five perspectives on the same content from Builder, Red Team, Systems, Frame Breaker, and Empath. Your job is not to summarize them or pick the best one. Find the answer that NONE of the five perspectives saw on their own. The emergent insight that only exists because all five collided.`;
+
+async function callAI(apiKey: string, systemPrompt: string, content: string): Promise<string> {
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content },
+      ],
+    }),
+  });
+  if (!resp.ok) {
+    if (resp.status === 429) throw new Error("Rate limit exceeded. Please wait and try again.");
+    if (resp.status === 402) throw new Error("AI credits exhausted.");
+    throw new Error(`AI call failed: ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Missing authorization");
 
@@ -26,15 +59,12 @@ serve(async (req) => {
     const { url, dataset_id, domain_hint } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
 
-    // Step 1: Fetch the webpage content
+    // Step 1: Fetch webpage
     let pageContent = "";
     try {
-      const resp = await fetch(url, {
-        headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" },
-      });
+      const resp = await fetch(url, { headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" } });
       if (!resp.ok) throw new Error(`Failed to fetch: ${resp.status}`);
       const html = await resp.text();
-      // Simple HTML-to-text extraction
       pageContent = html
         .replace(/<script[\s\S]*?<\/script>/gi, "")
         .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -42,40 +72,55 @@ serve(async (req) => {
         .replace(/<footer[\s\S]*?<\/footer>/gi, "")
         .replace(/<header[\s\S]*?<\/header>/gi, "")
         .replace(/<[^>]+>/g, " ")
-        .replace(/&nbsp;/g, " ")
-        .replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
+        .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
         .replace(/\s+/g, " ")
         .trim()
-        .slice(0, 12000); // Cap content for AI processing
+        .slice(0, 12000);
     } catch (fetchErr) {
       throw new Error(`Could not fetch URL: ${fetchErr instanceof Error ? fetchErr.message : "Unknown error"}`);
     }
 
-    if (pageContent.length < 100) {
-      throw new Error("Page content too short to extract training data");
-    }
+    if (pageContent.length < 100) throw new Error("Page content too short to extract training data");
 
-    // Step 2: Use AI to extract training pairs
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const extractionPrompt = `You are a training data extractor. Given the following web page content, extract 3-8 high-quality instruction/response training pairs suitable for fine-tuning a small language model.
+    // Step 2: Run all 5 perspectives in parallel
+    const contentPrompt = `Domain: ${domain_hint || "general"}\n\nContent:\n${pageContent}`;
 
-Domain hint: ${domain_hint || "general"}
+    const perspectiveResults = await Promise.all(
+      Object.entries(PERSPECTIVES).map(async ([key, prompt]) => {
+        const result = await callAI(LOVABLE_API_KEY, prompt, contentPrompt);
+        return [key, result] as [string, string];
+      })
+    );
 
-Rules:
-- Each pair should have a clear "instruction" (what a user would ask) and "response" (ideal answer)
-- Make instructions diverse: questions, commands, analysis requests
-- Responses should be detailed, accurate, and drawn from the source content
-- Skip trivial or repetitive content
-- Output ONLY valid JSON
+    const perspectives: Record<string, string> = {};
+    for (const [key, result] of perspectiveResults) {
+      perspectives[key] = result;
+    }
 
-Web page content:
-${pageContent}`;
+    // Step 3: Synthesis — send all 5 to a synthesis AI with structured output
+    const synthesisInput = `
+BUILDER PERSPECTIVE:
+${perspectives.builder}
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+RED TEAM PERSPECTIVE:
+${perspectives.red_team}
+
+SYSTEMS PERSPECTIVE:
+${perspectives.systems}
+
+FRAME BREAKER PERSPECTIVE:
+${perspectives.frame_breaker}
+
+EMPATH PERSPECTIVE:
+${perspectives.empath}
+
+Original content domain: ${domain_hint || "general"}
+`;
+
+    const synthResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -83,12 +128,15 @@ ${pageContent}`;
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
-        messages: [{ role: "user", content: extractionPrompt }],
+        messages: [
+          { role: "system", content: SYNTHESIS_PROMPT },
+          { role: "user", content: synthesisInput },
+        ],
         tools: [{
           type: "function",
           function: {
-            name: "extract_training_pairs",
-            description: "Extract instruction/response training pairs from web content",
+            name: "create_training_pairs",
+            description: "Create training pairs from the five-perspective analysis",
             parameters: {
               type: "object",
               properties: {
@@ -97,38 +145,34 @@ ${pageContent}`;
                   items: {
                     type: "object",
                     properties: {
-                      instruction: { type: "string" },
-                      response: { type: "string" },
-                      quality: { type: "integer", minimum: 1, maximum: 5 }
+                      instruction: { type: "string", description: "The question or topic" },
+                      response: { type: "string", description: "The comprehensive synthesized answer" },
+                      synthesis: { type: "string", description: "The emergent insight none of the five perspectives saw alone" },
+                      quality: { type: "integer", minimum: 1, maximum: 5 },
                     },
-                    required: ["instruction", "response", "quality"],
-                    additionalProperties: false
-                  }
-                }
+                    required: ["instruction", "response", "synthesis", "quality"],
+                    additionalProperties: false,
+                  },
+                },
               },
               required: ["pairs"],
-              additionalProperties: false
-            }
-          }
+              additionalProperties: false,
+            },
+          },
         }],
-        tool_choice: { type: "function", function: { name: "extract_training_pairs" } },
+        tool_choice: { type: "function", function: { name: "create_training_pairs" } },
       }),
     });
 
-    if (!aiResp.ok) {
-      if (aiResp.status === 429) throw new Error("Rate limit exceeded. Please wait and try again.");
-      if (aiResp.status === 402) throw new Error("AI credits exhausted.");
-      throw new Error("AI extraction failed");
-    }
-
-    const aiData = await aiResp.json();
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) throw new Error("AI did not return structured data");
+    if (!synthResp.ok) throw new Error("Synthesis AI call failed");
+    const synthData = await synthResp.json();
+    const toolCall = synthData.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) throw new Error("Synthesis AI did not return structured data");
 
     const { pairs } = JSON.parse(toolCall.function.arguments);
     if (!pairs || !pairs.length) throw new Error("No training pairs extracted");
 
-    // Step 3: Insert samples into database
+    // Step 4: Insert samples with all perspective fields
     const samples = pairs.map((p: any) => ({
       dataset_id,
       user_id: user.id,
@@ -137,6 +181,12 @@ ${pageContent}`;
       source_url: url,
       quality_score: p.quality || 3,
       status: "pending",
+      builder: perspectives.builder,
+      red_team: perspectives.red_team,
+      systems: perspectives.systems,
+      frame_breaker: perspectives.frame_breaker,
+      empath: perspectives.empath,
+      synthesis: p.synthesis,
     }));
 
     const { error: insertErr } = await supabase.from("dataset_samples").insert(samples);
@@ -156,6 +206,7 @@ ${pageContent}`;
     return new Response(JSON.stringify({
       success: true,
       extracted: pairs.length,
+      perspectives: Object.keys(perspectives),
       samples: pairs.map((p: any) => ({ instruction: p.instruction.slice(0, 80), quality: p.quality })),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
