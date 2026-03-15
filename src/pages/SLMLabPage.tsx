@@ -1529,7 +1529,7 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
       status: "draft", metrics: {}, created_at: "", updated_at: ""
     };
 
-    exportDatasetAsJsonl(approvedSamples, dataset.name);
+    // JSONL is now bundled inside the ZIP — no separate download needed
     
     const scriptContent = generateTrainingScript(job, dataset);
     const readmeContent = `# 🧠 SoupyForge Training Kit — Five Perspective Pipeline
