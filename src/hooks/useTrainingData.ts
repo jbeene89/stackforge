@@ -638,7 +638,6 @@ def train_cpu_fallback():
         device_map="cpu",
         trust_remote_code=True,
         token=HF_TOKEN,
-        trust_remote_code=True,
     )
 
     tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
