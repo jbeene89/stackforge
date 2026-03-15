@@ -31,6 +31,7 @@ import {
   useSamples, useCreateSample, useUpdateSample, useDeleteSample,
   useScrapeForTraining, useProcessChatExport, useTrainingJobs, useCreateTrainingJob,
   useStartInterview, useInterviewRespond, useFinishInterview,
+  useHFSearch, useHFPreview, useHFImport,
   exportDatasetAsJsonl, generateTrainingScript,
   type TrainingDataset, type DatasetSample, type TrainingJob,
 } from "@/hooks/useTrainingData";
@@ -596,7 +597,289 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
   );
 }
 
-// ── Step 2: Add Training Data ──
+// ── Hugging Face Dataset Panel ──
+function HuggingFacePanel({ dataset }: { dataset: TrainingDataset }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDataset, setSelectedDataset] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [inputCol, setInputCol] = useState("");
+  const [outputCol, setOutputCol] = useState("");
+  const [importCount, setImportCount] = useState(100);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<any>(null);
+
+  const hfSearch = useHFSearch();
+  const hfPreview = useHFPreview();
+  const hfImport = useHFImport();
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+    hfSearch.mutate(searchQuery);
+    setSelectedDataset(null);
+    setPreviewData(null);
+    setImportResult(null);
+  };
+
+  const handleSelectDataset = async (ds: any) => {
+    setSelectedDataset(ds);
+    setPreviewData(null);
+    setInputCol("");
+    setOutputCol("");
+    setImportResult(null);
+    hfPreview.mutate({ hf_dataset_id: ds.id, length: 5 }, {
+      onSuccess: (data) => {
+        setPreviewData(data);
+        // Auto-detect columns
+        const cols = data.columns || Object.keys(data.rows?.[0]?.row || {});
+        const inputGuess = cols.find((c: string) => /instruction|input|question|prompt|human/i.test(c)) || "";
+        const outputGuess = cols.find((c: string) => /output|response|answer|assistant|completion/i.test(c)) || "";
+        setInputCol(inputGuess);
+        setOutputCol(outputGuess);
+      },
+    });
+  };
+
+  const handleImport = async () => {
+    if (!selectedDataset || !inputCol || !outputCol) return;
+    setImporting(true);
+    setImportResult(null);
+
+    // Import in batches of 100
+    let totalImported = 0;
+    let totalSkipped = 0;
+    const batchSize = 100;
+    const batches = Math.ceil(importCount / batchSize);
+
+    for (let i = 0; i < batches; i++) {
+      const offset = i * batchSize;
+      const length = Math.min(batchSize, importCount - offset);
+      try {
+        const result = await hfImport.mutateAsync({
+          hf_dataset_id: selectedDataset.id,
+          dataset_id: dataset.id,
+          input_column: inputCol,
+          output_column: outputCol,
+          offset,
+          length,
+        });
+        totalImported += result.imported;
+        totalSkipped += result.skipped;
+      } catch {
+        break;
+      }
+    }
+
+    setImportResult({ imported: totalImported, skipped: totalSkipped });
+    setImporting(false);
+  };
+
+  const formatNum = (n: number) => n >= 1000000 ? `${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Database className="h-4 w-4 text-forge-amber" /> Hugging Face Datasets
+        </CardTitle>
+        <CardDescription>
+          Search and import high-quality training data from the Hugging Face Hub. Thousands of curated instruction, Q&A, and chat datasets available.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Search */}
+        <div className="flex gap-2">
+          <Input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="e.g. instruction tuning, code assistant, medical qa..."
+            onKeyDown={e => e.key === "Enter" && handleSearch()}
+          />
+          <Button onClick={handleSearch} disabled={hfSearch.isPending || !searchQuery.trim()}>
+            {hfSearch.isPending ? <RotateCcw className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        {/* Suggested searches */}
+        {!hfSearch.data && !selectedDataset && (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Popular categories:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {["instruction tuning", "code generation", "chat", "reasoning", "math", "medical", "legal", "creative writing"].map(q => (
+                <button key={q} onClick={() => { setSearchQuery(q); hfSearch.mutate(q); }}
+                  className="text-xs px-2.5 py-1 rounded-full border border-border hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Search results */}
+        {hfSearch.data && !selectedDataset && (
+          <ScrollArea className="h-[320px]">
+            <div className="space-y-2">
+              {hfSearch.data.datasets.map((ds) => (
+                <button key={ds.id} onClick={() => handleSelectDataset(ds)}
+                  className="w-full text-left rounded-lg px-4 py-3 border border-border hover:border-primary/40 hover:bg-primary/5 transition-all space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium truncate">{ds.id}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
+                      <span>⬇ {formatNum(ds.downloads)}</span>
+                      <span>♥ {formatNum(ds.likes)}</span>
+                    </div>
+                  </div>
+                  {ds.description && <p className="text-xs text-muted-foreground line-clamp-2">{ds.description}</p>}
+                  {ds.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {ds.tags.slice(0, 5).map((t: string) => (
+                        <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              ))}
+              {hfSearch.data.datasets.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">No datasets found. Try a different search.</p>
+              )}
+            </div>
+          </ScrollArea>
+        )}
+
+        {/* Selected dataset + preview */}
+        {selectedDataset && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <button onClick={() => { setSelectedDataset(null); setPreviewData(null); setImportResult(null); }}
+                className="text-xs text-primary hover:underline flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" /> Back to results
+              </button>
+              <a href={`https://huggingface.co/datasets/${selectedDataset.id}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+                View on HF <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+
+            <div className="bg-muted/30 rounded-lg p-3">
+              <p className="text-sm font-medium">{selectedDataset.id}</p>
+              <p className="text-xs text-muted-foreground mt-1">⬇ {formatNum(selectedDataset.downloads)} downloads · ♥ {formatNum(selectedDataset.likes)} likes</p>
+            </div>
+
+            {hfPreview.isPending && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
+                <RotateCcw className="h-4 w-4 animate-spin" /> Loading preview...
+              </div>
+            )}
+
+            {previewData && (
+              <div className="space-y-4">
+                <p className="text-xs text-muted-foreground">{formatNum(previewData.num_rows)} total rows · Showing first {previewData.rows.length}</p>
+
+                {/* Preview table */}
+                <div className="border rounded-lg overflow-hidden">
+                  <ScrollArea className="max-h-[200px]">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="bg-muted/50">
+                            {(previewData.columns.length > 0 ? previewData.columns : Object.keys(previewData.rows[0]?.row || {})).map((col: string) => (
+                              <th key={col} className="px-2 py-1.5 text-left font-medium whitespace-nowrap">{col}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {previewData.rows.map((row: any, i: number) => {
+                            const r = row.row || row;
+                            const cols = previewData.columns.length > 0 ? previewData.columns : Object.keys(r);
+                            return (
+                              <tr key={i} className="border-t border-border/50">
+                                {cols.map((col: string) => (
+                                  <td key={col} className="px-2 py-1.5 max-w-[200px] truncate text-muted-foreground">
+                                    {typeof r[col] === "string" ? r[col].slice(0, 100) : JSON.stringify(r[col])?.slice(0, 100)}
+                                  </td>
+                                ))}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </ScrollArea>
+                </div>
+
+                {/* Column mapping */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Input column (question/instruction)</Label>
+                    <Select value={inputCol} onValueChange={setInputCol}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select column" /></SelectTrigger>
+                      <SelectContent>
+                        {(previewData.columns.length > 0 ? previewData.columns : Object.keys(previewData.rows[0]?.row || {})).map((col: string) => (
+                          <SelectItem key={col} value={col}>{col}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Output column (response/answer)</Label>
+                    <Select value={outputCol} onValueChange={setOutputCol}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select column" /></SelectTrigger>
+                      <SelectContent>
+                        {(previewData.columns.length > 0 ? previewData.columns : Object.keys(previewData.rows[0]?.row || {})).map((col: string) => (
+                          <SelectItem key={col} value={col}>{col}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Import count */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">How many rows to import?</Label>
+                  <div className="flex gap-2">
+                    {[50, 100, 200, 500].map(n => (
+                      <button key={n} onClick={() => setImportCount(n)}
+                        className={`text-xs px-3 py-1.5 rounded-md border transition-all ${
+                          importCount === n ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/30"
+                        }`}>
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Import button */}
+                <Button onClick={handleImport}
+                  disabled={importing || !inputCol || !outputCol}
+                  className="w-full">
+                  {importing ? (
+                    <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Importing from Hugging Face...</>
+                  ) : (
+                    <><Download className="h-4 w-4 mr-2" /> Import {importCount} rows into "{dataset.name}"</>
+                  )}
+                </Button>
+
+                {/* Result */}
+                {importResult && (
+                  <div className="bg-forge-emerald/5 rounded-lg p-3 flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-forge-emerald shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Imported {importResult.imported} training pairs!</p>
+                      {importResult.skipped > 0 && (
+                        <p className="text-xs text-muted-foreground">{importResult.skipped} rows skipped (too short or invalid)</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+
 function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: () => void }) {
   const [url, setUrl] = useState("");
   const [bulkUrls, setBulkUrls] = useState("");
@@ -604,7 +887,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; currentUrl: string; results: { url: string; pairs: number; error?: string }[] }>({ current: 0, total: 0, currentUrl: "", results: [] });
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
-  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file">("import");
+  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
   const [fileText, setFileText] = useState("");
@@ -707,6 +990,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="flex-1">
           <Upload className="h-4 w-4 mr-2" /> Import AI Chats
         </Button>
+        <Button variant={mode === "huggingface" ? "default" : "outline"} onClick={() => setMode("huggingface")} className="flex-1">
+          <Database className="h-4 w-4 mr-2" /> Hugging Face
+        </Button>
         <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="flex-1">
           <Globe className="h-4 w-4 mr-2" /> Scrape URL
         </Button>
@@ -720,6 +1006,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
       {mode === "import" ? (
         <ImportChatsPanel dataset={dataset} />
+      ) : mode === "huggingface" ? (
+        <HuggingFacePanel dataset={dataset} />
       ) : mode === "file" ? (
         <Card>
           <CardHeader>

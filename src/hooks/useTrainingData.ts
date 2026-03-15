@@ -260,6 +260,54 @@ export function useProcessChatExport() {
   });
 }
 
+// Hugging Face Datasets
+export function useHFSearch() {
+  return useMutation({
+    mutationFn: async (query: string) => {
+      const { data, error } = await supabase.functions.invoke("fetch-hf-dataset", {
+        body: { action: "search", query },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { datasets: Array<{ id: string; author: string; name: string; downloads: number; likes: number; tags: string[]; description: string }> };
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useHFPreview() {
+  return useMutation({
+    mutationFn: async (params: { hf_dataset_id: string; config?: string; split?: string; offset?: number; length?: number }) => {
+      const { data, error } = await supabase.functions.invoke("fetch-hf-dataset", {
+        body: { action: "preview", ...params },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { rows: any[]; columns: string[]; num_rows: number };
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useHFImport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { hf_dataset_id: string; dataset_id: string; config?: string; split?: string; input_column: string; output_column: string; offset?: number; length?: number }) => {
+      const { data, error } = await supabase.functions.invoke("fetch-hf-dataset", {
+        body: { action: "import", ...params },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { imported: number; total_rows: number; skipped: number };
+    },
+    onSuccess: (data, vars) => {
+      qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
+      qc.invalidateQueries({ queryKey: ["training-datasets"] });
+      toast.success(`Imported ${data.imported} training pairs from Hugging Face!`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
 
 
 // Founder Interview

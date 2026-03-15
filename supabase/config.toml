@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.perspective-worker]
 verify_jwt = false
+
+[functions.fetch-hf-dataset]
+verify_jwt = false
