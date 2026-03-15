@@ -4,15 +4,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useUpdateProfile } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Key, Plus, Trash2, Eye, EyeOff, Shield } from "lucide-react";
+import { Key, Plus, Trash2, Eye, EyeOff, Shield, Sparkles, Wand2 } from "lucide-react";
 import ReferralSection from "@/components/ReferralSection";
 import { TierBadge } from "@/components/TierBadge";
 import { useCredits } from "@/hooks/useCredits";
+import { useSpriteSettings } from "@/providers/SpriteSettingsProvider";
 
 interface ApiKey {
   id: string;

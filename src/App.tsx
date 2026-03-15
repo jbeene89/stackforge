@@ -108,6 +108,7 @@ const App = () => (
           <CookieConsentBanner />
         </BrowserRouter>
       </TooltipProvider>
+      </SpriteSettingsProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
