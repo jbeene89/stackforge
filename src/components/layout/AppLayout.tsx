@@ -5,6 +5,7 @@ import { CommandPalette, useCommandPalette } from "./CommandPalette";
 import { Button } from "@/components/ui/button";
 import { Search, Command } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CompanionSprites } from "@/components/CompanionSprites";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, User, Settings } from "lucide-react";
@@ -73,6 +74,7 @@ export function AppLayout() {
           </main>
         </div>
       </div>
+      <CompanionSprites />
       <CommandPalette open={open} onOpenChange={setOpen} />
     </SidebarProvider>
   );
