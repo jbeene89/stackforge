@@ -286,6 +286,8 @@ function CompanionSprite({
   onDismiss,
   bubbleContent,
   creditData,
+  sizeMultiplier,
+  isHit,
 }: {
   sprite: (typeof SPRITES)[0];
   state: SpriteState;
@@ -295,6 +297,8 @@ function CompanionSprite({
   onDismiss: () => void;
   bubbleContent: string;
   creditData?: { balance: number; tier: string; isLow: boolean } | null;
+  sizeMultiplier: number;
+  isHit: boolean;
 }) {
   const { scrollVelocity, clicked, mouseX, mouseY } = state;
 
