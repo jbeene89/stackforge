@@ -41,7 +41,7 @@ export function SpellCanvas({
     const resize = () => {
       canvas.width = window.innerWidth * window.devicePixelRatio;
       canvas.height = window.innerHeight * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
