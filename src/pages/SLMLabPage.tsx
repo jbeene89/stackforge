@@ -656,12 +656,15 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </Card>
 
       {/* Mode toggle */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="flex-1">
           <Upload className="h-4 w-4 mr-2" /> Import AI Chats
         </Button>
         <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="flex-1">
           <Globe className="h-4 w-4 mr-2" /> Scrape URL
+        </Button>
+        <Button variant={mode === "file" ? "default" : "outline"} onClick={() => setMode("file")} className="flex-1">
+          <FileText className="h-4 w-4 mr-2" /> Upload File
         </Button>
         <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")} className="flex-1">
           <Plus className="h-4 w-4 mr-2" /> Manual
