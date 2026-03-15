@@ -202,7 +202,7 @@ export function useDeleteSample() {
 export function useScrapeForTraining() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { url: string; dataset_id: string; domain_hint?: string }) => {
+    mutationFn: async (params: { url: string; dataset_id: string; domain_hint?: string; offload_perspective?: string }) => {
       const { data, error } = await supabase.functions.invoke("scrape-for-training", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -211,9 +211,34 @@ export function useScrapeForTraining() {
     onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
-      toast.success(`Extracted ${data.extracted} five-perspective training pairs`);
+      const msg = data.offloaded
+        ? `Extracted ${data.extracted} pairs (${data.offloaded} offloaded to tablet)`
+        : `Extracted ${data.extracted} five-perspective training pairs`;
+      toast.success(msg);
     },
     onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// Check offloaded batch status
+export function useOffloadBatchStatus() {
+  return useMutation({
+    mutationFn: async (batchId: string) => {
+      const { data, error } = await supabase.functions.invoke("perspective-worker", {
+        body: null,
+        method: "GET",
+      });
+      // Use fetch directly for GET with query params
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker?action=status&batch_id=${batchId}`;
+      const resp = await fetch(url, {
+        headers: {
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!resp.ok) throw new Error("Failed to check batch status");
+      return await resp.json();
+    },
   });
 }
 
