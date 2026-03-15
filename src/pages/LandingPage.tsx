@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { PyreflyBackground } from "@/components/PyreflyBackground";
+import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
 
 // ------- HERO TYPEWRITER -------
 
@@ -45,11 +47,11 @@ function TypewriterDemo() {
   }, [displayText, isTyping, idx]);
 
   return (
-    <div className="glass-strong rounded-xl p-4 sm:p-5 max-w-2xl mx-auto text-left">
+    <div className="ffx-card glass-strong rounded-xl p-4 sm:p-5 max-w-2xl mx-auto text-left">
       <div className="flex items-center gap-2 mb-3">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-forge-rose/50" />
-          <div className="w-2.5 h-2.5 rounded-full bg-forge-amber/50" />
+          <div className="w-2.5 h-2.5 rounded-full bg-forge-gold/50" />
           <div className="w-2.5 h-2.5 rounded-full bg-forge-emerald/50" />
         </div>
         <span className="text-[10px] text-muted-foreground ml-2 font-mono">soupyforge prompt</span>
@@ -57,7 +59,7 @@ function TypewriterDemo() {
       <div className="font-mono text-xs sm:text-sm text-foreground min-h-[24px]">
         <span className="text-primary">❯ </span>
         {displayText}
-        <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5" />
+        <span className="inline-block w-1.5 h-4 bg-forge-gold animate-pulse ml-0.5" />
       </div>
       {showOutput && (
         <motion.div
@@ -72,25 +74,39 @@ function TypewriterDemo() {
   );
 }
 
-// ------- ARCHITECTURE DIAGRAM -------
+// ------- ARCHITECTURE DIAGRAM - FFX style -------
 
 function ArchitectureDiagram() {
   const nodes = [
     { label: "Classifier", x: 60, y: 40, color: "bg-forge-cyan/20 border-forge-cyan/40 text-forge-cyan" },
     { label: "Specialist", x: 220, y: 40, color: "bg-primary/20 border-primary/40 text-primary" },
     { label: "Critic", x: 380, y: 20, color: "bg-forge-rose/20 border-forge-rose/40 text-forge-rose" },
-    { label: "Formatter", x: 380, y: 60, color: "bg-forge-amber/20 border-forge-amber/40 text-forge-amber" },
+    { label: "Formatter", x: 380, y: 60, color: "bg-forge-gold/20 border-forge-gold/40 text-forge-gold" },
     { label: "Output", x: 530, y: 40, color: "bg-forge-emerald/20 border-forge-emerald/40 text-forge-emerald" },
   ];
 
   return (
     <div className="relative w-full max-w-[640px] h-[100px] mx-auto hidden sm:block">
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 640 100" fill="none">
-        <motion.path d="M140,50 L210,50" stroke="hsl(var(--border))" strokeWidth="1.5" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} />
-        <motion.path d="M300,50 L370,30" stroke="hsl(var(--border))" strokeWidth="1.5" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
-        <motion.path d="M300,50 L370,70" stroke="hsl(var(--border))" strokeWidth="1.5" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
-        <motion.path d="M460,30 L520,50" stroke="hsl(var(--border))" strokeWidth="1.5" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
-        <motion.path d="M460,70 L520,50" stroke="hsl(var(--border))" strokeWidth="1.5" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
+        {/* Glowing connection lines */}
+        <defs>
+          <linearGradient id="edge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0.6)" />
+            <stop offset="100%" stopColor="hsl(var(--forge-cyan) / 0.6)" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <motion.path d="M140,50 L210,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} />
+        <motion.path d="M300,50 L370,30" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
+        <motion.path d="M300,50 L370,70" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
+        <motion.path d="M460,30 L520,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
+        <motion.path d="M460,70 L520,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
       </svg>
       {nodes.map((node, i) => (
         <motion.div
@@ -99,7 +115,7 @@ function ArchitectureDiagram() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ delay: i * 0.12 }}
-          className={`absolute px-3 py-1.5 rounded-lg border text-[11px] font-semibold ${node.color}`}
+          className={`absolute px-3 py-1.5 rounded-lg border text-[11px] font-semibold ${node.color} backdrop-blur-sm`}
           style={{ left: node.x, top: node.y, transform: "translate(-50%, -50%)" }}
         >
           {node.label}
@@ -118,7 +134,7 @@ const differentiators = [
     subtitle: "Not chatbots. Single-purpose AIs.",
     desc: "Each module does one thing with precision: classify, estimate, critique, extract, or format. Define its goal, guardrails, boundaries, and output format.",
     details: ["Deterministic mode for repeatable outputs", "SLM mode for cost-optimized deployment", "Built-in guardrails and task boundaries", "Per-module temperature and constraints"],
-    color: "from-forge-amber to-forge-rose",
+    color: "from-forge-gold to-forge-rose",
   },
   {
     icon: Layers,
@@ -154,7 +170,7 @@ const realUseCases = [
     desc: "Intake → scope → cost → risk → proposal. 5 specialist modules processing real job requests into client-ready proposals.",
     type: "Stack",
     modules: 5,
-    color: "border-forge-cyan/30",
+    color: "border-forge-cyan/40",
   },
   {
     industry: "Legal & Compliance",
@@ -162,7 +178,7 @@ const realUseCases = [
     desc: "Scans construction contracts clause-by-clause for risk, liability gaps, and missing protections.",
     type: "Module",
     modules: 1,
-    color: "border-forge-rose/30",
+    color: "border-forge-rose/40",
   },
   {
     industry: "Field Operations",
@@ -170,7 +186,7 @@ const realUseCases = [
     desc: "Android app for on-site inspectors. Photo capture with annotation, GPS tagging, offline checklists.",
     type: "Android",
     modules: 0,
-    color: "border-forge-emerald/30",
+    color: "border-forge-emerald/40",
   },
   {
     industry: "R&D / Innovation",
@@ -178,7 +194,7 @@ const realUseCases = [
     desc: "Idea expander → engineering critic → red team → patent tightener → executive summary.",
     type: "Stack",
     modules: 5,
-    color: "border-primary/30",
+    color: "border-primary/40",
   },
 ];
 
@@ -186,143 +202,177 @@ const realUseCases = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-base font-bold">Soupy<span className="text-primary">Forge</span></span>
+            <span className="text-base font-bold font-display tracking-wider">
+              Soupy<span className="gradient-text">Forge</span>
+            </span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-            <a href="#use-cases" className="hover:text-foreground transition-colors">Use Cases</a>
-            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground font-medium">
+            <a href="#how-it-works" className="hover:text-primary transition-colors duration-300">How It Works</a>
+            <a href="#use-cases" className="hover:text-primary transition-colors duration-300">Use Cases</a>
+            <Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/login"><Button variant="ghost" size="sm">Log in</Button></Link>
-            <Link to="/signup"><Button size="sm" className="gradient-primary text-primary-foreground text-xs sm:text-sm">Start Building</Button></Link>
+            <Link to="/login"><Button variant="ghost" size="sm" className="font-semibold">Log in</Button></Link>
+            <Link to="/signup">
+              <Button size="sm" className="gradient-primary text-primary-foreground font-semibold glow-primary">
+                Start Building
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-24 sm:pt-32 pb-12 sm:pb-16 px-4 sm:px-6 relative overflow-hidden gradient-mesh">
-        <div className="max-w-4xl mx-auto text-center relative">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-4 sm:mb-6 text-balance">
-              Cook up <span className="gradient-text">specialist AI systems</span>,
-              <br className="hidden md:block" /> not chatbots
+      {/* ════════════════════ HERO ════════════════════ */}
+      <section className="relative pt-24 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
+        {/* Background layers */}
+        <div className="absolute inset-0 gradient-mesh" />
+        <PyreflyBackground count={50} />
+
+        {/* Decorative rune circles */}
+        <div className="absolute top-20 -left-16 opacity-30">
+          <RuneCircle size={200} />
+        </div>
+        <div className="absolute bottom-0 -right-20 opacity-20">
+          <RuneCircle size={260} />
+        </div>
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full glass border border-forge-gold/20 text-xs font-semibold text-forge-gold"
+            >
+              <Sparkles className="h-3 w-3" />
+              AI Development Kitchen
+            </motion.div>
+
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-wide leading-[1.1] mb-5 sm:mb-7 text-balance">
+              Cook up{" "}
+              <span className="gradient-text">specialist AI systems</span>
+              <br className="hidden md:block" />
+              <span className="text-foreground/80"> not chatbots</span>
             </h1>
-            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed text-balance">
+
+            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed text-balance font-medium">
               Brew narrow-purpose AI modules. Stir them into multi-step pipelines.
               Serve Android apps for the field. Taste-test every step.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
               <Link to="/signup" className="w-full sm:w-auto">
-                <Button size="lg" className="gradient-primary text-primary-foreground px-8 group w-full sm:w-auto">
-                  Start Building <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold group w-full sm:w-auto glow-primary">
+                  Start Building <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
                   <Play className="h-4 w-4" /> Explore Demo
                 </Button>
               </Link>
             </div>
+
             <TypewriterDemo />
           </motion.div>
         </div>
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* Anti-pattern statement */}
-      <section className="py-8 sm:py-10 px-4 sm:px-6 border-y border-border bg-secondary/20">
+      {/* ════════════════════ ANTI-PATTERN ════════════════════ */}
+      <section className="relative py-8 sm:py-10 px-4 sm:px-6">
+        <FFXDivider className="mb-6" />
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">SoupyForge is not a wrapper around ChatGPT.</span>{" "}
+          <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+            <span className="font-bold text-foreground font-display tracking-wide">SoupyForge is not a wrapper around ChatGPT.</span>{" "}
             It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
           </p>
         </div>
+        <FFXDivider className="mt-6" />
       </section>
 
-      {/* Three Differentiators */}
-      <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6">
+      {/* ════════════════════ THREE DIFFERENTIATORS ════════════════════ */}
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <Badge variant="outline" className="text-[10px] mb-4">What makes SoupyForge different</Badge>
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-balance">Three things we do that nobody else does</h2>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-20">
+            <Badge variant="outline" className="text-[10px] mb-4 border-forge-gold/30 text-forge-gold font-semibold">
+              What makes SoupyForge different
+            </Badge>
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
+              Three things we do that nobody else does
+            </h2>
           </motion.div>
 
-          <div className="space-y-12 sm:space-y-20">
+          <div className="space-y-16 sm:space-y-28">
             {differentiators.map((d, i) => (
               <motion.div
                 key={d.title}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} gap-6 sm:gap-8 items-center`}
+                transition={{ delay: 0.1, duration: 0.6 }}
+                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} gap-8 sm:gap-12 items-center`}
               >
-                <div className="flex-1 space-y-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${d.color} flex items-center justify-center`}>
-                    <d.icon className="h-6 w-6 text-primary-foreground" />
+                <div className="flex-1 space-y-5">
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${d.color} flex items-center justify-center glow-primary`}>
+                    <d.icon className="h-7 w-7 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold mb-1">{d.title}</h3>
-                    <p className="text-sm font-medium text-primary">{d.subtitle}</p>
+                    <h3 className="text-lg sm:text-2xl font-display font-bold mb-1 tracking-wide">{d.title}</h3>
+                    <p className="text-sm font-semibold text-primary">{d.subtitle}</p>
                   </div>
                   <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{d.desc}</p>
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {d.details.map((detail) => (
-                      <li key={detail} className="flex items-center gap-2 text-xs sm:text-sm">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald shrink-0" />
+                      <li key={detail} className="flex items-center gap-2.5 text-xs sm:text-sm font-medium">
+                        <CheckCircle2 className="h-4 w-4 text-forge-emerald shrink-0" />
                         {detail}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="flex-1 glass rounded-xl p-4 sm:p-6 min-h-[180px] sm:min-h-[200px] flex items-center justify-center w-full">
+                <div className="flex-1 ffx-card glass rounded-xl p-5 sm:p-7 min-h-[200px] sm:min-h-[220px] flex items-center justify-center w-full">
                   {i === 0 && (
                     <div className="space-y-3 w-full">
-                      <div className="flex items-center gap-3 glass rounded-lg px-3 sm:px-4 py-2.5">
-                        <Brain className="h-4 w-4 text-forge-amber shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-semibold truncate">Marine Scope Summarizer</div>
-                          <div className="text-[10px] text-muted-foreground">specialist • temp 0.3 • deterministic</div>
+                      {[
+                        { icon: Brain, name: "Marine Scope Summarizer", sub: "specialist • temp 0.3 • deterministic", ver: "v6", iconColor: "text-forge-gold" },
+                        { icon: Shield, name: "Red Team Critic", sub: "critic • temp 0.5 • skeptical tone", ver: "v3", iconColor: "text-forge-rose" },
+                        { icon: Cpu, name: "Cost Estimator", sub: "specialist • SLM mode • JSON output", ver: "v9", iconColor: "text-forge-cyan" },
+                      ].map((m) => (
+                        <div key={m.name} className="flex items-center gap-3 glass rounded-lg px-3 sm:px-4 py-3 hover:glow-primary transition-all">
+                          <m.icon className={`h-4 w-4 ${m.iconColor} shrink-0`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-bold truncate">{m.name}</div>
+                            <div className="text-[10px] text-muted-foreground">{m.sub}</div>
+                          </div>
+                          <Badge className="bg-forge-emerald/15 text-forge-emerald text-[9px] shrink-0 border-forge-emerald/20">{m.ver}</Badge>
                         </div>
-                        <Badge className="bg-forge-emerald/15 text-forge-emerald text-[9px] shrink-0">v6</Badge>
-                      </div>
-                      <div className="flex items-center gap-3 glass rounded-lg px-3 sm:px-4 py-2.5">
-                        <Shield className="h-4 w-4 text-forge-rose shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-semibold truncate">Red Team Critic</div>
-                          <div className="text-[10px] text-muted-foreground">critic • temp 0.5 • skeptical tone</div>
-                        </div>
-                        <Badge className="bg-forge-emerald/15 text-forge-emerald text-[9px] shrink-0">v3</Badge>
-                      </div>
-                      <div className="flex items-center gap-3 glass rounded-lg px-3 sm:px-4 py-2.5">
-                        <Cpu className="h-4 w-4 text-forge-cyan shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-semibold truncate">Cost Estimator</div>
-                          <div className="text-[10px] text-muted-foreground">specialist • SLM mode • JSON output</div>
-                        </div>
-                        <Badge className="bg-primary/15 text-primary text-[9px] shrink-0">v9</Badge>
-                      </div>
+                      ))}
                     </div>
                   )}
                   {i === 1 && <ArchitectureDiagram />}
                   {i === 2 && (
-                    <div className="w-[180px] mx-auto">
-                      <div className="rounded-2xl border-2 border-border bg-background p-2 shadow-xl">
-                        <div className="rounded-xl bg-secondary/50 h-8 flex items-center justify-center text-[10px] font-semibold mb-1.5">Field Inspector</div>
-                        <div className="space-y-1">
-                          <div className="rounded-lg bg-forge-cyan/10 h-16 flex items-center justify-center text-[9px] text-forge-cyan">📷 Photo Capture</div>
-                          <div className="rounded-lg bg-forge-emerald/10 h-6 flex items-center justify-center text-[9px] text-forge-emerald">📍 GPS Tagged</div>
-                          <div className="grid grid-cols-2 gap-1">
-                            <div className="rounded bg-forge-amber/10 h-8 flex items-center justify-center text-[8px] text-forge-amber">Checklist</div>
-                            <div className="rounded bg-primary/10 h-8 flex items-center justify-center text-[8px] text-primary">Sync ↑</div>
+                    <div className="w-[200px] mx-auto">
+                      <div className="ffx-card rounded-2xl border border-primary/20 bg-background/80 p-3 glow-primary">
+                        <div className="rounded-xl bg-primary/10 h-9 flex items-center justify-center text-[11px] font-bold mb-2 text-primary font-display tracking-wide">
+                          Field Inspector
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="rounded-lg bg-forge-cyan/10 h-16 flex items-center justify-center text-[10px] text-forge-cyan font-semibold border border-forge-cyan/10">📷 Photo Capture</div>
+                          <div className="rounded-lg bg-forge-emerald/10 h-7 flex items-center justify-center text-[10px] text-forge-emerald font-semibold border border-forge-emerald/10">📍 GPS Tagged</div>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <div className="rounded-lg bg-forge-gold/10 h-8 flex items-center justify-center text-[9px] text-forge-gold font-semibold border border-forge-gold/10">Checklist</div>
+                            <div className="rounded-lg bg-primary/10 h-8 flex items-center justify-center text-[9px] text-primary font-semibold border border-primary/10">Sync ↑</div>
                           </div>
                         </div>
                       </div>
@@ -335,147 +385,164 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Architecture philosophy */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-secondary/20 border-y border-border">
-        <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-10">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Architecture principles</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2">How SoupyForge thinks about AI systems.</p>
+      {/* ════════════════════ ARCHITECTURE PHILOSOPHY ════════════════════ */}
+      <section className="relative py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
+        {/* Subtle background */}
+        <div className="absolute inset-0 gradient-mesh opacity-50" />
+        <PyreflyBackground count={20} />
+
+        <div className="max-w-5xl mx-auto relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
+            <h2 className="text-lg sm:text-xl md:text-3xl font-display font-bold tracking-wide">Architecture Principles</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-3 font-medium">How SoupyForge thinks about AI systems.</p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
             {architecturePoints.map((p, i) => (
               <motion.div
                 key={p.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className="glass rounded-lg px-4 py-3 flex items-start gap-3"
-              >
-                <p.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <div className="text-sm font-semibold">{p.label}</div>
-                  <div className="text-xs text-muted-foreground">{p.desc}</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Real use cases */}
-      <section id="use-cases" className="py-12 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3">Built for real industries</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground text-balance">Not toy demos. These are production patterns used by contractors, legal teams, and field operators.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            {realUseCases.map((uc, i) => (
-              <motion.div
-                key={uc.title}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className={`glass rounded-xl p-4 sm:p-6 border-l-4 ${uc.color} hover:glow-primary transition-all cursor-pointer group`}
+                className="ffx-card glass rounded-xl px-5 py-4 flex items-start gap-3 hover:glow-primary transition-all duration-500"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{uc.industry}</span>
-                  <Badge variant="outline" className="text-[10px]">{uc.type}</Badge>
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <p.icon className="h-4 w-4 text-primary" />
                 </div>
-                <h3 className="font-bold text-base sm:text-lg mb-2 group-hover:text-primary transition-colors">{uc.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{uc.desc}</p>
+                <div>
+                  <div className="text-sm font-bold font-display tracking-wide">{p.label}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════ REAL USE CASES ════════════════════ */}
+      <section id="use-cases" className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold mb-3 tracking-wide">Built for Real Industries</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground text-balance font-medium">Not toy demos. These are production patterns used by contractors, legal teams, and field operators.</p>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+            {realUseCases.map((uc, i) => (
+              <motion.div
+                key={uc.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={`ffx-card glass rounded-xl p-5 sm:p-7 border-l-4 ${uc.color} hover:glow-primary transition-all duration-500 cursor-pointer group`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] font-display">{uc.industry}</span>
+                  <Badge variant="outline" className="text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
+                </div>
+                <h3 className="font-display font-bold text-base sm:text-lg mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
                 {uc.modules > 0 && (
-                  <div className="mt-3 text-[10px] text-muted-foreground">{uc.modules} specialist modules</div>
+                  <div className="mt-3 text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
                 )}
               </motion.div>
             ))}
           </div>
-          <div className="text-center mt-8">
+          <div className="text-center mt-10">
             <Link to="/templates">
-              <Button variant="outline">Browse All Templates <ArrowRight className="ml-2 h-4 w-4" /></Button>
+              <Button variant="outline" className="font-bold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
+                Browse All Templates <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6">
+      {/* ════════════════════ CTA ════════════════════ */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-mesh opacity-40" />
+        <PyreflyBackground count={30} />
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="max-w-3xl mx-auto text-center glass-strong rounded-2xl p-8 sm:p-12 glow-primary"
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto text-center ffx-card glass-strong rounded-2xl p-10 sm:p-14 glow-primary relative z-10"
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3">Stop prompting. Start engineering.</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-6 max-w-lg mx-auto">
+          <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold mb-4 tracking-wide">
+            Stop Prompting.{" "}
+            <span className="gradient-text">Start Engineering.</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-8 max-w-lg mx-auto font-medium leading-relaxed">
             Build modular AI systems with defined roles, traceable behavior, and real-world deployment.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/signup" className="w-full sm:w-auto">
-              <Button size="lg" className="gradient-primary text-primary-foreground px-8 w-full sm:w-auto">
-                Start Building Free <ArrowRight className="ml-2 h-4 w-4" />
+              <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold w-full sm:w-auto glow-primary">
+                Start Building Free <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to="/pricing" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">View Pricing</Button>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:glow-primary">View Pricing</Button>
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-6 text-xs sm:text-sm text-muted-foreground">
-            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald" /> Free tier</div>
-            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald" /> No credit card</div>
-            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald" /> Export anytime</div>
+          <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 mt-8 text-xs sm:text-sm text-muted-foreground font-semibold">
+            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Free tier</div>
+            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> No credit card</div>
+            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Export anytime</div>
           </div>
         </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-border">
+      {/* ════════════════════ FOOTER ════════════════════ */}
+      <footer className="relative py-10 sm:py-14 px-4 sm:px-6">
+        <FFXDivider className="mb-10" />
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-8">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
             <div>
-              <Link to="/" className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
+              <Link to="/" className="flex items-center gap-2.5 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold">Soupy<span className="text-primary">Forge</span></span>
+                <span className="text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Forge</span></span>
               </Link>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">The modular AI development kitchen for specialist systems.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs font-medium">The modular AI development kitchen for specialist systems.</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
               <div>
-                <div className="font-semibold mb-3">Product</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm">
-                  <div><Link to="/templates" className="hover:text-foreground transition-colors">Templates</Link></div>
-                  <div><Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></div>
-                  <div><a href="#" className="hover:text-foreground transition-colors">Changelog</a></div>
+                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Product</div>
+                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                  <div><Link to="/templates" className="hover:text-primary transition-colors duration-300">Templates</Link></div>
+                  <div><Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link></div>
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Changelog</a></div>
                 </div>
               </div>
               <div>
-                <div className="font-semibold mb-3">Resources</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm">
-                  <div><a href="#" className="hover:text-foreground transition-colors">Documentation</a></div>
-                  <div><a href="#" className="hover:text-foreground transition-colors">API Reference</a></div>
-                  <div><a href="#" className="hover:text-foreground transition-colors">Community</a></div>
+                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Resources</div>
+                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Documentation</a></div>
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">API Reference</a></div>
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Community</a></div>
                 </div>
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <div className="font-semibold mb-3">Company</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm">
-                  <div><a href="#" className="hover:text-foreground transition-colors">About</a></div>
-                  <div><a href="#" className="hover:text-foreground transition-colors">Blog</a></div>
-                  <div><a href="#" className="hover:text-foreground transition-colors">Careers</a></div>
+                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Company</div>
+                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">About</a></div>
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Blog</a></div>
+                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Careers</a></div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border text-xs sm:text-sm text-muted-foreground">
+          <FFXDivider className="mb-6" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-muted-foreground font-medium">
             <span>© 2026 SoupyForge. All rights reserved.</span>
             <div className="flex gap-6">
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-              <a href="#" className="hover:text-foreground transition-colors">Status</a>
+              <Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link>
+              <Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link>
+              <a href="#" className="hover:text-primary transition-colors duration-300">Status</a>
             </div>
           </div>
         </div>
