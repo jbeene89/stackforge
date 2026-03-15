@@ -223,8 +223,71 @@ export default function AccountPage() {
 
       <Separator />
 
+      {/* Sprite Companions Settings */}
+      <div className="glass rounded-xl p-6 space-y-5">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h2 className="font-semibold font-display tracking-wide">Companion Sprites</h2>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Mochi, Ember, and Wisp — your AI spirit companions. They give tips, cast spells at each other, and react to everything you do.
+        </p>
+
+        <div className="space-y-4">
+          {/* Visibility toggle */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-semibold">Show Sprites</Label>
+              <p className="text-[11px] text-muted-foreground">Toggle companion visibility across all pages</p>
+            </div>
+            <Switch
+              checked={spriteSettings.visible}
+              onCheckedChange={spriteSettings.setVisible}
+            />
+          </div>
+
+          {/* Size slider */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">Sprite Size</Label>
+              <span className="text-xs text-muted-foreground font-mono">{Math.round(spriteSettings.sizeMultiplier * 100)}%</span>
+            </div>
+            <Slider
+              value={[spriteSettings.sizeMultiplier]}
+              onValueChange={([v]) => spriteSettings.setSizeMultiplier(v)}
+              min={0.8}
+              max={2.5}
+              step={0.1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>Small</span>
+              <span>Default</span>
+              <span>Chonky</span>
+            </div>
+          </div>
+
+          {/* Spell combat toggle */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <Wand2 className="h-3.5 w-3.5 text-forge-violet" />
+                <Label className="text-sm font-semibold">Spell Combat</Label>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Sprites randomly cast spells at each other with particle effects</p>
+            </div>
+            <Switch
+              checked={spriteSettings.spellsEnabled}
+              onCheckedChange={spriteSettings.setSpellsEnabled}
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
       <div className="glass rounded-xl p-6 space-y-4">
-        <h2 className="font-semibold">Session</h2>
+        <h2 className="font-semibold font-display tracking-wide">Session</h2>
         <p className="text-sm text-muted-foreground">
           Signed in as <span className="font-medium text-foreground">{user?.email}</span>
         </p>
