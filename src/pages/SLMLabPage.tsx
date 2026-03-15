@@ -724,6 +724,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
       {mode === "import" ? (
         <ImportChatsPanel dataset={dataset} />
+      ) : mode === "huggingface" ? (
+        <HuggingFacePanel dataset={dataset} />
       ) : mode === "file" ? (
         <Card>
           <CardHeader>
