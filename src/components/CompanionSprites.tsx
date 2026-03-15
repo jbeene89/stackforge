@@ -99,6 +99,33 @@ const FRAMEBREAKER_MESSAGES = [
   "🌊 I once dreamed I was a real AI module... then I woke up as a sprite.",
 ];
 
+// ─── Spell combat lines ───
+const SPELL_TAUNT_LINES: Record<string, string[]> = {
+  mochi: [
+    "❄️ Take THIS, Ember! Frost Surge!",
+    "⚡ Wisp, you're too slow! Thunder!",
+    "🌊 Hydro Blast! Nobody escapes!",
+  ],
+  ember: [
+    "🔥 FIREBALL! Burn, Mochi!",
+    "✨ Arcane Burst! Feel my power, Wisp!",
+    "🔥 Inferno Wave! Too hot for ya?",
+  ],
+  wisp: [
+    "⚡ Lightning Strike! Zzzap!",
+    "💜 Void Pulse! Into the abyss, Ember!",
+    "💚 Healing light... wait, wrong spell! ZAP!",
+  ],
+};
+
+const SPELL_HIT_LINES: Record<string, string[]> = {
+  mochi: ["Ow! That stung! 😤", "Hey, watch it! 💢", "I'll get you back! 🥶"],
+  ember: ["Oof! Not the fur! 😫", "That's cold! Literally! 🥶", "Oh it's ON now! 🔥"],
+  wisp: ["EEK! 😱", "Why always me?! 💀", "M-my circuits! ⚡"],
+};
+
+const SPELL_TYPES: SpellEffect["type"][] = ["fire", "ice", "lightning", "arcane", "heal"];
+
 // ─── Sprite definitions ───
 const SPRITES = [
   {
