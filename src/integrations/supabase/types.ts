@@ -44,6 +44,50 @@ export type Database = {
         }
         Relationships: []
       }
+      dataset_samples: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          id: string
+          input: string
+          output: string
+          quality_score: number
+          source_url: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          id?: string
+          input: string
+          output: string
+          quality_score?: number
+          source_url?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          id?: string
+          input?: string
+          output?: string
+          quality_score?: number
+          source_url?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataset_samples_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "training_datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discussions: {
         Row: {
           content: string
@@ -479,6 +523,95 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "marketplace_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_datasets: {
+        Row: {
+          created_at: string
+          description: string
+          domain: string
+          format: string
+          id: string
+          name: string
+          sample_count: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          domain?: string
+          format?: string
+          id?: string
+          name: string
+          sample_count?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          domain?: string
+          format?: string
+          id?: string
+          name?: string
+          sample_count?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      training_jobs: {
+        Row: {
+          base_model: string
+          created_at: string
+          dataset_id: string
+          hyperparameters: Json
+          id: string
+          method: string
+          metrics: Json
+          name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_model?: string
+          created_at?: string
+          dataset_id: string
+          hyperparameters?: Json
+          id?: string
+          method?: string
+          metrics?: Json
+          name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_model?: string
+          created_at?: string
+          dataset_id?: string
+          hyperparameters?: Json
+          id?: string
+          method?: string
+          metrics?: Json
+          name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_jobs_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "training_datasets"
             referencedColumns: ["id"]
           },
         ]
