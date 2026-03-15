@@ -1068,24 +1068,64 @@ pause
         </CardContent>
       </Card>
 
-      {/* Model selection */}
+      {/* Hardware profile */}
       <div className="space-y-3">
-        <Label className="text-base">Pick a Base Model</Label>
+        <Label className="text-base">What's your hardware?</Label>
+        <p className="text-xs text-muted-foreground -mt-1">We'll auto-tune everything for your setup</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {models.map(m => (
-            <button key={m.value} onClick={() => setBaseModel(m.value)}
+          {(Object.entries(HARDWARE_PROFILES) as [HardwareProfile, typeof HARDWARE_PROFILES[HardwareProfile]][]).map(([key, profile]) => (
+            <button key={key} onClick={() => applyProfile(key)}
               className={`text-left rounded-lg px-4 py-3 border transition-all ${
-                baseModel === m.value ? "border-primary bg-primary/10 ring-1 ring-primary/30" : "border-border hover:border-primary/30"
+                hwProfile === key ? "border-primary bg-primary/10 ring-1 ring-primary/30" : "border-border hover:border-primary/30"
               }`}>
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">{m.label}</p>
-                <Badge variant="outline" className="text-[10px]">{m.vram}</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{m.desc}</p>
+              <p className="text-sm font-medium">{profile.label}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{profile.desc}</p>
             </button>
           ))}
         </div>
       </div>
+
+      {/* Model selection */}
+      <div className="space-y-3">
+        <Label className="text-base">Pick a Base Model</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {models.map(m => {
+            const isRecommended = m.rec.includes(hwProfile);
+            return (
+              <button key={m.value} onClick={() => setBaseModel(m.value)}
+                className={`text-left rounded-lg px-4 py-3 border transition-all ${
+                  baseModel === m.value ? "border-primary bg-primary/10 ring-1 ring-primary/30" : 
+                  isRecommended ? "border-border hover:border-primary/30" : "border-border/50 opacity-50 hover:opacity-75"
+                }`}>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{m.label}</p>
+                  <div className="flex items-center gap-1">
+                    {isRecommended && <Badge variant="outline" className="text-[9px] text-forge-emerald border-forge-emerald/30">rec</Badge>}
+                    <Badge variant="outline" className="text-[10px]">{m.vram}</Badge>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{m.desc}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Hardware-specific note */}
+      {(hwProfile === "cpu_only" || hwProfile === "low_vram") && (
+        <Card className="bg-forge-amber/5 border-forge-amber/20">
+          <CardContent className="py-3">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-forge-amber shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                {hwProfile === "cpu_only" 
+                  ? "Training will use your CPU and RAM. A 1B model with 50 samples takes ~30-60 min on 16GB DDR4. Grab a coffee ☕" 
+                  : "We've tuned batch size to 1, shortened sequences, and enabled gradient checkpointing to fit in your VRAM."}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <AdvancedSettings epochs={epochs} setEpochs={setEpochs} lr={lr} setLr={setLr} batchSize={batchSize} setBatchSize={setBatchSize} loraRank={loraRank} setLoraRank={setLoraRank} />
 
