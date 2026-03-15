@@ -12,7 +12,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Space Grotesk", "system-ui", "sans-serif"],
+        sans: ["Rajdhani", "system-ui", "sans-serif"],
+        display: ["Cinzel", "serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
@@ -65,6 +66,8 @@ export default {
           amber: "hsl(var(--forge-amber))",
           rose: "hsl(var(--forge-rose))",
           emerald: "hsl(var(--forge-emerald))",
+          gold: "hsl(var(--forge-gold))",
+          violet: "hsl(var(--forge-violet))",
         },
       },
       borderRadius: {
