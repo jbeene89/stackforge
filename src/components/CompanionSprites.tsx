@@ -550,14 +550,15 @@ export function CompanionSprites() {
   useEffect(() => {
     if (!spellsEnabled || !visible) return;
 
-    const scheduleSpell = () => {
-      const delay = 15000 + Math.random() * 25000; // 15-40 seconds
+    // Fire first spell quickly so user sees it
+    const firstDelay = 3000 + Math.random() * 4000; // 3-7s for the first one
+    const scheduleSpell = (delay: number) => {
       spellTimer.current = setTimeout(() => {
         castSpell();
-        scheduleSpell();
+        scheduleSpell(8000 + Math.random() * 20000); // 8-28s after that
       }, delay);
     };
-    scheduleSpell();
+    scheduleSpell(firstDelay);
     return () => clearTimeout(spellTimer.current);
   }, [spellsEnabled, visible, castSpell]);
 
