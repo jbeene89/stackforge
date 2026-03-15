@@ -46,6 +46,8 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import MarketplacePage from "./pages/MarketplacePage";
 import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
 import InstallPage from "./pages/InstallPage";
+import SLMLabPage from "./pages/SLMLabPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
