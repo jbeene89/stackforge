@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { streamAI } from "@/hooks/useSupabaseData";
 import {
   Sparkles, Send, Loader2, CheckCircle2, Download,
   Code2, Cpu, Zap, Box, RotateCcw, Copy, Play,
