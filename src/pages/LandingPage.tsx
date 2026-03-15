@@ -203,7 +203,10 @@ const realUseCases = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background overflow-hidden relative">
+      {/* Companion Sprites - they follow you everywhere */}
+      <CompanionSprites />
+
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-4 sm:px-6">
