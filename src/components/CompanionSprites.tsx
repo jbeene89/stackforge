@@ -351,7 +351,19 @@ function CompanionSprite({
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  const s = sprite.size;
+  const s = sprite.size * sizeMultiplier;
+
+  // Hit shake effect
+  const hitShake = useSpring(0, { stiffness: 600, damping: 8 });
+  useEffect(() => {
+    if (isHit) {
+      hitShake.set(15);
+      setTimeout(() => hitShake.set(-12), 50);
+      setTimeout(() => hitShake.set(8), 100);
+      setTimeout(() => hitShake.set(-5), 150);
+      setTimeout(() => hitShake.set(0), 200);
+    }
+  }, [isHit]);
 
   return (
     <motion.div
