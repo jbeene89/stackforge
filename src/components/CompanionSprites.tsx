@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, useSpring, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCredits } from "@/hooks/useCredits";
+import { useSpriteSettings } from "@/providers/SpriteSettingsProvider";
+import { SpellCanvas, type SpellEffect } from "@/components/SpellCanvas";
 import {
   Brain, Layers, Wand2, FolderOpen, Sparkles, Coins, ArrowRight,
   Zap, FlaskConical, BarChart3, Gamepad2, Radio, Joystick
