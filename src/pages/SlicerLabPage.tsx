@@ -164,12 +164,29 @@ export default function SlicerLabPage() {
     setResult(null);
     
     let aiOutput = "";
+    const slicerSystemPrompt = `You are a 3D printing slicer configuration AI. Given a description of a print job, output a JSON object with this exact structure:
+{
+  "config": {
+    "quality": { "layerHeight": number, "lineWidth": number, "initialLayerHeight": number },
+    "shell": { "wallCount": number, "topLayers": number, "bottomLayers": number },
+    "infill": { "density": number, "pattern": "gyroid"|"cubic"|"lines"|"triangles", "gradual": boolean },
+    "speed": { "printSpeed": number, "wallSpeed": number, "infillSpeed": number, "travelSpeed": number },
+    "temperature": { "nozzle": number, "bed": number, "nozzleInitial": number, "bedInitial": number },
+    "support": { "enabled": boolean, "type": "tree"|"normal"|"none", "angle": number },
+    "adhesion": { "type": "brim"|"raft"|"skirt"|"none", "brimWidth": number },
+    "cooling": { "fanSpeed": number, "minLayerTime": number, "liftHead": boolean }
+  },
+  "rationale": ["reason1", "reason2", ...],
+  "warnings": ["warning1", ...] // empty array if none
+}
+Output ONLY the JSON, no markdown, no explanation outside the JSON.`;
     try {
       await streamAI({
         messages: [
+          { role: "system", content: slicerSystemPrompt },
           { role: "user", content: input }
         ],
-        mode: "module",
+        mode: "general",
         onDelta: (text) => { aiOutput += text; },
         onDone: () => {
           const parsed = parseAISlicerResponse(aiOutput);
