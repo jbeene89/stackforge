@@ -500,6 +500,11 @@ HYPERPARAMS = {
 # Hardware profile: ${hwProfile}
 USE_CPU_ONLY = ${isCpuOnly ? "True" : "False"}
 
+# Hugging Face auth — required for gated models like Llama
+# Run: pip install huggingface_hub && huggingface-cli login
+# Or set HF_TOKEN environment variable
+HF_TOKEN = os.environ.get("HF_TOKEN", None)
+
 # Special tokens for five-perspective thinking
 SPECIAL_TOKENS = [
     "<BUILDER>", "</BUILDER>",
