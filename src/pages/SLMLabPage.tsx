@@ -1552,7 +1552,7 @@ type HardwareProfile = keyof typeof HARDWARE_PROFILES;
 function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: () => void }) {
   const { data: samples } = useSamples(dataset.id);
   const [hwProfile, setHwProfile] = useState<HardwareProfile>("cpu_only");
-  const [baseModel, setBaseModel] = useState("llama-3.2-1b");
+  const [baseModel, setBaseModel] = useState("qwen2.5-1.5b");
   const [epochs, setEpochs] = useState(3);
   const [lr, setLr] = useState(0.0002);
   const [batchSize, setBatchSize] = useState(1);
@@ -1575,7 +1575,7 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
     setGradientCheckpoint(d.gradientCheckpoint);
     // Auto-select best model for the profile
     if (profile === "cpu_only" || profile === "low_vram") {
-      setBaseModel("llama-3.2-1b");
+      setBaseModel("qwen2.5-1.5b");
     } else if (profile === "mid_vram") {
       setBaseModel("qwen2.5-1.5b");
     }
