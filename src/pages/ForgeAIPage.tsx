@@ -119,13 +119,13 @@ export default function ForgeAIPage() {
     if (!prompt.trim()) return;
     setGenerating(true);
     try {
-      const asset = await simulateGeneration(domain, prompt);
+      const asset = await generateWithAI(domain, prompt);
       setAssets(prev => [asset, ...prev]);
       setSelectedAsset(asset);
       toast.success(`${asset.name} generated successfully`);
       setPrompt("");
-    } catch {
-      toast.error("Generation failed");
+    } catch (err: any) {
+      toast.error(err.message || "Generation failed");
     } finally {
       setGenerating(false);
     }
