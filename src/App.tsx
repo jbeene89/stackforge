@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { SpriteSettingsProvider } from "@/providers/SpriteSettingsProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -52,6 +53,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
+      <SpriteSettingsProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -106,6 +108,7 @@ const App = () => (
           <CookieConsentBanner />
         </BrowserRouter>
       </TooltipProvider>
+      </SpriteSettingsProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
