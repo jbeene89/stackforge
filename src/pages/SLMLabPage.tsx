@@ -599,6 +599,9 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
 // ── Step 2: Add Training Data ──
 function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: () => void }) {
   const [url, setUrl] = useState("");
+  const [bulkUrls, setBulkUrls] = useState("");
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; currentUrl: string; results: { url: string; pairs: number; error?: string }[] }>({ current: 0, total: 0, currentUrl: "", results: [] });
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
   const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file">("import");
@@ -763,20 +766,72 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
               <Sparkles className="h-4 w-4 text-forge-amber" /> Five Perspective Pipeline Scraper
             </CardTitle>
             <CardDescription>
-              Each URL is analyzed by 5 AI perspectives (Builder, Red Team, Systems, Frame Breaker, Empath) then synthesized into training pairs with emergent insights.
+              Paste one URL per line. Each is analyzed by 5 AI perspectives then synthesized into training pairs. Results save after each URL.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://docs.example.com/getting-started" className="flex-1 text-base"
-                onKeyDown={e => e.key === "Enter" && handleScrape()} />
-              <Button onClick={handleScrape} disabled={scrape.isPending || !url.trim()} className="px-6">
-                {scrape.isPending ? <RotateCcw className="h-4 w-4 animate-spin" /> : <>Scrape <Sparkles className="h-4 w-4 ml-1" /></>}
-              </Button>
-            </div>
-            {scrape.isPending && (
+            <Textarea
+              value={bulkUrls}
+              onChange={e => setBulkUrls(e.target.value)}
+              placeholder={"https://docs.example.com/getting-started\nhttps://blog.example.com/best-practices\nhttps://wiki.example.com/architecture"}
+              rows={4}
+              className="text-sm font-mono"
+              disabled={bulkProcessing}
+            />
+            {(() => {
+              const urls = bulkUrls.split("\n").map(u => u.trim()).filter(u => u.length > 0);
+              return (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">{urls.length} URL{urls.length !== 1 ? "s" : ""} ready</p>
+                  <Button
+                    onClick={async () => {
+                      if (urls.length === 0) return;
+                      setBulkProcessing(true);
+                      const results: typeof bulkProgress.results = [];
+                      setBulkProgress({ current: 0, total: urls.length, currentUrl: "", results: [] });
+
+                      for (let i = 0; i < urls.length; i++) {
+                        const u = urls[i];
+                        setBulkProgress({ current: i + 1, total: urls.length, currentUrl: u, results: [...results] });
+                        try {
+                          const data = await scrape.mutateAsync({
+                            url: u,
+                            dataset_id: dataset.id,
+                            domain_hint: dataset.domain,
+                            offload_perspective: offloadPerspective || undefined,
+                          });
+                          results.push({ url: u, pairs: data.extracted });
+                        } catch (err: any) {
+                          results.push({ url: u, pairs: 0, error: err.message });
+                          if (err.message?.includes("Rate limit")) {
+                            await new Promise(r => setTimeout(r, 5000));
+                          }
+                        }
+                        setBulkProgress({ current: i + 1, total: urls.length, currentUrl: u, results: [...results] });
+                      }
+
+                      setBulkProcessing(false);
+                      const totalPairs = results.reduce((s, r) => s + r.pairs, 0);
+                      toast.success(`Done! Extracted ${totalPairs} pairs from ${results.filter(r => r.pairs > 0).length}/${urls.length} URLs`);
+                    }}
+                    disabled={bulkProcessing || urls.length === 0}
+                    className="px-6"
+                  >
+                    {bulkProcessing ? <RotateCcw className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                    {bulkProcessing ? `Processing ${bulkProgress.current}/${bulkProgress.total}…` : `Scrape ${urls.length} URL${urls.length !== 1 ? "s" : ""}`}
+                  </Button>
+                </div>
+              );
+            })()}
+
+            {bulkProcessing && (
               <div className="bg-primary/5 rounded-lg p-4 space-y-3">
-                <p className="text-sm font-medium">🔍 Running Five Perspective Pipeline…</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">🔍 Processing URL {bulkProgress.current}/{bulkProgress.total}</p>
+                  <span className="text-xs text-muted-foreground">{Math.round((bulkProgress.current / bulkProgress.total) * 100)}%</span>
+                </div>
+                <Progress value={(bulkProgress.current / bulkProgress.total) * 100} className="h-2" />
+                <p className="text-xs text-muted-foreground truncate">{bulkProgress.currentUrl}</p>
                 <div className="grid grid-cols-5 gap-1">
                   {(["builder", "red_team", "systems", "frame_breaker", "empath"] as const).map(k => {
                     const cfg = PERSPECTIVE_CONFIG[k];
@@ -789,7 +844,22 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                     );
                   })}
                 </div>
-                <p className="text-xs text-muted-foreground">5 AIs analyzing simultaneously → synthesis → training pairs</p>
+              </div>
+            )}
+
+            {bulkProgress.results.length > 0 && (
+              <div className="space-y-1.5 pt-2">
+                <p className="text-xs font-medium text-muted-foreground">Results ({bulkProgress.results.reduce((s, r) => s + r.pairs, 0)} total pairs)</p>
+                {bulkProgress.results.map((r, i) => (
+                  <div key={i} className={`flex items-center justify-between text-xs px-2 py-1.5 rounded ${r.error ? "bg-destructive/5" : "bg-forge-emerald/5"}`}>
+                    <span className="truncate flex-1 font-mono">{r.url.replace(/^https?:\/\//, "").slice(0, 50)}</span>
+                    {r.error ? (
+                      <span className="text-destructive shrink-0 ml-2">⚠ {r.error.slice(0, 30)}</span>
+                    ) : (
+                      <Badge variant="outline" className="text-[9px] text-forge-emerald border-forge-emerald/30 shrink-0 ml-2">+{r.pairs} pairs</Badge>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
