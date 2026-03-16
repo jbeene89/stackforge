@@ -1903,6 +1903,14 @@ export default function SLMLabPage() {
   }
   const activeDataset = liveDataset || cachedDatasetRef.current;
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem(
+      "slm-lab-state",
+      JSON.stringify({ step, activeDatasetId })
+    );
+  }, [step, activeDatasetId]);
+
   const handleDatasetCreated = (id: string) => {
     setActiveDatasetId(id);
     setShowInterview(true);
