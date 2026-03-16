@@ -1583,7 +1583,10 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   <p className="text-sm font-medium flex items-center gap-2">
                     <Video className="h-4 w-4" /> {videoFileName}
                   </p>
-                  <p className="text-xs text-muted-foreground">{videoFrames.length} frames extracted</p>
+                  <p className="text-xs text-muted-foreground">
+                    {videoFrames.length} frames extracted{smartKeyframe ? " (smart keyframe)" : ""}
+                    {videoCCText ? ` · ${videoCCText.split("\n").length} CC lines` : ""}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
