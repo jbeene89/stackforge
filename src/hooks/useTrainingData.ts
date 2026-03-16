@@ -747,7 +747,7 @@ def train_with_unsloth():
 
 
 def train_cpu_fallback():
-    """CPU path — uses transformers + PEFT directly (no Unsloth needed)."""
+    """CPU path - uses transformers + PEFT directly (no Unsloth needed)."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
     from peft import LoraConfig, get_peft_model, TaskType
