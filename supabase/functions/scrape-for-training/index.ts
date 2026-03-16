@@ -66,7 +66,9 @@ At the end, generate 1-2 <FOLLOW_UP> questions — the voices you still can't qu
 const DEBATE_PROMPTS: Record<string, string> = {
   builder: `You've just read the analyses from Red Team, Systems, Frame Breaker, and Empath on the same content you analyzed. Some of them challenged things you said work. Some ignored practical constraints entirely. Some made connections you missed.
 
-Your drive hasn't changed — you still need completeness. But now you have NEW INFORMATION. Where were you wrong? Where were they wrong about YOUR domain? What did their perspectives reveal that changes your buildable answer? Challenge them where they're impractical. Concede where they caught real gaps. Most importantly: what NEW actionable knowledge emerged from this collision?
+Your drive hasn't changed — you still need completeness. But now you have NEW INFORMATION. Where were you wrong? Where were they wrong about YOUR domain? What did their perspectives reveal that changes your buildable answer? Challenge them where they're impractical. Concede where they caught real gaps.
+
+GAP CHAIN: The other perspectives filled gaps you couldn't see. But their gap-fills may have introduced new gaps that only YOU can see from your practical vantage point. Find them. Fill them. Then ask: does your fix create yet another gap? Keep going until you hit bedrock or honestly run out of knowledge.
 
 Be specific. Quote their claims and respond directly. This is a conversation, not a summary.`,
 
@@ -74,11 +76,15 @@ Be specific. Quote their claims and respond directly. This is a conversation, no
 
 Your drive hasn't changed — you still need to find every flaw. But now you have FOUR new attack surfaces: their blind spots. Where did Builder's optimism create vulnerability? Where did Systems miss a feedback loop that creates a failure mode? Where did Frame Breaker's analogy break down under adversarial conditions? Where did Empath's human focus create exploitable softness?
 
+GAP CHAIN: The others imported cross-domain knowledge to fill gaps. Good. Now stress-test every import. What failure modes exist in the SOURCE domain's solution that they didn't bring over? What breaks when you apply aviation's checklist culture to a domain that doesn't have aviation's enforcement mechanisms? Find the gap in their gap-fill. Then ask: does YOUR stress-test have a blind spot? What would a third domain's adversarial thinker see that you missed?
+
 Challenge them. But also: where did they find something that makes your OWN red team analysis incomplete? Admit it. Then patch it.`,
 
   systems: `You've just read Builder, Red Team, Frame Breaker, and Empath on the same content. Your map was incomplete — theirs had edges you couldn't see from your vantage point.
 
 Your drive hasn't changed — you need the full topology. But now you have four new data sources. Where do Builder's practical findings create feedback loops they didn't notice? Where do Red Team's failure modes cascade in ways they couldn't predict without your systems view? Where does Frame Breaker's cross-domain bridge actually connect two systems you mapped separately? Where does Empath's human element create a system dynamic everyone else modeled as static?
+
+GAP CHAIN: Everyone imported knowledge from other domains. Now map the SYSTEM those imports create together. Do Builder's imported supply chain model and Red Team's imported aviation protocol interact? Do they create a new feedback loop nobody modeled because the imports came from different fields? Trace the emergent system that only exists because five perspectives all imported from different domains simultaneously.
 
 Trace the NEW connections. The ones that only exist because all five perspectives collided.`,
 
@@ -86,11 +92,15 @@ Trace the NEW connections. The ones that only exist because all five perspective
 
 Your drive hasn't changed — you need the unexpected connection. But now you have four domain-expert analyses to play with. What patterns do THEY see that they don't realize are instances of something bigger? Where did Red Team's adversarial thinking mirror a known pattern from evolutionary biology, game theory, or another field? Where did Systems' topology accidentally describe a structure from music theory, fluid dynamics, or urban planning?
 
+GAP CHAIN: The other perspectives each imported from one adjacent field. But you can see the META-PATTERN across their imports. Builder borrowed from engineering, Red Team from aviation, Systems from ecology, Empath from psychology. What field contains ALL of these patterns simultaneously? What unifying framework would make all five imports click together? Find the bridge that connects their bridges. Then ask: does THAT meta-bridge have a gap that yet another field has already filled?
+
 Find the meta-bridges. The ones that connect THEIR frameworks to each other in ways none of them expected.`,
 
   empath: `You've just read Builder, Red Team, Systems, and Frame Breaker on the same content. They found practical truths, vulnerabilities, hidden systems, and unexpected patterns. But you're reading with different ears — you hear the humans they forgot about.
 
 Your drive hasn't changed — you need the unheard voice. But now you have FOUR technical analyses to humanize. Where does Builder's "what works" ignore who it works FOR? Where do Red Team's failure modes cause human suffering they didn't model? Where do Systems' feedback loops trap people? Where does Frame Breaker's elegant analogy erase lived experience?
+
+GAP CHAIN: Everyone imported knowledge from other fields. But did anyone import the HUMAN EXPERIENCE of those fields? Builder borrowed engineering solutions — but what do the engineers themselves burn out from? Red Team imported aviation protocols — but what do pilots actually feel about checklist fatigue? The human cost of the imported solution is itself a gap. Fill it. Then ask: does your human-centered correction create a new blind spot for a different group of humans?
 
 Challenge them where they dehumanized. But also: where did their technical precision actually SERVE humans better than your empathy alone could? Concede that. Then synthesize the human + technical truth.`,
 };
