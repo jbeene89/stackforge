@@ -101,26 +101,59 @@ export function parseOpenAI(raw: any): ParsedConversation[] {
 }
 
 // ── Anthropic (Claude export) ──
+function extractAnthropicContent(m: any): string {
+  // Handle plain text field
+  if (typeof m.text === "string" && m.text.trim()) return m.text;
+  // Handle content as array of parts (newer Claude format)
+  if (Array.isArray(m.content)) {
+    return m.content
+      .map((c: any) => {
+        if (typeof c === "string") return c;
+        if (c?.type === "text" && typeof c.text === "string") return c.text;
+        return c?.text || c?.value || "";
+      })
+      .filter(Boolean)
+      .join("\n");
+  }
+  // Handle content as string
+  if (typeof m.content === "string") return m.content;
+  // Handle message field
+  if (typeof m.message === "string") return m.message;
+  return "";
+}
+
 export function parseAnthropic(raw: any): ParsedConversation[] {
   const conversations: ParsedConversation[] = [];
-  const data = Array.isArray(raw) ? raw : raw.conversations || raw.chats || [raw];
+
+  // Try multiple top-level shapes: array, or object with various keys
+  let data: any[];
+  if (Array.isArray(raw)) {
+    data = raw;
+  } else {
+    // Try every known wrapper key
+    const found = raw.conversations || raw.chats || raw.chat_conversations || raw.data || raw.items;
+    data = found ? (Array.isArray(found) ? found : [found]) : [raw];
+  }
 
   for (const conv of data) {
     try {
-      const title = conv.name || conv.title || conv.uuid?.slice(0, 8) || "Untitled";
-      const messages = conv.chat_messages || conv.messages || [];
+      const title = conv.name || conv.title || conv.uuid?.slice(0, 8) || conv.conversation_id?.slice(0, 8) || "Untitled";
+      const messages = conv.chat_messages || conv.messages || conv.turns || conv.history || [];
 
-      if (messages.length < 2) continue;
+      if (messages.length < 1) continue;
 
-      const formatted = messages.map((m: any) => ({
-        role: m.sender === "human" ? "user" : m.sender === "assistant" ? "assistant" : m.role || m.sender || "unknown",
-        content: typeof m.text === "string" ? m.text : Array.isArray(m.content) ? m.content.map((c: any) => c.text || "").join("\n") : m.content || "",
-      }));
+      const formatted = messages.map((m: any) => {
+        let role = m.sender || m.role || m.author || "unknown";
+        if (role === "human") role = "user";
+        return { role, content: extractAnthropicContent(m) };
+      }).filter((m: any) => m.content.trim().length > 0);
+
+      if (formatted.length < 1) continue;
 
       const text = flattenMessages(formatted);
-      if (text.length < 100) continue;
+      if (text.length < 20) continue;
 
-      conversations.push({ title, text, messageCount: messages.length });
+      conversations.push({ title, text, messageCount: formatted.length });
     } catch {
       continue;
     }
