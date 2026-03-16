@@ -95,13 +95,31 @@ Two synthesis modes support this:
 - **Oracle Mode**: Training pairs contain settled, authoritative knowledge. No hedging, no "it depends," no visible reasoning chain. The model sounds like it was born knowing.
 - **Teacher Mode**: Training pairs preserve the reasoning transparently. The model explains how it arrives at answers. Useful for educational and explainable AI use cases.
 
+## CROSS-DOMAIN GAP SENSING: PREEMPTIVE KNOWLEDGE COMPLETION
+"Make AI reason across all domains. Use CDPT to make them see their gaps and urge to fill them before they need to."
+
+The deepest limitation of current AI models is not that they can't reason — it's that they don't know what they don't know. A language model trained on medical literature has no idea that a supply chain failure pattern it's never seen perfectly predicts the drug shortage it was just asked about. A model trained on software engineering doesn't realize that jazz improvisation has already formalized the error-recovery pattern it's trying to rediscover from first principles.
+
+CDPT solves this through **Cross-Domain Gap Sensing** — a directive embedded in every perspective that compels each agent to look OUTSIDE its analytical domain before finishing:
+
+- **Builder** asks: "What adjacent field has already solved a problem this content is still struggling with?"
+- **Red Team** asks: "What failure modes from OTHER fields apply here that nobody in THIS field has considered?"
+- **Systems** asks: "What systems in OTHER domains share this topology but have been studied longer?"
+- **Frame Breaker** imports wholesale: "What does mycology know about networks that computer science reinvented from scratch?"
+- **Empath** crosses the human boundary: "What do therapists already know about this that the engineers never asked?"
+
+The result: training pairs tagged with <BRIDGE> tokens that carry cross-domain knowledge the original content never contained. The model doesn't learn to SEARCH for adjacent knowledge at inference time — it already HAS it in its weights. When asked about boat hull design, it already knows what a structural engineer, an ecologist, a materials scientist, and a trauma counselor would add. Not because it reasons about them. Because the perspectives already did that work, and the knowledge was baked in.
+
+This is preemptive intelligence: a model that fills gaps before they become questions.
+
 ## COMPARISON
 Compare this approach to:
-- Standard instruction tuning (single perspective, shallow)
+- Standard instruction tuning (single perspective, shallow, single-domain)
 - Constitutional AI (constraint-based, not curiosity-based)  
 - RLHF (feedback-based, not exploration-based)
 - Self-play (competitive, not curious)
-Show why curiosity-driven multi-perspective training is a fundamentally different paradigm.
+- RAG (retrieval-based, requires the right document to exist; CDPT generates the knowledge that documents never contained)
+Show why curiosity-driven multi-perspective training with cross-domain gap sensing is a fundamentally different paradigm.
 
 ---
 
