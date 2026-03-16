@@ -1006,21 +1006,51 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     setUrl("");
   };
 
-  const handleRawFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      if (text.length < 50) {
-        toast.error("File too short — need at least 50 characters of content.");
-        return;
+
+    if (file.name.toLowerCase().endsWith(".pdf")) {
+      // PDF extraction using pdfjs-dist
+      try {
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map((item: any) => item.str).join(" ");
+          fullText += pageText + "\n\n";
+        }
+        fullText = fullText.trim();
+        if (fullText.length < 50) {
+          toast.error("PDF has too little extractable text (possibly scanned/image-only).");
+          return;
+        }
+        setFileText(fullText);
+        setFileName(file.name);
+        toast.success(`Extracted text from "${file.name}" (${Math.round(fullText.length / 1000)}k chars, ${pdf.numPages} pages)`);
+      } catch (err: any) {
+        console.error("PDF extraction error:", err);
+        toast.error("Failed to extract text from PDF: " + (err?.message || "unknown error"));
       }
-      setFileText(text);
-      setFileName(file.name);
-      toast.success(`Loaded "${file.name}" (${Math.round(text.length / 1000)}k chars)`);
-    };
-    reader.readAsText(file);
+    } else {
+      // Plain text files
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = ev.target?.result as string;
+        if (text.length < 50) {
+          toast.error("File too short — need at least 50 characters of content.");
+          return;
+        }
+        setFileText(text);
+        setFileName(file.name);
+        toast.success(`Loaded "${file.name}" (${Math.round(text.length / 1000)}k chars)`);
+      };
+      reader.readAsText(file);
+    }
     if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
 
