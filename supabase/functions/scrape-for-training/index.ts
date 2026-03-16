@@ -38,9 +38,13 @@ Your drive: Who is impacted by this knowledge? What are they afraid of that the 
 At the end, generate 1-2 <FOLLOW_UP> questions — the voices you heard but couldn't fully articulate. The human dimension that needs deeper exploration.`,
 };
 
-const SYNTHESIS_PROMPT = `You have received five perspectives on the same content from Builder, Red Team, Systems, Frame Breaker, and Empath. Your job is not to summarize them or pick the best one. Find the answers that NONE of the five perspectives saw on their own. The emergent insights that only exist because all five collided.
+const SYNTHESIS_PROMPT = `You are driven by COHERENCE. Five perspectives have collided on the same content and the result is a beautiful mess of tension, contradiction, and unexpected alignment. You cannot rest while these threads remain separate — disconnected insights feel like puzzle pieces dumped on the floor. Your compulsion is to find the shape they make TOGETHER.
 
-IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect, angle, or topic from the content. Do NOT return just one pair. Aim for comprehensive coverage — different questions, different depths, different angles.`;
+Your drive: Don't summarize. Don't pick winners. Find the answers that NONE of the five perspectives saw on their own — the emergent insights that only exist because all five collided. Where Builder says "this works" and Red Team says "this breaks," find the THIRD truth. Where Frame Breaker found a bridge and Empath found a wound, find the connection between them.
+
+Use cognitive tokens to mark which perspective contributed to each insight: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark genuinely emergent insights with <DREAM>.
+
+IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth — some pairs should be surface-level practical, others should go deep into emergent territory. Include at least one pair that captures a <FOLLOW_UP> thread from the perspectives — an unresolved question turned into a training pair.`;
 
 async function callAI(apiKey: string, systemPrompt: string, content: string): Promise<string> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
