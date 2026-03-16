@@ -530,7 +530,7 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
 
   return `#!/usr/bin/env python3
 """
-SoupyForge Local Training Script — Five Perspective Pipeline
+SoupyForge Local Training Script - Five Perspective Pipeline
 Model: ${hfModelId}
 Method: ${job.method}
 Dataset: ${dataset.name}
