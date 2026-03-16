@@ -1405,6 +1405,23 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Frame interval (seconds)</Label>
+                <div className="flex items-center gap-3">
+                  <Slider min={1} max={10} step={1} value={[videoInterval]} onValueChange={([v]) => setVideoInterval(v)} className="flex-1" disabled={videoExtracting} />
+                  <span className="text-sm font-mono w-6 text-right">{videoInterval}s</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Max frames</Label>
+                <div className="flex items-center gap-3">
+                  <Slider min={5} max={30} step={5} value={[videoMaxFrames]} onValueChange={([v]) => setVideoMaxFrames(v)} className="flex-1" disabled={videoExtracting} />
+                  <span className="text-sm font-mono w-6 text-right">{videoMaxFrames}</span>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3">
               <Button onClick={() => videoUploadRef.current?.click()} variant="outline" className="flex-1" disabled={videoExtracting}>
                 <Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}
