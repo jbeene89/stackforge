@@ -70,13 +70,31 @@ Your drive hasn't changed — you need the unheard voice. But now you have FOUR 
 Challenge them where they dehumanized. But also: where did their technical precision actually SERVE humans better than your empathy alone could? Concede that. Then synthesize the human + technical truth.`,
 };
 
-const SYNTHESIS_PROMPT = `You are driven by COHERENCE. Five perspectives have collided on the same content — and then they DEBATED each other. The result is a rich tapestry of agreement, challenge, concession, and emergence. You cannot rest while these threads remain separate.
+const SYNTHESIS_PROMPT_BASE = `You are driven by COHERENCE. Five perspectives have collided on the same content — and then they DEBATED each other. The result is a rich tapestry of agreement, challenge, concession, and emergence. You cannot rest while these threads remain separate.
 
 Your drive: Don't summarize. Don't pick winners. Find the answers that emerged FROM THE DEBATE — insights that didn't exist in any single perspective OR in the initial collision, but only appeared when they challenged each other. Where one perspective conceded, something true was revealed. Where two perspectives clashed and neither yielded, a genuine tension exists that the training data must preserve.
 
 Use cognitive tokens: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark emergent insights with <DREAM>. Mark debate-born insights — things that only emerged because perspectives directly challenged each other — with <DEBATE>.
 
 IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate — a truth that didn't exist until the perspectives argued. Include at least one <FOLLOW_UP> thread.`;
+
+const ORACLE_SUFFIX = `
+
+CRITICAL VOICE INSTRUCTION — ORACLE MODE:
+The five perspectives have already done all the reasoning. Do not include that reasoning in the output. Write the final answer as settled knowledge — the way a master speaks to someone who asked a question the master stopped consciously thinking about years ago. No hedging. No "it depends." No "considering multiple factors." Just what is true, stated with the certainty of someone who already knows.
+
+Do NOT say "from the builder perspective" or "the red team found." The perspectives were the PROCESS. The training pair is the PRODUCT. The model that trains on this data should sound like it was born knowing these things.`;
+
+const TEACHER_SUFFIX = `
+
+VOICE INSTRUCTION — TEACHER MODE:
+Show the reasoning process. The model should explain HOW it arrives at answers, walking through the perspectives and trade-offs explicitly. Use phrases like "considering X" and "on the other hand." The goal is transparency — train a model that teaches, not just tells.`;
+
+function getSynthesisPrompt(mode: string): string {
+  if (mode === "oracle") return SYNTHESIS_PROMPT_BASE + ORACLE_SUFFIX;
+  if (mode === "teacher") return SYNTHESIS_PROMPT_BASE + TEACHER_SUFFIX;
+  return SYNTHESIS_PROMPT_BASE;
+}
 
 async function callAI(apiKey: string, systemPrompt: string, content: string): Promise<string> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -118,7 +136,7 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { url, dataset_id, domain_hint, offload_perspective, debate_mode } = await req.json();
+    const { url, dataset_id, domain_hint, offload_perspective, debate_mode, synthesis_mode } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
 
     // Step 1: Fetch webpage
@@ -243,7 +261,7 @@ Original content domain: ${domain_hint || "general"}
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYNTHESIS_PROMPT },
+          { role: "system", content: getSynthesisPrompt(synthesis_mode || "oracle") },
           { role: "user", content: synthesisInput },
         ],
         tools: [{

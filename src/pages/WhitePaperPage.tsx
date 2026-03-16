@@ -84,6 +84,17 @@ A proposed scoring system where each training pair carries a numeric measure of 
 ## KEY INSIGHT
 "Creativity isn't randomness — it's structured curiosity." The breakthrough is recognizing that each perspective should not just analyze from a different angle, but should be driven by genuine curiosity about what else is true about the subject that nobody in the conversation explored. This produces training data that teaches models to THINK laterally, not just recombine patterns.
 
+## THE ORACLE PRINCIPLE: SEPARATING REASONING FROM KNOWLEDGE
+"CDPT separates the reasoning process from the knowledge artifact. The perspectives reason so the model doesn't have to."
+
+Every AI company is racing to make models that reason better. CDPT takes a fundamentally different approach: the heavy multi-perspective reasoning happens during DATA GENERATION, not during inference. The five perspectives debate, challenge, concede, and synthesize — but the final training pair contains only the settled knowledge. The model trained on this data doesn't perform reasoning; it HAS the answer, the way a domain expert who stopped consciously thinking about a problem years ago simply knows.
+
+This is not a better reasoner. It is a different category of intelligence entirely: knowledge so thoroughly processed during training that inference becomes recall, not computation.
+
+Two synthesis modes support this:
+- **Oracle Mode**: Training pairs contain settled, authoritative knowledge. No hedging, no "it depends," no visible reasoning chain. The model sounds like it was born knowing.
+- **Teacher Mode**: Training pairs preserve the reasoning transparently. The model explains how it arrives at answers. Useful for educational and explainable AI use cases.
+
 ## COMPARISON
 Compare this approach to:
 - Standard instruction tuning (single perspective, shallow)

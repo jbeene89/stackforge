@@ -986,7 +986,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
-  const [debateMode, setDebateMode] = useState(false);
+   const [debateMode, setDebateMode] = useState(false);
+   const [synthesisMode, setSynthesisMode] = useState<"oracle" | "teacher">("oracle");
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileProcessing, setFileProcessing] = useState(false);
@@ -1001,7 +1002,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
   const handleScrape = () => {
     if (!url.trim()) return;
-    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined, debate_mode: debateMode });
+    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined, debate_mode: debateMode, synthesis_mode: synthesisMode });
     setUrl("");
   };
 
@@ -1185,6 +1186,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                             domain_hint: dataset.domain,
                             offload_perspective: offloadPerspective || undefined,
                             debate_mode: debateMode,
+                            synthesis_mode: synthesisMode,
                           });
                           results.push({ url: u, pairs: data.extracted });
                         } catch (err: any) {
@@ -1271,6 +1273,54 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           </CardContent>
         </Card>
       )}
+
+      {/* Synthesis Mode Toggle */}
+      <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Brain className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Synthesis Voice</p>
+            <p className="text-[10px] text-muted-foreground">How the final training pairs sound</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5">
+          <button
+            onClick={() => setSynthesisMode("oracle")}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${synthesisMode === "oracle" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Oracle
+          </button>
+          <button
+            onClick={() => setSynthesisMode("teacher")}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${synthesisMode === "teacher" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Teacher
+          </button>
+        </div>
+      </div>
+
+      {/* Synthesis mode description */}
+      <Card className={synthesisMode === "oracle" ? "border-primary/20 bg-primary/5" : "border-blue-500/20 bg-blue-500/5"}>
+        <CardContent className="py-3">
+          <div className="flex items-start gap-2">
+            {synthesisMode === "oracle" ? (
+              <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+            ) : (
+              <BookOpen className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+            )}
+            <div className="space-y-1">
+              <p className="text-xs font-medium">{synthesisMode === "oracle" ? "Oracle Mode" : "Teacher Mode"}</p>
+              <p className="text-[10px] text-muted-foreground">
+                {synthesisMode === "oracle"
+                  ? "The perspectives reason so the model doesn't have to. Training pairs contain settled knowledge — no hedging, no \"it depends.\" The model speaks as someone who already knows."
+                  : "Training pairs show reasoning transparently. The model explains how it arrives at answers, walking through trade-offs. Good for educational use cases."}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Debate Mode Toggle */}
       <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">

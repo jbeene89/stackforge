@@ -202,7 +202,7 @@ export function useDeleteSample() {
 export function useScrapeForTraining() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { url: string; dataset_id: string; domain_hint?: string; offload_perspective?: string; debate_mode?: boolean }) => {
+    mutationFn: async (params: { url: string; dataset_id: string; domain_hint?: string; offload_perspective?: string; debate_mode?: boolean; synthesis_mode?: string }) => {
       const { data, error } = await supabase.functions.invoke("scrape-for-training", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
