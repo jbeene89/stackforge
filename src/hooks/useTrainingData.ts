@@ -572,6 +572,45 @@ USE_CPU_ONLY = ${isCpuOnly ? "True" : "False"}
 # Or set HF_TOKEN environment variable
 HF_TOKEN = os.environ.get("HF_TOKEN", None)
 
+GATED_MODELS = ["meta-llama"]
+
+def check_hf_auth():
+    """Pre-flight check: ensure HF_TOKEN is set for gated models."""
+    is_gated = any(g in BASE_MODEL.lower() for g in GATED_MODELS)
+    if not is_gated:
+        return
+    if HF_TOKEN:
+        print(f"  ✅ HF_TOKEN found — authenticated for gated model")
+        return
+    # Check if logged in via huggingface-cli
+    try:
+        from huggingface_hub import HfApi
+        api = HfApi()
+        user = api.whoami()
+        print(f"  ✅ Logged in as: {user.get('name', 'unknown')}")
+        return
+    except Exception:
+        pass
+    print()
+    print("  ⚠️  GATED MODEL DETECTED: " + BASE_MODEL)
+    print("  Llama models require Hugging Face authentication.")
+    print()
+    print("  Option 1: Set HF_TOKEN environment variable")
+    print("    Windows:  set HF_TOKEN=hf_your_token_here")
+    print("    Mac/Linux: export HF_TOKEN=hf_your_token_here")
+    print()
+    print("  Option 2: Login via CLI")
+    print("    pip install huggingface_hub")
+    print("    huggingface-cli login")
+    print()
+    print("  Get your token at: https://huggingface.co/settings/tokens")
+    print("  Accept the model license at: https://huggingface.co/meta-llama")
+    print()
+    response = input("  Continue anyway? (y/n): ").strip().lower()
+    if response != "y":
+        print("  Exiting. Set HF_TOKEN and try again.")
+        sys.exit(1)
+
 # Special tokens for five-perspective thinking
 SPECIAL_TOKENS = [
     "<BUILDER>", "</BUILDER>",
@@ -801,6 +840,7 @@ if __name__ == "__main__":
     print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
     print()
     hw = check_hardware()
+    check_hf_auth()
     print()
 
     if USE_CPU_ONLY:
