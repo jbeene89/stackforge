@@ -757,25 +757,26 @@ def train_cpu_fallback():
 
     dataset = Dataset.from_list(formatted)
 
-    trainer = SFTTrainer(
+    training_args = TrainingArguments(
+        output_dir=OUTPUT_DIR,
+        num_train_epochs=HYPERPARAMS["epochs"],
+        per_device_train_batch_size=HYPERPARAMS["batch_size"],
+        learning_rate=HYPERPARAMS["learning_rate"],
+        warmup_steps=HYPERPARAMS["warmup_steps"],
+        logging_steps=1,
+        save_strategy="epoch",
+        fp16=False,
+        use_cpu=True,
+        gradient_accumulation_steps=8,
+        dataloader_num_workers=0,
+    )
+
+    trainer = build_sft_trainer(
+        SFTTrainer=SFTTrainer,
         model=model,
         tokenizer=tokenizer,
-        train_dataset=dataset,
-        dataset_text_field="text",
-        max_seq_length=HYPERPARAMS["max_seq_length"],
-        args=TrainingArguments(
-            output_dir=OUTPUT_DIR,
-            num_train_epochs=HYPERPARAMS["epochs"],
-            per_device_train_batch_size=HYPERPARAMS["batch_size"],
-            learning_rate=HYPERPARAMS["learning_rate"],
-            warmup_steps=HYPERPARAMS["warmup_steps"],
-            logging_steps=1,
-            save_strategy="epoch",
-            fp16=False,
-            use_cpu=True,
-            gradient_accumulation_steps=8,
-            dataloader_num_workers=0,
-        ),
+        dataset=dataset,
+        training_args=training_args,
     )
 
     print("\\n🔥 Starting CPU training with Five Perspective Pipeline tokens...")
