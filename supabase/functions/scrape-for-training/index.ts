@@ -186,22 +186,50 @@ serve(async (req) => {
       perspectives[key] = result;
     }
 
-    // Step 3: Synthesis — send all 5 to a synthesis AI with structured output
+    // Step 2.5: DEBATE ROUND — perspectives challenge each other
+    let debateResults: Record<string, string> = {};
+    if (debate_mode && !offloadKey) {
+      const allPerspectivesSummary = Object.entries(perspectives)
+        .map(([key, val]) => `${key.toUpperCase()} PERSPECTIVE:\n${val}`)
+        .join("\n\n---\n\n");
+
+      const debateRound = await Promise.all(
+        Object.entries(DEBATE_PROMPTS).map(async ([key, debatePrompt]) => {
+          const debateInput = `ORIGINAL CONTENT:\n${pageContent.slice(0, 6000)}\n\n---\n\nALL FIVE INITIAL ANALYSES:\n${allPerspectivesSummary}`;
+          const result = await callAI(LOVABLE_API_KEY, debatePrompt, debateInput);
+          return [key, result] as [string, string];
+        })
+      );
+
+      for (const [key, result] of debateRound) {
+        debateResults[key] = result;
+      }
+    }
+
+    // Step 3: Synthesis — send perspectives (+ debate if enabled) to synthesis AI
+    const hasDebate = Object.keys(debateResults).length > 0;
     const synthesisInput = `
 BUILDER PERSPECTIVE:
 ${perspectives.builder}
+${hasDebate ? `\nBUILDER DEBATE RESPONSE:\n${debateResults.builder}` : ""}
 
 RED TEAM PERSPECTIVE:
 ${perspectives.red_team}
+${hasDebate ? `\nRED TEAM DEBATE RESPONSE:\n${debateResults.red_team}` : ""}
 
 SYSTEMS PERSPECTIVE:
 ${perspectives.systems}
+${hasDebate ? `\nSYSTEMS DEBATE RESPONSE:\n${debateResults.systems}` : ""}
 
 FRAME BREAKER PERSPECTIVE:
 ${perspectives.frame_breaker}
+${hasDebate ? `\nFRAME BREAKER DEBATE RESPONSE:\n${debateResults.frame_breaker}` : ""}
 
 EMPATH PERSPECTIVE:
 ${perspectives.empath}
+${hasDebate ? `\nEMPATH DEBATE RESPONSE:\n${debateResults.empath}` : ""}
+
+${hasDebate ? "NOTE: This content went through a DEBATE ROUND where each perspective directly challenged the others. Pay special attention to concessions, unresolved tensions, and insights that emerged FROM the debate itself." : ""}
 
 Original content domain: ${domain_hint || "general"}
 `;
