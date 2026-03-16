@@ -736,7 +736,7 @@ def train_with_unsloth():
     print("\\n>> Starting GPU training with Unsloth...")
     trainer.train()
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
-    print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
+    print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
 
     try:
         model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
