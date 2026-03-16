@@ -754,7 +754,7 @@ def train_cpu_fallback():
     from trl import SFTTrainer
     from datasets import Dataset
 
-    print("\\n🖥️  CPU-only mode: using transformers + PEFT (no Unsloth)")
+    print("\\n[CPU] CPU-only mode: using transformers + PEFT (no Unsloth)")
     print("   This will be slower but works without a GPU.\\n")
 
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
