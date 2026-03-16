@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -26,7 +27,7 @@ import {
   CheckCircle2, Circle, ArrowRight, ArrowLeft, Package,
   Zap, BookOpen, ChevronRight, ChevronDown, Info, ThumbsUp, ThumbsDown,
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
-  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video
+  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye
 } from "lucide-react";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
@@ -999,6 +1000,10 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [videoAnalysisText, setVideoAnalysisText] = useState("");
   const [videoInterval, setVideoInterval] = useState(2);
   const [videoMaxFrames, setVideoMaxFrames] = useState(20);
+  const [smartKeyframe, setSmartKeyframe] = useState(false);
+  const [smartThreshold, setSmartThreshold] = useState(15);
+  const [extractCC, setExtractCC] = useState(true);
+  const [videoCCText, setVideoCCText] = useState("");
   const videoUploadRef = useRef<HTMLInputElement>(null);
   const scrape = useScrapeForTraining();
   const createSample = useCreateSample();
@@ -1136,36 +1141,110 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
-  const extractVideoFrames = async (file: File, intervalSec = 2, maxFrames = 20): Promise<string[]> => {
+  // Compare two ImageData arrays for similarity (returns % difference 0-100)
+  const computeFrameDiff = (a: ImageData, b: ImageData): number => {
+    const d1 = a.data;
+    const d2 = b.data;
+    const len = d1.length;
+    let totalDiff = 0;
+    // Sample every 16th pixel for performance (RGBA stride = 4, so step 64)
+    const step = 64;
+    let samples = 0;
+    for (let i = 0; i < len; i += step) {
+      totalDiff += Math.abs(d1[i] - d2[i]); // R
+      totalDiff += Math.abs(d1[i + 1] - d2[i + 1]); // G
+      totalDiff += Math.abs(d1[i + 2] - d2[i + 2]); // B
+      samples += 3;
+    }
+    return (totalDiff / samples / 255) * 100;
+  };
+
+  // Extract closed captions / subtitles from a video file's text tracks
+  const extractClosedCaptions = (video: HTMLVideoElement): Promise<string> => {
+    return new Promise((resolve) => {
+      const tracks = video.textTracks;
+      if (!tracks || tracks.length === 0) {
+        resolve("");
+        return;
+      }
+
+      // Try to enable the first available text track
+      const track = tracks[0];
+      track.mode = "hidden";
+
+      // Wait briefly for cues to load
+      const checkCues = () => {
+        if (track.cues && track.cues.length > 0) {
+          const lines: string[] = [];
+          for (let i = 0; i < track.cues.length; i++) {
+            const cue = track.cues[i] as VTTCue;
+            if (cue.text) {
+              lines.push(cue.text.replace(/<[^>]+>/g, "").trim());
+            }
+          }
+          resolve(lines.filter(Boolean).join("\n"));
+        } else {
+          resolve("");
+        }
+      };
+
+      // Some browsers need a moment to parse cues
+      if (track.cues && track.cues.length > 0) {
+        checkCues();
+      } else {
+        track.addEventListener("cuechange", checkCues, { once: true });
+        setTimeout(checkCues, 2000);
+      }
+    });
+  };
+
+  const extractVideoFrames = async (
+    file: File,
+    intervalSec = 2,
+    maxFrames = 20,
+    useSmartKeyframe = false,
+    diffThreshold = 15,
+    shouldExtractCC = false
+  ): Promise<{ frames: string[]; captions: string }> => {
     return new Promise((resolve, reject) => {
       const video = document.createElement("video");
       video.muted = true;
       video.preload = "auto";
+      video.crossOrigin = "anonymous";
       const url = URL.createObjectURL(file);
       video.src = url;
 
-      video.onloadedmetadata = () => {
+      video.onloadedmetadata = async () => {
         const duration = video.duration;
-        const totalFrames = Math.min(maxFrames, Math.ceil(duration / intervalSec));
+        // In smart mode, sample more densely (every 0.5s) and filter duplicates
+        const sampleInterval = useSmartKeyframe ? 0.5 : intervalSec;
+        const totalSamples = Math.ceil(duration / sampleInterval);
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d")!;
         const frames: string[] = [];
-        let currentFrame = 0;
+        let prevImageData: ImageData | null = null;
+        let currentSample = 0;
+        let skippedCount = 0;
+
+        // Extract CC if requested
+        let captionText = "";
+        if (shouldExtractCC) {
+          try {
+            captionText = await extractClosedCaptions(video);
+          } catch { /* ignore CC errors */ }
+        }
 
         const captureFrame = () => {
-          if (currentFrame >= totalFrames) {
+          if (currentSample >= totalSamples || frames.length >= maxFrames) {
             URL.revokeObjectURL(url);
-            resolve(frames);
+            if (useSmartKeyframe && skippedCount > 0) {
+              console.log(`Smart keyframe: kept ${frames.length}, skipped ${skippedCount} similar frames`);
+            }
+            resolve({ frames, captions: captionText });
             return;
           }
 
-          const time = currentFrame * intervalSec;
-          if (time > duration) {
-            URL.revokeObjectURL(url);
-            resolve(frames);
-            return;
-          }
-
+          const time = Math.min(currentSample * sampleInterval, duration - 0.01);
           video.currentTime = time;
         };
 
@@ -1173,10 +1252,27 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           canvas.width = Math.min(video.videoWidth, 1280);
           canvas.height = Math.round(canvas.width * (video.videoHeight / video.videoWidth));
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          if (useSmartKeyframe) {
+            const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            if (prevImageData) {
+              const diff = computeFrameDiff(prevImageData, currentImageData);
+              if (diff < diffThreshold) {
+                // Frame is too similar — skip
+                skippedCount++;
+                currentSample++;
+                setVideoExtractProgress(Math.round((currentSample / totalSamples) * 100));
+                captureFrame();
+                return;
+              }
+            }
+            prevImageData = currentImageData;
+          }
+
           const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
           frames.push(dataUrl);
-          currentFrame++;
-          setVideoExtractProgress(Math.round((currentFrame / totalFrames) * 100));
+          currentSample++;
+          setVideoExtractProgress(Math.round((currentSample / totalSamples) * 100));
           captureFrame();
         };
 
@@ -1210,16 +1306,19 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     setVideoFrames([]);
     setVideoFileName(file.name);
     setVideoAnalysisText("");
+    setVideoCCText("");
 
     try {
-      const frames = await extractVideoFrames(file, videoInterval, videoMaxFrames);
+      const { frames, captions } = await extractVideoFrames(file, videoInterval, videoMaxFrames, smartKeyframe, smartThreshold, extractCC);
       if (frames.length === 0) {
         toast.error("Could not extract any frames from the video.");
         setVideoExtracting(false);
         return;
       }
       setVideoFrames(frames);
-      toast.success(`Extracted ${frames.length} frames from "${file.name}"`);
+      if (captions) setVideoCCText(captions);
+      const ccNote = captions ? ` + ${captions.split("\n").length} CC lines` : "";
+      toast.success(`Extracted ${frames.length} frames${ccNote} from "${file.name}"`);
     } catch (err: any) {
       console.error("Video frame extraction error:", err);
       toast.error("Failed to extract video frames: " + (err?.message || "unknown error"));
@@ -1245,6 +1344,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           frames: videoFrames,
           domain_hint: dataset.domain,
           dataset_id: dataset.id,
+          captions: videoCCText || undefined,
         }),
       });
 
@@ -1405,14 +1505,40 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Frame interval (seconds)</Label>
-                <div className="flex items-center gap-3">
-                  <Slider min={1} max={10} step={1} value={[videoInterval]} onValueChange={([v]) => setVideoInterval(v)} className="flex-1" disabled={videoExtracting} />
-                  <span className="text-sm font-mono w-6 text-right">{videoInterval}s</span>
+            {/* Smart Keyframe Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/50">
+              <div className="flex items-center gap-2">
+                <ScanEye className="h-4 w-4 text-primary" />
+                <div>
+                  <Label className="text-sm font-medium cursor-pointer" htmlFor="smart-keyframe">Smart Keyframe Detection</Label>
+                  <p className="text-xs text-muted-foreground">Skip duplicate/similar frames automatically</p>
                 </div>
               </div>
+              <Switch id="smart-keyframe" checked={smartKeyframe} onCheckedChange={setSmartKeyframe} disabled={videoExtracting} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {!smartKeyframe && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Frame interval (seconds)</Label>
+                  <div className="flex items-center gap-3">
+                    <Slider min={1} max={10} step={1} value={[videoInterval]} onValueChange={([v]) => setVideoInterval(v)} className="flex-1" disabled={videoExtracting} />
+                    <span className="text-sm font-mono w-6 text-right">{videoInterval}s</span>
+                  </div>
+                </div>
+              )}
+              {smartKeyframe && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Sensitivity threshold ({smartThreshold}%)
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <Slider min={3} max={40} step={1} value={[smartThreshold]} onValueChange={([v]) => setSmartThreshold(v)} className="flex-1" disabled={videoExtracting} />
+                    <span className="text-sm font-mono w-8 text-right">{smartThreshold}%</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Lower = more frames kept, Higher = only big changes kept</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Max frames</Label>
                 <div className="flex items-center gap-3">
@@ -1420,6 +1546,18 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   <span className="text-sm font-mono w-6 text-right">{videoMaxFrames}</span>
                 </div>
               </div>
+            </div>
+
+            {/* CC Extraction Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/50">
+              <div className="flex items-center gap-2">
+                <Subtitles className="h-4 w-4 text-primary" />
+                <div>
+                  <Label className="text-sm font-medium cursor-pointer" htmlFor="extract-cc">Extract Closed Captions</Label>
+                  <p className="text-xs text-muted-foreground">Read embedded subtitles/CC tracks from the video</p>
+                </div>
+              </div>
+              <Switch id="extract-cc" checked={extractCC} onCheckedChange={setExtractCC} disabled={videoExtracting} />
             </div>
 
             <div className="flex items-center gap-3">
@@ -1445,7 +1583,10 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   <p className="text-sm font-medium flex items-center gap-2">
                     <Video className="h-4 w-4" /> {videoFileName}
                   </p>
-                  <p className="text-xs text-muted-foreground">{videoFrames.length} frames extracted</p>
+                  <p className="text-xs text-muted-foreground">
+                    {videoFrames.length} frames extracted{smartKeyframe ? " (smart keyframe)" : ""}
+                    {videoCCText ? ` · ${videoCCText.split("\n").length} CC lines` : ""}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
@@ -1453,6 +1594,23 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                     <img key={i} src={frame} alt={`Frame ${i + 1}`} className="rounded border border-border/50 w-full aspect-video object-cover" />
                   ))}
                 </div>
+
+                {videoCCText && (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">
+                        <Subtitles className="h-3.5 w-3.5 mr-2" />
+                        {videoCCText.split("\n").length} closed caption lines extracted
+                        <ChevronDown className="h-3 w-3 ml-auto" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
+                        <p className="text-[11px] text-muted-foreground font-mono whitespace-pre-wrap">{videoCCText}</p>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
 
                 {!videoAnalysisText && (
                   <Button onClick={handleAnalyzeFrames} disabled={videoAnalyzing} className="w-full">
