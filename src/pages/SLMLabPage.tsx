@@ -34,7 +34,7 @@ import {
   useScrapeForTraining, useProcessChatExport, useTrainingJobs, useCreateTrainingJob,
   useStartInterview, useInterviewRespond, useFinishInterview,
   useHFSearch, useHFPreview, useHFImport,
-  exportDatasetAsJsonl, generateTrainingScript,
+  exportDatasetAsJsonl, generateTrainingScript, validatePythonScript,
   type TrainingDataset, type DatasetSample, type TrainingJob,
 } from "@/hooks/useTrainingData";
 import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } from "@/lib/chatExportParsers";
