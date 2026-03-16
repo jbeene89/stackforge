@@ -584,7 +584,7 @@ SPECIAL_TOKENS = [
 
 def load_dataset(path):
     samples = []
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             samples.append(json.loads(line))
     print(f"Loaded {len(samples)} training samples")
