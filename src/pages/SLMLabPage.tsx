@@ -1272,6 +1272,39 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         </Card>
       )}
 
+      {/* Debate Mode Toggle */}
+      <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-forge-amber/10 flex items-center justify-center">
+            <MessageSquare className="h-4 w-4 text-forge-amber" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Debate Mode</p>
+            <p className="text-[10px] text-muted-foreground">Perspectives challenge each other before synthesis — richer but uses 2× AI calls</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setDebateMode(!debateMode)}
+          className={`relative h-6 w-11 rounded-full transition-colors ${debateMode ? "bg-forge-amber" : "bg-muted"}`}
+        >
+          <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${debateMode ? "translate-x-5" : ""}`} />
+        </button>
+      </div>
+
+      {debateMode && (
+        <Card className="border-forge-amber/30 bg-forge-amber/5">
+          <CardContent className="py-3">
+            <div className="flex items-start gap-2">
+              <Zap className="h-4 w-4 text-forge-amber shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-forge-amber">Debate Round Active</p>
+                <p className="text-[10px] text-muted-foreground">After initial analysis, each perspective reads ALL others and directly challenges their claims. Concessions, rebuttals, and meta-bridges feed into Dream Mode synthesis. Training pairs include <code className="text-[9px] bg-muted px-1 rounded">{"<DEBATE>"}</code> tokens for debate-born insights.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Device Offload Panel */}
       <Collapsible open={showOffloadSetup} onOpenChange={setShowOffloadSetup}>
         <CollapsibleTrigger asChild>
