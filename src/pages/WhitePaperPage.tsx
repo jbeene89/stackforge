@@ -53,6 +53,30 @@ CDPT solves this through **Cross-Domain Gap Sensing** — a directive embedded i
 - **Frame Breaker** imports wholesale: "What does mycology know about networks that computer science reinvented from scratch?"
 - **Empath** crosses the human boundary: "What do therapists already know about this that the engineers never asked?"
 
+### Contribution 4: The Recursive Gap-Fill Loop (Detect → Fill → Self-Inspect)
+Gap sensing alone is not enough — naming a gap leaves the gap open. CDPT mandates a three-step recursive process in every perspective:
+
+**Step 1 — DETECT**: Identify knowledge that exists in an adjacent domain but is missing from the current content. This is standard cross-domain gap sensing.
+
+**Step 2 — FILL**: Do not merely flag the gap. IMPORT the solution. State the cross-domain knowledge as settled fact that belongs here. Example: Red Team doesn't just say "aviation has a checklist for this" — it writes the checklist into the analysis as if it always existed in this domain.
+
+**Step 3 — SELF-INSPECT**: The gap-fill just introduced new knowledge. That new knowledge has its own gaps. Turn the lens on yourself: "Does my imported solution have a known limitation? Has a THIRD field already solved the limitation of the solution I just imported?" Go one more level. Fill the gap in your gap-fill.
+
+This creates a recursive chain of completeness. Each perspective doesn't just cross one domain boundary — it crosses two or three, each time filling the gap exposed by the previous fill. The depth is bounded by genuine knowledge limits, not by instruction — the agent stops when it honestly runs out of bridges to cross.
+
+### Contribution 5: The Gap Chain (Debate-Round Recursive Completeness)
+The recursive gap-fill loop operates within each individual perspective. The **Gap Chain** extends this across perspectives during the Debate Round.
+
+When perspectives read each other's analyses in the debate round, each one runs a cross-perspective gap chain:
+
+- **Builder** checks: "The others imported knowledge from aviation, ecology, psychology. Are those imports practically buildable? What gaps do they have that only a builder can see?"
+- **Red Team** stress-tests: "Every import is a new attack surface. What failure modes exist in the SOURCE domain's solution that nobody brought over?"
+- **Systems** maps: "Five perspectives imported from five different fields. Do those imports interact? Do they create a new feedback loop nobody modeled because the imports came from different domains?"
+- **Frame Breaker** bridges bridges: "Builder borrowed from engineering, Red Team from aviation, Systems from ecology, Empath from psychology. What unifying framework contains ALL of these patterns? What field bridges the bridges?"
+- **Empath** humanizes the imports: "Builder borrowed engineering solutions — but what do the engineers themselves burn out from? Red Team imported aviation protocols — but what do pilots actually feel about checklist fatigue? The human cost of the imported solution is itself a gap."
+
+Each perspective fills the gaps in the other perspectives' gap-fills, creating a chain of recursive completeness that no single agent could achieve alone.
+
 The result: training pairs tagged with <BRIDGE> tokens that carry cross-domain knowledge the original content never contained. The model doesn't learn to SEARCH for adjacent knowledge at inference time — it already HAS it in its weights.
 
 This is preemptive intelligence: a model that fills gaps before they become questions.
@@ -60,7 +84,9 @@ This is preemptive intelligence: a model that fills gaps before they become ques
 ## THE PROGRESSION
 Standard fine-tuning → Model knows what it was trained on
 CDPT Identity/Oracle mode → Model knows it deeply, speaks with certainty  
-CDPT + Cross-Domain Gap Sensing → Model knows things the training data never contained, because the perspectives imported them from adjacent fields during generation
+CDPT + Cross-Domain Gap Sensing → Model knows things the training data never contained
+CDPT + Recursive Gap-Fill → Model knows the LIMITS of its imported knowledge and has already patched them
+CDPT + Gap Chain (Debate) → Model's knowledge has been stress-tested across all five cognitive modes recursively
 
 ## THE FIVE CURIOSITY-DRIVEN PERSPECTIVES
 
