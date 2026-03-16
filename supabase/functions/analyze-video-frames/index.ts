@@ -39,6 +39,7 @@ For each distinct piece of content you identify across the frames, produce a det
 - Context and meaning (what concept is being taught or shown)
 
 ${domain_hint ? `Domain context: ${domain_hint}` : ""}
+${captions ? `\nIMPORTANT — The following closed captions / subtitles were extracted from the video. Use them as a primary source for the spoken content, and cross-reference with the visual frames:\n\n---BEGIN CAPTIONS---\n${captions}\n---END CAPTIONS---\n` : ""}
 
 Output your analysis as a single comprehensive document with clear section breaks (use "---" between distinct content sections).
 Be thorough — this text will be used to generate AI training pairs, so capture everything meaningful.
