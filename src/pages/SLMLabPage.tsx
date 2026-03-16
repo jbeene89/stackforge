@@ -1877,15 +1877,13 @@ export default function SLMLabPage() {
   const [activeDatasetId, setActiveDatasetId] = useState<string | null>(null);
   const [showInterview, setShowInterview] = useState(false);
 
-  // Cache dataset so it doesn't flicker to undefined during query refetches
-  const [cachedDataset, setCachedDataset] = useState<TrainingDataset | null>(null);
+  // Cache dataset so component doesn't unmount during query refetches
+  const cachedDatasetRef = useRef<TrainingDataset | null>(null);
   const liveDataset = datasets?.find(d => d.id === activeDatasetId);
-  
-  // Update cache when we get fresh data, but never clear it during refetches
-  const activeDataset = liveDataset || cachedDataset;
-  if (liveDataset && liveDataset !== cachedDataset) {
-    setCachedDataset(liveDataset);
+  if (liveDataset) {
+    cachedDatasetRef.current = liveDataset;
   }
+  const activeDataset = liveDataset || cachedDatasetRef.current;
 
   const handleDatasetCreated = (id: string) => {
     setActiveDatasetId(id);
