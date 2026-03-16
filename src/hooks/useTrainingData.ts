@@ -633,6 +633,9 @@ def train_with_unsloth():
     tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
     model.resize_token_embeddings(len(tokenizer))
 
+    if not getattr(tokenizer, "chat_template", None):
+        tokenizer.chat_template = "{% for message in messages %}{% if message['role'] == 'system' %}<|system|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'user' %}<|user|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'assistant' %}<|assistant|>\\n{{ message['content'] }}\\n{% endif %}{% endfor %}"
+
     model = FastLanguageModel.get_peft_model(
         model,
         r=HYPERPARAMS["lora_rank"],
