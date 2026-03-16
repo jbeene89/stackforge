@@ -1877,7 +1877,13 @@ export default function SLMLabPage() {
   const [activeDatasetId, setActiveDatasetId] = useState<string | null>(null);
   const [showInterview, setShowInterview] = useState(false);
 
-  const activeDataset = datasets?.find(d => d.id === activeDatasetId);
+  // Cache dataset so component doesn't unmount during query refetches
+  const cachedDatasetRef = useRef<TrainingDataset | null>(null);
+  const liveDataset = datasets?.find(d => d.id === activeDatasetId);
+  if (liveDataset) {
+    cachedDatasetRef.current = liveDataset;
+  }
+  const activeDataset = liveDataset || cachedDatasetRef.current;
 
   const handleDatasetCreated = (id: string) => {
     setActiveDatasetId(id);
