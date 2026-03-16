@@ -643,6 +643,13 @@ export type Database = {
             referencedRelation: "marketplace_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "template_purchases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_templates_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       training_datasets: {
@@ -802,7 +809,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      marketplace_templates_public: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          downloads: number | null
+          id: string | null
+          name: string | null
+          price_credits: number | null
+          source_id: string | null
+          status: string | null
+          tags: string[] | null
+          tier: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          downloads?: number | null
+          id?: string | null
+          name?: string | null
+          price_credits?: number | null
+          source_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          tier?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          downloads?: number | null
+          id?: string | null
+          name?: string | null
+          price_credits?: number | null
+          source_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          tier?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
