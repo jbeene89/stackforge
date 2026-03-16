@@ -1212,7 +1212,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     setVideoAnalysisText("");
 
     try {
-      const frames = await extractVideoFrames(file);
+      const frames = await extractVideoFrames(file, videoInterval, videoMaxFrames);
       if (frames.length === 0) {
         toast.error("Could not extract any frames from the video.");
         setVideoExtracting(false);
