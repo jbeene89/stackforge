@@ -592,7 +592,7 @@ def check_hf_auth():
     except Exception:
         pass
     print()
-    print("  ⚠️  GATED MODEL DETECTED: " + BASE_MODEL)
+    print("  [!] GATED MODEL DETECTED: " + BASE_MODEL)
     print("  Llama models require Hugging Face authentication.")
     print()
     print("  Option 1: Set HF_TOKEN environment variable")
