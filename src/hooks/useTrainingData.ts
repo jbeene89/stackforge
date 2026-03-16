@@ -590,6 +590,27 @@ def load_dataset(path):
     print(f"Loaded {len(samples)} training samples")
     return samples
 
+def build_sft_trainer(SFTTrainer, model, tokenizer, dataset, training_args):
+    base_kwargs = {
+        "model": model,
+        "train_dataset": dataset,
+        "args": training_args,
+    }
+    attempts = [
+        {"processing_class": tokenizer, "dataset_text_field": "text", "max_seq_length": HYPERPARAMS["max_seq_length"]},
+        {"tokenizer": tokenizer, "dataset_text_field": "text", "max_seq_length": HYPERPARAMS["max_seq_length"]},
+        {"processing_class": tokenizer},
+        {"tokenizer": tokenizer},
+        {},
+    ]
+    last_error = None
+    for extra_kwargs in attempts:
+        try:
+            return SFTTrainer(**base_kwargs, **extra_kwargs)
+        except TypeError as e:
+            last_error = e
+    raise last_error
+
 def check_hardware():
     import torch
     if torch.cuda.is_available():
@@ -653,23 +674,24 @@ def train_with_unsloth():
 
     dataset = Dataset.from_list(formatted)
 
-    trainer = SFTTrainer(
+    training_args = TrainingArguments(
+        output_dir=OUTPUT_DIR,
+        num_train_epochs=HYPERPARAMS["epochs"],
+        per_device_train_batch_size=HYPERPARAMS["batch_size"],
+        learning_rate=HYPERPARAMS["learning_rate"],
+        warmup_steps=HYPERPARAMS["warmup_steps"],
+        logging_steps=1,
+        save_strategy="epoch",
+        fp16=True,
+        gradient_accumulation_steps=${cpuOffload ? 4 : 1},
+    )
+
+    trainer = build_sft_trainer(
+        SFTTrainer=SFTTrainer,
         model=model,
         tokenizer=tokenizer,
-        train_dataset=dataset,
-        dataset_text_field="text",
-        max_seq_length=HYPERPARAMS["max_seq_length"],
-        args=TrainingArguments(
-            output_dir=OUTPUT_DIR,
-            num_train_epochs=HYPERPARAMS["epochs"],
-            per_device_train_batch_size=HYPERPARAMS["batch_size"],
-            learning_rate=HYPERPARAMS["learning_rate"],
-            warmup_steps=HYPERPARAMS["warmup_steps"],
-            logging_steps=1,
-            save_strategy="epoch",
-            fp16=True,
-            gradient_accumulation_steps=${cpuOffload ? 4 : 1},
-        ),
+        dataset=dataset,
+        training_args=training_args,
     )
 
     print("\\n🔥 Starting GPU training with Unsloth...")
@@ -735,25 +757,26 @@ def train_cpu_fallback():
 
     dataset = Dataset.from_list(formatted)
 
-    trainer = SFTTrainer(
+    training_args = TrainingArguments(
+        output_dir=OUTPUT_DIR,
+        num_train_epochs=HYPERPARAMS["epochs"],
+        per_device_train_batch_size=HYPERPARAMS["batch_size"],
+        learning_rate=HYPERPARAMS["learning_rate"],
+        warmup_steps=HYPERPARAMS["warmup_steps"],
+        logging_steps=1,
+        save_strategy="epoch",
+        fp16=False,
+        use_cpu=True,
+        gradient_accumulation_steps=8,
+        dataloader_num_workers=0,
+    )
+
+    trainer = build_sft_trainer(
+        SFTTrainer=SFTTrainer,
         model=model,
         tokenizer=tokenizer,
-        train_dataset=dataset,
-        dataset_text_field="text",
-        max_seq_length=HYPERPARAMS["max_seq_length"],
-        args=TrainingArguments(
-            output_dir=OUTPUT_DIR,
-            num_train_epochs=HYPERPARAMS["epochs"],
-            per_device_train_batch_size=HYPERPARAMS["batch_size"],
-            learning_rate=HYPERPARAMS["learning_rate"],
-            warmup_steps=HYPERPARAMS["warmup_steps"],
-            logging_steps=1,
-            save_strategy="epoch",
-            fp16=False,
-            use_cpu=True,
-            gradient_accumulation_steps=8,
-            dataloader_num_workers=0,
-        ),
+        dataset=dataset,
+        training_args=training_args,
     )
 
     print("\\n🔥 Starting CPU training with Five Perspective Pipeline tokens...")
