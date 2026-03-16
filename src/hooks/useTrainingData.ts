@@ -743,7 +743,7 @@ def train_with_unsloth():
         print(f"[OK] GGUF model saved to {OUTPUT_DIR}/gguf")
         print(f"   Run with: ollama create mymodel -f {OUTPUT_DIR}/gguf/Modelfile")
     except Exception as e:
-        print(f"⚠️  GGUF export skipped: {e}")
+        print(f"[!] GGUF export skipped: {e}")
 
 
 def train_cpu_fallback():
