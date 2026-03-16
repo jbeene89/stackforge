@@ -441,7 +441,74 @@ export function exportDatasetAsJsonl(samples: DatasetSample[], datasetName: stri
   URL.revokeObjectURL(url);
 }
 
-// Map short model IDs to valid Hugging Face Hub repo identifiers
+// Validate generated Python script for common syntax issues
+export function validatePythonScript(script: string): string[] {
+  const errors: string[] = [];
+  const lines = script.split("\n");
+
+  lines.forEach((line, i) => {
+    const lineNum = i + 1;
+    const stripped = line.trimStart();
+
+    // Skip comments and blank lines
+    if (stripped.startsWith("#") || stripped === "") return;
+
+    // Check for unterminated string literals (single-line strings only)
+    // Count unescaped quotes outside of triple-quoted strings
+    for (const q of ['"', "'"]) {
+      // Skip triple-quoted lines
+      if (stripped.includes(q.repeat(3))) return;
+
+      // Find all quote positions that aren't escaped
+      let inString = false;
+      let opens = 0;
+      for (let j = 0; j < stripped.length; j++) {
+        if (stripped[j] === q && (j === 0 || stripped[j - 1] !== "\\")) {
+          inString = !inString;
+          opens++;
+        }
+      }
+      if (opens % 2 !== 0) {
+        errors.push(`Line ${lineNum}: Unterminated string literal — ${line.trim().substring(0, 60)}`);
+      }
+    }
+
+    // Check for duplicate keyword arguments in function calls
+    const funcCallMatch = stripped.match(/^\w[\w.]*\((.+)\)\s*$/);
+    if (funcCallMatch) {
+      const kwargs = [...funcCallMatch[1].matchAll(/\b(\w+)\s*=/g)].map(m => m[1]);
+      const seen = new Set<string>();
+      for (const kw of kwargs) {
+        if (seen.has(kw)) {
+          errors.push(`Line ${lineNum}: Duplicate keyword argument '${kw}'`);
+        }
+        seen.add(kw);
+      }
+    }
+
+    // Check for unbalanced parentheses/brackets per line (basic)
+    const parens = (stripped.match(/\(/g) || []).length - (stripped.match(/\)/g) || []).length;
+    const brackets = (stripped.match(/\[/g) || []).length - (stripped.match(/\]/g) || []).length;
+    const braces = (stripped.match(/\{/g) || []).length - (stripped.match(/\}/g) || []).length;
+
+    // These are line-level heuristics — multi-line constructs are expected to be unbalanced per line
+    // Only flag obviously wrong cases (closing more than opening on a single line)
+    if (parens < -1) errors.push(`Line ${lineNum}: Unbalanced parentheses`);
+    if (brackets < -1) errors.push(`Line ${lineNum}: Unbalanced brackets`);
+    if (braces < -1) errors.push(`Line ${lineNum}: Unbalanced braces`);
+  });
+
+  // Global balance check
+  const allParens = (script.match(/\(/g) || []).length - (script.match(/\)/g) || []).length;
+  const allBrackets = (script.match(/\[/g) || []).length - (script.match(/\]/g) || []).length;
+  const allBraces = (script.match(/\{/g) || []).length - (script.match(/\}/g) || []).length;
+  if (allParens !== 0) errors.push(`Global: Unbalanced parentheses (${allParens > 0 ? "missing )" : "extra )"})`);
+  if (allBrackets !== 0) errors.push(`Global: Unbalanced brackets (${allBrackets > 0 ? "missing ]" : "extra ]"})`);
+  if (allBraces !== 0) errors.push(`Global: Unbalanced braces (${allBraces > 0 ? "missing }" : "extra }"})`);
+
+  return errors;
+}
+
 const HF_MODEL_MAP: Record<string, string> = {
   "llama-3.2-1b": "meta-llama/Llama-3.2-1B",
   "llama-3.2-3b": "meta-llama/Llama-3.2-3B",
