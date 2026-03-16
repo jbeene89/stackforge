@@ -580,7 +580,7 @@ def check_hf_auth():
     if not is_gated:
         return
     if HF_TOKEN:
-        print(f"  ✅ HF_TOKEN found — authenticated for gated model")
+        print(f"  [OK] HF_TOKEN found - authenticated for gated model")
         return
     # Check if logged in via huggingface-cli
     try:
