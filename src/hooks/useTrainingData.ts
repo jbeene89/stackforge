@@ -658,7 +658,7 @@ def check_hardware():
         print(f"  NVIDIA CUDA GPU: {gpu_name} ({vram:.1f} GB VRAM)")
         return "cuda"
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        print("  Apple Silicon detected (MPS) — using CPU fallback path")
+        print("  Apple Silicon detected (MPS) - using CPU fallback path")
         return "mps"
     else:
         import psutil
