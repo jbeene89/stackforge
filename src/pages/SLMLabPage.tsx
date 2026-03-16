@@ -1140,10 +1140,10 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" /> Upload a Text File
+              <FileText className="h-4 w-4 text-primary" /> Upload a File
             </CardTitle>
             <CardDescription>
-              Upload any .txt, .md, .csv, or .log file. Its contents will be run through the Five Perspective Pipeline to extract training pairs.
+              Upload a .pdf, .txt, .md, .csv, or .log file. Its contents will be run through the Five Perspective Pipeline to extract training pairs.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
