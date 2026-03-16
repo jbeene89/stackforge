@@ -1873,8 +1873,26 @@ function AdvancedSettings({ epochs, setEpochs, lr, setLr, batchSize, setBatchSiz
 // ── Main Page ──
 export default function SLMLabPage() {
   const { data: datasets, isLoading: dsLoading } = useDatasets();
-  const [step, setStep] = useState<number>(-1); // -1 = landing
-  const [activeDatasetId, setActiveDatasetId] = useState<string | null>(null);
+
+  const readSavedLabState = () => {
+    if (typeof window === "undefined") return { step: -1 as number, activeDatasetId: null as string | null };
+    try {
+      const raw = sessionStorage.getItem("slm-lab-state");
+      if (!raw) return { step: -1 as number, activeDatasetId: null as string | null };
+      const parsed = JSON.parse(raw) as { step?: number; activeDatasetId?: string | null };
+      const safeStep = typeof parsed.step === "number" ? parsed.step : -1;
+      return {
+        // Step 0 is interview-only and can't be resumed safely after remount
+        step: safeStep === 0 ? 2 : safeStep,
+        activeDatasetId: parsed.activeDatasetId ?? null,
+      };
+    } catch {
+      return { step: -1 as number, activeDatasetId: null as string | null };
+    }
+  };
+
+  const [step, setStep] = useState<number>(() => readSavedLabState().step); // -1 = landing
+  const [activeDatasetId, setActiveDatasetId] = useState<string | null>(() => readSavedLabState().activeDatasetId);
   const [showInterview, setShowInterview] = useState(false);
 
   // Cache dataset so component doesn't unmount during query refetches
