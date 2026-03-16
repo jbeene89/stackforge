@@ -199,20 +199,22 @@ Write the complete white paper with these sections:
 1. Abstract (include "preemptive intelligence" and "CDPT doesn't make AI smarter. It makes AI complete.")
 2. Introduction  
 3. Background & Related Work
-4. The Three Theoretical Contributions (Identity Over Instruction, Oracle Principle, Cross-Domain Gap Sensing)
-5. Methodology (detailed breakdown of all 5 perspectives + 6 mechanisms + Debate Round)
-6. The Cognitive Token System
-7. System Architecture (including Oracle/Teacher modes)
-8. The Curiosity-Distance Metric
-9. Dream Mode Synthesis & The Debate Round
-10. Cross-Domain Gap Sensing: Preemptive Intelligence (flagship section — this is the breakthrough)
-11. Experimental Framework (proposed evaluation methodology)
-12. Expected Impact & Applications
-13. Limitations & Future Work
-14. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
-15. References
+4. The Five Theoretical Contributions (Identity Over Instruction, Oracle Principle, Cross-Domain Gap Sensing, Recursive Gap-Fill Loop, Gap Chain)
+5. Methodology (detailed breakdown of all 5 perspectives + 6 mechanisms)
+6. The Recursive Gap-Fill Loop: Detect → Fill → Self-Inspect (detailed section with examples showing the three-step process and how it recurses across domain boundaries)
+7. The Debate Round & Gap Chain (how recursive completeness extends ACROSS perspectives during debate)
+8. The Cognitive Token System (all 8 tokens)
+9. System Architecture (including Oracle/Teacher modes)
+10. The Curiosity-Distance Metric
+11. Dream Mode Synthesis
+12. Cross-Domain Gap Sensing: Preemptive Intelligence (flagship section)
+13. Experimental Framework (proposed evaluation methodology — include metrics for measuring gap-chain depth and cross-domain bridge quality)
+14. Expected Impact & Applications
+15. Limitations & Future Work
+16. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
+17. References
 
-Make it rigorous, novel, and compelling. This is a genuine methodological breakthrough in training data generation for small language models. The central thesis is preemptive intelligence — not better reasoning, but complete knowledge.`;
+Make it rigorous, novel, and compelling. This is a genuine methodological breakthrough in training data generation for small language models. The central thesis is preemptive intelligence — not better reasoning, but complete knowledge. The recursive gap-fill loop is the mechanism that makes preemptive intelligence possible: gaps are not just detected but filled, and each fill is self-inspected for its own gaps, creating chains of completeness that cross multiple domain boundaries.`;
 
 export default function WhitePaperPage() {
   const navigate = useNavigate();
