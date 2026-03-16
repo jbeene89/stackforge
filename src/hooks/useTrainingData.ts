@@ -530,7 +530,7 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
 
   return `#!/usr/bin/env python3
 """
-SoupyForge Local Training Script — Five Perspective Pipeline
+SoupyForge Local Training Script - Five Perspective Pipeline
 Model: ${hfModelId}
 Method: ${job.method}
 Dataset: ${dataset.name}
@@ -567,7 +567,7 @@ HYPERPARAMS = {
 # Hardware profile: ${hwProfile}
 USE_CPU_ONLY = ${isCpuOnly ? "True" : "False"}
 
-# Hugging Face auth — required for gated models like Llama
+# Hugging Face auth - required for gated models like Llama
 # Run: pip install huggingface_hub && huggingface-cli login
 # Or set HF_TOKEN environment variable
 HF_TOKEN = os.environ.get("HF_TOKEN", None)
@@ -580,19 +580,19 @@ def check_hf_auth():
     if not is_gated:
         return
     if HF_TOKEN:
-        print(f"  ✅ HF_TOKEN found — authenticated for gated model")
+        print(f"  [OK] HF_TOKEN found - authenticated for gated model")
         return
     # Check if logged in via huggingface-cli
     try:
         from huggingface_hub import HfApi
         api = HfApi()
         user = api.whoami()
-        print(f"  ✅ Logged in as: {user.get('name', 'unknown')}")
+        print(f"  [OK] Logged in as: {user.get('name', 'unknown')}")
         return
     except Exception:
         pass
     print()
-    print("  ⚠️  GATED MODEL DETECTED: " + BASE_MODEL)
+    print("  [!] GATED MODEL DETECTED: " + BASE_MODEL)
     print("  Llama models require Hugging Face authentication.")
     print()
     print("  Option 1: Set HF_TOKEN environment variable")
@@ -658,20 +658,20 @@ def check_hardware():
         print(f"  NVIDIA CUDA GPU: {gpu_name} ({vram:.1f} GB VRAM)")
         return "cuda"
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        print("  Apple Silicon detected (MPS) — using CPU fallback path")
+        print("  Apple Silicon detected (MPS) - using CPU fallback path")
         return "mps"
     else:
         import psutil
         ram = psutil.virtual_memory().total / 1e9
-        print(f"  CPU mode — {ram:.0f} GB RAM available")
+        print(f"  CPU mode - {ram:.0f} GB RAM available")
         return "cpu"
 
 def train_with_unsloth():
-    """NVIDIA CUDA path — uses Unsloth for fast LoRA fine-tuning."""
+    """NVIDIA CUDA path - uses Unsloth for fast LoRA fine-tuning."""
     try:
         from unsloth import FastLanguageModel
     except Exception as e:
-        print(f"⚠️  Unsloth unavailable ({e})")
+        print(f"[!] Unsloth unavailable ({e})")
         print("   Falling back to CPU-compatible training path.")
         train_cpu_fallback()
         return
@@ -733,28 +733,28 @@ def train_with_unsloth():
         training_args=training_args,
     )
 
-    print("\\n🔥 Starting GPU training with Unsloth...")
+    print("\\n>> Starting GPU training with Unsloth...")
     trainer.train()
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
-    print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
+    print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
 
     try:
         model.save_pretrained_gguf(f"{OUTPUT_DIR}/gguf", tokenizer, quantization_method="q4_k_m")
-        print(f"✅ GGUF model saved to {OUTPUT_DIR}/gguf")
+        print(f"[OK] GGUF model saved to {OUTPUT_DIR}/gguf")
         print(f"   Run with: ollama create mymodel -f {OUTPUT_DIR}/gguf/Modelfile")
     except Exception as e:
-        print(f"⚠️  GGUF export skipped: {e}")
+        print(f"[!] GGUF export skipped: {e}")
 
 
 def train_cpu_fallback():
-    """CPU path — uses transformers + PEFT directly (no Unsloth needed)."""
+    """CPU path - uses transformers + PEFT directly (no Unsloth needed)."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
     from peft import LoraConfig, get_peft_model, TaskType
     from trl import SFTTrainer
     from datasets import Dataset
 
-    print("\\n🖥️  CPU-only mode: using transformers + PEFT (no Unsloth)")
+    print("\\n[CPU] CPU-only mode: using transformers + PEFT (no Unsloth)")
     print("   This will be slower but works without a GPU.\\n")
 
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -818,19 +818,19 @@ def train_cpu_fallback():
         training_args=training_args,
     )
 
-    print("\\n🔥 Starting CPU training with Five Perspective Pipeline tokens...")
+    print("\\n>> Starting CPU training with Five Perspective Pipeline tokens...")
     print(f"   Batch size: {HYPERPARAMS['batch_size']} (x8 gradient accumulation)")
     trainer.train()
 
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     tokenizer.save_pretrained(f"{OUTPUT_DIR}/lora")
-    print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
+    print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
     print(f"   To merge: use peft merge_and_unload() then export to GGUF manually")
 
 
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-    print(f"🧠 SoupyForge Local Trainer — Five Perspective Pipeline")
+    print(f"SoupyForge Local Trainer - Five Perspective Pipeline")
     print(f"   Model: {BASE_MODEL}")
     print(f"   Method: ${job.method}")
     print(f"   Hardware: ${hwProfile}")
@@ -848,7 +848,7 @@ if __name__ == "__main__":
     elif hw == "cuda":
         train_with_unsloth()
     else:
-        print("⚠️  Non-NVIDIA environment detected — using CPU fallback path.")
+        print("Non-NVIDIA environment detected - using CPU fallback path.")
         train_cpu_fallback()
 `;
 }
