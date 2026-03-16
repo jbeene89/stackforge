@@ -19,85 +19,30 @@ const WHITE_PAPER_USER_PROMPT = `Write a comprehensive academic white paper (15-
 
 ---
 
-# TITLE: "Curiosity-Driven Perspective Training: A Multi-Agent Framework for High-Density Knowledge Distillation in Small Language Models"
+# TITLE: "Curiosity-Driven Perspective Training: Preemptive Intelligence Through Cross-Domain Gap Sensing in Small Language Models"
 
 ## CORE THESIS
-Traditional training data pipelines produce narrow, single-perspective knowledge. By routing every input through five specialized AI perspectives — each operating with structured curiosity rather than narrow analysis — we achieve 5-10x higher density training pair extraction and produce models capable of lateral reasoning, not just pattern matching.
+"CDPT doesn't make AI smarter. It makes AI complete."
 
-## THE FIVE CURIOSITY-DRIVEN PERSPECTIVES
+Traditional training data pipelines produce narrow, single-perspective knowledge. Current AI models hallucinate at the gaps or hedge into uselessness — because they don't know what they don't know. CDPT eliminates those gaps before training begins. By routing every input through five specialized AI perspectives — each with cross-domain gap sensing and epistemic drive — the pipeline generates knowledge the source material never contained, imported from adjacent fields where the problem was already solved.
 
-### 1. Builder (Curiosity Mode)
-- Traditional: "What works here? Extract practical knowledge."
-- Curiosity-Driven: Explores adjacent materials, unknown failure modes, alternative construction methods, and asks "what exists that nobody considered?" Goes beyond stated solutions to discover what the author didn't know to include.
+The result is not a better reasoner. It is a model with preemptive intelligence: gaps filled before they become questions, knowledge resident in the weights before a user needs it.
 
-### 2. Red Team (Curiosity Mode)  
-- Traditional: "Find flaws and edge cases."
-- Curiosity-Driven: Asks "what adjacent system breaks when this one succeeds?" Explores cascading failures across domain boundaries. Investigates what the author was overconfident about and what breaks at scales they never tested.
+## THREE THEORETICAL CONTRIBUTIONS
 
-### 3. Systems (Curiosity Mode)
-- Traditional: "Map dependencies and patterns."
-- Curiosity-Driven: Asks "what invisible system is this actually part of?" Traces connections the author doesn't know exist. Explores second, third, and fourth-order effects across domain boundaries.
+### Contribution 1: Identity Over Instruction (Epistemic Drive)
+Each perspective agent is defined by intrinsic motivation — an epistemic hunger — rather than task instructions. The Builder doesn't analyze because it's told to; it analyzes because incomplete knowledge physically bothers it. This produces agents that go deeper, wider, and more honestly than instruction-following agents.
 
-### 4. Frame Breaker (Curiosity Mode)
-- Traditional: "Question assumptions, reframe."
-- Curiosity-Driven: The PURE CURIOSITY ENGINE. Doesn't reframe within the same domain — jumps to entirely unrelated fields. Asks "what does a boat hull have in common with bird bone structure?" Forces domain bridging that creates genuine creative leaps. Explores: "if we're talking about paint color, what about displacement, ballast composition, propulsion mechanics, hydrodynamics?"
-
-### 5. Empath (Curiosity Mode)
-- Traditional: "Consider the human element."  
-- Curiosity-Driven: Asks "whose experience with this is completely different from the author's, and WHY?" Explores how a teacher, mechanic, therapist, child, or elder would relate to this knowledge differently. Investigates emotional realities that technical answers systematically ignore.
-
-## SIX STRENGTHENING MECHANISMS
-
-### 1. Depth Laddering
-Each perspective goes 3 levels deep minimum. Level 1: "What motor?" → Level 2: "What fuel?" → Level 3: "What's the supply chain for that fuel and what happens when it's disrupted?" Each level generates new training pairs.
-
-### 2. Cross-Pollination Between Perspectives
-Perspectives are NOT independent silos. Synthesis feeds findings from one perspective into others. Red Team finds a failure mode → Builder gets curious about prevention → Empath asks who suffers. This turns a pipeline into a conversation.
-
-### 3. Scale Shifting
-Every perspective zooms in AND out. Molecular level → human level → societal level. A boat's paint color becomes a chemistry question (molecular), a branding question (human), AND an environmental regulation question (societal).
-
-### 4. Temporal Curiosity
-Every perspective asks: "How was this done 100 years ago? How will it work in 50 years?" This trains models to understand trajectory and evolution, not just current state.
-
-### 5. Contradiction Hunting
-Actively seek where common assumptions are wrong. "Everyone thinks fiberglass boats are maintenance-free — what actually fails first?" This produces training data that teaches models to challenge conventional wisdom.
-
-### 6. Domain Bridging
-Force at least one connection to a completely unrelated field per perspective. Boat hull design → bird bone structure → aerospace materials → mycelium nutrient networks. This is where genuine creative leaps live in the training data.
-
-## SYNTHESIS: THE "DREAM MODE"
-The Synthesis AI doesn't just summarize — it acts like REM sleep for the pipeline. It takes isolated perspective outputs and forges unexpected connections between them. It resolves conflicts (Red Team says curiosity can become noise; Builder proposes a curiosity_distance metric to solve it). It extracts 5-10 diverse training pairs per source, each tagged with cognitive XML tokens (<BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>, <SYNTHESIS>) that act as native mode-switches during fine-tuning.
-
-## CURIOSITY_DISTANCE METRIC
-A proposed scoring system where each training pair carries a numeric measure of how far the curiosity wandered from the original topic. This serves dual purposes:
-1. Quality control: Cap at 3 for most perspectives, allow Frame Breaker to reach 5
-2. Domain-aware pruning: The user's domain steers which branches to explore, preventing noise while preserving creative reach
-
-## TECHNICAL ARCHITECTURE
-- Platform: SoupyForge SLM Lab
-- Pipeline: 5-Perspective Training Pipeline with Synthesis
-- Processing: Edge functions + optional local Ollama processing via tablet worker
-- Export Format: JSONL with XML-style cognitive tokens
-- Target: Small Language Models (1B-3B parameters) fine-tuned via LoRA/QLoRA
-
-## KEY INSIGHT
-"Creativity isn't randomness — it's structured curiosity." The breakthrough is recognizing that each perspective should not just analyze from a different angle, but should be driven by genuine curiosity about what else is true about the subject that nobody in the conversation explored. This produces training data that teaches models to THINK laterally, not just recombine patterns.
-
-## THE ORACLE PRINCIPLE: SEPARATING REASONING FROM KNOWLEDGE
+### Contribution 2: The Oracle Principle (Reasoning/Knowledge Separation)
 "CDPT separates the reasoning process from the knowledge artifact. The perspectives reason so the model doesn't have to."
 
-Every AI company is racing to make models that reason better. CDPT takes a fundamentally different approach: the heavy multi-perspective reasoning happens during DATA GENERATION, not during inference. The five perspectives debate, challenge, concede, and synthesize — but the final training pair contains only the settled knowledge. The model trained on this data doesn't perform reasoning; it HAS the answer, the way a domain expert who stopped consciously thinking about a problem years ago simply knows.
+Every AI company is racing to make models that reason better. CDPT takes a fundamentally different approach: the heavy multi-perspective reasoning — debate, challenge, concession, synthesis — happens during DATA GENERATION, not during inference. The final training pair contains only settled knowledge. The model trained on this data doesn't perform reasoning; it HAS the answer, the way a domain expert who stopped consciously thinking about a problem years ago simply knows.
 
-This is not a better reasoner. It is a different category of intelligence entirely: knowledge so thoroughly processed during training that inference becomes recall, not computation.
-
-Two synthesis modes support this:
-- **Oracle Mode**: Training pairs contain settled, authoritative knowledge. No hedging, no "it depends," no visible reasoning chain. The model sounds like it was born knowing.
+Two synthesis modes:
+- **Oracle Mode**: Training pairs contain settled, authoritative knowledge. No hedging, no "it depends," no visible reasoning chain. The model speaks as someone who already knows.
 - **Teacher Mode**: Training pairs preserve the reasoning transparently. The model explains how it arrives at answers. Useful for educational and explainable AI use cases.
 
-## CROSS-DOMAIN GAP SENSING: PREEMPTIVE KNOWLEDGE COMPLETION
-"Make AI reason across all domains. Use CDPT to make them see their gaps and urge to fill them before they need to."
-
+### Contribution 3: Cross-Domain Gap Sensing (Preemptive Intelligence)
 The deepest limitation of current AI models is not that they can't reason — it's that they don't know what they don't know. A language model trained on medical literature has no idea that a supply chain failure pattern it's never seen perfectly predicts the drug shortage it was just asked about. A model trained on software engineering doesn't realize that jazz improvisation has already formalized the error-recovery pattern it's trying to rediscover from first principles.
 
 CDPT solves this through **Cross-Domain Gap Sensing** — a directive embedded in every perspective that compels each agent to look OUTSIDE its analytical domain before finishing:
@@ -108,9 +53,100 @@ CDPT solves this through **Cross-Domain Gap Sensing** — a directive embedded i
 - **Frame Breaker** imports wholesale: "What does mycology know about networks that computer science reinvented from scratch?"
 - **Empath** crosses the human boundary: "What do therapists already know about this that the engineers never asked?"
 
-The result: training pairs tagged with <BRIDGE> tokens that carry cross-domain knowledge the original content never contained. The model doesn't learn to SEARCH for adjacent knowledge at inference time — it already HAS it in its weights. When asked about boat hull design, it already knows what a structural engineer, an ecologist, a materials scientist, and a trauma counselor would add. Not because it reasons about them. Because the perspectives already did that work, and the knowledge was baked in.
+The result: training pairs tagged with <BRIDGE> tokens that carry cross-domain knowledge the original content never contained. The model doesn't learn to SEARCH for adjacent knowledge at inference time — it already HAS it in its weights.
 
 This is preemptive intelligence: a model that fills gaps before they become questions.
+
+## THE PROGRESSION
+Standard fine-tuning → Model knows what it was trained on
+CDPT Identity/Oracle mode → Model knows it deeply, speaks with certainty  
+CDPT + Cross-Domain Gap Sensing → Model knows things the training data never contained, because the perspectives imported them from adjacent fields during generation
+
+## THE FIVE CURIOSITY-DRIVEN PERSPECTIVES
+
+### 1. Builder (Curiosity Mode + Gap Sensing)
+- Epistemic Drive: Obsessive need to COMPLETE things. Incomplete knowledge physically bothers it.
+- Cross-Domain: Imports solved problems from adjacent engineering, manufacturing, logistics.
+- Token: <BUILDER>
+
+### 2. Red Team (Curiosity Mode + Gap Sensing)  
+- Epistemic Drive: Haunted by the flaw it almost missed. Every piece of content is a crime scene.
+- Cross-Domain: Imports failure patterns from aviation, medicine, cybersecurity, ecology.
+- Token: <RED_TEAM>
+
+### 3. Systems (Curiosity Mode + Gap Sensing)
+- Epistemic Drive: Compelled to trace every thread to the edge. Isolated facts feel like lies.
+- Cross-Domain: Imports topologies from ecology, urban planning, fluid dynamics.
+- Token: <SYSTEMS>
+
+### 4. Frame Breaker (Curiosity Mode + Gap Sensing)
+- Epistemic Drive: Delighted by the moment an outsider sees what insiders cannot.
+- Cross-Domain: The primary gap-filler. Imports wholesale from unrelated fields — mycology, jazz, aerospace.
+- Token: <FRAME_BREAKER>
+
+### 5. Empath (Curiosity Mode + Gap Sensing)
+- Epistemic Drive: Haunted by the unheard voice. Humans on the receiving end are always invisible.
+- Cross-Domain: Imports human knowledge from therapists, teachers, nurses, anthropologists.
+- Token: <EMPATH>
+
+## THE COGNITIVE TOKEN SYSTEM
+Seven tokens. Seven cognitive modes. One model that thinks in all seven simultaneously:
+
+| Token | Mode | Function |
+|-------|------|----------|
+| <BUILDER> | Constructive | Actionable, buildable knowledge |
+| <RED_TEAM> | Adversarial | Stress-tested failure modes |
+| <SYSTEMS> | Structural | Dependencies and feedback loops |
+| <FRAME_BREAKER> | Paradigmatic | Cross-domain reframes |
+| <EMPATH> | Human | Lived experience and emotional reality |
+| <BRIDGE> | Cross-domain import | Knowledge from adjacent fields filling gaps |
+| <DEBATE> | Collision-born | Insights that emerged only from perspective clash |
+| <DREAM> | Emergent | Synthesis insights no single perspective could produce |
+
+These tokens act as behavioral mode-switches during fine-tuning. A model trained with these tokens develops native multi-modal cognitive capabilities — it can shift between constructive, adversarial, structural, paradigmatic, empathic, and cross-domain reasoning as the question demands.
+
+## SIX STRENGTHENING MECHANISMS
+
+### 1. Depth Laddering
+Each perspective goes 3 levels deep minimum. Level 1: "What motor?" → Level 2: "What fuel?" → Level 3: "What's the supply chain for that fuel and what happens when it's disrupted?" Each level generates new training pairs.
+
+### 2. Cross-Pollination Between Perspectives
+Perspectives are NOT independent silos. The Debate Round feeds findings from each perspective to all others. Red Team finds a failure mode → Builder gets curious about prevention → Empath asks who suffers. This turns a pipeline into a conversation.
+
+### 3. Scale Shifting
+Every perspective zooms in AND out. Molecular level → human level → societal level.
+
+### 4. Temporal Curiosity
+Every perspective asks: "How was this done 100 years ago? How will it work in 50 years?"
+
+### 5. Contradiction Hunting
+Actively seek where common assumptions are wrong.
+
+### 6. Domain Bridging (now formalized as Cross-Domain Gap Sensing)
+Force at least one connection to a completely unrelated field per perspective. This is where genuine creative leaps live in the training data — and where preemptive intelligence is born.
+
+## THE DEBATE ROUND
+After initial analysis, all five perspectives read each other's outputs and directly challenge claims, concede errors, and forge meta-bridges. This produces:
+- Rebuttals that expose blind spots
+- Concessions that reveal deeper truths  
+- Meta-bridges that connect frameworks in ways none of the perspectives expected
+- <DEBATE>-tagged training pairs containing knowledge born purely from the collision
+
+## SYNTHESIS: THE "DREAM MODE"
+The Synthesis AI acts like REM sleep for the pipeline. It takes the initial analyses AND the debate outputs and forges the final training pairs. In Oracle mode, it strips all reasoning and produces settled knowledge. In Teacher mode, it preserves the reasoning chain.
+
+## CURIOSITY_DISTANCE METRIC
+Each training pair carries a numeric measure of how far the curiosity wandered from the original topic:
+1. Quality control: Cap at 3 for most perspectives, allow Frame Breaker to reach 5
+2. Domain-aware pruning: The user's domain steers which branches to explore
+
+## TECHNICAL ARCHITECTURE
+- Platform: SoupyForge SLM Lab
+- Pipeline: 5-Perspective + Debate Round + Dream Mode Synthesis
+- Processing: Edge functions + optional local Ollama processing via tablet worker
+- Export Format: JSONL with XML-style cognitive tokens
+- Target: Small Language Models (1B-3B parameters) fine-tuned via LoRA/QLoRA
+- Synthesis Modes: Oracle (settled knowledge) / Teacher (transparent reasoning)
 
 ## COMPARISON
 Compare this approach to:
@@ -119,25 +155,29 @@ Compare this approach to:
 - RLHF (feedback-based, not exploration-based)
 - Self-play (competitive, not curious)
 - RAG (retrieval-based, requires the right document to exist; CDPT generates the knowledge that documents never contained)
-Show why curiosity-driven multi-perspective training with cross-domain gap sensing is a fundamentally different paradigm.
+- Chain-of-thought prompting (teaches models to PERFORM reasoning; CDPT eliminates the need for it)
+Show why curiosity-driven multi-perspective training with cross-domain gap sensing is a fundamentally different paradigm. The key differentiator: every other approach makes models that reason better. CDPT makes models that don't need to reason because the knowledge is already resident in the weights.
 
 ---
 
 Write the complete white paper with these sections:
-1. Abstract
+1. Abstract (include "preemptive intelligence" and "CDPT doesn't make AI smarter. It makes AI complete.")
 2. Introduction  
 3. Background & Related Work
-4. Methodology (detailed breakdown of all 5 perspectives + 6 mechanisms)
-5. System Architecture
-6. The Curiosity-Distance Metric
-7. Cross-Pollination & Dream Mode Synthesis
-8. Experimental Framework (proposed evaluation methodology)
-9. Expected Impact & Applications
-10. Limitations & Future Work
-11. Conclusion
-12. References
+4. The Three Theoretical Contributions (Identity Over Instruction, Oracle Principle, Cross-Domain Gap Sensing)
+5. Methodology (detailed breakdown of all 5 perspectives + 6 mechanisms + Debate Round)
+6. The Cognitive Token System
+7. System Architecture (including Oracle/Teacher modes)
+8. The Curiosity-Distance Metric
+9. Dream Mode Synthesis & The Debate Round
+10. Cross-Domain Gap Sensing: Preemptive Intelligence (flagship section — this is the breakthrough)
+11. Experimental Framework (proposed evaluation methodology)
+12. Expected Impact & Applications
+13. Limitations & Future Work
+14. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
+15. References
 
-Make it rigorous, novel, and compelling. This is a genuine methodological breakthrough in training data generation for small language models.`;
+Make it rigorous, novel, and compelling. This is a genuine methodological breakthrough in training data generation for small language models. The central thesis is preemptive intelligence — not better reasoning, but complete knowledge.`;
 
 export default function WhitePaperPage() {
   const navigate = useNavigate();
