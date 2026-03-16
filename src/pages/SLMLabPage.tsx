@@ -1000,6 +1000,10 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [videoAnalysisText, setVideoAnalysisText] = useState("");
   const [videoInterval, setVideoInterval] = useState(2);
   const [videoMaxFrames, setVideoMaxFrames] = useState(20);
+  const [smartKeyframe, setSmartKeyframe] = useState(false);
+  const [smartThreshold, setSmartThreshold] = useState(15);
+  const [extractCC, setExtractCC] = useState(true);
+  const [videoCCText, setVideoCCText] = useState("");
   const videoUploadRef = useRef<HTMLInputElement>(null);
   const scrape = useScrapeForTraining();
   const createSample = useCreateSample();
