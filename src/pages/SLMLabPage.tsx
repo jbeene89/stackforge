@@ -1344,6 +1344,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")} className="flex-1">
           <Plus className="h-4 w-4 mr-2" /> Manual
         </Button>
+        <Button variant={mode === "video" ? "default" : "outline"} onClick={() => setMode("video")} className="flex-1">
+          <Video className="h-4 w-4 mr-2" /> Video
+        </Button>
       </div>
 
       {mode === "import" ? (
