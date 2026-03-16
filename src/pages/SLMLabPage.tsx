@@ -1302,7 +1302,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </div>
 
       {/* Synthesis mode description */}
-      <Card className={`border-${synthesisMode === "oracle" ? "primary" : "blue-500"}/20 bg-${synthesisMode === "oracle" ? "primary" : "blue-500"}/5`}>
+      <Card className={synthesisMode === "oracle" ? "border-primary/20 bg-primary/5" : "border-blue-500/20 bg-blue-500/5"}>
         <CardContent className="py-3">
           <div className="flex items-start gap-2">
             {synthesisMode === "oracle" ? (
