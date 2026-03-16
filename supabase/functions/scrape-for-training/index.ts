@@ -322,6 +322,7 @@ Original content domain: ${domain_hint || "general"}
       success: true,
       extracted: pairs.length,
       perspectives: Object.keys(perspectives),
+      debate_mode: hasDebate,
       offloaded: offloadKey || null,
       batch_id: offloadKey ? batchId : null,
       samples: pairs.map((p: any) => ({ instruction: p.instruction.slice(0, 80), quality: p.quality })),
