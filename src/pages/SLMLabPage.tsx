@@ -1264,9 +1264,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     } finally {
       setVideoAnalyzing(false);
     }
-  };
 
-  const handleProcessVideoText = async () => {
+  const handleAddManual = () => {
+    if (!manualInput.trim() || !manualOutput.trim()) return;
     if (!videoAnalysisText.trim()) return;
     setFileProcessing(true);
     try {
