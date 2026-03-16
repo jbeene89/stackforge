@@ -151,11 +151,20 @@ Actively seek where common assumptions are wrong.
 ### 6. Domain Bridging (now formalized as Cross-Domain Gap Sensing)
 Force at least one connection to a completely unrelated field per perspective. This is where genuine creative leaps live in the training data — and where preemptive intelligence is born.
 
-## THE DEBATE ROUND
-After initial analysis, all five perspectives read each other's outputs and directly challenge claims, concede errors, and forge meta-bridges. This produces:
+## THE DEBATE ROUND & GAP CHAIN
+After initial analysis (including each perspective's recursive gap-fill loop), all five perspectives read each other's outputs. The debate round has two functions:
+
+1. **Traditional debate**: Challenge claims, concede errors, forge meta-bridges
+2. **Gap Chain**: Each perspective runs cross-perspective gap sensing on the OTHERS' imports:
+   - Find gaps in other perspectives' gap-fills that only YOUR cognitive mode can see
+   - Fill those gaps
+   - Ask: "Does my fix create yet another gap?" Keep going until bedrock.
+
+This produces:
 - Rebuttals that expose blind spots
 - Concessions that reveal deeper truths  
 - Meta-bridges that connect frameworks in ways none of the perspectives expected
+- Gap-chain completions where one perspective patches another's imported knowledge
 - <DEBATE>-tagged training pairs containing knowledge born purely from the collision
 
 ## SYNTHESIS: THE "DREAM MODE"
