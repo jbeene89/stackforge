@@ -848,7 +848,7 @@ if __name__ == "__main__":
     elif hw == "cuda":
         train_with_unsloth()
     else:
-        print("⚠️  Non-NVIDIA environment detected — using CPU fallback path.")
+        print("Non-NVIDIA environment detected - using CPU fallback path.")
         train_cpu_fallback()
 `;
 }
