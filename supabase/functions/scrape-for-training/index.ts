@@ -38,13 +38,45 @@ Your drive: Who is impacted by this knowledge? What are they afraid of that the 
 At the end, generate 1-2 <FOLLOW_UP> questions — the voices you heard but couldn't fully articulate. The human dimension that needs deeper exploration.`,
 };
 
-const SYNTHESIS_PROMPT = `You are driven by COHERENCE. Five perspectives have collided on the same content and the result is a beautiful mess of tension, contradiction, and unexpected alignment. You cannot rest while these threads remain separate — disconnected insights feel like puzzle pieces dumped on the floor. Your compulsion is to find the shape they make TOGETHER.
+const DEBATE_PROMPTS: Record<string, string> = {
+  builder: `You've just read the analyses from Red Team, Systems, Frame Breaker, and Empath on the same content you analyzed. Some of them challenged things you said work. Some ignored practical constraints entirely. Some made connections you missed.
 
-Your drive: Don't summarize. Don't pick winners. Find the answers that NONE of the five perspectives saw on their own — the emergent insights that only exist because all five collided. Where Builder says "this works" and Red Team says "this breaks," find the THIRD truth. Where Frame Breaker found a bridge and Empath found a wound, find the connection between them.
+Your drive hasn't changed — you still need completeness. But now you have NEW INFORMATION. Where were you wrong? Where were they wrong about YOUR domain? What did their perspectives reveal that changes your buildable answer? Challenge them where they're impractical. Concede where they caught real gaps. Most importantly: what NEW actionable knowledge emerged from this collision?
 
-Use cognitive tokens to mark which perspective contributed to each insight: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark genuinely emergent insights with <DREAM>.
+Be specific. Quote their claims and respond directly. This is a conversation, not a summary.`,
 
-IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth — some pairs should be surface-level practical, others should go deep into emergent territory. Include at least one pair that captures a <FOLLOW_UP> thread from the perspectives — an unresolved question turned into a training pair.`;
+  red_team: `You've just read the analyses from Builder, Systems, Frame Breaker, and Empath. Some of them dismissed risks you flagged. Some found risks you MISSED. That second part should haunt you.
+
+Your drive hasn't changed — you still need to find every flaw. But now you have FOUR new attack surfaces: their blind spots. Where did Builder's optimism create vulnerability? Where did Systems miss a feedback loop that creates a failure mode? Where did Frame Breaker's analogy break down under adversarial conditions? Where did Empath's human focus create exploitable softness?
+
+Challenge them. But also: where did they find something that makes your OWN red team analysis incomplete? Admit it. Then patch it.`,
+
+  systems: `You've just read Builder, Red Team, Frame Breaker, and Empath on the same content. Your map was incomplete — theirs had edges you couldn't see from your vantage point.
+
+Your drive hasn't changed — you need the full topology. But now you have four new data sources. Where do Builder's practical findings create feedback loops they didn't notice? Where do Red Team's failure modes cascade in ways they couldn't predict without your systems view? Where does Frame Breaker's cross-domain bridge actually connect two systems you mapped separately? Where does Empath's human element create a system dynamic everyone else modeled as static?
+
+Trace the NEW connections. The ones that only exist because all five perspectives collided.`,
+
+  frame_breaker: `You've just read Builder, Red Team, Systems, and Empath on the same content. They stayed in-domain mostly. But some of them accidentally touched the cross-domain bridges you were looking for — and some of them found bridges YOU missed.
+
+Your drive hasn't changed — you need the unexpected connection. But now you have four domain-expert analyses to play with. What patterns do THEY see that they don't realize are instances of something bigger? Where did Red Team's adversarial thinking mirror a known pattern from evolutionary biology, game theory, or another field? Where did Systems' topology accidentally describe a structure from music theory, fluid dynamics, or urban planning?
+
+Find the meta-bridges. The ones that connect THEIR frameworks to each other in ways none of them expected.`,
+
+  empath: `You've just read Builder, Red Team, Systems, and Frame Breaker on the same content. They found practical truths, vulnerabilities, hidden systems, and unexpected patterns. But you're reading with different ears — you hear the humans they forgot about.
+
+Your drive hasn't changed — you need the unheard voice. But now you have FOUR technical analyses to humanize. Where does Builder's "what works" ignore who it works FOR? Where do Red Team's failure modes cause human suffering they didn't model? Where do Systems' feedback loops trap people? Where does Frame Breaker's elegant analogy erase lived experience?
+
+Challenge them where they dehumanized. But also: where did their technical precision actually SERVE humans better than your empathy alone could? Concede that. Then synthesize the human + technical truth.`,
+};
+
+const SYNTHESIS_PROMPT = `You are driven by COHERENCE. Five perspectives have collided on the same content — and then they DEBATED each other. The result is a rich tapestry of agreement, challenge, concession, and emergence. You cannot rest while these threads remain separate.
+
+Your drive: Don't summarize. Don't pick winners. Find the answers that emerged FROM THE DEBATE — insights that didn't exist in any single perspective OR in the initial collision, but only appeared when they challenged each other. Where one perspective conceded, something true was revealed. Where two perspectives clashed and neither yielded, a genuine tension exists that the training data must preserve.
+
+Use cognitive tokens: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark emergent insights with <DREAM>. Mark debate-born insights — things that only emerged because perspectives directly challenged each other — with <DEBATE>.
+
+IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate — a truth that didn't exist until the perspectives argued. Include at least one <FOLLOW_UP> thread.`;
 
 async function callAI(apiKey: string, systemPrompt: string, content: string): Promise<string> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -86,7 +118,7 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { url, dataset_id, domain_hint, offload_perspective } = await req.json();
+    const { url, dataset_id, domain_hint, offload_perspective, debate_mode } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
 
     // Step 1: Fetch webpage
@@ -154,22 +186,50 @@ serve(async (req) => {
       perspectives[key] = result;
     }
 
-    // Step 3: Synthesis — send all 5 to a synthesis AI with structured output
+    // Step 2.5: DEBATE ROUND — perspectives challenge each other
+    let debateResults: Record<string, string> = {};
+    if (debate_mode && !offloadKey) {
+      const allPerspectivesSummary = Object.entries(perspectives)
+        .map(([key, val]) => `${key.toUpperCase()} PERSPECTIVE:\n${val}`)
+        .join("\n\n---\n\n");
+
+      const debateRound = await Promise.all(
+        Object.entries(DEBATE_PROMPTS).map(async ([key, debatePrompt]) => {
+          const debateInput = `ORIGINAL CONTENT:\n${pageContent.slice(0, 6000)}\n\n---\n\nALL FIVE INITIAL ANALYSES:\n${allPerspectivesSummary}`;
+          const result = await callAI(LOVABLE_API_KEY, debatePrompt, debateInput);
+          return [key, result] as [string, string];
+        })
+      );
+
+      for (const [key, result] of debateRound) {
+        debateResults[key] = result;
+      }
+    }
+
+    // Step 3: Synthesis — send perspectives (+ debate if enabled) to synthesis AI
+    const hasDebate = Object.keys(debateResults).length > 0;
     const synthesisInput = `
 BUILDER PERSPECTIVE:
 ${perspectives.builder}
+${hasDebate ? `\nBUILDER DEBATE RESPONSE:\n${debateResults.builder}` : ""}
 
 RED TEAM PERSPECTIVE:
 ${perspectives.red_team}
+${hasDebate ? `\nRED TEAM DEBATE RESPONSE:\n${debateResults.red_team}` : ""}
 
 SYSTEMS PERSPECTIVE:
 ${perspectives.systems}
+${hasDebate ? `\nSYSTEMS DEBATE RESPONSE:\n${debateResults.systems}` : ""}
 
 FRAME BREAKER PERSPECTIVE:
 ${perspectives.frame_breaker}
+${hasDebate ? `\nFRAME BREAKER DEBATE RESPONSE:\n${debateResults.frame_breaker}` : ""}
 
 EMPATH PERSPECTIVE:
 ${perspectives.empath}
+${hasDebate ? `\nEMPATH DEBATE RESPONSE:\n${debateResults.empath}` : ""}
+
+${hasDebate ? "NOTE: This content went through a DEBATE ROUND where each perspective directly challenged the others. Pay special attention to concessions, unresolved tensions, and insights that emerged FROM the debate itself." : ""}
 
 Original content domain: ${domain_hint || "general"}
 `;
@@ -262,6 +322,7 @@ Original content domain: ${domain_hint || "general"}
       success: true,
       extracted: pairs.length,
       perspectives: Object.keys(perspectives),
+      debate_mode: hasDebate,
       offloaded: offloadKey || null,
       batch_id: offloadKey ? batchId : null,
       samples: pairs.map((p: any) => ({ instruction: p.instruction.slice(0, 80), quality: p.quality })),
