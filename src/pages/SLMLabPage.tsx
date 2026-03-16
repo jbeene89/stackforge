@@ -1602,6 +1602,14 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
     // JSONL is now bundled inside the ZIP — no separate download needed
     
     const scriptContent = generateTrainingScript(job, dataset);
+
+    // Validate generated Python script for syntax issues before bundling
+    const scriptErrors = validatePythonScript(scriptContent);
+    if (scriptErrors.length > 0) {
+      toast.error(`Script template has ${scriptErrors.length} issue(s): ${scriptErrors[0]}`);
+      console.error("Script validation errors:", scriptErrors);
+      return;
+    }
     const readmeContent = `# 🧠 SoupyForge Training Kit — Five Perspective Pipeline
 ## ${dataset.name}
 
