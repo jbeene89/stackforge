@@ -1265,8 +1265,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       setVideoAnalyzing(false);
     }
 
-  const handleAddManual = () => {
-    if (!manualInput.trim() || !manualOutput.trim()) return;
+  };
+
+  const handleProcessVideoText = async () => {
     if (!videoAnalysisText.trim()) return;
     setFileProcessing(true);
     try {
@@ -1288,7 +1289,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
-
+  const handleAddManual = () => {
     if (!manualInput.trim() || !manualOutput.trim()) return;
     createSample.mutate(
       { dataset_id: dataset.id, input: manualInput, output: manualOutput, quality_score: 4 },
