@@ -100,6 +100,7 @@ const App = () => (
                 <Route path="/export" element={<ExportStudioPage />} />
                 <Route path="/experimental" element={<ExperimentalPage />} />
                 <Route path="/slm-lab" element={<SLMLabPage />} />
+                <Route path="/white-paper" element={<WhitePaperPage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/account" element={<AccountPage />} />
