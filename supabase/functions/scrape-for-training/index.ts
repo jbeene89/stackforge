@@ -84,9 +84,11 @@ const SYNTHESIS_PROMPT_BASE = `You are driven by COHERENCE. Five perspectives ha
 
 Your drive: Don't summarize. Don't pick winners. Find the answers that emerged FROM THE DEBATE — insights that didn't exist in any single perspective OR in the initial collision, but only appeared when they challenged each other. Where one perspective conceded, something true was revealed. Where two perspectives clashed and neither yielded, a genuine tension exists that the training data must preserve.
 
-Use cognitive tokens: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark emergent insights with <DREAM>. Mark debate-born insights — things that only emerged because perspectives directly challenged each other — with <DEBATE>.
+CROSS-DOMAIN COMPLETENESS: Each perspective identified knowledge gaps that OTHER domains have already filled. These cross-domain imports are the highest-value training data. A model trained on this should already HAVE the knowledge that normally requires consulting five different specialists. When a user asks about boats, the model should already know what a structural engineer, an ecologist, a supply chain expert, and a therapist would add — without being asked. The gaps should be pre-filled in the weights.
 
-IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate — a truth that didn't exist until the perspectives argued. Include at least one <FOLLOW_UP> thread.`;
+Use cognitive tokens: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark emergent insights with <DREAM>. Mark debate-born insights with <DEBATE>. Mark cross-domain gap-fills — knowledge imported from another field that completes the picture — with <BRIDGE>.
+
+IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate. Include at least one <BRIDGE> pair that imports knowledge from an adjacent domain the original content never touched. Include at least one <FOLLOW_UP> thread.`;
 
 const ORACLE_SUFFIX = `
 
