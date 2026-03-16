@@ -830,7 +830,7 @@ def train_cpu_fallback():
 
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-    print(f"🧠 SoupyForge Local Trainer — Five Perspective Pipeline")
+    print(f"SoupyForge Local Trainer - Five Perspective Pipeline")
     print(f"   Model: {BASE_MODEL}")
     print(f"   Method: ${job.method}")
     print(f"   Hardware: ${hwProfile}")
