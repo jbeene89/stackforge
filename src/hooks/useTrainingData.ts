@@ -663,7 +663,7 @@ def check_hardware():
     else:
         import psutil
         ram = psutil.virtual_memory().total / 1e9
-        print(f"  CPU mode — {ram:.0f} GB RAM available")
+        print(f"  CPU mode - {ram:.0f} GB RAM available")
         return "cpu"
 
 def train_with_unsloth():
