@@ -704,7 +704,7 @@ def train_cpu_fallback():
 
     model = AutoModelForCausalLM.from_pretrained(
         BASE_MODEL,
-        torch_dtype=torch.float32,
+        dtype=torch.float32,
         device_map="cpu",
         trust_remote_code=True,
         token=HF_TOKEN,
