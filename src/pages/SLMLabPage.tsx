@@ -1006,51 +1006,103 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     setUrl("");
   };
 
+  const extractDocxText = async (arrayBuffer: ArrayBuffer): Promise<string> => {
+    const JSZip = (await import("jszip")).default;
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    const docXml = await zip.file("word/document.xml")?.async("string");
+    if (!docXml) throw new Error("No document.xml found in DOCX");
+    // Extract text from <w:t> tags
+    const matches = docXml.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || [];
+    const paragraphs: string[] = [];
+    let current = "";
+    // Split by paragraph markers
+    const parts = docXml.split(/<\/w:p>/);
+    for (const part of parts) {
+      const texts = part.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || [];
+      if (texts.length > 0) {
+        const line = texts.map(t => t.replace(/<[^>]+>/g, "")).join("");
+        if (line.trim()) paragraphs.push(line.trim());
+      }
+    }
+    return paragraphs.join("\n\n");
+  };
+
+  const extractPptxText = async (arrayBuffer: ArrayBuffer): Promise<string> => {
+    const JSZip = (await import("jszip")).default;
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    const slides: string[] = [];
+    // PPTX slides are in ppt/slides/slide1.xml, slide2.xml, etc.
+    const slideFiles = Object.keys(zip.files)
+      .filter(f => /^ppt\/slides\/slide\d+\.xml$/.test(f))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/slide(\d+)/)?.[1] || "0");
+        const numB = parseInt(b.match(/slide(\d+)/)?.[1] || "0");
+        return numA - numB;
+      });
+    for (const slideFile of slideFiles) {
+      const xml = await zip.file(slideFile)?.async("string");
+      if (!xml) continue;
+      // Extract text from <a:t> tags
+      const texts = xml.match(/<a:t>([^<]*)<\/a:t>/g) || [];
+      const slideText = texts.map(t => t.replace(/<[^>]+>/g, "")).join(" ").trim();
+      if (slideText) slides.push(slideText);
+    }
+    return slides.join("\n\n");
+  };
+
   const handleRawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ext = file.name.toLowerCase().split(".").pop();
 
-    if (file.name.toLowerCase().endsWith(".pdf")) {
-      // PDF extraction using pdfjs-dist
-      try {
+    try {
+      let fullText = "";
+      let meta = "";
+
+      if (ext === "pdf") {
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let fullText = "";
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
-          const pageText = content.items.map((item: any) => item.str).join(" ");
-          fullText += pageText + "\n\n";
+          fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
         }
-        fullText = fullText.trim();
-        if (fullText.length < 50) {
-          toast.error("PDF has too little extractable text (possibly scanned/image-only).");
-          return;
-        }
-        setFileText(fullText);
-        setFileName(file.name);
-        toast.success(`Extracted text from "${file.name}" (${Math.round(fullText.length / 1000)}k chars, ${pdf.numPages} pages)`);
-      } catch (err: any) {
-        console.error("PDF extraction error:", err);
-        toast.error("Failed to extract text from PDF: " + (err?.message || "unknown error"));
+        meta = `${pdf.numPages} pages`;
+      } else if (ext === "docx") {
+        const arrayBuffer = await file.arrayBuffer();
+        fullText = await extractDocxText(arrayBuffer);
+        meta = "DOCX";
+      } else if (ext === "pptx") {
+        const arrayBuffer = await file.arrayBuffer();
+        fullText = await extractPptxText(arrayBuffer);
+        meta = "PPTX";
+      } else {
+        // Plain text files
+        const text = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve(ev.target?.result as string);
+          reader.onerror = () => reject(new Error("Failed to read file"));
+          reader.readAsText(file);
+        });
+        fullText = text;
+        meta = "text";
       }
-    } else {
-      // Plain text files
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const text = ev.target?.result as string;
-        if (text.length < 50) {
-          toast.error("File too short — need at least 50 characters of content.");
-          return;
-        }
-        setFileText(text);
-        setFileName(file.name);
-        toast.success(`Loaded "${file.name}" (${Math.round(text.length / 1000)}k chars)`);
-      };
-      reader.readAsText(file);
+
+      fullText = fullText.trim();
+      if (fullText.length < 50) {
+        toast.error("File has too little extractable text (need at least 50 characters).");
+        return;
+      }
+      setFileText(fullText);
+      setFileName(file.name);
+      toast.success(`Extracted text from "${file.name}" (${Math.round(fullText.length / 1000)}k chars, ${meta})`);
+    } catch (err: any) {
+      console.error("File extraction error:", err);
+      toast.error("Failed to extract text: " + (err?.message || "unknown error"));
     }
+
     if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
 
@@ -1151,7 +1203,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
               <Button onClick={() => fileUploadRef.current?.click()} variant="outline" className="flex-1">
                 <Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}
               </Button>
-              <input ref={fileUploadRef} type="file" accept=".pdf,.txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
+              <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
             </div>
             {fileName && (
               <div className="space-y-3">
