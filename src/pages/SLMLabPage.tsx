@@ -1392,6 +1392,80 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             )}
           </CardContent>
         </Card>
+      ) : mode === "video" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Video className="h-4 w-4 text-primary" /> Video Frame Analysis
+            </CardTitle>
+            <CardDescription>
+              Upload a short video (slides, whiteboard, diagram). Frames are extracted client-side, then Gemini 2.5 Pro analyzes the visual content and converts it into text for the pipeline.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Button onClick={() => videoUploadRef.current?.click()} variant="outline" className="flex-1" disabled={videoExtracting}>
+                <Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}
+              </Button>
+              <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="hidden" onChange={handleVideoUpload} />
+            </div>
+
+            {videoExtracting && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RotateCcw className="h-3.5 w-3.5 animate-spin" />
+                  Extracting frames… {videoExtractProgress}%
+                </div>
+                <Progress value={videoExtractProgress} className="h-1.5" />
+              </div>
+            )}
+
+            {videoFrames.length > 0 && !videoExtracting && (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <Video className="h-4 w-4" /> {videoFileName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{videoFrames.length} frames extracted</p>
+                </div>
+
+                <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
+                  {videoFrames.map((frame, i) => (
+                    <img key={i} src={frame} alt={`Frame ${i + 1}`} className="rounded border border-border/50 w-full aspect-video object-cover" />
+                  ))}
+                </div>
+
+                {!videoAnalysisText && (
+                  <Button onClick={handleAnalyzeFrames} disabled={videoAnalyzing} className="w-full">
+                    {videoAnalyzing ? (
+                      <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Analyzing with Gemini 2.5 Pro…</>
+                    ) : (
+                      <><Eye className="h-4 w-4 mr-2" /> Analyze Frames with AI</>
+                    )}
+                  </Button>
+                )}
+
+                {videoAnalysisText && (
+                  <div className="space-y-3">
+                    <div className="bg-muted/30 rounded-lg p-3 max-h-48 overflow-y-auto">
+                      <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
+                        {videoAnalysisText.slice(0, 800)}{videoAnalysisText.length > 800 ? "…" : ""}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{Math.round(videoAnalysisText.length / 1000)}k characters extracted from video</p>
+                    <Button onClick={handleProcessVideoText} disabled={fileProcessing} className="w-full">
+                      {fileProcessing ? (
+                        <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
+                      ) : (
+                        <><Sparkles className="h-4 w-4 mr-2" /> Process Through Pipeline</>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ) : mode === "scrape" ? (
         <Card>
           <CardHeader>
