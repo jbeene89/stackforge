@@ -1274,6 +1274,54 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         </Card>
       )}
 
+      {/* Synthesis Mode Toggle */}
+      <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Brain className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Synthesis Voice</p>
+            <p className="text-[10px] text-muted-foreground">How the final training pairs sound</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5">
+          <button
+            onClick={() => setSynthesisMode("oracle")}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${synthesisMode === "oracle" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Oracle
+          </button>
+          <button
+            onClick={() => setSynthesisMode("teacher")}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${synthesisMode === "teacher" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Teacher
+          </button>
+        </div>
+      </div>
+
+      {/* Synthesis mode description */}
+      <Card className={`border-${synthesisMode === "oracle" ? "primary" : "blue-500"}/20 bg-${synthesisMode === "oracle" ? "primary" : "blue-500"}/5`}>
+        <CardContent className="py-3">
+          <div className="flex items-start gap-2">
+            {synthesisMode === "oracle" ? (
+              <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+            ) : (
+              <BookOpen className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+            )}
+            <div className="space-y-1">
+              <p className="text-xs font-medium">{synthesisMode === "oracle" ? "Oracle Mode" : "Teacher Mode"}</p>
+              <p className="text-[10px] text-muted-foreground">
+                {synthesisMode === "oracle"
+                  ? "The perspectives reason so the model doesn't have to. Training pairs contain settled knowledge — no hedging, no \"it depends.\" The model speaks as someone who already knows."
+                  : "Training pairs show reasoning transparently. The model explains how it arrives at answers, walking through trade-offs. Good for educational use cases."}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Debate Mode Toggle */}
       <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
         <div className="flex items-center gap-3">

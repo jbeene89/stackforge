@@ -261,7 +261,7 @@ Original content domain: ${domain_hint || "general"}
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYNTHESIS_PROMPT },
+          { role: "system", content: getSynthesisPrompt(synthesis_mode || "oracle") },
           { role: "user", content: synthesisInput },
         ],
         tools: [{
