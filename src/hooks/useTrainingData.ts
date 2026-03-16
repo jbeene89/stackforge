@@ -587,7 +587,7 @@ def check_hf_auth():
         from huggingface_hub import HfApi
         api = HfApi()
         user = api.whoami()
-        print(f"  ✅ Logged in as: {user.get('name', 'unknown')}")
+        print(f"  [OK] Logged in as: {user.get('name', 'unknown')}")
         return
     except Exception:
         pass
