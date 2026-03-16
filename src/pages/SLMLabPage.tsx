@@ -1595,6 +1595,23 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   ))}
                 </div>
 
+                {videoCCText && (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">
+                        <Subtitles className="h-3.5 w-3.5 mr-2" />
+                        {videoCCText.split("\n").length} closed caption lines extracted
+                        <ChevronDown className="h-3 w-3 ml-auto" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
+                        <p className="text-[11px] text-muted-foreground font-mono whitespace-pre-wrap">{videoCCText}</p>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
                 {!videoAnalysisText && (
                   <Button onClick={handleAnalyzeFrames} disabled={videoAnalyzing} className="w-full">
                     {videoAnalyzing ? (
