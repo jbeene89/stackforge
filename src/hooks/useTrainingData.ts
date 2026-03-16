@@ -824,7 +824,7 @@ def train_cpu_fallback():
 
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     tokenizer.save_pretrained(f"{OUTPUT_DIR}/lora")
-    print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
+    print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
     print(f"   To merge: use peft merge_and_unload() then export to GGUF manually")
 
 
