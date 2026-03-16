@@ -31,10 +31,10 @@ export function useMarketplaceTemplates(type?: string) {
   return useQuery({
     queryKey: ["marketplace-templates", type],
     queryFn: async () => {
+      // Use the public view which excludes template_data
       let query = supabase
-        .from("marketplace_templates" as any)
+        .from("marketplace_templates_public" as any)
         .select("*")
-        .eq("status", "published")
         .order("downloads", { ascending: false });
 
       if (type && type !== "all") {
@@ -55,6 +55,7 @@ export function useMarketplaceTemplates(type?: string) {
 
       return (data as any[]).map((d: any) => ({
         ...d,
+        template_data: null, // Not included in public view
         creator_name: nameMap.get(d.creator_id) || "Anonymous",
       })) as MarketplaceTemplate[];
     },
