@@ -733,7 +733,7 @@ def train_with_unsloth():
         training_args=training_args,
     )
 
-    print("\\n🔥 Starting GPU training with Unsloth...")
+    print("\\n>> Starting GPU training with Unsloth...")
     trainer.train()
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     print(f"\\n✅ LoRA adapter saved to {OUTPUT_DIR}/lora")
