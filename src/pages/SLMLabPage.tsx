@@ -986,6 +986,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
+  const [debateMode, setDebateMode] = useState(false);
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileProcessing, setFileProcessing] = useState(false);
