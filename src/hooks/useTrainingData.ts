@@ -840,6 +840,7 @@ if __name__ == "__main__":
     print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
     print()
     hw = check_hardware()
+    check_hf_auth()
     print()
 
     if USE_CPU_ONLY:
