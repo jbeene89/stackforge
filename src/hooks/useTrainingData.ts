@@ -667,7 +667,7 @@ def check_hardware():
         return "cpu"
 
 def train_with_unsloth():
-    """NVIDIA CUDA path — uses Unsloth for fast LoRA fine-tuning."""
+    """NVIDIA CUDA path - uses Unsloth for fast LoRA fine-tuning."""
     try:
         from unsloth import FastLanguageModel
     except Exception as e:
