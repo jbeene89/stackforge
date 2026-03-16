@@ -118,7 +118,7 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { url, dataset_id, domain_hint, offload_perspective } = await req.json();
+    const { url, dataset_id, domain_hint, offload_perspective, debate_mode } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
 
     // Step 1: Fetch webpage
