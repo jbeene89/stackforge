@@ -1344,6 +1344,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           frames: videoFrames,
           domain_hint: dataset.domain,
           dataset_id: dataset.id,
+          captions: videoCCText || undefined,
         }),
       });
 
