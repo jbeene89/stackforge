@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.fetch-hf-dataset]
 verify_jwt = false
+
+[functions.analyze-video-frames]
+verify_jwt = false
