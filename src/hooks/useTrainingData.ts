@@ -818,7 +818,7 @@ def train_cpu_fallback():
         training_args=training_args,
     )
 
-    print("\\n🔥 Starting CPU training with Five Perspective Pipeline tokens...")
+    print("\\n>> Starting CPU training with Five Perspective Pipeline tokens...")
     print(f"   Batch size: {HYPERPARAMS['batch_size']} (x8 gradient accumulation)")
     trainer.train()
 
