@@ -1306,16 +1306,19 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     setVideoFrames([]);
     setVideoFileName(file.name);
     setVideoAnalysisText("");
+    setVideoCCText("");
 
     try {
-      const frames = await extractVideoFrames(file, videoInterval, videoMaxFrames);
+      const { frames, captions } = await extractVideoFrames(file, videoInterval, videoMaxFrames, smartKeyframe, smartThreshold, extractCC);
       if (frames.length === 0) {
         toast.error("Could not extract any frames from the video.");
         setVideoExtracting(false);
         return;
       }
       setVideoFrames(frames);
-      toast.success(`Extracted ${frames.length} frames from "${file.name}"`);
+      if (captions) setVideoCCText(captions);
+      const ccNote = captions ? ` + ${captions.split("\n").length} CC lines` : "";
+      toast.success(`Extracted ${frames.length} frames${ccNote} from "${file.name}"`);
     } catch (err: any) {
       console.error("Video frame extraction error:", err);
       toast.error("Failed to extract video frames: " + (err?.message || "unknown error"));
