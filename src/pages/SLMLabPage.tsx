@@ -1184,6 +1184,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                             dataset_id: dataset.id,
                             domain_hint: dataset.domain,
                             offload_perspective: offloadPerspective || undefined,
+                            debate_mode: debateMode,
                           });
                           results.push({ url: u, pairs: data.extracted });
                         } catch (err: any) {
