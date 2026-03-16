@@ -590,6 +590,27 @@ def load_dataset(path):
     print(f"Loaded {len(samples)} training samples")
     return samples
 
+def build_sft_trainer(SFTTrainer, model, tokenizer, dataset, training_args):
+    base_kwargs = {
+        "model": model,
+        "train_dataset": dataset,
+        "args": training_args,
+    }
+    attempts = [
+        {"processing_class": tokenizer, "dataset_text_field": "text", "max_seq_length": HYPERPARAMS["max_seq_length"]},
+        {"tokenizer": tokenizer, "dataset_text_field": "text", "max_seq_length": HYPERPARAMS["max_seq_length"]},
+        {"processing_class": tokenizer},
+        {"tokenizer": tokenizer},
+        {},
+    ]
+    last_error = None
+    for extra_kwargs in attempts:
+        try:
+            return SFTTrainer(**base_kwargs, **extra_kwargs)
+        except TypeError as e:
+            last_error = e
+    raise last_error
+
 def check_hardware():
     import torch
     if torch.cuda.is_available():
