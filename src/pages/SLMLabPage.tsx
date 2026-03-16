@@ -468,21 +468,46 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
-        const raw = JSON.parse(ev.target?.result as string);
-        const convos = parseExport(provider, raw);
+        const text = ev.target?.result as string;
+        if (!text || text.length < 10) {
+          toast.error("File appears empty or unreadable.");
+          return;
+        }
+        let raw: any;
+        try {
+          raw = JSON.parse(text);
+        } catch (parseErr) {
+          console.error("JSON parse error:", parseErr);
+          toast.error("Could not parse file. Make sure it's a valid JSON export.");
+          return;
+        }
+        console.log("Parsed JSON type:", typeof raw, "isArray:", Array.isArray(raw), "keys:", raw && typeof raw === 'object' ? Object.keys(raw).slice(0, 10) : "N/A");
+        let convos: ParsedConversation[] = [];
+        try {
+          convos = parseExport(provider, raw);
+        } catch (exportErr) {
+          console.error("parseExport error:", exportErr);
+          toast.error("Error processing conversations. Check the console for details.");
+          return;
+        }
         if (convos.length === 0) {
-          toast.error("No conversations found. Make sure you selected the right provider and file format.");
+          const topKeys = raw && typeof raw === 'object' && !Array.isArray(raw) ? Object.keys(raw).join(', ') : (Array.isArray(raw) ? `array of ${raw.length} items` : typeof raw);
+          toast.error(`No conversations found. File structure: ${topKeys}. Make sure you selected the right provider.`);
           return;
         }
         setParsedConvos(convos);
         setSelectedIds(new Set(convos.map((_, i) => i)));
         setResults([]);
         toast.success(`Found ${convos.length} conversations!`);
-      } catch {
-        toast.error("Could not parse file. Make sure it's a valid JSON export.");
+      } catch (err: any) {
+        console.error("handleFileUpload unexpected error:", err);
+        toast.error("Unexpected error reading file: " + (err?.message || "unknown"));
       }
     };
-    reader.readAsText(file);
+    reader.onerror = () => {
+      toast.error("Failed to read file.");
+    };
+    reader.readAsText(file, "utf-8");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
