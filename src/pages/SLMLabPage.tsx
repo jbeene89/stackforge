@@ -1505,14 +1505,40 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Frame interval (seconds)</Label>
-                <div className="flex items-center gap-3">
-                  <Slider min={1} max={10} step={1} value={[videoInterval]} onValueChange={([v]) => setVideoInterval(v)} className="flex-1" disabled={videoExtracting} />
-                  <span className="text-sm font-mono w-6 text-right">{videoInterval}s</span>
+            {/* Smart Keyframe Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/50">
+              <div className="flex items-center gap-2">
+                <ScanEye className="h-4 w-4 text-primary" />
+                <div>
+                  <Label className="text-sm font-medium cursor-pointer" htmlFor="smart-keyframe">Smart Keyframe Detection</Label>
+                  <p className="text-xs text-muted-foreground">Skip duplicate/similar frames automatically</p>
                 </div>
               </div>
+              <Switch id="smart-keyframe" checked={smartKeyframe} onCheckedChange={setSmartKeyframe} disabled={videoExtracting} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {!smartKeyframe && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Frame interval (seconds)</Label>
+                  <div className="flex items-center gap-3">
+                    <Slider min={1} max={10} step={1} value={[videoInterval]} onValueChange={([v]) => setVideoInterval(v)} className="flex-1" disabled={videoExtracting} />
+                    <span className="text-sm font-mono w-6 text-right">{videoInterval}s</span>
+                  </div>
+                </div>
+              )}
+              {smartKeyframe && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Sensitivity threshold ({smartThreshold}%)
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <Slider min={3} max={40} step={1} value={[smartThreshold]} onValueChange={([v]) => setSmartThreshold(v)} className="flex-1" disabled={videoExtracting} />
+                    <span className="text-sm font-mono w-8 text-right">{smartThreshold}%</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Lower = more frames kept, Higher = only big changes kept</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Max frames</Label>
                 <div className="flex items-center gap-3">
@@ -1520,6 +1546,18 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   <span className="text-sm font-mono w-6 text-right">{videoMaxFrames}</span>
                 </div>
               </div>
+            </div>
+
+            {/* CC Extraction Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/50">
+              <div className="flex items-center gap-2">
+                <Subtitles className="h-4 w-4 text-primary" />
+                <div>
+                  <Label className="text-sm font-medium cursor-pointer" htmlFor="extract-cc">Extract Closed Captions</Label>
+                  <p className="text-xs text-muted-foreground">Read embedded subtitles/CC tracks from the video</p>
+                </div>
+              </div>
+              <Switch id="extract-cc" checked={extractCC} onCheckedChange={setExtractCC} disabled={videoExtracting} />
             </div>
 
             <div className="flex items-center gap-3">
