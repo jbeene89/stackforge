@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   LayoutDashboard,
   FolderOpen,
   Brain,
@@ -68,6 +69,7 @@ const mainItems = [
 
 const toolItems = [
   { title: "Export Studio", url: "/export", icon: ScrollText },
+  { title: "White Paper", url: "/white-paper", icon: BookOpen },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
   { title: "Runs", url: "/runs", icon: Activity },
 ];
