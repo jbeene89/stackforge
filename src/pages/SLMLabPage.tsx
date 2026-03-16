@@ -1141,36 +1141,110 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
-  const extractVideoFrames = async (file: File, intervalSec = 2, maxFrames = 20): Promise<string[]> => {
+  // Compare two ImageData arrays for similarity (returns % difference 0-100)
+  const computeFrameDiff = (a: ImageData, b: ImageData): number => {
+    const d1 = a.data;
+    const d2 = b.data;
+    const len = d1.length;
+    let totalDiff = 0;
+    // Sample every 16th pixel for performance (RGBA stride = 4, so step 64)
+    const step = 64;
+    let samples = 0;
+    for (let i = 0; i < len; i += step) {
+      totalDiff += Math.abs(d1[i] - d2[i]); // R
+      totalDiff += Math.abs(d1[i + 1] - d2[i + 1]); // G
+      totalDiff += Math.abs(d1[i + 2] - d2[i + 2]); // B
+      samples += 3;
+    }
+    return (totalDiff / samples / 255) * 100;
+  };
+
+  // Extract closed captions / subtitles from a video file's text tracks
+  const extractClosedCaptions = (video: HTMLVideoElement): Promise<string> => {
+    return new Promise((resolve) => {
+      const tracks = video.textTracks;
+      if (!tracks || tracks.length === 0) {
+        resolve("");
+        return;
+      }
+
+      // Try to enable the first available text track
+      const track = tracks[0];
+      track.mode = "hidden";
+
+      // Wait briefly for cues to load
+      const checkCues = () => {
+        if (track.cues && track.cues.length > 0) {
+          const lines: string[] = [];
+          for (let i = 0; i < track.cues.length; i++) {
+            const cue = track.cues[i] as VTTCue;
+            if (cue.text) {
+              lines.push(cue.text.replace(/<[^>]+>/g, "").trim());
+            }
+          }
+          resolve(lines.filter(Boolean).join("\n"));
+        } else {
+          resolve("");
+        }
+      };
+
+      // Some browsers need a moment to parse cues
+      if (track.cues && track.cues.length > 0) {
+        checkCues();
+      } else {
+        track.addEventListener("cuechange", checkCues, { once: true });
+        setTimeout(checkCues, 2000);
+      }
+    });
+  };
+
+  const extractVideoFrames = async (
+    file: File,
+    intervalSec = 2,
+    maxFrames = 20,
+    useSmartKeyframe = false,
+    diffThreshold = 15,
+    shouldExtractCC = false
+  ): Promise<{ frames: string[]; captions: string }> => {
     return new Promise((resolve, reject) => {
       const video = document.createElement("video");
       video.muted = true;
       video.preload = "auto";
+      video.crossOrigin = "anonymous";
       const url = URL.createObjectURL(file);
       video.src = url;
 
-      video.onloadedmetadata = () => {
+      video.onloadedmetadata = async () => {
         const duration = video.duration;
-        const totalFrames = Math.min(maxFrames, Math.ceil(duration / intervalSec));
+        // In smart mode, sample more densely (every 0.5s) and filter duplicates
+        const sampleInterval = useSmartKeyframe ? 0.5 : intervalSec;
+        const totalSamples = Math.ceil(duration / sampleInterval);
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d")!;
         const frames: string[] = [];
-        let currentFrame = 0;
+        let prevImageData: ImageData | null = null;
+        let currentSample = 0;
+        let skippedCount = 0;
+
+        // Extract CC if requested
+        let captionText = "";
+        if (shouldExtractCC) {
+          try {
+            captionText = await extractClosedCaptions(video);
+          } catch { /* ignore CC errors */ }
+        }
 
         const captureFrame = () => {
-          if (currentFrame >= totalFrames) {
+          if (currentSample >= totalSamples || frames.length >= maxFrames) {
             URL.revokeObjectURL(url);
-            resolve(frames);
+            if (useSmartKeyframe && skippedCount > 0) {
+              console.log(`Smart keyframe: kept ${frames.length}, skipped ${skippedCount} similar frames`);
+            }
+            resolve({ frames, captions: captionText });
             return;
           }
 
-          const time = currentFrame * intervalSec;
-          if (time > duration) {
-            URL.revokeObjectURL(url);
-            resolve(frames);
-            return;
-          }
-
+          const time = Math.min(currentSample * sampleInterval, duration - 0.01);
           video.currentTime = time;
         };
 
@@ -1178,10 +1252,27 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           canvas.width = Math.min(video.videoWidth, 1280);
           canvas.height = Math.round(canvas.width * (video.videoHeight / video.videoWidth));
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          if (useSmartKeyframe) {
+            const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            if (prevImageData) {
+              const diff = computeFrameDiff(prevImageData, currentImageData);
+              if (diff < diffThreshold) {
+                // Frame is too similar — skip
+                skippedCount++;
+                currentSample++;
+                setVideoExtractProgress(Math.round((currentSample / totalSamples) * 100));
+                captureFrame();
+                return;
+              }
+            }
+            prevImageData = currentImageData;
+          }
+
           const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
           frames.push(dataUrl);
-          currentFrame++;
-          setVideoExtractProgress(Math.round((currentFrame / totalFrames) * 100));
+          currentSample++;
+          setVideoExtractProgress(Math.round((currentSample / totalSamples) * 100));
           captureFrame();
         };
 
