@@ -1134,7 +1134,161 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
-  const handleAddManual = () => {
+  const extractVideoFrames = async (file: File, intervalSec = 2, maxFrames = 20): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      video.muted = true;
+      video.preload = "auto";
+      const url = URL.createObjectURL(file);
+      video.src = url;
+
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        const totalFrames = Math.min(maxFrames, Math.ceil(duration / intervalSec));
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+        const frames: string[] = [];
+        let currentFrame = 0;
+
+        const captureFrame = () => {
+          if (currentFrame >= totalFrames) {
+            URL.revokeObjectURL(url);
+            resolve(frames);
+            return;
+          }
+
+          const time = currentFrame * intervalSec;
+          if (time > duration) {
+            URL.revokeObjectURL(url);
+            resolve(frames);
+            return;
+          }
+
+          video.currentTime = time;
+        };
+
+        video.onseeked = () => {
+          canvas.width = Math.min(video.videoWidth, 1280);
+          canvas.height = Math.round(canvas.width * (video.videoHeight / video.videoWidth));
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          frames.push(dataUrl);
+          currentFrame++;
+          setVideoExtractProgress(Math.round((currentFrame / totalFrames) * 100));
+          captureFrame();
+        };
+
+        video.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Failed to load video"));
+        };
+
+        captureFrame();
+      };
+
+      video.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Failed to load video file"));
+      };
+    });
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 100 * 1024 * 1024; // 100MB client limit
+    if (file.size > maxSize) {
+      toast.error("Video too large. Maximum size is 100MB.");
+      return;
+    }
+
+    setVideoExtracting(true);
+    setVideoExtractProgress(0);
+    setVideoFrames([]);
+    setVideoFileName(file.name);
+    setVideoAnalysisText("");
+
+    try {
+      const frames = await extractVideoFrames(file);
+      if (frames.length === 0) {
+        toast.error("Could not extract any frames from the video.");
+        setVideoExtracting(false);
+        return;
+      }
+      setVideoFrames(frames);
+      toast.success(`Extracted ${frames.length} frames from "${file.name}"`);
+    } catch (err: any) {
+      console.error("Video frame extraction error:", err);
+      toast.error("Failed to extract video frames: " + (err?.message || "unknown error"));
+    } finally {
+      setVideoExtracting(false);
+      if (videoUploadRef.current) videoUploadRef.current.value = "";
+    }
+  };
+
+  const handleAnalyzeFrames = async () => {
+    if (videoFrames.length === 0) return;
+    setVideoAnalyzing(true);
+    setVideoAnalysisText("");
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-video-frames`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          frames: videoFrames,
+          domain_hint: dataset.domain,
+          dataset_id: dataset.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `Server error ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.text || data.text.trim().length < 20) {
+        toast.error("AI could not extract meaningful content from the video frames.");
+        return;
+      }
+      setVideoAnalysisText(data.text);
+      toast.success(`AI analyzed ${data.frame_count} frames and extracted content!`);
+    } catch (err: any) {
+      console.error("Video analysis error:", err);
+      toast.error(err.message || "Failed to analyze video frames");
+    } finally {
+      setVideoAnalyzing(false);
+    }
+  };
+
+  const handleProcessVideoText = async () => {
+    if (!videoAnalysisText.trim()) return;
+    setFileProcessing(true);
+    try {
+      const data = await processExport.mutateAsync({
+        conversation_text: videoAnalysisText,
+        dataset_id: dataset.id,
+        domain_hint: dataset.domain,
+        provider: "video-extraction",
+        conversation_title: videoFileName || "Video Upload",
+      });
+      toast.success(`Extracted ${data.extracted} training pairs from video analysis!`);
+      setVideoAnalysisText("");
+      setVideoFrames([]);
+      setVideoFileName("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process video content");
+    } finally {
+      setFileProcessing(false);
+    }
+  };
+
+
     if (!manualInput.trim() || !manualOutput.trim()) return;
     createSample.mutate(
       { dataset_id: dataset.id, input: manualInput, output: manualOutput, quality_score: 4 },
