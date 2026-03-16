@@ -1001,7 +1001,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
   const handleScrape = () => {
     if (!url.trim()) return;
-    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined });
+    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined, debate_mode: debateMode });
     setUrl("");
   };
 
