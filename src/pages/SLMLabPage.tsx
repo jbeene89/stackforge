@@ -1203,7 +1203,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
               <Button onClick={() => fileUploadRef.current?.click()} variant="outline" className="flex-1">
                 <Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}
               </Button>
-              <input ref={fileUploadRef} type="file" accept=".pdf,.txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
+              <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
             </div>
             {fileName && (
               <div className="space-y-3">
