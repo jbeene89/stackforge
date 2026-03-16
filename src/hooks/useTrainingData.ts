@@ -750,7 +750,7 @@ def train_cpu_fallback():
             logging_steps=1,
             save_strategy="epoch",
             fp16=False,
-            no_cuda=True,
+            use_cpu=True,
             gradient_accumulation_steps=8,
             dataloader_num_workers=0,
         ),
