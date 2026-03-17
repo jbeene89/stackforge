@@ -638,7 +638,8 @@ export default function DeployPipelinePage() {
           description="Run the training script offline — GPU or CPU"
           icon={Cpu}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("train")}
+          onToggleComplete={() => handleToggleStep("train")}
         >
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground">
