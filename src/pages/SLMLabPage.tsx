@@ -2137,7 +2137,139 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
         </CardContent>
       </Card>
 
-      {/* Sample list */}
+      {/* Pipeline Tools */}
+      <Card className="border-border">
+        <CardContent className="py-4 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Zap className="h-4 w-4 text-forge-amber" />
+            <span className="text-sm font-semibold">Pipeline Tools</span>
+            <Badge variant="outline" className="text-[9px]">Novel Modes</Badge>
+          </div>
+          <p className="text-[11px] text-muted-foreground">Run advanced analysis modes on your training data to generate specialized training pairs.</p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {([
+              { mode: "socratic" as PipelineMode, label: "Socratic", icon: "🏛️", desc: "Teach your model to ASK, not tell" },
+              { mode: "contradictions" as PipelineMode, label: "Contradictions", icon: "⚡", desc: "Find self-contradictions in your data" },
+              { mode: "dream" as PipelineMode, label: "Dream", icon: "🌙", desc: "Creative cross-domain connections" },
+              { mode: "epistemic" as PipelineMode, label: "Humility", icon: "🎯", desc: "Calibrate confidence levels" },
+              { mode: "load_balance" as PipelineMode, label: "Coverage", icon: "⚖️", desc: "Find topic gaps in your data" },
+              { mode: "reverse_engineer" as PipelineMode, label: "Reverse", icon: "🔄", desc: "Infer prompts from outputs" },
+            ]).map(({ mode: m, label, icon, desc }) => (
+              <button
+                key={m}
+                onClick={() => {
+                  setActivePipelineMode(m);
+                  setPipelineResult(null);
+                  pipelineMode.mutate({ mode: m, dataset_id: dataset.id }, {
+                    onSuccess: (data) => {
+                      setPipelineResult(data);
+                      const count = data.pairs?.length || data.analysis?.underrepresented?.length || 0;
+                      toast.success(`${label}: Generated ${count} results`);
+                    }
+                  });
+                }}
+                disabled={pipelineMode.isPending || (samples?.length || 0) < 5}
+                className={`text-left p-3 rounded-lg border transition-all hover:border-primary/30 ${
+                  activePipelineMode === m && pipelineMode.isPending ? "border-primary/50 bg-primary/5 animate-pulse" :
+                  activePipelineMode === m && pipelineResult ? "border-forge-emerald/50 bg-forge-emerald/5" :
+                  "border-border hover:bg-muted/30"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm">{icon}</span>
+                  <span className="text-xs font-semibold">{label}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-tight">{desc}</p>
+              </button>
+            ))}
+          </div>
+
+          {(samples?.length || 0) < 5 && (
+            <p className="text-[10px] text-muted-foreground">Need at least 5 samples to run pipeline tools.</p>
+          )}
+
+          {/* Pipeline Result Display */}
+          {pipelineResult && (
+            <div className="space-y-2 pt-2 border-t border-border/50 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold">
+                  {activePipelineMode === "load_balance" ? "Coverage Analysis" : `${pipelineResult.pairs?.length || 0} pairs generated`}
+                </p>
+                <Badge variant="outline" className="text-[9px] text-forge-emerald border-forge-emerald/30">
+                  {pipelineResult.samples_analyzed} samples analyzed
+                </Badge>
+              </div>
+
+              {/* Load balance shows topic analysis */}
+              {activePipelineMode === "load_balance" && pipelineResult.analysis && (
+                <div className="space-y-2">
+                  {pipelineResult.analysis.overrepresented?.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-muted-foreground mb-1">📈 Overrepresented</p>
+                      <div className="flex flex-wrap gap-1">
+                        {pipelineResult.analysis.overrepresented.map((t: string, i: number) => (
+                          <Badge key={i} variant="secondary" className="text-[9px]">{t}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {pipelineResult.analysis.underrepresented?.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-muted-foreground mb-1">📉 Needs More Coverage</p>
+                      {pipelineResult.analysis.underrepresented.map((item: any, i: number) => (
+                        <div key={i} className="text-xs bg-muted/30 rounded-md p-2 mb-1">
+                          <p className="font-medium">{item.topic}</p>
+                          {item.interview_question && (
+                            <p className="text-muted-foreground mt-0.5">🎤 {item.interview_question}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {pipelineResult.analysis.missing?.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-muted-foreground mb-1">❌ Missing Topics</p>
+                      {pipelineResult.analysis.missing.map((item: any, i: number) => (
+                        <div key={i} className="text-xs bg-destructive/5 rounded-md p-2 mb-1">
+                          <p className="font-medium">{item.topic}</p>
+                          <p className="text-muted-foreground">{item.evidence}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Other modes show pairs */}
+              {activePipelineMode !== "load_balance" && pipelineResult.pairs?.length > 0 && (
+                <ScrollArea className="h-[200px]">
+                  <div className="space-y-1.5">
+                    {pipelineResult.pairs.map((p: any, i: number) => (
+                      <div key={i} className="bg-muted/30 rounded-md p-2 text-xs">
+                        <p className="font-medium">{p.instruction || p.vague_prompt || ""}</p>
+                        <p className="text-muted-foreground mt-0.5 line-clamp-2">
+                          {p.response || p.calibrated_response || p.output_summary || ""}
+                        </p>
+                        {p.assumption_targeted && <p className="text-primary/70 mt-0.5 text-[10px]">🎯 {p.assumption_targeted}</p>}
+                        {p.tension_type && <p className="text-forge-amber/70 mt-0.5 text-[10px]">⚡ {p.tension_type}</p>}
+                        {p.connection_type && <p className="text-purple-400/70 mt-0.5 text-[10px]">🌙 {p.connection_type} · novelty {p.novelty_score}/10</p>}
+                        {p.prompt_gap && <p className="text-blue-400/70 mt-0.5 text-[10px]">🔄 Gap: {p.prompt_gap}</p>}
+                        {p.uncertainty_type && <p className="text-forge-emerald/70 mt-0.5 text-[10px]">🎯 {p.uncertainty_type} · should be {p.confidence_should_be}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+
+              {activePipelineMode === "dream" && (
+                <p className="text-[10px] text-muted-foreground">
+                  💭 Dreamed {pipelineResult.total_dreamed} connections, critic kept {pipelineResult.kept}
+                </p>
+              )}
+            </div>
+          )}
+        </CardContent>
       <ScrollArea className="h-[500px]">
         <div className="space-y-2">
           {samples?.map(s => {
