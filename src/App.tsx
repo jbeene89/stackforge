@@ -49,6 +49,7 @@ import InstallPage from "./pages/InstallPage";
 import SLMLabPage from "./pages/SLMLabPage";
 import WhitePaperPage from "./pages/WhitePaperPage";
 import CapturePage from "./pages/CapturePage";
+import SwipeReviewPage from "./pages/SwipeReviewPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
