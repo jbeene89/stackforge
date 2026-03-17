@@ -255,6 +255,11 @@ export function useProcessChatExport() {
     onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
+      const parts = [`${data.extracted} pairs (2-round debate)`];
+      if (data.anti_patterns > 0) parts.push(`${data.anti_patterns} anti-patterns`);
+      if (data.gaps_filled) parts.push("gap-filled");
+      if (data.bootstrap_active) parts.push("🧬 fingerprint-boosted");
+      toast.success(`Extracted ${parts.join(" · ")}`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
