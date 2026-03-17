@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDatasets } from "@/hooks/useTrainingData";
 import { toast } from "sonner";
 import {
   onDeviceSLMTemplates,
@@ -29,6 +30,7 @@ import {
   Download,
   Layers,
   Star,
+  Rocket,
 } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
@@ -42,6 +44,24 @@ export default function OnDeviceTemplatesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<OnDeviceSLMTemplate | null>(null);
+  const { data: datasets } = useDatasets();
+
+  // Find existing dataset matching a template slug
+  const getMatchingDatasetId = (template: OnDeviceSLMTemplate): string | null => {
+    const match = datasets?.find(
+      (d) => d.domain === template.slug || d.name.toLowerCase().includes(template.slug)
+    );
+    return match?.id ?? null;
+  };
+
+  const handleDeployTemplate = (template: OnDeviceSLMTemplate) => {
+    const datasetId = getMatchingDatasetId(template);
+    if (datasetId) {
+      navigate(`/deploy?dataset=${datasetId}`);
+    } else {
+      toast.error("Create a dataset from this template first, then deploy.");
+    }
+  };
 
   const createDataset = useMutation({
     mutationFn: async (template: OnDeviceSLMTemplate) => {
@@ -148,12 +168,29 @@ export default function OnDeviceTemplatesPage() {
                         {t.recommendedSamples}+ samples
                       </Badge>
                     </div>
-                    <p className="text-[10px] text-muted-foreground/70 italic">
-                      📱 {t.onDeviceCapability}
-                    </p>
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <p className="text-[10px] text-muted-foreground/70 italic flex-1">
+                        📱 {t.onDeviceCapability}
+                      </p>
+                      {getMatchingDatasetId(t) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[10px] px-2 shrink-0 border-[hsl(var(--forge-cyan))]/40 text-[hsl(var(--forge-cyan))] hover:bg-[hsl(var(--forge-cyan))]/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeployTemplate(t);
+                          }}
+                        >
+                          <Rocket className="h-2.5 w-2.5 mr-1" />
+                          Deploy
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
+
             </div>
           </section>
         );
@@ -217,6 +254,16 @@ export default function OnDeviceTemplatesPage() {
                     <Download className="h-4 w-4 mr-1" />
                     {createDataset.isPending ? "Creating…" : "Use This Template"}
                   </Button>
+                  {getMatchingDatasetId(selected) && (
+                    <Button
+                      variant="outline"
+                      className="border-[hsl(var(--forge-cyan))]/40 text-[hsl(var(--forge-cyan))] hover:bg-[hsl(var(--forge-cyan))]/10"
+                      onClick={() => handleDeployTemplate(selected)}
+                    >
+                      <Rocket className="h-4 w-4 mr-1" />
+                      Deploy
+                    </Button>
+                  )}
                   <Button variant="outline" onClick={() => setSelected(null)}>
                     Cancel
                   </Button>

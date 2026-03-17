@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useDatasets, useSamples, exportDatasetAsJsonl, type DatasetSample } from "@/hooks/useTrainingData";
 import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
 import { onDeviceSLMTemplates } from "@/data/on-device-slm-templates";
@@ -358,8 +359,17 @@ function StepCard({
 
 // ─── Main Page ───────────────────────────────────────────────
 export default function DeployPipelinePage() {
+  const [searchParams] = useSearchParams();
   const { data: datasets, isLoading } = useDatasets();
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
+
+  // Pre-select dataset from URL query param
+  useEffect(() => {
+    const paramId = searchParams.get("dataset");
+    if (paramId && !selectedDatasetId && datasets?.some((d) => d.id === paramId)) {
+      setSelectedDatasetId(paramId);
+    }
+  }, [searchParams, datasets, selectedDatasetId]);
   const [baseModel, setBaseModel] = useState("meta-llama/Llama-3.2-1B-Instruct");
   const [epochs, setEpochs] = useState(3);
   const [loraRank, setLoraRank] = useState(16);
