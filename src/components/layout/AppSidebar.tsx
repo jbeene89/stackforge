@@ -24,6 +24,7 @@ import {
   ScrollText,
   Flame,
   Rocket,
+  TabletSmartphone,
   LogOut,
   Store,
   Smartphone,
