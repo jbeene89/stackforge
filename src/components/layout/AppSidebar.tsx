@@ -25,6 +25,7 @@ import {
   Flame,
   LogOut,
   Store,
+  Smartphone,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { useLocation, useNavigate } from "react-router-dom";
