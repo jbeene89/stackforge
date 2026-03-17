@@ -36,6 +36,7 @@ import {
   useStartInterview, useInterviewRespond, useFinishInterview,
   useHFSearch, useHFPreview, useHFImport,
   exportDatasetAsJsonl, generateTrainingScript, validatePythonScript,
+  useCognitiveFingerprint, useGenerateCognitiveFingerprint,
   type TrainingDataset, type DatasetSample, type TrainingJob,
 } from "@/hooks/useTrainingData";
 import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } from "@/lib/chatExportParsers";
