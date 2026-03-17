@@ -368,13 +368,15 @@ export default function DeployPipelinePage() {
 
   const selectedDataset = datasets?.find((d) => d.id === selectedDatasetId);
   const { data: samples } = useSamples(selectedDatasetId);
+  const { isStepCompleted, completedCount, totalSteps, toggleStep } = useDeployStatus(
+    selectedDatasetId || undefined
+  );
 
   const approvedCount = useMemo(
     () => samples?.filter((s) => s.status === "approved").length ?? 0,
     [samples]
   );
 
-  // Match template for context
   const matchedTemplate = useMemo(() => {
     if (!selectedDataset) return null;
     return onDeviceSLMTemplates.find((t) =>
@@ -407,6 +409,14 @@ export default function DeployPipelinePage() {
     toast.success("JSONL exported!");
   };
 
+  const handleToggleStep = (stepKey: DeployStepKey) => {
+    toggleStep.mutate({
+      stepKey,
+      completed: !isStepCompleted(stepKey),
+      metadata: stepKey === "export" ? { base_model: baseModel, epochs, lora_rank: loraRank } : {},
+    });
+  };
+
   const currentStep = !selectedDatasetId ? 0 : readiness < 100 ? 1 : 2;
 
   return (
@@ -421,6 +431,26 @@ export default function DeployPipelinePage() {
           Export → Train → Convert → Deploy to Phone — one connected flow.
         </p>
       </div>
+
+      {/* Overall Progress */}
+      {selectedDatasetId && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-muted-foreground">Pipeline Progress</span>
+              <span className="text-xs font-bold text-[hsl(var(--forge-cyan))]">
+                {completedCount}/{totalSteps} steps
+              </span>
+            </div>
+            <Progress value={(completedCount / totalSteps) * 100} className="h-2" />
+            {completedCount === totalSteps && (
+              <p className="text-[10px] text-[hsl(var(--forge-emerald))] mt-2 font-semibold">
+                🎉 Pipeline complete — your SLM is deployed and running on-device!
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dataset Selector */}
       <Card>
