@@ -2047,6 +2047,91 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
         </div>
       )}
 
+      {/* Cognitive Fingerprint */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold">Cognitive Fingerprint</span>
+              {fingerprint && <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Active</Badge>}
+            </div>
+            {!fingerprint ? (
+              <Button
+                onClick={() => generateFingerprint.mutate({ dataset_id: dataset.id })}
+                disabled={generateFingerprint.isPending || (samples?.length || 0) < 5}
+                variant="outline"
+                className="text-xs border-primary/30 text-primary hover:bg-primary/10"
+              >
+                {generateFingerprint.isPending ? <RotateCcw className="h-3 w-3 mr-1 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                {generateFingerprint.isPending ? "Analyzing..." : "Extract Fingerprint"}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setShowFingerprint(!showFingerprint)}
+                variant="ghost"
+                className="text-xs"
+              >
+                {showFingerprint ? "Hide" : "View"} <ChevronDown className={`h-3 w-3 ml-1 transition-transform ${showFingerprint ? "rotate-180" : ""}`} />
+              </Button>
+            )}
+          </div>
+          {!fingerprint && (samples?.length || 0) < 5 && (
+            <p className="text-[11px] text-muted-foreground">Need at least 5 samples to generate a fingerprint.</p>
+          )}
+          {!fingerprint && (samples?.length || 0) >= 5 && (
+            <p className="text-[11px] text-muted-foreground">Extract your cognitive fingerprint to supercharge future data generation. The pipeline will analyze through YOUR thinking lens.</p>
+          )}
+          {fingerprint && showFingerprint && (
+            <div className="space-y-2 text-xs">
+              <div>
+                <p className="font-semibold text-muted-foreground mb-1">Reasoning Style</p>
+                <p className="text-foreground">{fingerprint.reasoning_style}</p>
+              </div>
+              {fingerprint.heuristics?.length > 0 && (
+                <div>
+                  <p className="font-semibold text-muted-foreground mb-1">Heuristics</p>
+                  <div className="flex flex-wrap gap-1">
+                    {fingerprint.heuristics.map((h: string, i: number) => (
+                      <Badge key={i} variant="secondary" className="text-[10px]">{h}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {fingerprint.domain_bridges?.length > 0 && (
+                <div>
+                  <p className="font-semibold text-muted-foreground mb-1">Domain Bridges</p>
+                  <div className="flex flex-wrap gap-1">
+                    {fingerprint.domain_bridges.map((d: string, i: number) => (
+                      <Badge key={i} variant="outline" className="text-[10px] border-purple-500/30 text-purple-400">{d}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {fingerprint.fingerprint?.blind_spots?.length > 0 && (
+                <div>
+                  <p className="font-semibold text-muted-foreground mb-1">Blind Spots</p>
+                  <div className="flex flex-wrap gap-1">
+                    {fingerprint.fingerprint.blind_spots.map((b: string, i: number) => (
+                      <Badge key={i} variant="outline" className="text-[10px] border-destructive/30 text-destructive">{b}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <Button
+                onClick={() => generateFingerprint.mutate({ dataset_id: dataset.id })}
+                disabled={generateFingerprint.isPending}
+                variant="ghost"
+                className="text-[11px] text-muted-foreground"
+              >
+                <RotateCcw className={`h-3 w-3 mr-1 ${generateFingerprint.isPending ? "animate-spin" : ""}`} />
+                Re-analyze ({fingerprint.sample_count} → {samples?.length || 0} samples)
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Sample list */}
       <ScrollArea className="h-[500px]">
         <div className="space-y-2">
