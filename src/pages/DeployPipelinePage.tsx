@@ -862,7 +862,8 @@ export default function DeployPipelinePage() {
           description="Your SLM now processes mobile captures on-device"
           icon={Zap}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("run")}
+          onToggleComplete={() => handleToggleStep("run")}
         >
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground">
