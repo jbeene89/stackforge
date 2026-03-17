@@ -254,6 +254,16 @@ export default function OnDeviceTemplatesPage() {
                     <Download className="h-4 w-4 mr-1" />
                     {createDataset.isPending ? "Creating…" : "Use This Template"}
                   </Button>
+                  {getMatchingDatasetId(selected) && (
+                    <Button
+                      variant="outline"
+                      className="border-[hsl(var(--forge-cyan))]/40 text-[hsl(var(--forge-cyan))] hover:bg-[hsl(var(--forge-cyan))]/10"
+                      onClick={() => handleDeployTemplate(selected)}
+                    >
+                      <Rocket className="h-4 w-4 mr-1" />
+                      Deploy
+                    </Button>
+                  )}
                   <Button variant="outline" onClick={() => setSelected(null)}>
                     Cancel
                   </Button>
