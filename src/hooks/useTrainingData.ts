@@ -852,3 +852,37 @@ if __name__ == "__main__":
         train_cpu_fallback()
 `;
 }
+
+// Cognitive Fingerprint
+export function useCognitiveFingerprint(datasetId: string) {
+  return useQuery({
+    queryKey: ["cognitive-fingerprint", datasetId],
+    enabled: !!datasetId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cognitive_fingerprints" as any)
+        .select("*")
+        .eq("dataset_id", datasetId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as any;
+    },
+  });
+}
+
+export function useGenerateCognitiveFingerprint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { dataset_id: string }) => {
+      const { data, error } = await supabase.functions.invoke("cognitive-fingerprint", { body: params });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data, vars) => {
+      qc.invalidateQueries({ queryKey: ["cognitive-fingerprint", vars.dataset_id] });
+      toast.success(`Cognitive fingerprint extracted from ${data.samples_analyzed} samples`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
