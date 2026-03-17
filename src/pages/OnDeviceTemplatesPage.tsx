@@ -186,8 +186,10 @@ export default function OnDeviceTemplatesPage() {
                           Deploy
                         </Button>
                       )}
-                    </div>
+                  </CardContent>
+                </Card>
               ))}
+
             </div>
           </section>
         );
