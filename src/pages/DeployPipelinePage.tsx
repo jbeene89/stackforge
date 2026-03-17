@@ -519,7 +519,8 @@ export default function DeployPipelinePage() {
           description="Download everything you need to train offline"
           icon={Package}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("export")}
+          onToggleComplete={() => handleToggleStep("export")}
         >
           <div className="space-y-4 pt-2">
             {/* Config */}
