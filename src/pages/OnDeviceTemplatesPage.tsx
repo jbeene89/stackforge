@@ -168,11 +168,25 @@ export default function OnDeviceTemplatesPage() {
                         {t.recommendedSamples}+ samples
                       </Badge>
                     </div>
-                    <p className="text-[10px] text-muted-foreground/70 italic">
-                      📱 {t.onDeviceCapability}
-                    </p>
-                  </CardContent>
-                </Card>
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <p className="text-[10px] text-muted-foreground/70 italic flex-1">
+                        📱 {t.onDeviceCapability}
+                      </p>
+                      {getMatchingDatasetId(t) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[10px] px-2 shrink-0 border-[hsl(var(--forge-cyan))]/40 text-[hsl(var(--forge-cyan))] hover:bg-[hsl(var(--forge-cyan))]/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeployTemplate(t);
+                          }}
+                        >
+                          <Rocket className="h-2.5 w-2.5 mr-1" />
+                          Deploy
+                        </Button>
+                      )}
+                    </div>
               ))}
             </div>
           </section>
