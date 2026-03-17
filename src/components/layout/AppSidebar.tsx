@@ -69,6 +69,7 @@ const mainItems = [
 ];
 
 const toolItems = [
+  { title: "Capture", url: "/capture", icon: Smartphone },
   { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "White Paper", url: "/white-paper", icon: BookOpen },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
