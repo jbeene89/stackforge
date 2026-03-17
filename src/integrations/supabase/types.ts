@@ -153,6 +153,42 @@ export type Database = {
           },
         ]
       }
+      deploy_pipeline_status: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          dataset_id: string
+          id: string
+          metadata: Json
+          step_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          dataset_id: string
+          id?: string
+          metadata?: Json
+          step_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          dataset_id?: string
+          id?: string
+          metadata?: Json
+          step_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       discussions: {
         Row: {
           content: string

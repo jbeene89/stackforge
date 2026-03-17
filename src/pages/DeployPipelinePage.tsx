@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useDatasets, useSamples, exportDatasetAsJsonl, type DatasetSample } from "@/hooks/useTrainingData";
+import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
 import { onDeviceSLMTemplates } from "@/data/on-device-slm-templates";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -281,6 +282,7 @@ function StepCard({
   icon: Icon,
   active,
   completed,
+  onToggleComplete,
   children,
 }: {
   step: number;
@@ -289,6 +291,7 @@ function StepCard({
   icon: React.ElementType;
   active: boolean;
   completed: boolean;
+  onToggleComplete?: () => void;
   children: React.ReactNode;
 }) {
   const [expanded, setExpanded] = useState(active);
@@ -328,6 +331,19 @@ function StepCard({
               {description}
             </CardDescription>
           </div>
+          {onToggleComplete && active && (
+            <Button
+              variant={completed ? "outline" : "default"}
+              size="sm"
+              className="text-[10px] h-7 shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleComplete();
+              }}
+            >
+              {completed ? "Undo" : "Mark Done"}
+            </Button>
+          )}
           {expanded ? (
             <ChevronUp className="h-4 w-4 text-muted-foreground" />
           ) : (
@@ -352,13 +368,15 @@ export default function DeployPipelinePage() {
 
   const selectedDataset = datasets?.find((d) => d.id === selectedDatasetId);
   const { data: samples } = useSamples(selectedDatasetId);
+  const { isStepCompleted, completedCount, totalSteps, toggleStep } = useDeployStatus(
+    selectedDatasetId || undefined
+  );
 
   const approvedCount = useMemo(
     () => samples?.filter((s) => s.status === "approved").length ?? 0,
     [samples]
   );
 
-  // Match template for context
   const matchedTemplate = useMemo(() => {
     if (!selectedDataset) return null;
     return onDeviceSLMTemplates.find((t) =>
@@ -391,6 +409,14 @@ export default function DeployPipelinePage() {
     toast.success("JSONL exported!");
   };
 
+  const handleToggleStep = (stepKey: DeployStepKey) => {
+    toggleStep.mutate({
+      stepKey,
+      completed: !isStepCompleted(stepKey),
+      metadata: stepKey === "export" ? { base_model: baseModel, epochs, lora_rank: loraRank } : {},
+    });
+  };
+
   const currentStep = !selectedDatasetId ? 0 : readiness < 100 ? 1 : 2;
 
   return (
@@ -405,6 +431,26 @@ export default function DeployPipelinePage() {
           Export → Train → Convert → Deploy to Phone — one connected flow.
         </p>
       </div>
+
+      {/* Overall Progress */}
+      {selectedDatasetId && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-muted-foreground">Pipeline Progress</span>
+              <span className="text-xs font-bold text-[hsl(var(--forge-cyan))]">
+                {completedCount}/{totalSteps} steps
+              </span>
+            </div>
+            <Progress value={(completedCount / totalSteps) * 100} className="h-2" />
+            {completedCount === totalSteps && (
+              <p className="text-[10px] text-[hsl(var(--forge-emerald))] mt-2 font-semibold">
+                🎉 Pipeline complete — your SLM is deployed and running on-device!
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dataset Selector */}
       <Card>
@@ -473,7 +519,8 @@ export default function DeployPipelinePage() {
           description="Download everything you need to train offline"
           icon={Package}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("export")}
+          onToggleComplete={() => handleToggleStep("export")}
         >
           <div className="space-y-4 pt-2">
             {/* Config */}
@@ -591,7 +638,8 @@ export default function DeployPipelinePage() {
           description="Run the training script offline — GPU or CPU"
           icon={Cpu}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("train")}
+          onToggleComplete={() => handleToggleStep("train")}
         >
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground">
@@ -637,7 +685,8 @@ export default function DeployPipelinePage() {
           description="Quantize to phone-friendly format"
           icon={HardDrive}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("convert")}
+          onToggleComplete={() => handleToggleStep("convert")}
         >
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground">
@@ -688,7 +737,8 @@ export default function DeployPipelinePage() {
           description="Get your model running on iOS or Android"
           icon={Smartphone}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("deploy")}
+          onToggleComplete={() => handleToggleStep("deploy")}
         >
           <div className="space-y-4 pt-2">
             <Tabs defaultValue="ios">
@@ -812,7 +862,8 @@ export default function DeployPipelinePage() {
           description="Your SLM now processes mobile captures on-device"
           icon={Zap}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("run")}
+          onToggleComplete={() => handleToggleStep("run")}
         >
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground">
