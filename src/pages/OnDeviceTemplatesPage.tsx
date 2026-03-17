@@ -44,6 +44,24 @@ export default function OnDeviceTemplatesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<OnDeviceSLMTemplate | null>(null);
+  const { data: datasets } = useDatasets();
+
+  // Find existing dataset matching a template slug
+  const getMatchingDatasetId = (template: OnDeviceSLMTemplate): string | null => {
+    const match = datasets?.find(
+      (d) => d.domain === template.slug || d.name.toLowerCase().includes(template.slug)
+    );
+    return match?.id ?? null;
+  };
+
+  const handleDeployTemplate = (template: OnDeviceSLMTemplate) => {
+    const datasetId = getMatchingDatasetId(template);
+    if (datasetId) {
+      navigate(`/deploy?dataset=${datasetId}`);
+    } else {
+      toast.error("Create a dataset from this template first, then deploy.");
+    }
+  };
 
   const createDataset = useMutation({
     mutationFn: async (template: OnDeviceSLMTemplate) => {
