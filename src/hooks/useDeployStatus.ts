@@ -59,19 +59,18 @@ export function useDeployStatus(datasetId: string | undefined) {
     }) => {
       if (!datasetId || !user) throw new Error("Missing context");
 
+      const row = {
+        user_id: user.id,
+        dataset_id: datasetId,
+        step_key: stepKey,
+        completed,
+        completed_at: completed ? new Date().toISOString() : null,
+        metadata: (metadata ?? {}) as any,
+      };
+
       const { error } = await supabase
         .from("deploy_pipeline_status")
-        .upsert(
-          {
-            user_id: user.id,
-            dataset_id: datasetId,
-            step_key: stepKey,
-            completed,
-            completed_at: completed ? new Date().toISOString() : null,
-            metadata: metadata ?? {},
-          },
-          { onConflict: "user_id,dataset_id,step_key" }
-        );
+        .upsert(row as any, { onConflict: "user_id,dataset_id,step_key" });
       if (error) throw error;
     },
     onSuccess: () => {
