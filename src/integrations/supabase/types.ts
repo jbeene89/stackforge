@@ -286,6 +286,56 @@ export type Database = {
         }
         Relationships: []
       }
+      mobile_captures: {
+        Row: {
+          content: string
+          created_at: string
+          dataset_id: string | null
+          file_path: string | null
+          id: string
+          metadata: Json
+          processed_at: string | null
+          status: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          dataset_id?: string | null
+          file_path?: string | null
+          id?: string
+          metadata?: Json
+          processed_at?: string | null
+          status?: string
+          title?: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          dataset_id?: string | null
+          file_path?: string | null
+          id?: string
+          metadata?: Json
+          processed_at?: string | null
+          status?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_captures_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "training_datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           allowed_inputs: string[] | null

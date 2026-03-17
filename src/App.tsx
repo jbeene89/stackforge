@@ -48,6 +48,7 @@ import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
 import InstallPage from "./pages/InstallPage";
 import SLMLabPage from "./pages/SLMLabPage";
 import WhitePaperPage from "./pages/WhitePaperPage";
+import CapturePage from "./pages/CapturePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,6 +102,7 @@ const App = () => (
                 <Route path="/experimental" element={<ExperimentalPage />} />
                 <Route path="/slm-lab" element={<SLMLabPage />} />
                 <Route path="/white-paper" element={<WhitePaperPage />} />
+                <Route path="/capture" element={<CapturePage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/account" element={<AccountPage />} />
