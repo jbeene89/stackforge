@@ -891,3 +891,18 @@ export function useGenerateCognitiveFingerprint() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+// Pipeline Modes (Socratic, Dream, Contradictions, etc.)
+export type PipelineMode = "socratic" | "contradictions" | "dream" | "epistemic" | "load_balance" | "reverse_engineer";
+
+export function usePipelineMode() {
+  return useMutation({
+    mutationFn: async (params: { mode: PipelineMode; dataset_id: string }) => {
+      const { data, error } = await supabase.functions.invoke("pipeline-modes", { body: params });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
