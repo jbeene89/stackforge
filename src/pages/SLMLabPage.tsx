@@ -1985,6 +1985,9 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
   const { data: fingerprint, isLoading: fpLoading } = useCognitiveFingerprint(dataset.id);
   const generateFingerprint = useGenerateCognitiveFingerprint();
   const [showFingerprint, setShowFingerprint] = useState(false);
+  const pipelineMode = usePipelineMode();
+  const [activePipelineMode, setActivePipelineMode] = useState<PipelineMode | null>(null);
+  const [pipelineResult, setPipelineResult] = useState<any>(null);
 
   const approved = samples?.filter(s => s.status === "approved") || [];
   const pending = samples?.filter(s => s.status === "pending") || [];
