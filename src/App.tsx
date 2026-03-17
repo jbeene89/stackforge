@@ -108,6 +108,7 @@ const App = () => (
                 <Route path="/capture" element={<CapturePage />} />
                 <Route path="/review" element={<SwipeReviewPage />} />
                 <Route path="/on-device" element={<OnDeviceTemplatesPage />} />
+                <Route path="/deploy" element={<DeployPipelinePage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/account" element={<AccountPage />} />

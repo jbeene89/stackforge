@@ -73,6 +73,7 @@ const toolItems = [
   { title: "Capture", url: "/capture", icon: Smartphone },
   { title: "Swipe Review", url: "/review", icon: SwatchBook },
   { title: "On-Device SLMs", url: "/on-device", icon: Smartphone },
+  { title: "Deploy Pipeline", url: "/deploy", icon: Rocket },
   { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "White Paper", url: "/white-paper", icon: BookOpen },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
