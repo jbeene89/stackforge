@@ -359,8 +359,17 @@ function StepCard({
 
 // ─── Main Page ───────────────────────────────────────────────
 export default function DeployPipelinePage() {
+  const [searchParams] = useSearchParams();
   const { data: datasets, isLoading } = useDatasets();
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
+
+  // Pre-select dataset from URL query param
+  useEffect(() => {
+    const paramId = searchParams.get("dataset");
+    if (paramId && !selectedDatasetId && datasets?.some((d) => d.id === paramId)) {
+      setSelectedDatasetId(paramId);
+    }
+  }, [searchParams, datasets, selectedDatasetId]);
   const [baseModel, setBaseModel] = useState("meta-llama/Llama-3.2-1B-Instruct");
   const [epochs, setEpochs] = useState(3);
   const [loraRank, setLoraRank] = useState(16);
