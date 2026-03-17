@@ -255,6 +255,11 @@ export function useProcessChatExport() {
     onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ["dataset-samples", vars.dataset_id] });
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
+      const parts = [`${data.extracted} pairs (2-round debate)`];
+      if (data.anti_patterns > 0) parts.push(`${data.anti_patterns} anti-patterns`);
+      if (data.gaps_filled) parts.push("gap-filled");
+      if (data.bootstrap_active) parts.push("🧬 fingerprint-boosted");
+      toast.success(`Extracted ${parts.join(" · ")}`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -851,4 +856,38 @@ if __name__ == "__main__":
         print("Non-NVIDIA environment detected - using CPU fallback path.")
         train_cpu_fallback()
 `;
+}
+
+// Cognitive Fingerprint
+export function useCognitiveFingerprint(datasetId: string) {
+  return useQuery({
+    queryKey: ["cognitive-fingerprint", datasetId],
+    enabled: !!datasetId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cognitive_fingerprints" as any)
+        .select("*")
+        .eq("dataset_id", datasetId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as any;
+    },
+  });
+}
+
+export function useGenerateCognitiveFingerprint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { dataset_id: string }) => {
+      const { data, error } = await supabase.functions.invoke("cognitive-fingerprint", { body: params });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data, vars) => {
+      qc.invalidateQueries({ queryKey: ["cognitive-fingerprint", vars.dataset_id] });
+      toast.success(`Cognitive fingerprint extracted from ${data.samples_analyzed} samples`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 }

@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      cognitive_fingerprints: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          domain_bridges: string[]
+          fingerprint: Json
+          heuristics: string[]
+          id: string
+          reasoning_style: string
+          sample_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          domain_bridges?: string[]
+          fingerprint?: Json
+          heuristics?: string[]
+          id?: string
+          reasoning_style?: string
+          sample_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          domain_bridges?: string[]
+          fingerprint?: Json
+          heuristics?: string[]
+          id?: string
+          reasoning_style?: string
+          sample_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cognitive_fingerprints_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "training_datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
