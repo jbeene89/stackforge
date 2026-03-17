@@ -737,7 +737,8 @@ export default function DeployPipelinePage() {
           description="Get your model running on iOS or Android"
           icon={Smartphone}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("deploy")}
+          onToggleComplete={() => handleToggleStep("deploy")}
         >
           <div className="space-y-4 pt-2">
             <Tabs defaultValue="ios">
