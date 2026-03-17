@@ -23,6 +23,7 @@ import {
   CircuitBoard,
   ScrollText,
   Flame,
+  Rocket,
   LogOut,
   Store,
   Smartphone,
