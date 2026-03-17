@@ -282,6 +282,7 @@ function StepCard({
   icon: Icon,
   active,
   completed,
+  onToggleComplete,
   children,
 }: {
   step: number;
@@ -290,6 +291,7 @@ function StepCard({
   icon: React.ElementType;
   active: boolean;
   completed: boolean;
+  onToggleComplete?: () => void;
   children: React.ReactNode;
 }) {
   const [expanded, setExpanded] = useState(active);
@@ -329,6 +331,19 @@ function StepCard({
               {description}
             </CardDescription>
           </div>
+          {onToggleComplete && active && (
+            <Button
+              variant={completed ? "outline" : "default"}
+              size="sm"
+              className="text-[10px] h-7 shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleComplete();
+              }}
+            >
+              {completed ? "Undo" : "Mark Done"}
+            </Button>
+          )}
           {expanded ? (
             <ChevronUp className="h-4 w-4 text-muted-foreground" />
           ) : (
