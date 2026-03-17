@@ -685,7 +685,8 @@ export default function DeployPipelinePage() {
           description="Quantize to phone-friendly format"
           icon={HardDrive}
           active={currentStep >= 1}
-          completed={false}
+          completed={isStepCompleted("convert")}
+          onToggleComplete={() => handleToggleStep("convert")}
         >
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground">
