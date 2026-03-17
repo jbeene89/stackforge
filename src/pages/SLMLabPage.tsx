@@ -2270,6 +2270,9 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
             </div>
           )}
         </CardContent>
+      </Card>
+
+      {/* Sample list */}
       <ScrollArea className="h-[500px]">
         <div className="space-y-2">
           {samples?.map(s => {
