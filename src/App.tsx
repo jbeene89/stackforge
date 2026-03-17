@@ -51,6 +51,7 @@ import WhitePaperPage from "./pages/WhitePaperPage";
 import CapturePage from "./pages/CapturePage";
 import SwipeReviewPage from "./pages/SwipeReviewPage";
 import OnDeviceTemplatesPage from "./pages/OnDeviceTemplatesPage";
+import DeployPipelinePage from "./pages/DeployPipelinePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +108,7 @@ const App = () => (
                 <Route path="/capture" element={<CapturePage />} />
                 <Route path="/review" element={<SwipeReviewPage />} />
                 <Route path="/on-device" element={<OnDeviceTemplatesPage />} />
+                <Route path="/deploy" element={<DeployPipelinePage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/account" element={<AccountPage />} />

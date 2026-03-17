@@ -1,0 +1,865 @@
+import { useState, useMemo } from "react";
+import { useDatasets, useSamples, exportDatasetAsJsonl, type DatasetSample } from "@/hooks/useTrainingData";
+import { onDeviceSLMTemplates } from "@/data/on-device-slm-templates";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Rocket,
+  Download,
+  Package,
+  Smartphone,
+  Terminal,
+  CheckCircle2,
+  ArrowRight,
+  Cpu,
+  HardDrive,
+  FileText,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Zap,
+} from "lucide-react";
+import { toast } from "sonner";
+
+// ─── Training Script Generator ───────────────────────────────
+function generateTrainScript(
+  datasetName: string,
+  baseModel: string,
+  epochs: number,
+  loraRank: number,
+  lr: number
+): string {
+  const slug = datasetName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return `#!/usr/bin/env python3
+"""
+SoupyForge Training Kit — ${datasetName}
+Auto-generated. Double-click to run (or: python train.py)
+"""
+import os, sys, json, subprocess
+
+# ── Config ────────────────────────────────────────────────────
+DATASET     = "dataset.jsonl"
+BASE_MODEL  = "${baseModel}"
+OUTPUT_DIR  = "output-${slug}"
+EPOCHS      = ${epochs}
+LORA_RANK   = ${loraRank}
+LR          = ${lr}
+BATCH_SIZE  = 4
+
+def check_deps():
+    """Install deps if missing."""
+    try:
+        import torch, peft, transformers, datasets
+    except ImportError:
+        print("Installing dependencies (one-time)...")
+        subprocess.check_call([
+            sys.executable, "-m", "pip", "install", "--quiet",
+            "torch", "transformers", "peft", "datasets", "accelerate", "bitsandbytes"
+        ])
+
+def detect_hardware():
+    """Auto-detect GPU vs CPU."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            name = torch.cuda.get_device_name(0)
+            print(f"GPU detected: {name}")
+            return "cuda"
+    except Exception:
+        pass
+    print("No GPU detected — training on CPU (slower but works!)")
+    return "cpu"
+
+def main():
+    check_deps()
+    device = detect_hardware()
+
+    from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+    from peft import LoraConfig, get_peft_model, TaskType
+    from datasets import load_dataset
+
+    print(f"\\nLoading {BASE_MODEL}...")
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    load_kwargs = {}
+    if device == "cuda":
+        load_kwargs["device_map"] = "auto"
+        load_kwargs["load_in_8bit"] = True
+
+    model = AutoModelForCausalLM.from_pretrained(BASE_MODEL, trust_remote_code=True, **load_kwargs)
+
+    lora = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        r=LORA_RANK,
+        lora_alpha=LORA_RANK * 2,
+        lora_dropout=0.05,
+        target_modules=["q_proj", "v_proj"],
+    )
+    model = get_peft_model(model, lora)
+    model.print_trainable_parameters()
+
+    print(f"Loading dataset from {DATASET}...")
+    ds = load_dataset("json", data_files=DATASET, split="train")
+
+    def tokenize(example):
+        msgs = example["messages"]
+        text = ""
+        for m in msgs:
+            text += f"<|{m['role']}|>\\n{m['content']}\\n"
+        out = tokenizer(text, truncation=True, max_length=2048, padding="max_length")
+        out["labels"] = out["input_ids"].copy()
+        return out
+
+    ds = ds.map(tokenize, remove_columns=ds.column_names)
+
+    args = TrainingArguments(
+        output_dir=OUTPUT_DIR,
+        num_train_epochs=EPOCHS,
+        per_device_train_batch_size=BATCH_SIZE,
+        learning_rate=LR,
+        logging_steps=10,
+        save_strategy="epoch",
+        fp16=(device == "cuda"),
+        report_to="none",
+    )
+
+    from transformers import Trainer
+    trainer = Trainer(model=model, args=args, train_dataset=ds, tokenizer=tokenizer)
+
+    print(f"\\nTraining for {EPOCHS} epochs...")
+    trainer.train()
+
+    print(f"\\nSaving merged model to {OUTPUT_DIR}/merged...")
+    merged = model.merge_and_unload()
+    merged.save_pretrained(f"{OUTPUT_DIR}/merged")
+    tokenizer.save_pretrained(f"{OUTPUT_DIR}/merged")
+
+    print(f"\\nDone! Merged model saved to {OUTPUT_DIR}/merged/")
+    print(f"Next step: Convert to GGUF with llama.cpp")
+
+if __name__ == "__main__":
+    main()
+`;
+}
+
+function generateConvertScript(datasetName: string): string {
+  const slug = datasetName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return `#!/usr/bin/env bash
+# SoupyForge GGUF Conversion Script
+# Converts merged model to phone-ready GGUF format
+# Requires: llama.cpp (git clone https://github.com/ggerganov/llama.cpp)
+
+set -e
+
+MODEL_DIR="output-${slug}/merged"
+LLAMA_CPP_DIR="./llama.cpp"
+OUTPUT_GGUF="${slug}.Q4_K_M.gguf"
+
+echo "=== SoupyForge GGUF Converter ==="
+
+# Check llama.cpp
+if [ ! -d "$LLAMA_CPP_DIR" ]; then
+  echo "Cloning llama.cpp..."
+  git clone https://github.com/ggerganov/llama.cpp
+fi
+
+# Convert to GGUF
+echo "Converting to GGUF..."
+python3 "$LLAMA_CPP_DIR/convert_hf_to_gguf.py" "$MODEL_DIR" --outfile "${slug}.f16.gguf"
+
+# Quantize to Q4_K_M (phone-friendly)
+echo "Quantizing to Q4_K_M..."
+"$LLAMA_CPP_DIR/build/bin/llama-quantize" "${slug}.f16.gguf" "$OUTPUT_GGUF" Q4_K_M
+
+# Cleanup
+rm -f "${slug}.f16.gguf"
+
+echo ""
+echo "Done! Phone-ready model: $OUTPUT_GGUF"
+echo "Transfer this file to your phone and load it in:"
+echo "  - iOS: LM Studio / MLC Chat"  
+echo "  - Android: MLC Chat / Ollama (Termux)"
+`;
+}
+
+// ─── ZIP Bundle Generator ────────────────────────────────────
+async function downloadTrainingKit(
+  samples: DatasetSample[],
+  datasetName: string,
+  baseModel: string,
+  epochs: number,
+  loraRank: number,
+  lr: number
+) {
+  const { default: JSZip } = await import("jszip");
+  const zip = new JSZip();
+
+  // dataset.jsonl
+  const approved = samples.filter((s) => s.status === "approved");
+  const lines = approved.map((s) => {
+    let content = "";
+    if (s.builder || s.red_team || s.systems || s.frame_breaker || s.empath || s.synthesis) {
+      content = [
+        s.builder ? `<BUILDER>${s.builder}</BUILDER>` : "",
+        s.red_team ? `<RED_TEAM>${s.red_team}</RED_TEAM>` : "",
+        s.systems ? `<SYSTEMS>${s.systems}</SYSTEMS>` : "",
+        s.frame_breaker ? `<FRAME_BREAKER>${s.frame_breaker}</FRAME_BREAKER>` : "",
+        s.empath ? `<EMPATH>${s.empath}</EMPATH>` : "",
+        s.synthesis ? `<SYNTHESIS>${s.synthesis}</SYNTHESIS>` : "",
+      ].filter(Boolean).join("\n\n");
+    } else {
+      content = s.output;
+    }
+    return JSON.stringify({ messages: [{ role: "user", content: s.input }, { role: "assistant", content }] });
+  });
+  zip.file("dataset.jsonl", lines.join("\n"));
+
+  // train.py
+  zip.file("train.py", generateTrainScript(datasetName, baseModel, epochs, loraRank, lr));
+
+  // convert.sh
+  zip.file("convert.sh", generateConvertScript(datasetName));
+
+  // README
+  zip.file(
+    "README.md",
+    `# ${datasetName} — Training Kit\n\nGenerated by SoupyForge.\n\n## Quick Start\n\n1. **Install Python 3.10+**\n2. **Run:** \`python train.py\`\n3. **Convert to GGUF:** \`bash convert.sh\`\n4. **Deploy:** Transfer the .gguf file to your phone\n\n## Contents\n\n- \`dataset.jsonl\` — ${approved.length} curated training samples\n- \`train.py\` — Auto-detecting training script (GPU/CPU)\n- \`convert.sh\` — GGUF conversion + quantization\n- \`README.md\` — This file\n\n## Configuration\n\n- Base model: ${baseModel}\n- Epochs: ${epochs}\n- LoRA rank: ${loraRank}\n- Learning rate: ${lr}\n- Samples: ${approved.length}\n`
+  );
+
+  const blob = await zip.generateAsync({ type: "blob" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${datasetName.toLowerCase().replace(/\s+/g, "-")}-training-kit.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Code Block Component ────────────────────────────────────
+function CodeBlock({ code, label }: { code: string; label: string }) {
+  return (
+    <div className="relative group rounded-lg border border-border/60 bg-secondary/30 overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-secondary/50">
+        <span className="text-[10px] font-mono text-muted-foreground">{label}</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6"
+          onClick={() => {
+            navigator.clipboard.writeText(code);
+            toast.success("Copied!");
+          }}
+        >
+          <Copy className="h-3 w-3" />
+        </Button>
+      </div>
+      <pre className="p-3 text-xs font-mono text-foreground/80 overflow-x-auto whitespace-pre-wrap">
+        {code}
+      </pre>
+    </div>
+  );
+}
+
+// ─── Step Card ───────────────────────────────────────────────
+function StepCard({
+  step,
+  title,
+  description,
+  icon: Icon,
+  active,
+  completed,
+  children,
+}: {
+  step: number;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  active: boolean;
+  completed: boolean;
+  children: React.ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(active);
+
+  return (
+    <Card
+      className={`transition-all ${
+        active
+          ? "border-[hsl(var(--forge-cyan))]/50 shadow-[0_0_15px_hsl(var(--forge-cyan)/0.1)]"
+          : completed
+          ? "border-[hsl(var(--forge-emerald))]/30 opacity-90"
+          : "opacity-60"
+      }`}
+    >
+      <CardHeader
+        className="cursor-pointer pb-2"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+              completed
+                ? "bg-[hsl(var(--forge-emerald))]/15 text-[hsl(var(--forge-emerald))]"
+                : active
+                ? "gradient-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {completed ? <CheckCircle2 className="h-4 w-4" /> : step}
+          </div>
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Icon className="h-4 w-4" />
+              {title}
+            </CardTitle>
+            <CardDescription className="text-xs mt-0.5">
+              {description}
+            </CardDescription>
+          </div>
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      </CardHeader>
+      {expanded && <CardContent className="pt-0">{children}</CardContent>}
+    </Card>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────
+export default function DeployPipelinePage() {
+  const { data: datasets, isLoading } = useDatasets();
+  const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
+  const [baseModel, setBaseModel] = useState("meta-llama/Llama-3.2-1B-Instruct");
+  const [epochs, setEpochs] = useState(3);
+  const [loraRank, setLoraRank] = useState(16);
+  const [lr] = useState(0.0002);
+  const [downloading, setDownloading] = useState(false);
+
+  const selectedDataset = datasets?.find((d) => d.id === selectedDatasetId);
+  const { data: samples } = useSamples(selectedDatasetId);
+
+  const approvedCount = useMemo(
+    () => samples?.filter((s) => s.status === "approved").length ?? 0,
+    [samples]
+  );
+
+  // Match template for context
+  const matchedTemplate = useMemo(() => {
+    if (!selectedDataset) return null;
+    return onDeviceSLMTemplates.find((t) =>
+      selectedDataset.domain === t.slug ||
+      selectedDataset.name.toLowerCase().includes(t.slug)
+    );
+  }, [selectedDataset]);
+
+  const readiness = useMemo(() => {
+    if (!selectedDataset) return 0;
+    const minSamples = matchedTemplate?.minSamples ?? 50;
+    return Math.min(100, Math.round((approvedCount / minSamples) * 100));
+  }, [approvedCount, matchedTemplate, selectedDataset]);
+
+  const handleDownloadKit = async () => {
+    if (!samples || !selectedDataset) return;
+    setDownloading(true);
+    try {
+      await downloadTrainingKit(samples, selectedDataset.name, baseModel, epochs, loraRank, lr);
+      toast.success("Training kit downloaded!");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+    setDownloading(false);
+  };
+
+  const handleExportJsonl = () => {
+    if (!samples || !selectedDataset) return;
+    exportDatasetAsJsonl(samples, selectedDataset.name);
+    toast.success("JSONL exported!");
+  };
+
+  const currentStep = !selectedDatasetId ? 0 : readiness < 100 ? 1 : 2;
+
+  return (
+    <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Hero */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <Rocket className="h-6 w-6 text-[hsl(var(--forge-cyan))]" />
+          <h1 className="text-2xl font-bold font-display">Deploy Pipeline</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Export → Train → Convert → Deploy to Phone — one connected flow.
+        </p>
+      </div>
+
+      {/* Dataset Selector */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex-1 min-w-0">
+              <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                Select Dataset
+              </label>
+              <Select value={selectedDatasetId} onValueChange={setSelectedDatasetId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={isLoading ? "Loading…" : "Pick a dataset to deploy"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {datasets?.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name} ({d.sample_count} samples)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedDataset && (
+              <div className="flex flex-col items-end gap-1">
+                <Badge variant="outline" className="text-[10px]">
+                  {selectedDataset.domain}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground">
+                  {approvedCount} approved samples
+                </span>
+              </div>
+            )}
+          </div>
+
+          {selectedDataset && (
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">
+                  Dataset readiness
+                  {matchedTemplate && ` (min: ${matchedTemplate.minSamples})`}
+                </span>
+                <span
+                  className={`font-semibold ${
+                    readiness >= 100
+                      ? "text-[hsl(var(--forge-emerald))]"
+                      : readiness >= 60
+                      ? "text-[hsl(var(--forge-amber))]"
+                      : "text-[hsl(var(--forge-rose))]"
+                  }`}
+                >
+                  {readiness}%
+                </span>
+              </div>
+              <Progress value={readiness} className="h-2" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pipeline Steps */}
+      <div className="space-y-3">
+        {/* Step 1: Export */}
+        <StepCard
+          step={1}
+          title="Export Training Kit"
+          description="Download everything you need to train offline"
+          icon={Package}
+          active={currentStep >= 1}
+          completed={false}
+        >
+          <div className="space-y-4 pt-2">
+            {/* Config */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
+                  Base Model
+                </label>
+                <Select value={baseModel} onValueChange={setBaseModel}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="meta-llama/Llama-3.2-1B-Instruct">
+                      Llama 3.2 1B
+                    </SelectItem>
+                    <SelectItem value="Qwen/Qwen2.5-0.5B-Instruct">
+                      Qwen 2.5 0.5B
+                    </SelectItem>
+                    <SelectItem value="Qwen/Qwen2.5-1.5B-Instruct">
+                      Qwen 2.5 1.5B
+                    </SelectItem>
+                    <SelectItem value="microsoft/Phi-3-mini-4k-instruct">
+                      Phi-3 Mini
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
+                  Epochs
+                </label>
+                <Select value={String(epochs)} onValueChange={(v) => setEpochs(Number(v))}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 5, 8].map((e) => (
+                      <SelectItem key={e} value={String(e)}>
+                        {e} epochs
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
+                  LoRA Rank
+                </label>
+                <Select value={String(loraRank)} onValueChange={(v) => setLoraRank(Number(v))}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[8, 16, 32, 64].map((r) => (
+                      <SelectItem key={r} value={String(r)}>
+                        r={r}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Kit contents preview */}
+            <div className="rounded-lg border border-border/40 bg-secondary/20 p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Kit Contains
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-3 w-3 text-[hsl(var(--forge-cyan))]" />
+                  <span>dataset.jsonl ({approvedCount} samples)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Terminal className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />
+                  <span>train.py (auto-detecting)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Terminal className="h-3 w-3 text-[hsl(var(--forge-amber))]" />
+                  <span>convert.sh (GGUF export)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-3 w-3 text-muted-foreground" />
+                  <span>README.md</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleDownloadKit}
+                disabled={!selectedDatasetId || approvedCount === 0 || downloading}
+                className="flex-1"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                {downloading ? "Bundling…" : "Download Training Kit (.zip)"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExportJsonl}
+                disabled={!selectedDatasetId || approvedCount === 0}
+              >
+                <FileText className="h-4 w-4 mr-1" />
+                JSONL Only
+              </Button>
+            </div>
+          </div>
+        </StepCard>
+
+        {/* Step 2: Train */}
+        <StepCard
+          step={2}
+          title="Train on Your Computer"
+          description="Run the training script offline — GPU or CPU"
+          icon={Cpu}
+          active={currentStep >= 1}
+          completed={false}
+        >
+          <div className="space-y-3 pt-2">
+            <p className="text-xs text-muted-foreground">
+              Unzip the training kit, open a terminal, and run:
+            </p>
+            <CodeBlock
+              label="Terminal"
+              code={`cd ${selectedDataset?.name.toLowerCase().replace(/\\s+/g, "-") ?? "training-kit"}\npython train.py`}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Zap className="h-3.5 w-3.5 text-[hsl(var(--forge-emerald))]" />
+                  <span className="text-xs font-semibold">With GPU</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  ~15-30 min on RTX 3060+. Auto-detected, uses 8-bit quantized loading + LoRA.
+                </p>
+              </div>
+              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Cpu className="h-3.5 w-3.5 text-[hsl(var(--forge-amber))]" />
+                  <span className="text-xs font-semibold">CPU Only</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  ~2.5-3 hrs for 165 samples. Works on any modern laptop. ~154s/step.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-muted-foreground italic">
+              Output: <code className="bg-secondary/50 px-1 rounded">output-*/merged/</code> — a
+              full HuggingFace model ready for GGUF conversion.
+            </p>
+          </div>
+        </StepCard>
+
+        {/* Step 3: Convert */}
+        <StepCard
+          step={3}
+          title="Convert to GGUF"
+          description="Quantize to phone-friendly format"
+          icon={HardDrive}
+          active={currentStep >= 1}
+          completed={false}
+        >
+          <div className="space-y-3 pt-2">
+            <p className="text-xs text-muted-foreground">
+              The training kit includes <code className="bg-secondary/50 px-1 rounded">convert.sh</code> —
+              it clones llama.cpp and quantizes to Q4_K_M automatically:
+            </p>
+            <CodeBlock label="Terminal" code="bash convert.sh" />
+
+            <Tabs defaultValue="auto" className="mt-2">
+              <TabsList className="h-8">
+                <TabsTrigger value="auto" className="text-xs h-6">
+                  Auto (included)
+                </TabsTrigger>
+                <TabsTrigger value="manual" className="text-xs h-6">
+                  Manual Steps
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="auto">
+                <p className="text-xs text-muted-foreground">
+                  The script handles everything: clone llama.cpp → convert HF → quantize Q4_K_M →
+                  cleanup. Output: a single <code>.gguf</code> file (~400MB–1.2GB).
+                </p>
+              </TabsContent>
+              <TabsContent value="manual">
+                <div className="space-y-2">
+                  <CodeBlock
+                    label="1. Clone llama.cpp"
+                    code="git clone https://github.com/ggerganov/llama.cpp\ncd llama.cpp && make"
+                  />
+                  <CodeBlock
+                    label="2. Convert to GGUF"
+                    code="python3 convert_hf_to_gguf.py ../output-*/merged/ --outfile model.f16.gguf"
+                  />
+                  <CodeBlock
+                    label="3. Quantize"
+                    code="./build/bin/llama-quantize model.f16.gguf model.Q4_K_M.gguf Q4_K_M"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </StepCard>
+
+        {/* Step 4: Deploy */}
+        <StepCard
+          step={4}
+          title="Deploy to Phone"
+          description="Get your model running on iOS or Android"
+          icon={Smartphone}
+          active={currentStep >= 1}
+          completed={false}
+        >
+          <div className="space-y-4 pt-2">
+            <Tabs defaultValue="ios">
+              <TabsList className="h-8">
+                <TabsTrigger value="ios" className="text-xs h-6">
+                  iOS
+                </TabsTrigger>
+                <TabsTrigger value="android" className="text-xs h-6">
+                  Android
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="ios" className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Badge className="shrink-0 text-[10px]">Option A</Badge>
+                    <div>
+                      <p className="text-xs font-semibold">LM Studio (Recommended)</p>
+                      <ol className="text-[11px] text-muted-foreground space-y-1 mt-1 list-decimal list-inside">
+                        <li>Install <strong>LM Studio</strong> from the App Store</li>
+                        <li>AirDrop or iCloud Drive the <code>.gguf</code> file to your iPhone</li>
+                        <li>Open in LM Studio → Import Model</li>
+                        <li>Chat interface ready — processes captures locally</li>
+                      </ol>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                      Option B
+                    </Badge>
+                    <div>
+                      <p className="text-xs font-semibold">MLC Chat</p>
+                      <ol className="text-[11px] text-muted-foreground space-y-1 mt-1 list-decimal list-inside">
+                        <li>Install <strong>MLC Chat</strong> from the App Store</li>
+                        <li>Transfer .gguf via Files app</li>
+                        <li>Add as custom model in MLC settings</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="android" className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Badge className="shrink-0 text-[10px]">Option A</Badge>
+                    <div>
+                      <p className="text-xs font-semibold">MLC Chat (Recommended)</p>
+                      <ol className="text-[11px] text-muted-foreground space-y-1 mt-1 list-decimal list-inside">
+                        <li>Install <strong>MLC Chat</strong> from Play Store</li>
+                        <li>Transfer .gguf to phone via USB / cloud storage</li>
+                        <li>Import model in MLC Chat settings</li>
+                        <li>Chat interface ready</li>
+                      </ol>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                      Option B
+                    </Badge>
+                    <div>
+                      <p className="text-xs font-semibold">Ollama via Termux</p>
+                      <ol className="text-[11px] text-muted-foreground space-y-1 mt-1 list-decimal list-inside">
+                        <li>Install <strong>Termux</strong> from F-Droid</li>
+                        <li>
+                          Run:{" "}
+                          <code className="bg-secondary/50 px-1 rounded">
+                            pkg install ollama
+                          </code>
+                        </li>
+                        <li>
+                          Create Modelfile:{" "}
+                          <code className="bg-secondary/50 px-1 rounded">
+                            FROM ./model.gguf
+                          </code>
+                        </li>
+                        <li>
+                          <code className="bg-secondary/50 px-1 rounded">
+                            ollama create mymodel -f Modelfile
+                          </code>
+                        </li>
+                        <li>
+                          <code className="bg-secondary/50 px-1 rounded">
+                            ollama run mymodel
+                          </code>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Phone specs */}
+            <div className="rounded-lg border border-[hsl(var(--forge-cyan))]/20 bg-[hsl(var(--forge-cyan))]/5 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[hsl(var(--forge-cyan))] font-semibold mb-1.5">
+                📱 Minimum Phone Specs
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs text-foreground/80">
+                <div>
+                  <strong>RAM:</strong> 6GB+ (8GB recommended)
+                </div>
+                <div>
+                  <strong>Storage:</strong> 1-2GB free per model
+                </div>
+                <div>
+                  <strong>iOS:</strong> iPhone 12+ (A14 chip)
+                </div>
+                <div>
+                  <strong>Android:</strong> Snapdragon 8 Gen 1+
+                </div>
+              </div>
+            </div>
+          </div>
+        </StepCard>
+
+        {/* Step 5: Run */}
+        <StepCard
+          step={5}
+          title="Run — Process Captures Locally"
+          description="Your SLM now processes mobile captures on-device"
+          icon={Zap}
+          active={currentStep >= 1}
+          completed={false}
+        >
+          <div className="space-y-3 pt-2">
+            <p className="text-xs text-muted-foreground">
+              Once deployed, your on-device SLM can process captures from the SoupyForge Capture
+              page. The flow:
+            </p>
+
+            <div className="flex items-center gap-2 flex-wrap text-xs">
+              {[
+                "📸 Capture",
+                "→",
+                "🤖 On-Device SLM",
+                "→",
+                "📋 Structured Output",
+                "→",
+                "📤 Sync to Cloud",
+              ].map((label, i) => (
+                <span
+                  key={i}
+                  className={
+                    label === "→"
+                      ? "text-muted-foreground"
+                      : "px-2 py-1 rounded-md bg-secondary/50 border border-border/40 font-medium"
+                  }
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            {matchedTemplate && (
+              <div className="rounded-lg border border-[hsl(var(--forge-emerald))]/20 bg-[hsl(var(--forge-emerald))]/5 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-[hsl(var(--forge-emerald))] font-semibold mb-1">
+                  {matchedTemplate.icon} {matchedTemplate.name} — On-Device
+                </p>
+                <p className="text-xs text-foreground/80">
+                  {matchedTemplate.onDeviceCapability}
+                </p>
+              </div>
+            )}
+
+            <p className="text-[10px] text-muted-foreground italic">
+              ✨ Zero internet. Zero latency. 100% private. Your data never leaves your phone.
+            </p>
+          </div>
+        </StepCard>
+      </div>
+    </div>
+  );
+}
