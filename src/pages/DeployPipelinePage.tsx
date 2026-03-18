@@ -930,9 +930,12 @@ export default function DeployPipelinePage() {
                 <span>✓ train.py</span>
                 <span>✓ convert.sh</span>
                 <span>✓ config.json</span>
+                <span>✓ inject.py 🍿</span>
+                <span>✓ injection_config.json</span>
                 <span>✓ inference.py</span>
                 <span>✓ batch_inference.py</span>
                 <span>✓ Modelfile (Ollama)</span>
+                <span>✓ POPCORN_README.md</span>
                 {matchedTemplate?.systemPrompt && <span>✓ system-prompt.txt</span>}
               </div>
             </div>
