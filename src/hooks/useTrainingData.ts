@@ -1229,6 +1229,7 @@ DOMAIN = "${domain}"
 ZONES = ${zonesJson}
 INTENSITY = ${intensity}
 PERSPECTIVES = ${perspectsJson}
+WEIGHTS = ${weightsJson}  # Per-perspective multiplier (0=off, 1=normal, 2=double, 3=triple)
 NUM_ROUNDS = ${numRounds}
 OUTPUT_DIR = Path("injection_output")
 OUTPUT_DIR.mkdir(exist_ok=True)
