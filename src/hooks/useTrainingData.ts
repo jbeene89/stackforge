@@ -1290,9 +1290,13 @@ BURNERS = {
 
 # ---- Main Popcorn Engine ----
 def pop_kernels():
+    total_slots = sum(WEIGHTS.get(p, 1) for p in PERSPECTIVES)
     print("\\n== POPCORN MODE: Applying heat to stock knowledge ==")
-    print(f"   {len(PERSPECTIVES)} burners x {NUM_ROUNDS} rounds = {len(PERSPECTIVES) * NUM_ROUNDS} pops")
+    print(f"   {len(PERSPECTIVES)} perspectives, {total_slots} weighted slots x {NUM_ROUNDS} rounds = {total_slots * NUM_ROUNDS} pops")
     print(f"   Domain: {DOMAIN}")
+    bias_info = [(p, WEIGHTS.get(p, 1)) for p in PERSPECTIVES if WEIGHTS.get(p, 1) >= 2]
+    if bias_info:
+        print(f"   BIAS HEAT: {', '.join(f'{p} @ {w}x' for p, w in bias_info)}")
     print(f"   No extraction. No seeds. Just heat.\\n")
 
     all_samples = []
