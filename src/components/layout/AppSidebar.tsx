@@ -81,6 +81,7 @@ const toolItems = [
   { title: "Phone Guide", url: "/deploy/phone", icon: TabletSmartphone },
   { title: "Inference", url: "/inference", icon: Terminal },
   { title: "Device Console", url: "/console", icon: Smartphone },
+  { title: "Self-Host", url: "/self-host", icon: Server },
   { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "White Paper", url: "/white-paper", icon: BookOpen },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
