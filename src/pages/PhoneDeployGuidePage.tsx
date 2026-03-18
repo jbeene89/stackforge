@@ -26,6 +26,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import { RamChecker } from "@/components/RamChecker";
 
 // ─── Helpers ─────────────────────────────────────────────────
 function CopyCommand({ code, label }: { code: string; label?: string }) {
@@ -234,6 +235,9 @@ export default function PhoneDeployGuidePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* RAM Checker */}
+      <RamChecker />
 
       {/* Platform Tabs */}
       <Tabs defaultValue="ios" className="space-y-4">
