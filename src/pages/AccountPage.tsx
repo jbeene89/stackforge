@@ -58,11 +58,10 @@ export default function AccountPage() {
   }
 
   const fetchKeys = async () => {
-    const { data } = await supabase
-      .from("user_api_keys")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setApiKeys(data as any);
+    const { data, error } = await supabase.functions.invoke("manage-api-keys", {
+      method: "GET",
+    });
+    if (!error && data) setApiKeys(data as ApiKey[]);
   };
 
   useEffect(() => { fetchKeys(); }, []);
