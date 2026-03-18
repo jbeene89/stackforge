@@ -3,7 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   syncPendingMutations,
   getPendingMutations,
+  getUnresolvedConflicts,
+  type SyncConflict,
 } from "@/lib/offlineCache";
+import { toast } from "sonner";
 
 export type ConnectionStatus = "online" | "offline" | "syncing";
 
@@ -12,12 +15,15 @@ export function useOfflineSync() {
     navigator.onLine ? "online" : "offline"
   );
   const [pendingCount, setPendingCount] = useState(0);
+  const [conflicts, setConflicts] = useState<SyncConflict[]>([]);
   const syncingRef = useRef(false);
 
-  const refreshPendingCount = useCallback(async () => {
+  const refreshState = useCallback(async () => {
     try {
       const pending = await getPendingMutations();
       setPendingCount(pending.length);
+      const unresolved = await getUnresolvedConflicts();
+      setConflicts(unresolved);
     } catch {
       // IndexedDB not available
     }
@@ -33,7 +39,16 @@ export function useOfflineSync() {
 
     try {
       const result = await syncPendingMutations(supabase);
-      console.log(`[OfflineSync] Synced ${result.synced}, failed ${result.failed}`);
+      console.log(`[OfflineSync] Synced ${result.synced}, failed ${result.failed}, conflicts ${result.conflicts}`);
+
+      if (result.conflicts > 0) {
+        toast.warning(`${result.conflicts} conflict${result.conflicts > 1 ? "s" : ""} detected — review in sidebar`, {
+          duration: 6000,
+        });
+      }
+      if (result.synced > 0) {
+        toast.success(`${result.synced} change${result.synced > 1 ? "s" : ""} synced`);
+      }
       if (result.failed === 0) {
         setStatus("online");
       }
@@ -41,10 +56,10 @@ export function useOfflineSync() {
       console.error("[OfflineSync] Sync error:", e);
     } finally {
       syncingRef.current = false;
-      await refreshPendingCount();
-      if (navigator.onLine && status !== "syncing") setStatus("online");
+      await refreshState();
+      if (navigator.onLine) setStatus("online");
     }
-  }, [refreshPendingCount]);
+  }, [refreshState]);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -56,21 +71,19 @@ export function useOfflineSync() {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Initial sync attempt + pending count
-    refreshPendingCount();
+    refreshState();
     if (navigator.onLine) doSync();
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [doSync, refreshPendingCount]);
+  }, [doSync, refreshState]);
 
-  // Poll pending count periodically
   useEffect(() => {
-    const interval = setInterval(refreshPendingCount, 10000);
+    const interval = setInterval(refreshState, 10000);
     return () => clearInterval(interval);
-  }, [refreshPendingCount]);
+  }, [refreshState]);
 
-  return { status, pendingCount, triggerSync: doSync };
+  return { status, pendingCount, conflicts, triggerSync: doSync, refreshState };
 }
