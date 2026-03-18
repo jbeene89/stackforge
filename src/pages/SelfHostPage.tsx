@@ -466,6 +466,9 @@ export default function SelfHostPage() {
         </p>
       </div>
 
+      {/* Independence Scorecard */}
+      <IndependenceScorecard />
+
       {/* Independence banner */}
       <div className="rounded-xl border border-[hsl(var(--forge-emerald))]/20 bg-gradient-to-r from-[hsl(var(--forge-emerald))]/[0.04] to-[hsl(var(--forge-cyan))]/[0.04] p-4 flex items-center gap-4">
         <Shield className="h-8 w-8 text-[hsl(var(--forge-emerald))] shrink-0" />
