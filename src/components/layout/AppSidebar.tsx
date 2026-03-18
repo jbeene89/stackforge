@@ -193,6 +193,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-1">
+        <OfflineIndicator collapsed={collapsed} />
         <CreditsBadge collapsed={collapsed} />
         <Button
           variant="ghost"
