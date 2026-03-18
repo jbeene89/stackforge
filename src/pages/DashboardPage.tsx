@@ -102,6 +102,9 @@ export default function DashboardPage() {
         </div>
       </motion.form>
 
+      {/* Independence Scorecard */}
+      <IndependenceScorecard compact />
+
       {/* Status bar */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {[
