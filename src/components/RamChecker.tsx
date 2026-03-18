@@ -212,7 +212,7 @@ export function RamChecker() {
         )}
 
         {/* Results */}
-        <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-3in">
+        <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-3">
           {/* Numbers */}
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
