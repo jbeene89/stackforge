@@ -106,7 +106,7 @@ export default function AccountPage() {
     }
   };
 
-  const maskKey = (key: string) => key.slice(0, 8) + "•".repeat(Math.max(0, key.length - 12)) + key.slice(-4);
+  // Keys are already masked server-side, no client masking needed
 
   return (
     <div className="p-6 space-y-6 animate-fade-in max-w-2xl">
