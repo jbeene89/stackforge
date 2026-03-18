@@ -236,6 +236,9 @@ export default function PhoneDeployGuidePage() {
         </CardContent>
       </Card>
 
+      {/* RAM Checker */}
+      <RamChecker />
+
       {/* Platform Tabs */}
       <Tabs defaultValue="ios" className="space-y-4">
         <TabsList className="w-full sm:w-auto">
