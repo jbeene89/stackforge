@@ -55,6 +55,7 @@ import DeployPipelinePage from "./pages/DeployPipelinePage";
 import PhoneDeployGuidePage from "./pages/PhoneDeployGuidePage";
 import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
 import DeviceConsolePage from "./pages/DeviceConsolePage";
+import SelfHostPage from "./pages/SelfHostPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
 import NotFound from "./pages/NotFound";
 
