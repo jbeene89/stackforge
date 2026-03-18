@@ -54,6 +54,7 @@ import OnDeviceTemplatesPage from "./pages/OnDeviceTemplatesPage";
 import DeployPipelinePage from "./pages/DeployPipelinePage";
 import PhoneDeployGuidePage from "./pages/PhoneDeployGuidePage";
 import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
+import DeviceConsolePage from "./pages/DeviceConsolePage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
 import NotFound from "./pages/NotFound";
 
