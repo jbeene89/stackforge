@@ -409,6 +409,38 @@ export function useCreateTrainingJob() {
   });
 }
 
+export function useUpdateTrainingJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; status?: string; metrics?: Record<string, any>; hyperparameters?: Record<string, any> }) => {
+      const { error } = await supabase
+        .from("training_jobs" as any)
+        .update(updates as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["training-jobs"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteTrainingJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("training_jobs" as any).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["training-jobs"] });
+      toast.success("Training job deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 // Export dataset as JSONL with perspective tokens
 export function exportDatasetAsJsonl(samples: DatasetSample[], datasetName: string) {
   const lines = samples
