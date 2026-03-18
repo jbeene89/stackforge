@@ -2,6 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import {
+  cacheGetAll,
+  cacheGetByIndex,
+  cachePutAll,
+  cachePut,
+  cacheDelete as cacheDeleteItem,
+  queueMutation,
+} from "@/lib/offlineCache";
 
 export interface TrainingDataset {
   id: string;
