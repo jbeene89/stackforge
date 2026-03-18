@@ -78,6 +78,7 @@ const toolItems = [
   { title: "On-Device SLMs", url: "/on-device", icon: Smartphone },
   { title: "Deploy Pipeline", url: "/deploy", icon: Rocket },
   { title: "Phone Guide", url: "/deploy/phone", icon: TabletSmartphone },
+  { title: "Inference", url: "/inference", icon: Terminal },
   { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "White Paper", url: "/white-paper", icon: BookOpen },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
