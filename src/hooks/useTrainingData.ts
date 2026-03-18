@@ -153,13 +153,18 @@ export function useSamples(datasetId: string) {
   return useQuery({
     queryKey: ["dataset-samples", datasetId],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        return cacheGetByIndex<DatasetSample>("dataset_samples", "by_dataset", datasetId);
+      }
       const { data, error } = await supabase
         .from("dataset_samples" as any)
         .select("*")
         .eq("dataset_id", datasetId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as DatasetSample[];
+      const samples = data as unknown as DatasetSample[];
+      cachePutAll("dataset_samples", samples).catch(console.error);
+      return samples;
     },
     enabled: !!datasetId,
   });
