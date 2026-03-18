@@ -49,7 +49,7 @@ export default function AccountPage() {
   const [newProvider, setNewProvider] = useState("openai");
   const [newLabel, setNewLabel] = useState("");
   const [newKey, setNewKey] = useState("");
-  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
+  // visibleKeys removed — keys are encrypted and only shown masked
   const [savingKey, setSavingKey] = useState(false);
 
   if (profile && !initialized) {
