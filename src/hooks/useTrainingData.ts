@@ -1309,32 +1309,48 @@ def pop_kernels():
         for pkey in PERSPECTIVES:
             if pkey not in BURNERS:
                 continue
+            weight = WEIGHTS.get(pkey, 1)
+            if weight <= 0:
+                continue
             burner = BURNERS[pkey]
             
-            if round_num == 0:
-                # Raw heat -- pop kernels directly
-                prompt = burner["heat"].format(domain=DOMAIN)
-                system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
-            else:
-                # Chain pop -- use previous round's combined output as input
-                prev_context = "\\n\\n".join([
-                    f"[{k.upper()}]: {v[:800]}" 
-                    for k, v in round_outputs.items() if v
-                ]) if round_outputs else "\\n\\n".join([
-                    f"[{s['perspective']}]: {s['content'][:800]}" 
-                    for s in all_samples[-len(PERSPECTIVES):]
-                ])
-                prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
-                system = f"You are the {pkey.upper()} perspective. Round {round_num + 1}. Push deeper than before."
-            
-            print(f"  [{pkey.upper()}] Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
-            output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05))
-            
-            if output and len(output) > 50:
-                round_outputs[pkey] = output
-                print(f"popped! ({len(output)} chars)")
-            else:
-                print("dud kernel")
+            for heat_pass in range(weight):
+                pass_label = f" (heat pass {heat_pass + 1}/{weight})" if weight > 1 else ""
+                temp_boost = heat_pass * 0.08  # Each extra pass gets slightly hotter
+                
+                if round_num == 0:
+                    # Raw heat -- pop kernels directly
+                    prompt = burner["heat"].format(domain=DOMAIN)
+                    if heat_pass > 0:
+                        # Subsequent passes on same perspective: vary the angle
+                        prompt += f"\\n\\nThis is heat pass {heat_pass + 1}. Go DEEPER and find what you missed in previous passes. Take a completely different angle."
+                    system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
+                else:
+                    # Chain pop -- use previous round's combined output as input
+                    prev_context = "\\n\\n".join([
+                        f"[{k.upper()}]: {v[:800]}" 
+                        for k, v in round_outputs.items() if v
+                    ]) if round_outputs else "\\n\\n".join([
+                        f"[{s['perspective']}]: {s['content'][:800]}" 
+                        for s in all_samples[-len(PERSPECTIVES):]
+                    ])
+                    prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
+                    if heat_pass > 0:
+                        prompt += f"\\n\\nHeat pass {heat_pass + 1}. Push harder. Find angles the previous pass missed entirely."
+                    system = f"You are the {pkey.upper()} perspective. Round {round_num + 1}. Push deeper than before."
+                
+                print(f"  [{pkey.upper()}]{pass_label} Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
+                output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05) + temp_boost)
+                
+                if output and len(output) > 50:
+                    # For multi-pass, merge outputs for this perspective
+                    if pkey in round_outputs and heat_pass > 0:
+                        round_outputs[pkey] += f"\\n\\n[HEAT PASS {heat_pass + 1}]\\n" + output
+                    else:
+                        round_outputs[pkey] = output
+                    print(f"popped! ({len(output)} chars)")
+                else:
+                    print("dud kernel")
         
         # Build training sample from this round
         if len(round_outputs) >= 2:
