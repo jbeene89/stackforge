@@ -117,13 +117,35 @@ export function useCreateDataset() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (ds: { name: string; description?: string; domain?: string; format?: string }) => {
+      const payload = {
+        ...ds,
+        user_id: user!.id,
+        id: crypto.randomUUID(),
+        sample_count: 0,
+        status: "draft",
+        domain: ds.domain || "general",
+        format: ds.format || "instruction",
+        description: ds.description || "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      if (!navigator.onLine) {
+        await cachePut("training_datasets", payload as any);
+        await queueMutation({ store: "training_datasets", action: "insert", payload });
+        toast.info("Saved offline — will sync when reconnected");
+        return payload as unknown as TrainingDataset;
+      }
+
       const { data, error } = await supabase
         .from("training_datasets" as any)
         .insert({ ...ds, user_id: user!.id } as any)
         .select()
         .single();
       if (error) throw error;
-      return data as unknown as TrainingDataset;
+      const result = data as unknown as TrainingDataset;
+      cachePut("training_datasets", result).catch(console.error);
+      return result;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
@@ -137,8 +159,15 @@ export function useDeleteDataset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!navigator.onLine) {
+        await cacheDeleteItem("training_datasets", id);
+        await queueMutation({ store: "training_datasets", action: "delete", payload: { id } });
+        toast.info("Deleted offline — will sync when reconnected");
+        return;
+      }
       const { error } = await supabase.from("training_datasets" as any).delete().eq("id", id);
       if (error) throw error;
+      cacheDeleteItem("training_datasets", id).catch(console.error);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
