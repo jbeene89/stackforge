@@ -2,6 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import {
+  cacheGetAll,
+  cacheGetByIndex,
+  cachePutAll,
+  cachePut,
+  cacheDelete as cacheDeleteItem,
+  queueMutation,
+} from "@/lib/offlineCache";
 
 export interface TrainingDataset {
   id: string;
@@ -64,12 +72,18 @@ export function useDatasets() {
   return useQuery({
     queryKey: ["training-datasets"],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        return cacheGetAll<TrainingDataset>("training_datasets");
+      }
       const { data, error } = await supabase
         .from("training_datasets" as any)
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as TrainingDataset[];
+      const datasets = data as unknown as TrainingDataset[];
+      // Populate cache in background
+      cachePutAll("training_datasets", datasets).catch(console.error);
+      return datasets;
     },
   });
 }
@@ -78,13 +92,21 @@ export function useDataset(id: string) {
   return useQuery({
     queryKey: ["training-datasets", id],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        const cached = await cacheGetAll<TrainingDataset>("training_datasets");
+        const found = cached.find(d => d.id === id);
+        if (found) return found;
+        throw new Error("Dataset not available offline");
+      }
       const { data, error } = await supabase
         .from("training_datasets" as any)
         .select("*")
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data as unknown as TrainingDataset;
+      const ds = data as unknown as TrainingDataset;
+      cachePut("training_datasets", ds).catch(console.error);
+      return ds;
     },
     enabled: !!id,
   });
@@ -95,13 +117,35 @@ export function useCreateDataset() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (ds: { name: string; description?: string; domain?: string; format?: string }) => {
+      const payload = {
+        ...ds,
+        user_id: user!.id,
+        id: crypto.randomUUID(),
+        sample_count: 0,
+        status: "draft",
+        domain: ds.domain || "general",
+        format: ds.format || "instruction",
+        description: ds.description || "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      if (!navigator.onLine) {
+        await cachePut("training_datasets", payload as any);
+        await queueMutation({ store: "training_datasets", action: "insert", payload });
+        toast.info("Saved offline — will sync when reconnected");
+        return payload as unknown as TrainingDataset;
+      }
+
       const { data, error } = await supabase
         .from("training_datasets" as any)
         .insert({ ...ds, user_id: user!.id } as any)
         .select()
         .single();
       if (error) throw error;
-      return data as unknown as TrainingDataset;
+      const result = data as unknown as TrainingDataset;
+      cachePut("training_datasets", result).catch(console.error);
+      return result;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
@@ -115,8 +159,15 @@ export function useDeleteDataset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!navigator.onLine) {
+        await cacheDeleteItem("training_datasets", id);
+        await queueMutation({ store: "training_datasets", action: "delete", payload: { id } });
+        toast.info("Deleted offline — will sync when reconnected");
+        return;
+      }
       const { error } = await supabase.from("training_datasets" as any).delete().eq("id", id);
       if (error) throw error;
+      cacheDeleteItem("training_datasets", id).catch(console.error);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["training-datasets"] });
@@ -131,13 +182,18 @@ export function useSamples(datasetId: string) {
   return useQuery({
     queryKey: ["dataset-samples", datasetId],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        return cacheGetByIndex<DatasetSample>("dataset_samples", "by_dataset", datasetId);
+      }
       const { data, error } = await supabase
         .from("dataset_samples" as any)
         .select("*")
         .eq("dataset_id", datasetId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as DatasetSample[];
+      const samples = data as unknown as DatasetSample[];
+      cachePutAll("dataset_samples", samples).catch(console.error);
+      return samples;
     },
     enabled: !!datasetId,
   });
@@ -378,12 +434,17 @@ export function useTrainingJobs() {
   return useQuery({
     queryKey: ["training-jobs"],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        return cacheGetAll<TrainingJob>("training_jobs");
+      }
       const { data, error } = await supabase
         .from("training_jobs" as any)
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as TrainingJob[];
+      const jobs = data as unknown as TrainingJob[];
+      cachePutAll("training_jobs", jobs).catch(console.error);
+      return jobs;
     },
   });
 }
