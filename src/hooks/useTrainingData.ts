@@ -705,6 +705,7 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
   const maxSeqLen = hp.max_seq_length || 1024;
   const isCpuOnly = hwProfile === "cpu_only";
   const hfModelId = HF_MODEL_MAP[job.base_model] || job.base_model;
+  const layerStrategy = hp.layer_strategy || "all";
 
   return `#!/usr/bin/env python3
 """
