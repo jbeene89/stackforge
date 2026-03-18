@@ -1172,8 +1172,9 @@ export function useGenerateCognitiveFingerprint() {
   });
 }
 
-// Generate injection-only script — queries the base model through 13 CDPT perspectives
-// No training data needed. Uses what the model already knows.
+// Generate injection-only script — no extraction, no upload, no seeds.
+// Just apply CDPT perspectives as HEAT to what the model already knows.
+// Popcorn mode: base model = bag, knowledge = kernels, perspectives = heat.
 export function generateInjectionScript(
   zones: string[],
   intensity: number,
@@ -1185,162 +1186,205 @@ export function generateInjectionScript(
   const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
   const zonesJson = JSON.stringify(zones);
   const perspectsJson = JSON.stringify(perspectives);
+  const numRounds = Math.max(3, Math.round(intensity * 4));
 
   return `#!/usr/bin/env python3
 """
-SoupyForge CDPT Root Injection - Zero Upload, Pure Densification
-================================================================
-This script creates a NEW MODEL by running the base model's own knowledge
-through 13 cognitive perspective passes, then training it on the enriched output.
+SoupyForge CDPT Popcorn Injection - Pure Heat, Zero Extract
+============================================================
+The base model is a bag of popcorn. Its stock knowledge is the kernels.
+The ${perspectives.length} CDPT perspectives are the HEAT.
 
-No training data upload. No cloud calls. Everything local via Ollama.
+No seeds. No extraction. No upload. No questions.
+Just heat the kernels and watch them pop into 13x their size.
 
 Base Model: ${hfModelId}
 Ollama Model: ${ollamaModel}
 Domain: ${domain}
 Zones: ${zones.join(", ")}
-Intensity: ${intensity}x
-Perspectives: ${perspectives.length}/9 channels
+Intensity: ${intensity}x (${numRounds} rounds)
+Perspectives: ${perspectives.length} heat channels
 
 How it works:
-  1. Generates seed prompts across ${domain} domain using the base model itself
-  2. For each seed, runs the model's response through all ${perspectives.length} perspective passes
-  3. Produces CDPT-enriched JSONL with perspective tokens
-  4. Trains LoRA adapters with zone-weighted ranks on targeted layers
-  5. Merges into a new, densified model
+  Each perspective channel is a BURNER. We put the model's knowledge
+  directly on each burner and let it pop. The model free-associates
+  through each cognitive lens — no prompting, no extraction, just heat.
 
-The model teaches ITSELF through YOUR cognitive lens. Same weights, new model.
+  Round 1: Each perspective pops raw kernels from the model's knowledge
+  Round 2+: Each perspective pops the PREVIOUS round's output (chain-pop)
+  Result: Dense, multi-layered cognitive output from stock knowledge alone
 """
 
-import subprocess, json, os, sys, time, re
+import subprocess, json, os, sys, time
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 OLLAMA_MODEL = "${ollamaModel}"
 DOMAIN = "${domain}"
 ZONES = ${zonesJson}
 INTENSITY = ${intensity}
 PERSPECTIVES = ${perspectsJson}
+NUM_ROUNDS = ${numRounds}
 OUTPUT_DIR = Path("injection_output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # ---- Ollama helper ----
-def ollama_generate(prompt, system="You are a helpful assistant.", temperature=0.7):
+def ollama_generate(prompt, system="You are a helpful assistant.", temperature=0.8):
     try:
         result = subprocess.run(
             ["ollama", "run", OLLAMA_MODEL, "--format", "plain"],
             input=f"System: {system}\\nUser: {prompt}",
-            capture_output=True, text=True, timeout=120
+            capture_output=True, text=True, timeout=180
         )
         return result.stdout.strip()
     except Exception as e:
         print(f"  [!] Ollama error: {e}")
         return ""
 
-# ---- Phase 1: Generate seed prompts from the model's own knowledge ----
-SEED_GENERATORS = [
-    "List 10 important questions someone learning about {domain} should be able to answer. Just the questions, numbered.",
-    "What are 10 common misconceptions about {domain}? Frame each as a question someone might ask.",
-    "List 10 practical scenarios where deep {domain} knowledge is critical. Frame as 'How would you...' questions.",
-    "What are 10 edge cases or nuanced situations in {domain} that most people get wrong? Frame as questions.",
-    "List 10 questions that connect {domain} to other fields or disciplines.",
-]
-
-def generate_seeds():
-    print("\\n== Phase 1: Extracting seed questions from base model knowledge ==")
-    seeds = []
-    for i, template in enumerate(SEED_GENERATORS):
-        prompt = template.format(domain=DOMAIN)
-        print(f"  Generating seed batch {i+1}/{len(SEED_GENERATORS)}...")
-        response = ollama_generate(prompt, system="You are a domain expert. Be specific and practical.")
-        if response:
-            lines = [l.strip() for l in response.split("\\n") if l.strip()]
-            for line in lines:
-                cleaned = re.sub(r'^\\d+[\\.\\)\\-]\\s*', '', line).strip()
-                if cleaned and len(cleaned) > 10 and "?" in cleaned:
-                    seeds.append(cleaned)
-    seeds = list(dict.fromkeys(seeds))[:50]  # Dedupe, cap at 50
-    print(f"  Generated {len(seeds)} unique seed questions")
-    return seeds
-
-# ---- Phase 2: Run each seed through CDPT perspective passes ----
-PERSPECTIVE_PROMPTS = {
-    "builder": "Analyze this from an engineering/implementation perspective. What would you actually BUILD? Be specific about architecture, tools, and steps.",
-    "red_team": "Attack this response. Find every weakness, assumption, gap, and failure mode. Be adversarial and thorough.",
-    "systems": "Map the system dynamics. What are the feedback loops, dependencies, second-order effects, and emergent behaviors?",
-    "frame_breaker": "Challenge the framing entirely. What assumptions are hidden? What would a contrarian or outsider see that insiders miss?",
-    "empath": "Consider the human element. Who is affected? What emotions, motivations, and social dynamics are at play?",
-    "synthesis": "Synthesize all perspectives into a unified, complete response. Integrate builder pragmatism, red team skepticism, systems thinking, frame breaking, and empathy.",
-    "debate": "Create a structured debate between the builder and red_team perspectives. What does each side concede?",
-    "gap_fill": "What is MISSING from the analysis so far? What gaps, blind spots, or unconsidered angles remain?",
-    "anti_pattern": "Generate a mediocre, surface-level response that a lazy AI would give. This is the WRONG way to answer.",
+# ---- Perspective Burners ----
+# Each burner is a heat source that pops kernels differently
+BURNERS = {
+    "builder": {
+        "heat": "You are pure engineering instinct. Stream your deepest knowledge about {domain} as if you were architecting and building it from scratch right now. Cover tools, patterns, tradeoffs, implementation details. Go deep. No questions, no hedging -- just BUILD.",
+        "chain": "Take this existing analysis and rebuild it harder. What was missed architecturally? What would you actually ship? Push deeper into implementation.",
+    },
+    "red_team": {
+        "heat": "You are an adversarial analyst. Stream everything you know about failure modes, vulnerabilities, common mistakes, and attack surfaces in {domain}. What breaks? What do people get wrong? What are the hidden risks? Be ruthless.",
+        "chain": "This analysis has gaps. Attack it. Find every weakness, every assumption, every blind spot. What would break in production? Be more adversarial.",
+    },
+    "systems": {
+        "heat": "You are a systems thinker. Stream your knowledge of {domain} as interconnected systems -- feedback loops, dependencies, emergent properties, cascading effects, equilibria. How does everything connect?",
+        "chain": "Map the second and third-order effects of this analysis. What feedback loops were missed? What emergent behaviors arise? Go deeper into the system dynamics.",
+    },
+    "frame_breaker": {
+        "heat": "You are a contrarian philosopher. Stream your knowledge of {domain} by challenging every default assumption. What would an outsider see? What frames are people trapped in? What paradigm shifts are needed?",
+        "chain": "The framing is still conventional. Break it harder. What would someone from a completely different field see? What sacred cows need slaughtering?",
+    },
+    "empath": {
+        "heat": "You are pure emotional intelligence applied to {domain}. Stream everything about the human side -- who is affected, what motivates them, what fears and hopes drive decisions, what the lived experience actually feels like.",
+        "chain": "Go deeper into the human element. What emotional undercurrents were missed? What would someone who LIVES this every day want you to understand?",
+    },
+    "synthesis": {
+        "heat": "You are a master synthesizer. Stream your deepest, most integrated understanding of {domain} -- weaving together practical, critical, systemic, contrarian, and human perspectives into unified insight. No fragments, pure integration.",
+        "chain": "This synthesis is incomplete. Integrate harder. Find the thread that connects ALL the perspectives. What is the unified insight that emerges when you hold everything at once?",
+    },
+    "debate": {
+        "heat": "You contain multitudes on {domain}. Stage an internal debate between your pragmatic side and your skeptical side. Let them argue, concede points, and reach hard-won conclusions. No easy agreement.",
+        "chain": "The debate was too polite. Escalate it. Make each side defend harder positions. What does the pragmatist concede? What does the skeptic acknowledge? Push to real resolution.",
+    },
+    "gap_fill": {
+        "heat": "You are a gap detector. Stream everything about {domain} that is USUALLY LEFT OUT -- the things tutorials skip, experts assume you know, textbooks omit, and conventional wisdom ignores. Fill every gap.",
+        "chain": "There are still gaps. What about the gaps BETWEEN the gaps? What meta-knowledge is missing? What would a true master know that even this analysis leaves out?",
+    },
+    "anti_pattern": {
+        "heat": "Generate the most generic, surface-level, copy-paste response about {domain} that a lazy AI would produce. Maximum fluff, minimum substance. This is the WRONG answer -- the thing we train AWAY from.",
+        "chain": "Make it even more generic and useless. More hedging, more filler, more 'it depends'. This is the anti-pattern we are training the model to NEVER produce.",
+    },
 }
 
-def run_perspectives(question, base_answer):
-    results = {}
-    active_perspectives = {k: v for k, v in PERSPECTIVE_PROMPTS.items() if k in PERSPECTIVES}
-    
-    for pkey, system_prompt in active_perspectives.items():
-        context = f"Original question: {question}\\n\\nBase answer: {base_answer}\\n\\n{system_prompt}"
-        result = ollama_generate(context, system=f"You are the {pkey.upper()} perspective analyst.")
-        if result:
-            results[pkey] = result
-    return results
+# ---- Main Popcorn Engine ----
+def pop_kernels():
+    print("\\n== POPCORN MODE: Applying heat to stock knowledge ==")
+    print(f"   {len(PERSPECTIVES)} burners x {NUM_ROUNDS} rounds = {len(PERSPECTIVES) * NUM_ROUNDS} pops")
+    print(f"   Domain: {DOMAIN}")
+    print(f"   No extraction. No seeds. Just heat.\\n")
 
-def process_seed(i, seed, total):
-    print(f"\\n  [{i+1}/{total}] Processing: {seed[:60]}...")
+    all_samples = []
     
-    # Get base model's answer
-    base_answer = ollama_generate(seed, system="Answer thoroughly and precisely.")
-    if not base_answer:
-        return None
+    for round_num in range(NUM_ROUNDS):
+        print(f"\\n--- Round {round_num + 1}/{NUM_ROUNDS} {'(RAW HEAT)' if round_num == 0 else '(CHAIN POP)'} ---")
+        
+        round_outputs = {}
+        
+        for pkey in PERSPECTIVES:
+            if pkey not in BURNERS:
+                continue
+            burner = BURNERS[pkey]
+            
+            if round_num == 0:
+                # Raw heat -- pop kernels directly
+                prompt = burner["heat"].format(domain=DOMAIN)
+                system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
+            else:
+                # Chain pop -- use previous round's combined output as input
+                prev_context = "\\n\\n".join([
+                    f"[{k.upper()}]: {v[:800]}" 
+                    for k, v in round_outputs.items() if v
+                ]) if round_outputs else "\\n\\n".join([
+                    f"[{s['perspective']}]: {s['content'][:800]}" 
+                    for s in all_samples[-len(PERSPECTIVES):]
+                ])
+                prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
+                system = f"You are the {pkey.upper()} perspective. Round {round_num + 1}. Push deeper than before."
+            
+            print(f"  [{pkey.upper()}] Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
+            output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05))
+            
+            if output and len(output) > 50:
+                round_outputs[pkey] = output
+                print(f"popped! ({len(output)} chars)")
+            else:
+                print("dud kernel")
+        
+        # Build training sample from this round
+        if len(round_outputs) >= 2:
+            # Create the enriched multi-perspective response
+            enriched_parts = []
+            for pkey, content in round_outputs.items():
+                tag = pkey.upper()
+                enriched_parts.append(f"<{tag}>{content}</{tag}>")
+            enriched_output = "\\n\\n".join(enriched_parts)
+            
+            # The "question" is implicit -- it's the domain itself viewed through heat
+            round_label = f"Round {round_num + 1}"
+            sample = {
+                "messages": [
+                    {"role": "user", "content": f"Apply deep {DOMAIN} expertise through all cognitive lenses. {round_label} analysis."},
+                    {"role": "assistant", "content": enriched_output}
+                ],
+                "metadata": {
+                    "source": "popcorn_injection",
+                    "round": round_num + 1,
+                    "perspectives_popped": list(round_outputs.keys()),
+                    "pop_count": len(round_outputs),
+                    "chain_depth": round_num,
+                }
+            }
+            all_samples.append(sample)
+            
+            # Also create per-perspective samples for finer-grained training
+            for pkey, content in round_outputs.items():
+                per_sample = {
+                    "messages": [
+                        {"role": "user", "content": f"Analyze {DOMAIN} from the {pkey.upper()} perspective. Depth level: {round_num + 1}."},
+                        {"role": "assistant", "content": f"<{pkey.upper()}>{content}</{pkey.upper()}>"}
+                    ],
+                    "metadata": {
+                        "source": "popcorn_injection",
+                        "round": round_num + 1,
+                        "perspective": pkey,
+                        "content": content[:200],
+                    }
+                }
+                all_samples.append(per_sample)
     
-    # Run through perspectives
-    perspectives = run_perspectives(seed, base_answer)
-    if len(perspectives) < 2:
-        return None
-    
-    # Build enriched output with perspective tokens
-    enriched_parts = []
-    for pkey, content in perspectives.items():
-        tag = pkey.upper()
-        enriched_parts.append(f"<{tag}>{content}</{tag}>")
-    enriched_output = "\\n\\n".join(enriched_parts)
-    
-    return {
-        "messages": [
-            {"role": "user", "content": seed},
-            {"role": "assistant", "content": enriched_output}
-        ],
-        "metadata": {
-            "source": "self_injection",
-            "perspectives_used": list(perspectives.keys()),
-            "perspective_count": len(perspectives),
-        }
-    }
+    return all_samples
 
-# ---- Phase 3: Generate zone-weighted training config ----
+# ---- Zone config ----
 def generate_train_config(sample_count):
     zone_config = {}
     base_rank = 16
     for zone in ["roots", "trunk", "canopy"]:
         if zone in ZONES:
-            zone_config[zone] = {
-                "lora_rank": int(base_rank * INTENSITY),
-                "active": True
-            }
+            zone_config[zone] = {"lora_rank": int(base_rank * INTENSITY), "active": True}
         else:
-            zone_config[zone] = {
-                "lora_rank": max(4, int(base_rank * 0.25)),
-                "active": False
-            }
-    
-    config = {
+            zone_config[zone] = {"lora_rank": max(4, int(base_rank * 0.25)), "active": False}
+    return {
         "base_model": "${hfModelId}",
-        "method": "injection_lora",
+        "method": "popcorn_injection",
         "zones": zone_config,
         "intensity": INTENSITY,
         "perspectives": PERSPECTIVES,
+        "rounds": NUM_ROUNDS,
         "sample_count": sample_count,
         "layer_mapping": {
             "roots": {"start": 0, "end": 6},
@@ -1348,13 +1392,13 @@ def generate_train_config(sample_count):
             "canopy": {"start": 25, "end": 31},
         }
     }
-    return config
 
 # ---- Main ----
 def main():
     print("=" * 60)
-    print("SoupyForge CDPT Root Injection")
-    print("Zero upload. Pure densification.")
+    print("  POPCORN MODE")
+    print("  Base model = bag | Knowledge = kernels | CDPT = heat")
+    print("  Nothing added. Everything expanded.")
     print("=" * 60)
     
     # Check Ollama
@@ -1365,55 +1409,41 @@ def main():
         print(f"Then run: ollama pull {OLLAMA_MODEL}")
         sys.exit(1)
     
-    # Phase 1: Seeds
-    seeds = generate_seeds()
-    if not seeds:
-        print("[ERROR] No seeds generated. Check Ollama connection.")
+    # Pop
+    samples = pop_kernels()
+    
+    if not samples:
+        print("[ERROR] No kernels popped. Check Ollama connection.")
         sys.exit(1)
     
-    # Phase 2: Process through perspectives
-    print(f"\\n== Phase 2: Running {len(seeds)} seeds through {len(PERSPECTIVES)} perspectives ==")
-    print(f"   This will make ~{len(seeds) * (len(PERSPECTIVES) + 1)} Ollama calls")
-    print(f"   Estimated time: {len(seeds) * len(PERSPECTIVES) * 8 // 60}-{len(seeds) * len(PERSPECTIVES) * 15 // 60} minutes")
-    
-    results = []
-    for i, seed in enumerate(seeds):
-        result = process_seed(i, seed, len(seeds))
-        if result:
-            results.append(result)
-    
-    if not results:
-        print("[ERROR] No samples generated.")
-        sys.exit(1)
-    
-    # Save JSONL
-    dataset_path = OUTPUT_DIR / "injection_dataset.jsonl"
+    # Save
+    dataset_path = OUTPUT_DIR / "popcorn_dataset.jsonl"
     with open(dataset_path, "w") as f:
-        for r in results:
-            f.write(json.dumps(r) + "\\n")
-    print(f"\\n== Saved {len(results)} enriched samples to {dataset_path} ==")
+        for s in samples:
+            f.write(json.dumps(s) + "\\n")
     
-    # Save training config
-    config = generate_train_config(len(results))
+    config = generate_train_config(len(samples))
     config_path = OUTPUT_DIR / "injection_config.json"
     with open(config_path, "w") as f:
         json.dump(config, f, indent=2)
-    print(f"   Training config saved to {config_path}")
     
-    # Summary
+    # Calculate expansion
+    perspective_count = len([p for p in PERSPECTIVES if p in BURNERS])
+    expansion = perspective_count * NUM_ROUNDS
+    
     print(f"\\n{'=' * 60}")
-    print(f"INJECTION COMPLETE")
+    print(f"  POPCORN COMPLETE")
     print(f"{'=' * 60}")
-    print(f"  Seeds extracted:    {len(seeds)}")
-    print(f"  Samples generated:  {len(results)}")
-    print(f"  Perspectives used:  {len(PERSPECTIVES)}")
-    print(f"  Zones targeted:     {', '.join(ZONES)}")
+    print(f"  Kernels popped:     {len(samples)}")
+    print(f"  Perspectives:       {perspective_count} burners")
+    print(f"  Rounds:             {NUM_ROUNDS}")
+    print(f"  Expansion:          ~{expansion}x cognitive density")
+    print(f"  Zones:              {', '.join(ZONES)}")
     print(f"  Intensity:          {INTENSITY}x")
-    print(f"\\nNext steps:")
-    print(f"  1. Review injection_output/injection_dataset.jsonl")
-    print(f"  2. Run: python3 train.py  (uses injection_config.json automatically)")
-    print(f"  3. Your model is now densified -- same weights, new cognitive structure")
-    print(f"\\n  The tree has been souped up from roots to canopy.")
+    print(f"\\n  Output: {dataset_path}")
+    print(f"  Config: {config_path}")
+    print(f"\\n  Next: python3 train.py")
+    print(f"  Same bag. Same kernels. {expansion}x the volume.")
 
 if __name__ == "__main__":
     main()
