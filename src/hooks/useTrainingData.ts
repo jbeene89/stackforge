@@ -1181,12 +1181,15 @@ export function generateInjectionScript(
   perspectives: string[],
   baseModel: string,
   ollamaModel: string = "llama3.2:1b",
-  domain: string = "general"
+  domain: string = "general",
+  weights: Record<string, number> = {}
 ): string {
   const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
   const zonesJson = JSON.stringify(zones);
   const perspectsJson = JSON.stringify(perspectives);
+  const weightsJson = JSON.stringify(weights);
   const numRounds = Math.max(3, Math.round(intensity * 4));
+  const totalSlots = perspectives.reduce((sum, p) => sum + (weights[p] || 1), 0);
 
   return `#!/usr/bin/env python3
 """
