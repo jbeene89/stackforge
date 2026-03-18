@@ -705,6 +705,7 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
   const maxSeqLen = hp.max_seq_length || 1024;
   const isCpuOnly = hwProfile === "cpu_only";
   const hfModelId = HF_MODEL_MAP[job.base_model] || job.base_model;
+  const layerStrategy = hp.layer_strategy || "all";
 
   return `#!/usr/bin/env python3
 """
@@ -741,6 +742,91 @@ HYPERPARAMS = {
     "gradient_checkpointing": ${gradientCheckpointing ? "True" : "False"},
     "cpu_offload": ${cpuOffload ? "True" : "False"},
 }
+
+# ── Selective Layer Control ──
+# Strategy: "${layerStrategy}"
+# - "all": Target all layers (default, maximum learning)
+# - "knowledge": Target middle layers (factual knowledge, associations)
+# - "style": Target early + late layers (tone, formatting, persona)
+# - "reasoning": Target attention layers only (logic, chain-of-thought)
+LAYER_STRATEGY = "${layerStrategy}"
+
+def get_target_layers(model, strategy):
+    """Determine which layers to apply LoRA to based on strategy."""
+    # Count total layers
+    num_layers = 0
+    for name, _ in model.named_modules():
+        if ".layers." in name or ".h." in name or ".blocks." in name:
+            parts = name.split(".")
+            for p in parts:
+                if p.isdigit():
+                    num_layers = max(num_layers, int(p) + 1)
+                    break
+
+    if num_layers == 0:
+        num_layers = 32  # fallback for unknown architectures
+
+    if strategy == "knowledge":
+        # Middle 40% of layers: where factual associations live
+        start = int(num_layers * 0.3)
+        end = int(num_layers * 0.7)
+        target_layer_indices = list(range(start, end))
+        print(f"  [Layer Control] Knowledge mode: targeting layers {start}-{end-1} of {num_layers}")
+    elif strategy == "style":
+        # First 20% + last 20%: where tone/formatting patterns live
+        early_end = int(num_layers * 0.2)
+        late_start = int(num_layers * 0.8)
+        target_layer_indices = list(range(0, early_end)) + list(range(late_start, num_layers))
+        print(f"  [Layer Control] Style mode: targeting layers 0-{early_end-1} and {late_start}-{num_layers-1}")
+    elif strategy == "reasoning":
+        # Focus on attention projections in middle-to-late layers
+        start = int(num_layers * 0.25)
+        end = int(num_layers * 0.85)
+        target_layer_indices = list(range(start, end))
+        print(f"  [Layer Control] Reasoning mode: targeting attention in layers {start}-{end-1}")
+    else:
+        target_layer_indices = list(range(num_layers))
+        print(f"  [Layer Control] All layers mode: targeting all {num_layers} layers")
+
+    return target_layer_indices, num_layers
+
+def filter_target_modules_by_layer(model, base_modules, layer_indices, strategy):
+    """Filter LoRA target modules to only apply to selected layers."""
+    if strategy == "all":
+        return base_modules  # No filtering needed
+
+    filtered = []
+    for name, _ in model.named_parameters():
+        for mod in base_modules:
+            if mod in name:
+                # Extract layer index from parameter name
+                parts = name.split(".")
+                layer_idx = None
+                for p in parts:
+                    if p.isdigit():
+                        layer_idx = int(p)
+                        break
+                if layer_idx is not None and layer_idx in layer_indices:
+                    # For reasoning mode, only target attention (q/k/v/o), skip MLP
+                    if strategy == "reasoning" and mod in ["gate_proj", "up_proj", "down_proj"]:
+                        continue
+                    filtered.append(name.rsplit(".", 1)[0] + "." + mod)
+                    break
+
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for m in filtered:
+        if m not in seen:
+            seen.add(m)
+            unique.append(m)
+
+    if not unique:
+        print(f"  [!] No layers matched strategy '{strategy}', falling back to all")
+        return base_modules
+
+    print(f"  [Layer Control] Targeting {len(unique)} module instances (vs {len(base_modules)} base modules)")
+    return unique
 
 # Hardware profile: ${hwProfile}
 USE_CPU_ONLY = ${isCpuOnly ? "True" : "False"}
@@ -874,13 +960,29 @@ def train_with_unsloth():
     if not getattr(tokenizer, "chat_template", None):
         tokenizer.chat_template = "{% for message in messages %}{% if message['role'] == 'system' %}<|system|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'user' %}<|user|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'assistant' %}<|assistant|>\\n{{ message['content'] }}\\n{% endif %}{% endfor %}"
 
-    model = FastLanguageModel.get_peft_model(
-        model,
-        r=HYPERPARAMS["lora_rank"],
-        lora_alpha=HYPERPARAMS["lora_alpha"],
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
-    )
+    # Apply selective layer control
+    base_target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    layer_indices, total_layers = get_target_layers(model, LAYER_STRATEGY)
+
+    if LAYER_STRATEGY != "all":
+        filtered_modules = filter_target_modules_by_layer(model, base_target_modules, layer_indices, LAYER_STRATEGY)
+        # For Unsloth, we pass base module names but control via layers_to_transform
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=HYPERPARAMS["lora_rank"],
+            lora_alpha=HYPERPARAMS["lora_alpha"],
+            target_modules=base_target_modules if LAYER_STRATEGY != "reasoning" else ["q_proj", "k_proj", "v_proj", "o_proj"],
+            layers_to_transform=layer_indices,
+            use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
+        )
+    else:
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=HYPERPARAMS["lora_rank"],
+            lora_alpha=HYPERPARAMS["lora_alpha"],
+            target_modules=base_target_modules,
+            use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
+        )
 
     raw = load_dataset(DATASET_FILE)
     formatted = []
@@ -955,11 +1057,16 @@ def train_cpu_fallback():
     if not getattr(tokenizer, "chat_template", None):
         tokenizer.chat_template = "{% for message in messages %}{% if message['role'] == 'system' %}<|system|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'user' %}<|user|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'assistant' %}<|assistant|>\\n{{ message['content'] }}\\n{% endif %}{% endfor %}"
 
+    # Apply selective layer control for CPU path
+    base_cpu_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
+    layer_indices, _ = get_target_layers(model, LAYER_STRATEGY)
+
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=HYPERPARAMS["lora_rank"],
         lora_alpha=HYPERPARAMS["lora_alpha"],
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        target_modules=base_cpu_modules,
+        layers_to_transform=layer_indices if LAYER_STRATEGY != "all" else None,
         lora_dropout=0.05,
     )
     model = get_peft_model(model, lora_config)
