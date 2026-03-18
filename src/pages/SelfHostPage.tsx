@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { generateInjectionScript } from "@/hooks/useTrainingData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import { Button } from "@/components/ui/button";
