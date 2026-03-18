@@ -1197,25 +1197,28 @@ SoupyForge CDPT Popcorn Injection - Pure Heat, Zero Extract
 ============================================================
 The base model is a bag of popcorn. Its stock knowledge is the kernels.
 The ${perspectives.length} CDPT perspectives are the HEAT.
+${totalSlots > perspectives.length ? `\nBIAS HEAT ACTIVE: ${totalSlots} weighted burner slots (some perspectives run multiple times)` : ""}
 
 No seeds. No extraction. No upload. No questions.
-Just heat the kernels and watch them pop into 13x their size.
+Just heat the kernels and watch them pop into ${totalSlots}x their size.
 
 Base Model: ${hfModelId}
 Ollama Model: ${ollamaModel}
 Domain: ${domain}
 Zones: ${zones.join(", ")}
 Intensity: ${intensity}x (${numRounds} rounds)
-Perspectives: ${perspectives.length} heat channels
+Perspectives: ${perspectives.length} heat channels (${totalSlots} weighted slots)
+${Object.entries(weights).filter(([, v]) => v >= 2).map(([k, v]) => `  ${k}: ${v}x (biased)`).join("\\n")}
 
 How it works:
-  Each perspective channel is a BURNER. We put the model's knowledge
-  directly on each burner and let it pop. The model free-associates
-  through each cognitive lens — no prompting, no extraction, just heat.
+  Each perspective channel is a BURNER. Weight > 1x means that burner
+  runs MULTIPLE TIMES per round with increasing temperature — like 
+  replacing one burner with two of the same kind. More heat = more 
+  expansion in that cognitive direction.
 
-  Round 1: Each perspective pops raw kernels from the model's knowledge
-  Round 2+: Each perspective pops the PREVIOUS round's output (chain-pop)
-  Result: Dense, multi-layered cognitive output from stock knowledge alone
+  Round 1: Each perspective pops raw kernels (weight x times)
+  Round 2+: Chain-pop previous output (weight x times)
+  Result: Bias-shaped cognitive expansion from stock knowledge alone
 """
 
 import subprocess, json, os, sys, time
