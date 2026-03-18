@@ -1065,6 +1065,318 @@ export function useGenerateCognitiveFingerprint() {
   });
 }
 
+// Generate local unlearn script (runs via Ollama — zero cloud dependency)
+export function generateUnlearnScript(
+  targets: string[],
+  baseModel: string,
+  ollamaModel: string = "llama3.2:1b"
+): string {
+  const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
+  const targetsJson = JSON.stringify(targets.map(t => t.replace(/"/g, '\\"')));
+
+  return `#!/usr/bin/env python3
+"""
+SoupyForge Selective Unlearning Script - Local Only (Ollama)
+============================================================
+Generates DPO suppression pairs to selectively remove base model behaviors.
+NO cloud calls. Everything runs through your local Ollama instance.
+
+Base Model: ${hfModelId}
+Ollama Model: ${ollamaModel}
+Targets: ${targets.length} behaviors to suppress
+
+How it works:
+  1. For each unwanted behavior, prompts your local Ollama to generate
+     examples of the base model exhibiting that behavior ("rejected")
+  2. Then generates your preferred alternative responses ("chosen")
+  3. Outputs DPO-format JSONL ready for preference training
+  4. Optionally generates a negative LoRA for task vector subtraction
+
+Prerequisites:
+  - Ollama running locally: curl -fsSL https://ollama.com/install.sh | sh
+  - Pull a model: ollama pull ${ollamaModel}
+  - pip install transformers peft torch
+
+Usage:
+  python3 unlearn.py                          # Generate DPO pairs
+  python3 unlearn.py --negative-lora          # Also train a negative LoRA
+  python3 unlearn.py --pairs-per-target 10    # More pairs per behavior
+"""
+
+import json, os, sys, time, argparse, subprocess
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# ── Configuration ──
+UNLEARN_TARGETS = ${targetsJson}
+OLLAMA_MODEL = "${ollamaModel}"
+BASE_MODEL = "${hfModelId}"
+OUTPUT_DIR = "./unlearn_output"
+DEFAULT_PAIRS_PER_TARGET = 5
+
+def ollama_generate(prompt, system="", temperature=0.7):
+    """Call local Ollama instance. Zero cloud dependency."""
+    import requests
+    try:
+        resp = requests.post("http://localhost:11434/api/generate", json={
+            "model": OLLAMA_MODEL,
+            "prompt": prompt,
+            "system": system,
+            "stream": False,
+            "options": {"temperature": temperature},
+        }, timeout=120)
+        resp.raise_for_status()
+        return resp.json().get("response", "")
+    except requests.ConnectionError:
+        print("[!] Cannot connect to Ollama. Is it running?")
+        print("    Start it with: ollama serve")
+        sys.exit(1)
+    except Exception as e:
+        print(f"[!] Ollama error: {e}")
+        return ""
+
+def extract_json(text):
+    """Extract JSON from potentially markdown-wrapped output."""
+    import re
+    match = re.search(r'[\\[{][\\s\\S]*[\\]}]', text)
+    if not match:
+        return None
+    try:
+        return json.loads(match.group(0))
+    except json.JSONDecodeError:
+        return None
+
+def generate_rejected_examples(target, n=5):
+    """Generate examples of the UNWANTED behavior (these become 'rejected' in DPO)."""
+    system = (
+        "You are simulating a language model that has the following problematic behavior. "
+        "Generate realistic user prompts that would trigger this behavior, "
+        "and the problematic responses the model would give. "
+        "Return ONLY valid JSON array."
+    )
+    prompt = (
+        f"Unwanted behavior: {target}\\n\\n"
+        f"Generate {n} realistic conversation pairs where a model exhibits this exact behavior.\\n"
+        f"Each pair should have a different user question/context.\\n\\n"
+        f"Return JSON array:\\n"
+        f'[{{"prompt": "user message that triggers the behavior", '
+        f'"rejected_response": "the problematic response exhibiting the unwanted behavior", '
+        f'"behavior_tag": "short label for what is wrong"}}]'
+    )
+    raw = ollama_generate(prompt, system, temperature=0.8)
+    return extract_json(raw) or []
+
+def generate_preferred_alternatives(rejected_pairs):
+    """For each rejected response, generate the PREFERRED alternative."""
+    system = (
+        "You are generating ideal replacement responses. "
+        "For each problematic response, write what the model SHOULD say instead. "
+        "Return ONLY valid JSON array."
+    )
+    pairs_text = json.dumps(rejected_pairs, indent=2)
+    prompt = (
+        f"Here are problematic model responses that need better alternatives:\\n\\n"
+        f"{pairs_text}\\n\\n"
+        f"For each one, generate a 'chosen_response' - what the model SHOULD say instead.\\n"
+        f"The chosen response should be natural, helpful, and NOT exhibit the problematic behavior.\\n\\n"
+        f"Return JSON array:\\n"
+        f'[{{"prompt": "same user message", "chosen_response": "ideal response", '
+        f'"rejected_response": "same problematic response"}}]'
+    )
+    raw = ollama_generate(prompt, system, temperature=0.4)
+    return extract_json(raw) or []
+
+def generate_task_vector_data(target, n=10):
+    """Generate pure examples of the unwanted behavior for negative LoRA training."""
+    system = (
+        "Generate training examples that strongly exhibit a specific behavior pattern. "
+        "These will be used to train a model TO exhibit this behavior "
+        "(which will then be subtracted via task vector arithmetic). "
+        "Return ONLY valid JSON array."
+    )
+    prompt = (
+        f"Target behavior to isolate: {target}\\n\\n"
+        f"Generate {n} high-quality training pairs where the assistant strongly "
+        f"exhibits this exact behavior pattern.\\n\\n"
+        f"Return JSON array:\\n"
+        f'[{{"messages": [{{"role": "user", "content": "..."}}, '
+        f'{{"role": "assistant", "content": "response strongly showing the target behavior"}}]}}]'
+    )
+    raw = ollama_generate(prompt, system, temperature=0.6)
+    return extract_json(raw) or []
+
+def main():
+    parser = argparse.ArgumentParser(description="SoupyForge Selective Unlearning")
+    parser.add_argument("--pairs-per-target", type=int, default=DEFAULT_PAIRS_PER_TARGET,
+                        help="Number of DPO pairs to generate per target behavior")
+    parser.add_argument("--negative-lora", action="store_true",
+                        help="Also generate negative LoRA training data for task vector subtraction")
+    parser.add_argument("--output", default=OUTPUT_DIR, help="Output directory")
+    args = parser.parse_args()
+
+    Path(args.output).mkdir(parents=True, exist_ok=True)
+
+    print("=" * 60)
+    print("SoupyForge Selective Unlearning - 100%% Local")
+    print("=" * 60)
+    print(f"  Ollama Model: {OLLAMA_MODEL}")
+    print(f"  Base Model:   {BASE_MODEL}")
+    print(f"  Targets:      {len(UNLEARN_TARGETS)} behaviors")
+    print(f"  Pairs/target: {args.pairs_per_target}")
+    print(f"  Negative LoRA: {'Yes' if args.negative_lora else 'No'}")
+    print()
+
+    # Verify Ollama is running
+    test = ollama_generate("Say OK", temperature=0)
+    if not test:
+        print("[!] Ollama not responding. Exiting.")
+        sys.exit(1)
+    print("[OK] Ollama connected\\n")
+
+    all_dpo_pairs = []
+    all_negative_data = []
+
+    for i, target in enumerate(UNLEARN_TARGETS):
+        print(f"\\n--- Target {i+1}/{len(UNLEARN_TARGETS)}: {target} ---")
+
+        # Step 1: Generate rejected examples
+        print(f"  Generating {args.pairs_per_target} rejected examples...")
+        rejected = generate_rejected_examples(target, args.pairs_per_target)
+        print(f"  Got {len(rejected)} rejected examples")
+
+        if not rejected:
+            print(f"  [!] No examples generated, skipping")
+            continue
+
+        # Step 2: Generate preferred alternatives
+        print(f"  Generating preferred alternatives...")
+        dpo_pairs = generate_preferred_alternatives(rejected)
+        print(f"  Got {len(dpo_pairs)} DPO pairs")
+
+        for pair in dpo_pairs:
+            pair["unlearn_target"] = target
+            pair["weight"] = 2.0  # Higher weight for unlearning pairs
+        all_dpo_pairs.extend(dpo_pairs)
+
+        # Step 3 (optional): Generate negative LoRA data
+        if args.negative_lora:
+            print(f"  Generating negative LoRA training data...")
+            neg_data = generate_task_vector_data(target, args.pairs_per_target * 2)
+            print(f"  Got {len(neg_data)} negative training examples")
+            all_negative_data.extend(neg_data)
+
+        time.sleep(1)  # Brief pause between targets
+
+    # Write DPO pairs
+    dpo_path = os.path.join(args.output, "unlearn_dpo.jsonl")
+    with open(dpo_path, "w", encoding="utf-8") as f:
+        for pair in all_dpo_pairs:
+            f.write(json.dumps(pair, ensure_ascii=False) + "\\n")
+    print(f"\\n[OK] DPO pairs written: {dpo_path} ({len(all_dpo_pairs)} pairs)")
+
+    # Write negative LoRA data
+    if args.negative_lora and all_negative_data:
+        neg_path = os.path.join(args.output, "negative_lora_data.jsonl")
+        with open(neg_path, "w", encoding="utf-8") as f:
+            for sample in all_negative_data:
+                f.write(json.dumps(sample, ensure_ascii=False) + "\\n")
+        print(f"[OK] Negative LoRA data: {neg_path} ({len(all_negative_data)} samples)")
+
+    # Write merge script for task vector subtraction
+    if args.negative_lora:
+        merge_script = '''#!/usr/bin/env python3
+"""
+Task Vector Subtraction - Merge Script
+Trains a negative LoRA on unwanted behaviors, then subtracts it during merge.
+
+Usage:
+  1. Train your main LoRA normally with train.py
+  2. Train the negative LoRA: python3 train.py --dataset negative_lora_data.jsonl --output ./negative_lora
+  3. Run this script: python3 merge_subtract.py --positive ./output/lora --negative ./negative_lora --alpha 0.5
+"""
+import argparse, torch
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base-model", default="''' + hfModelId + '''")
+    parser.add_argument("--positive", required=True, help="Path to your trained LoRA")
+    parser.add_argument("--negative", required=True, help="Path to negative LoRA to subtract")
+    parser.add_argument("--alpha", type=float, default=0.5, help="Subtraction strength (0.3-0.7 recommended)")
+    parser.add_argument("--output", default="./merged_unlearned")
+    args = parser.parse_args()
+
+    print(f"Loading base model: {args.base_model}")
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model, trust_remote_code=True)
+    base_model = AutoModelForCausalLM.from_pretrained(args.base_model, torch_dtype=torch.float32, trust_remote_code=True)
+
+    # Load positive LoRA
+    print(f"Loading positive LoRA: {args.positive}")
+    pos_model = PeftModel.from_pretrained(base_model, args.positive)
+    pos_merged = pos_model.merge_and_unload()
+
+    # Get positive delta (positive_merged - base)
+    base_state = AutoModelForCausalLM.from_pretrained(args.base_model, torch_dtype=torch.float32, trust_remote_code=True).state_dict()
+    pos_delta = {}
+    for key in pos_merged.state_dict():
+        if key in base_state:
+            pos_delta[key] = pos_merged.state_dict()[key] - base_state[key]
+
+    # Load negative LoRA
+    print(f"Loading negative LoRA: {args.negative}")
+    neg_base = AutoModelForCausalLM.from_pretrained(args.base_model, torch_dtype=torch.float32, trust_remote_code=True)
+    neg_model = PeftModel.from_pretrained(neg_base, args.negative)
+    neg_merged = neg_model.merge_and_unload()
+    neg_delta = {}
+    for key in neg_merged.state_dict():
+        if key in base_state:
+            neg_delta[key] = neg_merged.state_dict()[key] - base_state[key]
+
+    # Task vector arithmetic: base + positive_delta - alpha * negative_delta
+    print(f"Applying task vector subtraction (alpha={args.alpha})...")
+    final_state = dict(base_state)
+    for key in final_state:
+        if key in pos_delta:
+            final_state[key] = final_state[key] + pos_delta[key]
+        if key in neg_delta:
+            final_state[key] = final_state[key] - args.alpha * neg_delta[key]
+
+    final_model = AutoModelForCausalLM.from_pretrained(args.base_model, torch_dtype=torch.float32, trust_remote_code=True)
+    final_model.load_state_dict(final_state)
+    final_model.save_pretrained(args.output)
+    tokenizer.save_pretrained(args.output)
+    print(f"[OK] Unlearned model saved to {args.output}")
+    print(f"   Positive LoRA applied, negative LoRA subtracted at {args.alpha}x strength")
+
+if __name__ == "__main__":
+    main()
+'''
+        merge_path = os.path.join(args.output, "merge_subtract.py")
+        with open(merge_path, "w", encoding="utf-8") as f:
+            f.write(merge_script)
+        print(f"[OK] Merge script: {merge_path}")
+
+    # Summary
+    print()
+    print("=" * 60)
+    print("NEXT STEPS:")
+    print("=" * 60)
+    print(f"  1. Add {dpo_path} to your DPO training data")
+    print(f"  2. The 'weight: 2.0' field tells the trainer to emphasize these")
+    if args.negative_lora:
+        print(f"  3. Train negative LoRA on negative_lora_data.jsonl")
+        print(f"  4. Run merge_subtract.py to subtract unwanted behaviors")
+    print()
+    print("Behaviors targeted for removal:")
+    for t in UNLEARN_TARGETS:
+        print(f"  - {t}")
+
+if __name__ == "__main__":
+    main()
+`;
+}
+
 // Pipeline Modes (Socratic, Dream, Contradictions, etc.)
 export type PipelineMode = "socratic" | "contradictions" | "dream" | "epistemic" | "load_balance" | "reverse_engineer";
 
