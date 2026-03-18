@@ -992,7 +992,9 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      decrypt_api_key: { Args: { encrypted_key: string }; Returns: string }
+      encrypt_api_key: { Args: { raw_key: string }; Returns: string }
+      mask_api_key: { Args: { encrypted_key: string }; Returns: string }
     }
     Enums: {
       module_type:
