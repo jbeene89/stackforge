@@ -11,6 +11,7 @@ import {
 import { useProjects, useModules, useStacks, useRuns } from "@/hooks/useSupabaseData";
 import { useCredits } from "@/hooks/useCredits";
 import { TierBadge } from "@/components/TierBadge";
+import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
