@@ -72,12 +72,18 @@ export function useDatasets() {
   return useQuery({
     queryKey: ["training-datasets"],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        return cacheGetAll<TrainingDataset>("training_datasets");
+      }
       const { data, error } = await supabase
         .from("training_datasets" as any)
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as TrainingDataset[];
+      const datasets = data as unknown as TrainingDataset[];
+      // Populate cache in background
+      cachePutAll("training_datasets", datasets).catch(console.error);
+      return datasets;
     },
   });
 }
@@ -86,13 +92,21 @@ export function useDataset(id: string) {
   return useQuery({
     queryKey: ["training-datasets", id],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        const cached = await cacheGetAll<TrainingDataset>("training_datasets");
+        const found = cached.find(d => d.id === id);
+        if (found) return found;
+        throw new Error("Dataset not available offline");
+      }
       const { data, error } = await supabase
         .from("training_datasets" as any)
         .select("*")
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data as unknown as TrainingDataset;
+      const ds = data as unknown as TrainingDataset;
+      cachePut("training_datasets", ds).catch(console.error);
+      return ds;
     },
     enabled: !!id,
   });
