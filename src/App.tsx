@@ -115,6 +115,7 @@ const App = () => (
                 <Route path="/deploy" element={<DeployPipelinePage />} />
                 <Route path="/deploy/phone" element={<PhoneDeployGuidePage />} />
                 <Route path="/inference" element={<InferencePlaygroundPage />} />
+                <Route path="/console" element={<DeviceConsolePage />} />
                 <Route path="/training" element={<TrainingProgressPage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
