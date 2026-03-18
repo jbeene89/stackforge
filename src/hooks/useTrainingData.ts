@@ -495,13 +495,35 @@ export function useCreateTrainingJob() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (job: { dataset_id: string; name: string; base_model?: string; method?: string; hyperparameters?: Record<string, any> }) => {
+      const payload = {
+        ...job,
+        user_id: user!.id,
+        id: crypto.randomUUID(),
+        status: "draft",
+        base_model: job.base_model || "phi-3-mini",
+        method: job.method || "lora",
+        hyperparameters: job.hyperparameters || { epochs: 3, lora_rank: 16, batch_size: 4, learning_rate: 0.0002 },
+        metrics: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      if (!navigator.onLine) {
+        await cachePut("training_jobs", payload as any);
+        await queueMutation({ store: "training_jobs", action: "insert", payload });
+        toast.info("Job saved offline — will sync when reconnected");
+        return payload as unknown as TrainingJob;
+      }
+
       const { data, error } = await supabase
         .from("training_jobs" as any)
         .insert({ ...job, user_id: user!.id } as any)
         .select()
         .single();
       if (error) throw error;
-      return data as unknown as TrainingJob;
+      const result = data as unknown as TrainingJob;
+      cachePut("training_jobs", result).catch(console.error);
+      return result;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["training-jobs"] });
@@ -515,6 +537,15 @@ export function useUpdateTrainingJob() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string; status?: string; metrics?: Record<string, any>; hyperparameters?: Record<string, any> }) => {
+      if (!navigator.onLine) {
+        const cached = await cacheGetAll<TrainingJob>("training_jobs");
+        const existing = cached.find(j => j.id === id);
+        if (existing) await cachePut("training_jobs", { ...existing, ...updates } as any);
+        await queueMutation({ store: "training_jobs", action: "update", payload: { id, ...updates } });
+        toast.info("Update saved offline");
+        return;
+      }
+
       const { error } = await supabase
         .from("training_jobs" as any)
         .update(updates as any)
@@ -532,8 +563,16 @@ export function useDeleteTrainingJob() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!navigator.onLine) {
+        await cacheDeleteItem("training_jobs", id);
+        await queueMutation({ store: "training_jobs", action: "delete", payload: { id } });
+        toast.info("Deleted offline — will sync when reconnected");
+        return;
+      }
+
       const { error } = await supabase.from("training_jobs" as any).delete().eq("id", id);
       if (error) throw error;
+      cacheDeleteItem("training_jobs", id).catch(console.error);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["training-jobs"] });
