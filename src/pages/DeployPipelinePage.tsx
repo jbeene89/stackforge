@@ -876,6 +876,16 @@ export default function DeployPipelinePage() {
                 </SelectContent>
               </Select>
             </div>
+            {isPopcornOnly && (
+              <div className="flex flex-col items-end gap-1">
+                <Badge variant="outline" className="text-[10px] border-[hsl(var(--forge-amber))]/40 text-[hsl(var(--forge-amber))]">
+                  🍿 zero data
+                </Badge>
+                <span className="text-[10px] text-muted-foreground">
+                  Model densification only
+                </span>
+              </div>
+            )}
             {selectedDataset && (
               <div className="flex flex-col items-end gap-1">
                 <Badge variant="outline" className="text-[10px]">
@@ -887,6 +897,16 @@ export default function DeployPipelinePage() {
               </div>
             )}
           </div>
+
+          {isPopcornOnly && (
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">No dataset needed — the model IS the data</span>
+                <span className="font-semibold text-[hsl(var(--forge-emerald))]">Ready 🍿</span>
+              </div>
+              <Progress value={100} className="h-2" />
+            </div>
+          )}
 
           {selectedDataset && (
             <div className="mt-3 space-y-1.5">
