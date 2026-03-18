@@ -865,6 +865,9 @@ export default function DeployPipelinePage() {
                   <SelectValue placeholder={isLoading ? "Loading…" : "Pick a dataset to deploy"} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={POPCORN_ONLY_ID}>
+                    🍿 Popcorn Only (no data needed)
+                  </SelectItem>
                   {datasets?.map((d) => (
                     <SelectItem key={d.id} value={d.id}>
                       {d.name} ({d.sample_count} samples)
