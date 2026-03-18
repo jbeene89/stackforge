@@ -197,18 +197,7 @@ export default function AccountPage() {
               {key.label && <span className="text-xs text-muted-foreground">({key.label})</span>}
             </div>
             <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-                onClick={() => {
-                  const next = new Set(visibleKeys);
-                  visibleKeys.has(key.id) ? next.delete(key.id) : next.add(key.id);
-                  setVisibleKeys(next);
-                }}
-              >
-                {visibleKeys.has(key.id) ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              </Button>
+              <Shield className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => handleDeleteKey(key.id)}>
                 <Trash2 className="h-3 w-3" />
               </Button>
