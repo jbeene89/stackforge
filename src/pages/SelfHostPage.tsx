@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -464,6 +465,9 @@ export default function SelfHostPage() {
           and download a ready-to-run Docker package — zero cloud dependencies.
         </p>
       </div>
+
+      {/* Independence Scorecard */}
+      <IndependenceScorecard />
 
       {/* Independence banner */}
       <div className="rounded-xl border border-[hsl(var(--forge-emerald))]/20 bg-gradient-to-r from-[hsl(var(--forge-emerald))]/[0.04] to-[hsl(var(--forge-cyan))]/[0.04] p-4 flex items-center gap-4">
