@@ -428,6 +428,46 @@ export default function SelfHostPage() {
         );
       }
 
+      // Popcorn Injection — bias heat support
+      if (config.components.pipeline) {
+        const defaultWeights: Record<string, number> = { builder: 1, red_team: 1, systems: 1, frame_breaker: 1, empath: 1, synthesis: 1, debate: 1, gap_fill: 1, anti_pattern: 1 };
+        const allPerspectives = Object.keys(defaultWeights);
+        const injScript = generateInjectionScript(
+          ["roots", "trunk", "canopy"], 1.5, allPerspectives,
+          "meta-llama/Llama-3.2-1B-Instruct", config.ollamaModel, "general", defaultWeights
+        );
+        folder.file("scripts/inject.py", injScript);
+        folder.file("scripts/injection_config.json", JSON.stringify({
+          zones: ["roots", "trunk", "canopy"],
+          intensity: 1.5,
+          perspectives: allPerspectives,
+          perspective_weights: defaultWeights,
+          bias_presets: {
+            even_heat: defaultWeights,
+            novelty_seeker: { builder: 1, red_team: 0, systems: 0, frame_breaker: 3, empath: 1, synthesis: 1, debate: 1, gap_fill: 2, anti_pattern: 0 },
+            paranoid_builder: { builder: 2, red_team: 3, systems: 1, frame_breaker: 0, empath: 0, synthesis: 1, debate: 2, gap_fill: 1, anti_pattern: 1 },
+            deep_empathy: { builder: 0, red_team: 0, systems: 1, frame_breaker: 1, empath: 3, synthesis: 2, debate: 0, gap_fill: 1, anti_pattern: 0 },
+          },
+          layer_mapping: {
+            roots: { start: 0, end: 6 },
+            trunk: { start: 7, end: 24 },
+            canopy: { start: 25, end: 31 },
+          },
+        }, null, 2));
+        folder.file("scripts/POPCORN_README.md",
+          `# Popcorn Injection - Bias Heat\n\n` +
+          `Densify your model using its own knowledge. Zero data upload.\n\n` +
+          `## Usage\n\n` +
+          `\`\`\`bash\npython3 scripts/inject.py\n\`\`\`\n\n` +
+          `## Bias Presets\n\n` +
+          `Edit \`scripts/injection_config.json\` to change weights (0-3x per perspective).\n` +
+          `See presets: even_heat, novelty_seeker, paranoid_builder, deep_empathy.\n\n` +
+          `## How It Works\n\n` +
+          `Each CDPT perspective is a burner. Weight > 1x = multiple passes.\n` +
+          `Output: \`injection_output/popcorn_dataset.jsonl\` ready for training.\n`
+        );
+      }
+
       const blob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
