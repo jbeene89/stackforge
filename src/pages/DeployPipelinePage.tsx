@@ -250,6 +250,16 @@ async function downloadTrainingKit(
       system_prompt: systemPrompt || null,
       special_tokens: ["<BUILDER>", "</BUILDER>", "<RED_TEAM>", "</RED_TEAM>", "<SYSTEMS>", "</SYSTEMS>", "<FRAME_BREAKER>", "</FRAME_BREAKER>", "<EMPATH>", "</EMPATH>", "<SYNTHESIS>", "</SYNTHESIS>"],
       output: { gguf_quantization: "Q4_K_M", estimated_size_mb: "400-800" },
+      popcorn_injection: {
+        enabled: true,
+        perspectives: ["builder", "red_team", "systems", "frame_breaker", "empath", "synthesis", "debate", "gap_fill", "anti_pattern"],
+        bias_presets: {
+          even_heat: { builder: 1, red_team: 1, systems: 1, frame_breaker: 1, empath: 1, synthesis: 1, debate: 1, gap_fill: 1, anti_pattern: 1 },
+          novelty_seeker: { builder: 1, red_team: 0, systems: 0, frame_breaker: 3, empath: 1, synthesis: 1, debate: 1, gap_fill: 2, anti_pattern: 0 },
+          paranoid_builder: { builder: 2, red_team: 3, systems: 1, frame_breaker: 0, empath: 0, synthesis: 1, debate: 2, gap_fill: 1, anti_pattern: 1 },
+          deep_empathy: { builder: 0, red_team: 0, systems: 1, frame_breaker: 1, empath: 3, synthesis: 2, debate: 0, gap_fill: 1, anti_pattern: 0 },
+        },
+      },
     };
     zip.file("config.json", JSON.stringify(config, null, 2));
 
