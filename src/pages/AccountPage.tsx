@@ -11,7 +11,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Key, Plus, Trash2, Eye, EyeOff, Shield, Sparkles, Wand2 } from "lucide-react";
+import { Key, Plus, Trash2, Shield, Sparkles, Wand2 } from "lucide-react";
 import ReferralSection from "@/components/ReferralSection";
 import { TierBadge } from "@/components/TierBadge";
 import { useCredits } from "@/hooks/useCredits";
@@ -21,7 +21,7 @@ interface ApiKey {
   id: string;
   provider: string;
   label: string | null;
-  api_key_encrypted: string;
+  masked_key: string;
   created_at: string;
 }
 
@@ -49,7 +49,7 @@ export default function AccountPage() {
   const [newProvider, setNewProvider] = useState("openai");
   const [newLabel, setNewLabel] = useState("");
   const [newKey, setNewKey] = useState("");
-  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
+  // visibleKeys removed — keys are encrypted and only shown masked
   const [savingKey, setSavingKey] = useState(false);
 
   if (profile && !initialized) {
@@ -58,11 +58,10 @@ export default function AccountPage() {
   }
 
   const fetchKeys = async () => {
-    const { data } = await supabase
-      .from("user_api_keys")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setApiKeys(data as any);
+    const { data, error } = await supabase.functions.invoke("manage-api-keys", {
+      method: "GET",
+    });
+    if (!error && data) setApiKeys(data as ApiKey[]);
   };
 
   useEffect(() => { fetchKeys(); }, []);
@@ -80,16 +79,14 @@ export default function AccountPage() {
   const handleAddKey = async () => {
     if (!newKey.trim()) return;
     setSavingKey(true);
-    const { error } = await supabase.from("user_api_keys").insert({
-      user_id: user!.id,
-      provider: newProvider,
-      label: newLabel || null,
-      api_key_encrypted: newKey,
-    } as any);
+    const { error } = await supabase.functions.invoke("manage-api-keys", {
+      method: "POST",
+      body: { provider: newProvider, label: newLabel || null, api_key: newKey },
+    });
     if (error) {
       toast.error("Failed to save key");
     } else {
-      toast.success("API key saved");
+      toast.success("API key encrypted & saved");
       setNewKey("");
       setNewLabel("");
       setShowAddKey(false);
@@ -99,14 +96,17 @@ export default function AccountPage() {
   };
 
   const handleDeleteKey = async (id: string) => {
-    const { error } = await supabase.from("user_api_keys").delete().eq("id", id);
+    const { error } = await supabase.functions.invoke("manage-api-keys", {
+      method: "DELETE",
+      body: { id },
+    });
     if (!error) {
       toast.success("Key deleted");
       fetchKeys();
     }
   };
 
-  const maskKey = (key: string) => key.slice(0, 8) + "•".repeat(Math.max(0, key.length - 12)) + key.slice(-4);
+  // Keys are already masked server-side, no client masking needed
 
   return (
     <div className="p-6 space-y-6 animate-fade-in max-w-2xl">
@@ -192,23 +192,12 @@ export default function AccountPage() {
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-[10px]">{key.provider}</Badge>
               <span className="text-sm font-mono text-muted-foreground">
-                {visibleKeys.has(key.id) ? key.api_key_encrypted : maskKey(key.api_key_encrypted)}
+                {key.masked_key}
               </span>
               {key.label && <span className="text-xs text-muted-foreground">({key.label})</span>}
             </div>
             <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-                onClick={() => {
-                  const next = new Set(visibleKeys);
-                  visibleKeys.has(key.id) ? next.delete(key.id) : next.add(key.id);
-                  setVisibleKeys(next);
-                }}
-              >
-                {visibleKeys.has(key.id) ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              </Button>
+              <Shield className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => handleDeleteKey(key.id)}>
                 <Trash2 className="h-3 w-3" />
               </Button>
