@@ -743,6 +743,91 @@ HYPERPARAMS = {
     "cpu_offload": ${cpuOffload ? "True" : "False"},
 }
 
+# ── Selective Layer Control ──
+# Strategy: "${layerStrategy}"
+# - "all": Target all layers (default, maximum learning)
+# - "knowledge": Target middle layers (factual knowledge, associations)
+# - "style": Target early + late layers (tone, formatting, persona)
+# - "reasoning": Target attention layers only (logic, chain-of-thought)
+LAYER_STRATEGY = "${layerStrategy}"
+
+def get_target_layers(model, strategy):
+    """Determine which layers to apply LoRA to based on strategy."""
+    # Count total layers
+    num_layers = 0
+    for name, _ in model.named_modules():
+        if ".layers." in name or ".h." in name or ".blocks." in name:
+            parts = name.split(".")
+            for p in parts:
+                if p.isdigit():
+                    num_layers = max(num_layers, int(p) + 1)
+                    break
+
+    if num_layers == 0:
+        num_layers = 32  # fallback for unknown architectures
+
+    if strategy == "knowledge":
+        # Middle 40% of layers: where factual associations live
+        start = int(num_layers * 0.3)
+        end = int(num_layers * 0.7)
+        target_layer_indices = list(range(start, end))
+        print(f"  [Layer Control] Knowledge mode: targeting layers {start}-{end-1} of {num_layers}")
+    elif strategy == "style":
+        # First 20% + last 20%: where tone/formatting patterns live
+        early_end = int(num_layers * 0.2)
+        late_start = int(num_layers * 0.8)
+        target_layer_indices = list(range(0, early_end)) + list(range(late_start, num_layers))
+        print(f"  [Layer Control] Style mode: targeting layers 0-{early_end-1} and {late_start}-{num_layers-1}")
+    elif strategy == "reasoning":
+        # Focus on attention projections in middle-to-late layers
+        start = int(num_layers * 0.25)
+        end = int(num_layers * 0.85)
+        target_layer_indices = list(range(start, end))
+        print(f"  [Layer Control] Reasoning mode: targeting attention in layers {start}-{end-1}")
+    else:
+        target_layer_indices = list(range(num_layers))
+        print(f"  [Layer Control] All layers mode: targeting all {num_layers} layers")
+
+    return target_layer_indices, num_layers
+
+def filter_target_modules_by_layer(model, base_modules, layer_indices, strategy):
+    """Filter LoRA target modules to only apply to selected layers."""
+    if strategy == "all":
+        return base_modules  # No filtering needed
+
+    filtered = []
+    for name, _ in model.named_parameters():
+        for mod in base_modules:
+            if mod in name:
+                # Extract layer index from parameter name
+                parts = name.split(".")
+                layer_idx = None
+                for p in parts:
+                    if p.isdigit():
+                        layer_idx = int(p)
+                        break
+                if layer_idx is not None and layer_idx in layer_indices:
+                    # For reasoning mode, only target attention (q/k/v/o), skip MLP
+                    if strategy == "reasoning" and mod in ["gate_proj", "up_proj", "down_proj"]:
+                        continue
+                    filtered.append(name.rsplit(".", 1)[0] + "." + mod)
+                    break
+
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for m in filtered:
+        if m not in seen:
+            seen.add(m)
+            unique.append(m)
+
+    if not unique:
+        print(f"  [!] No layers matched strategy '{strategy}', falling back to all")
+        return base_modules
+
+    print(f"  [Layer Control] Targeting {len(unique)} module instances (vs {len(base_modules)} base modules)")
+    return unique
+
 # Hardware profile: ${hwProfile}
 USE_CPU_ONLY = ${isCpuOnly ? "True" : "False"}
 
