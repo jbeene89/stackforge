@@ -1236,13 +1236,25 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 # ---- Ollama helper ----
 def ollama_generate(prompt, system="You are a helpful assistant.", temperature=0.8):
+    """Call Ollama via its REST API for reliable generation."""
+    import urllib.request, urllib.error
+    url = os.environ.get("OLLAMA_HOST", "http://localhost:11434") + "/api/generate"
+    payload = json.dumps({
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "system": system,
+        "stream": False,
+        "options": {"temperature": temperature},
+    }).encode("utf-8")
     try:
-        result = subprocess.run(
-            ["ollama", "run", OLLAMA_MODEL, "--format", "plain"],
-            input=f"System: {system}\\nUser: {prompt}",
-            capture_output=True, text=True, timeout=180
-        )
-        return result.stdout.strip()
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=300) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("response", "").strip()
+    except urllib.error.URLError as e:
+        print(f"  [!] Ollama connection error: {e.reason}")
+        print(f"      Is Ollama running? Try: ollama serve")
+        return ""
     except Exception as e:
         print(f"  [!] Ollama error: {e}")
         return ""
