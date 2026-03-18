@@ -405,12 +405,17 @@ export function useTrainingJobs() {
   return useQuery({
     queryKey: ["training-jobs"],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        return cacheGetAll<TrainingJob>("training_jobs");
+      }
       const { data, error } = await supabase
         .from("training_jobs" as any)
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as TrainingJob[];
+      const jobs = data as unknown as TrainingJob[];
+      cachePutAll("training_jobs", jobs).catch(console.error);
+      return jobs;
     },
   });
 }
