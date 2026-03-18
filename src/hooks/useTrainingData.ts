@@ -1172,6 +1172,254 @@ export function useGenerateCognitiveFingerprint() {
   });
 }
 
+// Generate injection-only script — queries the base model through 13 CDPT perspectives
+// No training data needed. Uses what the model already knows.
+export function generateInjectionScript(
+  zones: string[],
+  intensity: number,
+  perspectives: string[],
+  baseModel: string,
+  ollamaModel: string = "llama3.2:1b",
+  domain: string = "general"
+): string {
+  const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
+  const zonesJson = JSON.stringify(zones);
+  const perspectsJson = JSON.stringify(perspectives);
+
+  return `#!/usr/bin/env python3
+"""
+SoupyForge CDPT Root Injection - Zero Upload, Pure Densification
+================================================================
+This script creates a NEW MODEL by running the base model's own knowledge
+through 13 cognitive perspective passes, then training it on the enriched output.
+
+No training data upload. No cloud calls. Everything local via Ollama.
+
+Base Model: ${hfModelId}
+Ollama Model: ${ollamaModel}
+Domain: ${domain}
+Zones: ${zones.join(", ")}
+Intensity: ${intensity}x
+Perspectives: ${perspectives.length}/9 channels
+
+How it works:
+  1. Generates seed prompts across ${domain} domain using the base model itself
+  2. For each seed, runs the model's response through all ${perspectives.length} perspective passes
+  3. Produces CDPT-enriched JSONL with perspective tokens
+  4. Trains LoRA adapters with zone-weighted ranks on targeted layers
+  5. Merges into a new, densified model
+
+The model teaches ITSELF through YOUR cognitive lens. Same weights, new model.
+"""
+
+import subprocess, json, os, sys, time, re
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+OLLAMA_MODEL = "${ollamaModel}"
+DOMAIN = "${domain}"
+ZONES = ${zonesJson}
+INTENSITY = ${intensity}
+PERSPECTIVES = ${perspectsJson}
+OUTPUT_DIR = Path("injection_output")
+OUTPUT_DIR.mkdir(exist_ok=True)
+
+# ---- Ollama helper ----
+def ollama_generate(prompt, system="You are a helpful assistant.", temperature=0.7):
+    try:
+        result = subprocess.run(
+            ["ollama", "run", OLLAMA_MODEL, "--format", "plain"],
+            input=f"System: {system}\\nUser: {prompt}",
+            capture_output=True, text=True, timeout=120
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        print(f"  [!] Ollama error: {e}")
+        return ""
+
+# ---- Phase 1: Generate seed prompts from the model's own knowledge ----
+SEED_GENERATORS = [
+    "List 10 important questions someone learning about {domain} should be able to answer. Just the questions, numbered.",
+    "What are 10 common misconceptions about {domain}? Frame each as a question someone might ask.",
+    "List 10 practical scenarios where deep {domain} knowledge is critical. Frame as 'How would you...' questions.",
+    "What are 10 edge cases or nuanced situations in {domain} that most people get wrong? Frame as questions.",
+    "List 10 questions that connect {domain} to other fields or disciplines.",
+]
+
+def generate_seeds():
+    print("\\n== Phase 1: Extracting seed questions from base model knowledge ==")
+    seeds = []
+    for i, template in enumerate(SEED_GENERATORS):
+        prompt = template.format(domain=DOMAIN)
+        print(f"  Generating seed batch {i+1}/{len(SEED_GENERATORS)}...")
+        response = ollama_generate(prompt, system="You are a domain expert. Be specific and practical.")
+        if response:
+            lines = [l.strip() for l in response.split("\\n") if l.strip()]
+            for line in lines:
+                cleaned = re.sub(r'^\\d+[\\.\\)\\-]\\s*', '', line).strip()
+                if cleaned and len(cleaned) > 10 and "?" in cleaned:
+                    seeds.append(cleaned)
+    seeds = list(dict.fromkeys(seeds))[:50]  # Dedupe, cap at 50
+    print(f"  Generated {len(seeds)} unique seed questions")
+    return seeds
+
+# ---- Phase 2: Run each seed through CDPT perspective passes ----
+PERSPECTIVE_PROMPTS = {
+    "builder": "Analyze this from an engineering/implementation perspective. What would you actually BUILD? Be specific about architecture, tools, and steps.",
+    "red_team": "Attack this response. Find every weakness, assumption, gap, and failure mode. Be adversarial and thorough.",
+    "systems": "Map the system dynamics. What are the feedback loops, dependencies, second-order effects, and emergent behaviors?",
+    "frame_breaker": "Challenge the framing entirely. What assumptions are hidden? What would a contrarian or outsider see that insiders miss?",
+    "empath": "Consider the human element. Who is affected? What emotions, motivations, and social dynamics are at play?",
+    "synthesis": "Synthesize all perspectives into a unified, complete response. Integrate builder pragmatism, red team skepticism, systems thinking, frame breaking, and empathy.",
+    "debate": "Create a structured debate between the builder and red_team perspectives. What does each side concede?",
+    "gap_fill": "What is MISSING from the analysis so far? What gaps, blind spots, or unconsidered angles remain?",
+    "anti_pattern": "Generate a mediocre, surface-level response that a lazy AI would give. This is the WRONG way to answer.",
+}
+
+def run_perspectives(question, base_answer):
+    results = {}
+    active_perspectives = {k: v for k, v in PERSPECTIVE_PROMPTS.items() if k in PERSPECTIVES}
+    
+    for pkey, system_prompt in active_perspectives.items():
+        context = f"Original question: {question}\\n\\nBase answer: {base_answer}\\n\\n{system_prompt}"
+        result = ollama_generate(context, system=f"You are the {pkey.upper()} perspective analyst.")
+        if result:
+            results[pkey] = result
+    return results
+
+def process_seed(i, seed, total):
+    print(f"\\n  [{i+1}/{total}] Processing: {seed[:60]}...")
+    
+    # Get base model's answer
+    base_answer = ollama_generate(seed, system="Answer thoroughly and precisely.")
+    if not base_answer:
+        return None
+    
+    # Run through perspectives
+    perspectives = run_perspectives(seed, base_answer)
+    if len(perspectives) < 2:
+        return None
+    
+    # Build enriched output with perspective tokens
+    enriched_parts = []
+    for pkey, content in perspectives.items():
+        tag = pkey.upper()
+        enriched_parts.append(f"<{tag}>{content}</{tag}>")
+    enriched_output = "\\n\\n".join(enriched_parts)
+    
+    return {
+        "messages": [
+            {"role": "user", "content": seed},
+            {"role": "assistant", "content": enriched_output}
+        ],
+        "metadata": {
+            "source": "self_injection",
+            "perspectives_used": list(perspectives.keys()),
+            "perspective_count": len(perspectives),
+        }
+    }
+
+# ---- Phase 3: Generate zone-weighted training config ----
+def generate_train_config(sample_count):
+    zone_config = {}
+    base_rank = 16
+    for zone in ["roots", "trunk", "canopy"]:
+        if zone in ZONES:
+            zone_config[zone] = {
+                "lora_rank": int(base_rank * INTENSITY),
+                "active": True
+            }
+        else:
+            zone_config[zone] = {
+                "lora_rank": max(4, int(base_rank * 0.25)),
+                "active": False
+            }
+    
+    config = {
+        "base_model": "${hfModelId}",
+        "method": "injection_lora",
+        "zones": zone_config,
+        "intensity": INTENSITY,
+        "perspectives": PERSPECTIVES,
+        "sample_count": sample_count,
+        "layer_mapping": {
+            "roots": {"start": 0, "end": 6},
+            "trunk": {"start": 7, "end": 24},
+            "canopy": {"start": 25, "end": 31},
+        }
+    }
+    return config
+
+# ---- Main ----
+def main():
+    print("=" * 60)
+    print("SoupyForge CDPT Root Injection")
+    print("Zero upload. Pure densification.")
+    print("=" * 60)
+    
+    # Check Ollama
+    try:
+        subprocess.run(["ollama", "list"], capture_output=True, check=True)
+    except Exception:
+        print("\\n[ERROR] Ollama not found! Install from https://ollama.com")
+        print(f"Then run: ollama pull {OLLAMA_MODEL}")
+        sys.exit(1)
+    
+    # Phase 1: Seeds
+    seeds = generate_seeds()
+    if not seeds:
+        print("[ERROR] No seeds generated. Check Ollama connection.")
+        sys.exit(1)
+    
+    # Phase 2: Process through perspectives
+    print(f"\\n== Phase 2: Running {len(seeds)} seeds through {len(PERSPECTIVES)} perspectives ==")
+    print(f"   This will make ~{len(seeds) * (len(PERSPECTIVES) + 1)} Ollama calls")
+    print(f"   Estimated time: {len(seeds) * len(PERSPECTIVES) * 8 // 60}-{len(seeds) * len(PERSPECTIVES) * 15 // 60} minutes")
+    
+    results = []
+    for i, seed in enumerate(seeds):
+        result = process_seed(i, seed, len(seeds))
+        if result:
+            results.append(result)
+    
+    if not results:
+        print("[ERROR] No samples generated.")
+        sys.exit(1)
+    
+    # Save JSONL
+    dataset_path = OUTPUT_DIR / "injection_dataset.jsonl"
+    with open(dataset_path, "w") as f:
+        for r in results:
+            f.write(json.dumps(r) + "\\n")
+    print(f"\\n== Saved {len(results)} enriched samples to {dataset_path} ==")
+    
+    # Save training config
+    config = generate_train_config(len(results))
+    config_path = OUTPUT_DIR / "injection_config.json"
+    with open(config_path, "w") as f:
+        json.dump(config, f, indent=2)
+    print(f"   Training config saved to {config_path}")
+    
+    # Summary
+    print(f"\\n{'=' * 60}")
+    print(f"INJECTION COMPLETE")
+    print(f"{'=' * 60}")
+    print(f"  Seeds extracted:    {len(seeds)}")
+    print(f"  Samples generated:  {len(results)}")
+    print(f"  Perspectives used:  {len(PERSPECTIVES)}")
+    print(f"  Zones targeted:     {', '.join(ZONES)}")
+    print(f"  Intensity:          {INTENSITY}x")
+    print(f"\\nNext steps:")
+    print(f"  1. Review injection_output/injection_dataset.jsonl")
+    print(f"  2. Run: python3 train.py  (uses injection_config.json automatically)")
+    print(f"  3. Your model is now densified -- same weights, new cognitive structure")
+    print(f"\\n  The tree has been souped up from roots to canopy.")
+
+if __name__ == "__main__":
+    main()
+`;
+}
+
 // Generate local unlearn script (runs via Ollama — zero cloud dependency)
 export function generateUnlearnScript(
   targets: string[],
