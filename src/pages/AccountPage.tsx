@@ -21,7 +21,7 @@ interface ApiKey {
   id: string;
   provider: string;
   label: string | null;
-  api_key_encrypted: string;
+  masked_key: string;
   created_at: string;
 }
 
