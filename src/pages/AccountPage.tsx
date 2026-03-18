@@ -192,7 +192,7 @@ export default function AccountPage() {
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-[10px]">{key.provider}</Badge>
               <span className="text-sm font-mono text-muted-foreground">
-                {visibleKeys.has(key.id) ? key.api_key_encrypted : maskKey(key.api_key_encrypted)}
+                {key.masked_key}
               </span>
               {key.label && <span className="text-xs text-muted-foreground">({key.label})</span>}
             </div>
