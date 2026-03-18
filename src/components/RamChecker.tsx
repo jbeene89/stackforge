@@ -169,7 +169,7 @@ export function RamChecker() {
                 ))}
               </SelectContent>
             </Select>
-313          </div>
+</div>
 
           {/* Device */}
           <div className="space-y-1">
