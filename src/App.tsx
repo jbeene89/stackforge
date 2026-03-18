@@ -104,10 +104,10 @@ const App = () => (
                 <Route path="/models" element={<ModelZooPage />} />
                 <Route path="/pipelines" element={<DataPipelinesPage />} />
                 <Route path="/signals" element={<SignalLabPage />} />
-                <Route path="/robotics" element={<RoboticsPage />} />
+                <Route path="/robotics" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Robotics Controllers"><RoboticsPage /></TierProtectedRoute>} />
                 <Route path="/forge-ai" element={<ForgeAIPage />} />
-                <Route path="/edge-training" element={<EdgeTrainingPage />} />
-                <Route path="/export" element={<ExportStudioPage />} />
+                <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
+                <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
                 <Route path="/experimental" element={<ExperimentalPage />} />
                 <Route path="/slm-lab" element={<SLMLabPage />} />
                 <Route path="/white-paper" element={<WhitePaperPage />} />
