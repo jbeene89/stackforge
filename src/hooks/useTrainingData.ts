@@ -1339,13 +1339,19 @@ def pop_kernels():
                     system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
                 else:
                     # Chain pop -- use previous round's combined output as input
-                    prev_context = "\\n\\n".join([
-                        f"[{k.upper()}]: {v[:800]}" 
-                        for k, v in round_outputs.items() if v
-                    ]) if round_outputs else "\\n\\n".join([
-                        f"[{s['perspective']}]: {s['content'][:800]}" 
-                        for s in all_samples[-len(PERSPECTIVES):]
-                    ])
+                    if round_outputs:
+                        prev_context = "\\n\\n".join([
+                            f"[{k.upper()}]: {v[:800]}" 
+                            for k, v in round_outputs.items() if v
+                        ])
+                    else:
+                        # Pull from previous round's metadata
+                        prev_samples = [s for s in all_samples if s.get("metadata", {}).get("round") == round_num]
+                        if prev_samples:
+                            last = prev_samples[-1]
+                            prev_context = last["messages"][1]["content"][:3000] if last.get("messages") else "Continue analysis."
+                        else:
+                            prev_context = "Continue deep analysis of " + DOMAIN
                     prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
                     if heat_pass > 0:
                         prompt += f"\\n\\nHeat pass {heat_pass + 1}. Push harder. Find angles the previous pass missed entirely."
