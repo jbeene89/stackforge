@@ -1057,11 +1057,16 @@ def train_cpu_fallback():
     if not getattr(tokenizer, "chat_template", None):
         tokenizer.chat_template = "{% for message in messages %}{% if message['role'] == 'system' %}<|system|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'user' %}<|user|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'assistant' %}<|assistant|>\\n{{ message['content'] }}\\n{% endif %}{% endfor %}"
 
+    # Apply selective layer control for CPU path
+    base_cpu_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
+    layer_indices, _ = get_target_layers(model, LAYER_STRATEGY)
+
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=HYPERPARAMS["lora_rank"],
         lora_alpha=HYPERPARAMS["lora_alpha"],
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        target_modules=base_cpu_modules,
+        layers_to_transform=layer_indices if LAYER_STRATEGY != "all" else None,
         lora_dropout=0.05,
     )
     model = get_peft_model(model, lora_config)
