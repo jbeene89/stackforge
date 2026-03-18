@@ -2397,9 +2397,9 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
   const [maxSeqLen, setMaxSeqLen] = useState(1024);
   const [cpuOffload, setCpuOffload] = useState(true);
   const [gradientCheckpoint, setGradientCheckpoint] = useState(true);
-  const [unlearnTargets, setUnlearnTargets] = useState<string[]>([]);
-  const [unlearnInput, setUnlearnInput] = useState("");
-  const [includeNegativeLora, setIncludeNegativeLora] = useState(false);
+  const [injectionZones, setInjectionZones] = useState<("roots" | "trunk" | "canopy")[]>(["roots", "trunk", "canopy"]);
+  const [injectionIntensity, setInjectionIntensity] = useState(1.5);
+  const [injectionPerspectives, setInjectionPerspectives] = useState<string[]>(["builder", "red_team", "systems", "frame_breaker", "empath", "synthesis", "debate", "gap_fill", "anti_pattern"]);
   const [layerStrategy, setLayerStrategy] = useState<"all" | "knowledge" | "style" | "reasoning">("all");
   const createJob = useCreateTrainingJob();
 
