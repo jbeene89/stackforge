@@ -600,12 +600,17 @@ export default function DeployPipelinePage() {
     return Math.min(100, Math.round((approvedCount / minSamples) * 100));
   }, [approvedCount, matchedTemplate, selectedDataset]);
 
-  const handleDownloadKit = async () => {
+  const handleDownloadKit = async (fullOffline: boolean = false) => {
     if (!samples || !selectedDataset) return;
     setDownloading(true);
     try {
-      await downloadTrainingKit(samples, selectedDataset.name, baseModel, epochs, loraRank, lr);
-      toast.success("Training kit downloaded!");
+      await downloadTrainingKit(
+        samples, selectedDataset.name, baseModel, epochs, loraRank, lr,
+        fullOffline,
+        matchedTemplate?.systemPrompt,
+        matchedTemplate?.slug
+      );
+      toast.success(fullOffline ? "Full offline bundle downloaded!" : "Training kit downloaded!");
     } catch (e: any) {
       toast.error(e.message);
     }
