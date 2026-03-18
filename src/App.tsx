@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { SpriteSettingsProvider } from "@/providers/SpriteSettingsProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { TierProtectedRoute } from "@/components/TierProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
