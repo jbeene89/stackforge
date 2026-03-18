@@ -1181,12 +1181,15 @@ export function generateInjectionScript(
   perspectives: string[],
   baseModel: string,
   ollamaModel: string = "llama3.2:1b",
-  domain: string = "general"
+  domain: string = "general",
+  weights: Record<string, number> = {}
 ): string {
   const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
   const zonesJson = JSON.stringify(zones);
   const perspectsJson = JSON.stringify(perspectives);
+  const weightsJson = JSON.stringify(weights);
   const numRounds = Math.max(3, Math.round(intensity * 4));
+  const totalSlots = perspectives.reduce((sum, p) => sum + (weights[p] || 1), 0);
 
   return `#!/usr/bin/env python3
 """
@@ -1194,25 +1197,28 @@ SoupyForge CDPT Popcorn Injection - Pure Heat, Zero Extract
 ============================================================
 The base model is a bag of popcorn. Its stock knowledge is the kernels.
 The ${perspectives.length} CDPT perspectives are the HEAT.
+${totalSlots > perspectives.length ? `\nBIAS HEAT ACTIVE: ${totalSlots} weighted burner slots (some perspectives run multiple times)` : ""}
 
 No seeds. No extraction. No upload. No questions.
-Just heat the kernels and watch them pop into 13x their size.
+Just heat the kernels and watch them pop into ${totalSlots}x their size.
 
 Base Model: ${hfModelId}
 Ollama Model: ${ollamaModel}
 Domain: ${domain}
 Zones: ${zones.join(", ")}
 Intensity: ${intensity}x (${numRounds} rounds)
-Perspectives: ${perspectives.length} heat channels
+Perspectives: ${perspectives.length} heat channels (${totalSlots} weighted slots)
+${Object.entries(weights).filter(([, v]) => v >= 2).map(([k, v]) => `  ${k}: ${v}x (biased)`).join("\\n")}
 
 How it works:
-  Each perspective channel is a BURNER. We put the model's knowledge
-  directly on each burner and let it pop. The model free-associates
-  through each cognitive lens — no prompting, no extraction, just heat.
+  Each perspective channel is a BURNER. Weight > 1x means that burner
+  runs MULTIPLE TIMES per round with increasing temperature — like 
+  replacing one burner with two of the same kind. More heat = more 
+  expansion in that cognitive direction.
 
-  Round 1: Each perspective pops raw kernels from the model's knowledge
-  Round 2+: Each perspective pops the PREVIOUS round's output (chain-pop)
-  Result: Dense, multi-layered cognitive output from stock knowledge alone
+  Round 1: Each perspective pops raw kernels (weight x times)
+  Round 2+: Chain-pop previous output (weight x times)
+  Result: Bias-shaped cognitive expansion from stock knowledge alone
 """
 
 import subprocess, json, os, sys, time
@@ -1223,6 +1229,7 @@ DOMAIN = "${domain}"
 ZONES = ${zonesJson}
 INTENSITY = ${intensity}
 PERSPECTIVES = ${perspectsJson}
+WEIGHTS = ${weightsJson}  # Per-perspective multiplier (0=off, 1=normal, 2=double, 3=triple)
 NUM_ROUNDS = ${numRounds}
 OUTPUT_DIR = Path("injection_output")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -1283,9 +1290,13 @@ BURNERS = {
 
 # ---- Main Popcorn Engine ----
 def pop_kernels():
+    total_slots = sum(WEIGHTS.get(p, 1) for p in PERSPECTIVES)
     print("\\n== POPCORN MODE: Applying heat to stock knowledge ==")
-    print(f"   {len(PERSPECTIVES)} burners x {NUM_ROUNDS} rounds = {len(PERSPECTIVES) * NUM_ROUNDS} pops")
+    print(f"   {len(PERSPECTIVES)} perspectives, {total_slots} weighted slots x {NUM_ROUNDS} rounds = {total_slots * NUM_ROUNDS} pops")
     print(f"   Domain: {DOMAIN}")
+    bias_info = [(p, WEIGHTS.get(p, 1)) for p in PERSPECTIVES if WEIGHTS.get(p, 1) >= 2]
+    if bias_info:
+        print(f"   BIAS HEAT: {', '.join(f'{p} @ {w}x' for p, w in bias_info)}")
     print(f"   No extraction. No seeds. Just heat.\\n")
 
     all_samples = []
@@ -1298,32 +1309,48 @@ def pop_kernels():
         for pkey in PERSPECTIVES:
             if pkey not in BURNERS:
                 continue
+            weight = WEIGHTS.get(pkey, 1)
+            if weight <= 0:
+                continue
             burner = BURNERS[pkey]
             
-            if round_num == 0:
-                # Raw heat -- pop kernels directly
-                prompt = burner["heat"].format(domain=DOMAIN)
-                system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
-            else:
-                # Chain pop -- use previous round's combined output as input
-                prev_context = "\\n\\n".join([
-                    f"[{k.upper()}]: {v[:800]}" 
-                    for k, v in round_outputs.items() if v
-                ]) if round_outputs else "\\n\\n".join([
-                    f"[{s['perspective']}]: {s['content'][:800]}" 
-                    for s in all_samples[-len(PERSPECTIVES):]
-                ])
-                prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
-                system = f"You are the {pkey.upper()} perspective. Round {round_num + 1}. Push deeper than before."
-            
-            print(f"  [{pkey.upper()}] Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
-            output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05))
-            
-            if output and len(output) > 50:
-                round_outputs[pkey] = output
-                print(f"popped! ({len(output)} chars)")
-            else:
-                print("dud kernel")
+            for heat_pass in range(weight):
+                pass_label = f" (heat pass {heat_pass + 1}/{weight})" if weight > 1 else ""
+                temp_boost = heat_pass * 0.08  # Each extra pass gets slightly hotter
+                
+                if round_num == 0:
+                    # Raw heat -- pop kernels directly
+                    prompt = burner["heat"].format(domain=DOMAIN)
+                    if heat_pass > 0:
+                        # Subsequent passes on same perspective: vary the angle
+                        prompt += f"\\n\\nThis is heat pass {heat_pass + 1}. Go DEEPER and find what you missed in previous passes. Take a completely different angle."
+                    system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
+                else:
+                    # Chain pop -- use previous round's combined output as input
+                    prev_context = "\\n\\n".join([
+                        f"[{k.upper()}]: {v[:800]}" 
+                        for k, v in round_outputs.items() if v
+                    ]) if round_outputs else "\\n\\n".join([
+                        f"[{s['perspective']}]: {s['content'][:800]}" 
+                        for s in all_samples[-len(PERSPECTIVES):]
+                    ])
+                    prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
+                    if heat_pass > 0:
+                        prompt += f"\\n\\nHeat pass {heat_pass + 1}. Push harder. Find angles the previous pass missed entirely."
+                    system = f"You are the {pkey.upper()} perspective. Round {round_num + 1}. Push deeper than before."
+                
+                print(f"  [{pkey.upper()}]{pass_label} Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
+                output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05) + temp_boost)
+                
+                if output and len(output) > 50:
+                    # For multi-pass, merge outputs for this perspective
+                    if pkey in round_outputs and heat_pass > 0:
+                        round_outputs[pkey] += f"\\n\\n[HEAT PASS {heat_pass + 1}]\\n" + output
+                    else:
+                        round_outputs[pkey] = output
+                    print(f"popped! ({len(output)} chars)")
+                else:
+                    print("dud kernel")
         
         # Build training sample from this round
         if len(round_outputs) >= 2:
