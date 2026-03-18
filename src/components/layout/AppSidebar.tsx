@@ -31,6 +31,7 @@ import {
   SwatchBook,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
