@@ -96,7 +96,10 @@ export default function AccountPage() {
   };
 
   const handleDeleteKey = async (id: string) => {
-    const { error } = await supabase.from("user_api_keys").delete().eq("id", id);
+    const { error } = await supabase.functions.invoke("manage-api-keys", {
+      method: "DELETE",
+      body: { id },
+    });
     if (!error) {
       toast.success("Key deleted");
       fetchKeys();
