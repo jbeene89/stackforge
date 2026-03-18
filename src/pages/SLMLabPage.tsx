@@ -2397,6 +2397,9 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
   const [maxSeqLen, setMaxSeqLen] = useState(1024);
   const [cpuOffload, setCpuOffload] = useState(true);
   const [gradientCheckpoint, setGradientCheckpoint] = useState(true);
+  const [unlearnTargets, setUnlearnTargets] = useState<string[]>([]);
+  const [unlearnInput, setUnlearnInput] = useState("");
+  const [includeNegativeLora, setIncludeNegativeLora] = useState(false);
   const createJob = useCreateTrainingJob();
 
   const approvedSamples = samples?.filter(s => s.status === "approved") || [];
