@@ -2400,6 +2400,10 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
   const [injectionZones, setInjectionZones] = useState<("roots" | "trunk" | "canopy")[]>(["roots", "trunk", "canopy"]);
   const [injectionIntensity, setInjectionIntensity] = useState(1.5);
   const [injectionPerspectives, setInjectionPerspectives] = useState<string[]>(["builder", "red_team", "systems", "frame_breaker", "empath", "synthesis", "debate", "gap_fill", "anti_pattern"]);
+  const [perspectiveWeights, setPerspectiveWeights] = useState<Record<string, number>>({
+    builder: 1, red_team: 1, systems: 1, frame_breaker: 1, empath: 1,
+    synthesis: 1, debate: 1, gap_fill: 1, anti_pattern: 1,
+  });
   const [unlearnTargets, setUnlearnTargets] = useState<string[]>([]);
   const [unlearnInput, setUnlearnInput] = useState("");
   const [includeNegativeLora, setIncludeNegativeLora] = useState(false);
