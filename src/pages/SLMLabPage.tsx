@@ -3305,6 +3305,20 @@ export default function SLMLabPage() {
               <Button onClick={() => setStep(1)} variant="outline" className="w-full h-12">
                 <Plus className="h-4 w-4 mr-2" /> Create New Dataset
               </Button>
+              <button
+                onClick={() => { window.location.href = "/deploy?dataset=__popcorn_only__"; }}
+                className="w-full text-left rounded-xl px-5 py-4 border border-[hsl(var(--forge-amber))]/30 bg-[hsl(var(--forge-amber))]/5 hover:border-[hsl(var(--forge-amber))]/60 hover:bg-[hsl(var(--forge-amber))]/10 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-base font-medium text-[hsl(var(--forge-amber))] group-hover:brightness-110 transition-all">🍿 Popcorn Only — No Data Needed</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Densify a base model using only its own knowledge. Zero datasets, zero cloud.
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-[hsl(var(--forge-amber))] group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
             </div>
           ) : (
             <Step1CreateDataset onCreated={handleDatasetCreated} />
