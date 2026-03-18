@@ -79,16 +79,14 @@ export default function AccountPage() {
   const handleAddKey = async () => {
     if (!newKey.trim()) return;
     setSavingKey(true);
-    const { error } = await supabase.from("user_api_keys").insert({
-      user_id: user!.id,
-      provider: newProvider,
-      label: newLabel || null,
-      api_key_encrypted: newKey,
-    } as any);
+    const { error } = await supabase.functions.invoke("manage-api-keys", {
+      method: "POST",
+      body: { provider: newProvider, label: newLabel || null, api_key: newKey },
+    });
     if (error) {
       toast.error("Failed to save key");
     } else {
-      toast.success("API key saved");
+      toast.success("API key encrypted & saved");
       setNewKey("");
       setNewLabel("");
       setShowAddKey(false);
