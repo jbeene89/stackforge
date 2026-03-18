@@ -30,20 +30,22 @@ export interface SyncConflict {
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
+    req.onupgradeneeded = (event) => {
       const db = req.result;
-      if (!db.objectStoreNames.contains("training_datasets")) {
+      const oldVersion = (event as IDBVersionChangeEvent).oldVersion;
+
+      if (oldVersion < 1) {
         db.createObjectStore("training_datasets", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("dataset_samples")) {
-        const store = db.createObjectStore("dataset_samples", { keyPath: "id" });
-        store.createIndex("by_dataset", "dataset_id", { unique: false });
-      }
-      if (!db.objectStoreNames.contains("training_jobs")) {
+        const samplesStore = db.createObjectStore("dataset_samples", { keyPath: "id" });
+        samplesStore.createIndex("by_dataset", "dataset_id", { unique: false });
         db.createObjectStore("training_jobs", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("pending_mutations")) {
         db.createObjectStore("pending_mutations", { keyPath: "id" });
+      }
+      if (oldVersion < 2) {
+        if (!db.objectStoreNames.contains("sync_conflicts")) {
+          const conflictStore = db.createObjectStore("sync_conflicts", { keyPath: "id" });
+          conflictStore.createIndex("by_resolved", "resolved", { unique: false });
+        }
       }
     };
     req.onsuccess = () => resolve(req.result);
