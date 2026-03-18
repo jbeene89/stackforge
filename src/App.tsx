@@ -53,6 +53,7 @@ import SwipeReviewPage from "./pages/SwipeReviewPage";
 import OnDeviceTemplatesPage from "./pages/OnDeviceTemplatesPage";
 import DeployPipelinePage from "./pages/DeployPipelinePage";
 import PhoneDeployGuidePage from "./pages/PhoneDeployGuidePage";
+import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
 import NotFound from "./pages/NotFound";
 
