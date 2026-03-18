@@ -30,6 +30,7 @@ import {
   Smartphone,
   SwatchBook,
   Terminal,
+  Server,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
