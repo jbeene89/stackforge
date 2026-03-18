@@ -385,7 +385,63 @@ if __name__ == "__main__":
 `;
     zip.file("batch_inference.py", batchPy);
 
-    // Enhanced README
+    // Popcorn Injection Kit — bias heat presets included
+    const defaultWeights = { builder: 1, red_team: 1, systems: 1, frame_breaker: 1, empath: 1, synthesis: 1, debate: 1, gap_fill: 1, anti_pattern: 1 };
+    const allPerspectives = Object.keys(defaultWeights);
+    const domain = templateSlug || "general";
+    const injScript = generateInjectionScript(
+      ["roots", "trunk", "canopy"], 1.5, allPerspectives,
+      baseModel, "llama3.2:1b", domain, defaultWeights
+    );
+    zip.file("inject.py", injScript);
+    zip.file("injection_config.json", JSON.stringify({
+      zones: ["roots", "trunk", "canopy"],
+      intensity: 1.5,
+      perspectives: allPerspectives,
+      perspective_weights: defaultWeights,
+      bias_presets: {
+        even_heat: defaultWeights,
+        novelty_seeker: { builder: 1, red_team: 0, systems: 0, frame_breaker: 3, empath: 1, synthesis: 1, debate: 1, gap_fill: 2, anti_pattern: 0 },
+        paranoid_builder: { builder: 2, red_team: 3, systems: 1, frame_breaker: 0, empath: 0, synthesis: 1, debate: 2, gap_fill: 1, anti_pattern: 1 },
+        deep_empathy: { builder: 0, red_team: 0, systems: 1, frame_breaker: 1, empath: 3, synthesis: 2, debate: 0, gap_fill: 1, anti_pattern: 0 },
+      },
+      layer_mapping: {
+        roots: { start: 0, end: 6, focus: "embedding, tokenization, conceptual anchors" },
+        trunk: { start: 7, end: 24, focus: "knowledge, associations, domain expertise" },
+        canopy: { start: 25, end: 31, focus: "output formatting, reasoning, voice" },
+      },
+    }, null, 2));
+    zip.file("POPCORN_README.md",
+      `# CDPT Popcorn Injection - Bias Heat Edition\n\n` +
+      `## Zero data. Zero cloud. Pure expansion.\n\n` +
+      `The base model is a bag of popcorn. Its knowledge = kernels. CDPT perspectives = heat.\n` +
+      `Bias heat lets you crank specific perspectives to shape the model's cognitive profile.\n\n` +
+      `## Quick Start\n\n` +
+      `\`\`\`bash\n` +
+      `# Default even heat (all perspectives at 1x)\n` +
+      `python3 inject.py\n\n` +
+      `# Then train on the output\n` +
+      `# The generated popcorn_dataset.jsonl goes into your training pipeline\n` +
+      `\`\`\`\n\n` +
+      `## Bias Presets\n\n` +
+      `Edit \`injection_config.json\` to apply a preset:\n\n` +
+      `| Preset | Style | Key Weights |\n` +
+      `|--------|-------|-------------|\n` +
+      `| Even Heat | Balanced expansion | All at 1x |\n` +
+      `| Novelty Seeker | Creative/divergent | Frame Breaker 3x, Gap Fill 2x |\n` +
+      `| Paranoid Builder | Security-focused | Red Team 3x, Builder 2x, Debate 2x |\n` +
+      `| Deep Empathy | Human-centered | Empath 3x, Synthesis 2x |\n\n` +
+      `## Custom Bias\n\n` +
+      `Set any perspective weight from 0 (off) to 3 (triple heat) in \`injection_config.json\`.\n` +
+      `Weight > 1 runs that perspective multiple times per round with increasing temperature.\n\n` +
+      `## How It Works\n\n` +
+      `1. Each perspective is a "burner" that pops the model's stock knowledge\n` +
+      `2. Weight = how many times that burner fires per round\n` +
+      `3. Multiple passes on the same perspective go deeper each time\n` +
+      `4. Output is CDPT-enriched JSONL ready for LoRA training\n` +
+      `5. No internet, no API keys, no data upload — ever\n`
+    );
+
     zip.file(
       "README.md",
       `# ${datasetName} — Full Offline Bundle
