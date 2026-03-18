@@ -824,14 +824,22 @@ export default function DeployPipelinePage() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button
-                onClick={handleDownloadKit}
+                onClick={() => handleDownloadKit(true)}
                 disabled={!selectedDatasetId || approvedCount === 0 || downloading}
                 className="flex-1"
               >
+                <Package className="h-4 w-4 mr-1" />
+                {downloading ? "Bundling…" : "Full Offline Bundle (.zip)"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleDownloadKit(false)}
+                disabled={!selectedDatasetId || approvedCount === 0 || downloading}
+              >
                 <Download className="h-4 w-4 mr-1" />
-                {downloading ? "Bundling…" : "Download Training Kit (.zip)"}
+                Training Kit
               </Button>
               <Button
                 variant="outline"
@@ -841,6 +849,23 @@ export default function DeployPipelinePage() {
                 <FileText className="h-4 w-4 mr-1" />
                 JSONL Only
               </Button>
+            </div>
+
+            {/* Offline bundle contents */}
+            <div className="rounded-lg border border-[hsl(var(--forge-emerald))]/20 bg-[hsl(var(--forge-emerald))]/5 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[hsl(var(--forge-emerald))] font-semibold mb-1.5">
+                🔌 Full Offline Bundle Includes
+              </p>
+              <div className="grid grid-cols-2 gap-1.5 text-[11px] text-foreground/80">
+                <span>✓ dataset.jsonl</span>
+                <span>✓ train.py</span>
+                <span>✓ convert.sh</span>
+                <span>✓ config.json</span>
+                <span>✓ inference.py</span>
+                <span>✓ batch_inference.py</span>
+                <span>✓ Modelfile (Ollama)</span>
+                {matchedTemplate?.systemPrompt && <span>✓ system-prompt.txt</span>}
+              </div>
             </div>
           </div>
         </StepCard>
