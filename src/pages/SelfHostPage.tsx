@@ -304,7 +304,13 @@ function generateReadme(config: PackageConfig, components: PackageComponent[]): 
   md += `- **Docker:** v20.10+\n`;
   if (config.gpuEnabled) md += `- **GPU:** NVIDIA with CUDA drivers\n`;
 
-  md += `\n## Stopping\n\n`;
+  md += `\n## Popcorn Injection (Bias Heat)\n\n`;
+  md += `Included in \`scripts/\` when CDPT Pipeline is enabled:\n\n`;
+  md += `- \`inject.py\` — Densify your model using its own knowledge (zero data upload)\n`;
+  md += `- \`injection_config.json\` — Perspective weights & 4 bias presets\n`;
+  md += `- Run: \`python3 scripts/inject.py\` then train on the output\n\n`;
+
+  md += `## Stopping\n\n`;
   md += `\`\`\`bash\ndocker compose down\n\`\`\`\n\n`;
   md += `## Data Persistence\n\n`;
   md += `All data is stored in Docker volumes. To backup:\n\n`;
