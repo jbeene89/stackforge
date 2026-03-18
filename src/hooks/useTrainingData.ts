@@ -1440,12 +1440,24 @@ def main():
     print("  Nothing added. Everything expanded.")
     print("=" * 60)
     
-    # Check Ollama
+    # Pre-flight: check Ollama is reachable and model is available
+    import urllib.request, urllib.error
+    ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+    print(f"\\n[CHECK] Connecting to Ollama at {ollama_host}...")
     try:
-        subprocess.run(["ollama", "list"], capture_output=True, check=True)
-    except Exception:
-        print("\\n[ERROR] Ollama not found! Install from https://ollama.com")
-        print(f"Then run: ollama pull {OLLAMA_MODEL}")
+        req = urllib.request.Request(f"{ollama_host}/api/tags")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            tags = json.loads(resp.read().decode("utf-8"))
+            models = [m.get("name", "") for m in tags.get("models", [])]
+            print(f"[CHECK] Available models: {', '.join(models) if models else '(none)'}")
+            if not any(OLLAMA_MODEL in m for m in models):
+                print(f"\\n[ERROR] Model '{OLLAMA_MODEL}' not found!")
+                print(f"  Run: ollama pull {OLLAMA_MODEL}")
+                sys.exit(1)
+            print(f"[CHECK] Model '{OLLAMA_MODEL}' found. Starting injection...\\n")
+    except urllib.error.URLError as e:
+        print(f"\\n[ERROR] Cannot reach Ollama at {ollama_host}: {e.reason}")
+        print("  Make sure Ollama is running: ollama serve")
         sys.exit(1)
     
     # Pop
