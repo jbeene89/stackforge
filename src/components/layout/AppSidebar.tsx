@@ -29,6 +29,7 @@ import {
   Store,
   Smartphone,
   SwatchBook,
+  Terminal,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
