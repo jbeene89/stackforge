@@ -1009,55 +1009,94 @@ export default function DeployPipelinePage() {
             </div>
 
             {/* Kit contents preview */}
-            <div className="rounded-lg border border-border/40 bg-secondary/20 p-3 space-y-1.5">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Kit Contains
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-3 w-3 text-[hsl(var(--forge-cyan))]" />
-                  <span>dataset.jsonl ({approvedCount} samples)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Terminal className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />
-                  <span>train.py (auto-detecting)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Terminal className="h-3 w-3 text-[hsl(var(--forge-amber))]" />
-                  <span>convert.sh (GGUF export)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FileText className="h-3 w-3 text-muted-foreground" />
-                  <span>README.md</span>
+            {isPopcornOnly ? (
+              <div className="rounded-lg border border-[hsl(var(--forge-amber))]/30 bg-[hsl(var(--forge-amber))]/5 p-3 space-y-1.5">
+                <p className="text-[10px] font-semibold text-[hsl(var(--forge-amber))] uppercase tracking-wider">
+                  🍿 Popcorn Kit Contains
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="h-3 w-3 text-[hsl(var(--forge-amber))]" />
+                    <span>inject.py (popcorn engine)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3 w-3 text-[hsl(var(--forge-cyan))]" />
+                    <span>injection_config.json</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />
+                    <span>POPCORN_README.md</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3 w-3 text-muted-foreground" />
+                    <span>Modelfile (Ollama)</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3 space-y-1.5">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Kit Contains
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3 w-3 text-[hsl(var(--forge-cyan))]" />
+                    <span>dataset.jsonl ({approvedCount} samples)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Terminal className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />
+                    <span>train.py (auto-detecting)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Terminal className="h-3 w-3 text-[hsl(var(--forge-amber))]" />
+                    <span>convert.sh (GGUF export)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3 w-3 text-muted-foreground" />
+                    <span>README.md</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2 flex-wrap">
-              <Button
-                onClick={() => handleDownloadKit(true)}
-                disabled={!selectedDatasetId || approvedCount === 0 || downloading}
-                className="flex-1"
-              >
-                <Package className="h-4 w-4 mr-1" />
-                {downloading ? "Bundling…" : "Full Offline Bundle (.zip)"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleDownloadKit(false)}
-                disabled={!selectedDatasetId || approvedCount === 0 || downloading}
-              >
-                <Download className="h-4 w-4 mr-1" />
-                Training Kit
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleExportJsonl}
-                disabled={!selectedDatasetId || approvedCount === 0}
-              >
-                <FileText className="h-4 w-4 mr-1" />
-                JSONL Only
-              </Button>
+              {isPopcornOnly ? (
+                <Button
+                  onClick={() => handleDownloadKit(true)}
+                  disabled={downloading}
+                  className="flex-1"
+                >
+                  <Package className="h-4 w-4 mr-1" />
+                  {downloading ? "Bundling…" : "Download Popcorn Kit 🍿"}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => handleDownloadKit(true)}
+                    disabled={!selectedDatasetId || approvedCount === 0 || downloading}
+                    className="flex-1"
+                  >
+                    <Package className="h-4 w-4 mr-1" />
+                    {downloading ? "Bundling…" : "Full Offline Bundle (.zip)"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDownloadKit(false)}
+                    disabled={!selectedDatasetId || approvedCount === 0 || downloading}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Training Kit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleExportJsonl}
+                    disabled={!selectedDatasetId || approvedCount === 0}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    JSONL Only
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Offline bundle contents */}
