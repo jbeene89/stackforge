@@ -55,6 +55,7 @@ import DeployPipelinePage from "./pages/DeployPipelinePage";
 import PhoneDeployGuidePage from "./pages/PhoneDeployGuidePage";
 import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
 import DeviceConsolePage from "./pages/DeviceConsolePage";
+import SelfHostPage from "./pages/SelfHostPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
 import NotFound from "./pages/NotFound";
 
@@ -116,6 +117,7 @@ const App = () => (
                 <Route path="/deploy/phone" element={<PhoneDeployGuidePage />} />
                 <Route path="/inference" element={<InferencePlaygroundPage />} />
                 <Route path="/console" element={<DeviceConsolePage />} />
+                <Route path="/self-host" element={<SelfHostPage />} />
                 <Route path="/training" element={<TrainingProgressPage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
