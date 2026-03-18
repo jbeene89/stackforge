@@ -1,17 +1,29 @@
 // Offline-first IndexedDB cache for training data
 // Caches: training_datasets, dataset_samples, training_jobs
-// Syncs pending mutations when back online
+// Syncs pending mutations when back online with conflict detection
 
 const DB_NAME = "soupyforge-offline";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
-type StoreName = "training_datasets" | "dataset_samples" | "training_jobs" | "pending_mutations";
+type StoreName = "training_datasets" | "dataset_samples" | "training_jobs" | "pending_mutations" | "sync_conflicts";
 
 interface PendingMutation {
   id: string;
-  store: StoreName;
+  store: Exclude<StoreName, "pending_mutations" | "sync_conflicts">;
   action: "insert" | "update" | "delete";
   payload: Record<string, any>;
+  created_at: string;
+}
+
+export interface SyncConflict {
+  id: string;
+  store: string;
+  record_id: string;
+  local_version: Record<string, any>;
+  server_version: Record<string, any>;
+  mutation_action: string;
+  resolved: boolean;
+  resolution?: "local" | "server" | "merged";
   created_at: string;
 }
 
