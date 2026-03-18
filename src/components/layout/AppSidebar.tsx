@@ -80,6 +80,7 @@ const toolItems = [
   { title: "Deploy Pipeline", url: "/deploy", icon: Rocket },
   { title: "Phone Guide", url: "/deploy/phone", icon: TabletSmartphone },
   { title: "Inference", url: "/inference", icon: Terminal },
+  { title: "Device Console", url: "/console", icon: Smartphone },
   { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "White Paper", url: "/white-paper", icon: BookOpen },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical },
