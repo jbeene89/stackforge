@@ -26,6 +26,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import { RamChecker } from "@/components/RamChecker";
 
 // ─── Helpers ─────────────────────────────────────────────────
 function CopyCommand({ code, label }: { code: string; label?: string }) {

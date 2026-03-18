@@ -186,7 +186,7 @@ export function RamChecker() {
               <SelectContent>
                 {DEVICES.map((d, i) => (
                   <SelectItem key={i} value={String(i)} className="text-xs">
-                    {d.label}{d.ram_gb > 0 ​? ` (${d.ram_gb} GB)` : ""}
+                    {d.label}{d.ram_gb > 0 ? ` (${d.ram_gb} GB)` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
