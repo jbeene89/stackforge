@@ -960,13 +960,29 @@ def train_with_unsloth():
     if not getattr(tokenizer, "chat_template", None):
         tokenizer.chat_template = "{% for message in messages %}{% if message['role'] == 'system' %}<|system|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'user' %}<|user|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'assistant' %}<|assistant|>\\n{{ message['content'] }}\\n{% endif %}{% endfor %}"
 
-    model = FastLanguageModel.get_peft_model(
-        model,
-        r=HYPERPARAMS["lora_rank"],
-        lora_alpha=HYPERPARAMS["lora_alpha"],
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
-    )
+    # Apply selective layer control
+    base_target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    layer_indices, total_layers = get_target_layers(model, LAYER_STRATEGY)
+
+    if LAYER_STRATEGY != "all":
+        filtered_modules = filter_target_modules_by_layer(model, base_target_modules, layer_indices, LAYER_STRATEGY)
+        # For Unsloth, we pass base module names but control via layers_to_transform
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=HYPERPARAMS["lora_rank"],
+            lora_alpha=HYPERPARAMS["lora_alpha"],
+            target_modules=base_target_modules if LAYER_STRATEGY != "reasoning" else ["q_proj", "k_proj", "v_proj", "o_proj"],
+            layers_to_transform=layer_indices,
+            use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
+        )
+    else:
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=HYPERPARAMS["lora_rank"],
+            lora_alpha=HYPERPARAMS["lora_alpha"],
+            target_modules=base_target_modules,
+            use_gradient_checkpointing=HYPERPARAMS["gradient_checkpointing"],
+        )
 
     raw = load_dataset(DATASET_FILE)
     formatted = []
