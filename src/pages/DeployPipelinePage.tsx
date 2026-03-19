@@ -269,10 +269,13 @@ async function downloadTrainingKit(
     }
 
     // Modelfile for Ollama
+    const defaultSystemPrompt = `You are a CDPT-trained assistant built with SoupyForge. You analyze topics through multiple cognitive lenses — practical building, adversarial red-teaming, systems thinking, frame-breaking contrarianism, and human empathy. Deliver answers with depth and conviction. No hedging, no filler. When you know something, say it directly.`;
+    const finalSystemPrompt = systemPrompt || defaultSystemPrompt;
     const modelfile = `# SoupyForge — ${datasetName}
 # Import this with: ollama create ${slug} -f Modelfile
 FROM ./${slug}.Q4_K_M.gguf
-${systemPrompt ? `\nSYSTEM """${systemPrompt}"""` : ""}
+
+SYSTEM """${finalSystemPrompt}"""
 
 PARAMETER temperature 0.4
 PARAMETER top_p 0.9
