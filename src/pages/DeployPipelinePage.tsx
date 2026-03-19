@@ -689,10 +689,13 @@ async function downloadPopcornOnlyKit(baseModel: string) {
   );
 
   // Modelfile for post-training Ollama import
+  const popcornSystemPrompt = `You are a knowledge-dense assistant trained through CDPT Popcorn Injection. You analyze topics through multiple cognitive lenses: practical building, adversarial red-teaming, systems thinking, frame-breaking contrarianism, and human empathy. Deliver answers with depth and conviction. No hedging, no filler. When you know something, say it directly. When perspectives conflict, acknowledge the tension and resolve it.`;
   zip.file("Modelfile", `# SoupyForge Popcorn Model
 # After training on popcorn_dataset.jsonl and converting to GGUF:
 # ollama create my-popcorn-model -f Modelfile
 FROM ./popcorn-model.Q4_K_M.gguf
+
+SYSTEM """${popcornSystemPrompt}"""
 
 PARAMETER temperature 0.4
 PARAMETER top_p 0.9

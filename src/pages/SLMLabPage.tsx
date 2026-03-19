@@ -3275,54 +3275,81 @@ export default function SLMLabPage() {
           <Badge variant="outline" className="text-[10px]">Five Perspective Pipeline</Badge>
         </div>
         <div className="flex-1 overflow-auto">
-          {datasets && datasets.length > 0 ? (
-            <div className="max-w-lg mx-auto py-8 px-4 space-y-6">
-              <div className="text-center space-y-2">
-                <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                  <Brain className="h-8 w-8 text-primary" />
+          <div className="max-w-xl mx-auto py-10 px-4 space-y-8">
+            {/* Hero */}
+            <div className="text-center space-y-3">
+              <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                <Brain className="h-10 w-10 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold">Train Your Model</h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Choose your path. Use your own data for a grounded model, or Popcorn to densify stock knowledge — zero data needed.
+              </p>
+            </div>
+
+            {/* Two paths */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Path 1: Use My Data */}
+              <button
+                onClick={() => datasets && datasets.length > 0 ? setStep(2) : setStep(1)}
+                className="text-left rounded-xl p-6 border-2 border-primary/20 hover:border-primary/60 hover:bg-primary/5 transition-all group"
+              >
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                  <Database className="h-6 w-6 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold">Welcome back! 👋</h2>
-                <p className="text-sm text-muted-foreground">Continue a dataset or start fresh.</p>
-              </div>
-              <div className="space-y-2">
-                {datasets.map(ds => (
-                  <button key={ds.id} onClick={() => handleSelectExisting(ds.id)}
-                    className="w-full text-left rounded-xl px-5 py-4 border border-border hover:border-primary/40 hover:bg-primary/5 transition-all group">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-base font-medium group-hover:text-primary transition-colors">{ds.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-[10px]">{ds.domain}</Badge>
-                          <span className="text-xs text-muted-foreground">{ds.sample_count} samples</span>
-                        </div>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <Separator />
-              <Button onClick={() => setStep(1)} variant="outline" className="w-full h-12">
-                <Plus className="h-4 w-4 mr-2" /> Create New Dataset
-              </Button>
+                <p className="text-lg font-bold group-hover:text-primary transition-colors">Use My Data</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Interview, scrape, or upload. Build a grounded model from real knowledge.
+                </p>
+                {datasets && datasets.length > 0 && (
+                  <Badge variant="outline" className="mt-3 text-[10px]">{datasets.length} dataset{datasets.length !== 1 ? "s" : ""} ready</Badge>
+                )}
+              </button>
+
+              {/* Path 2: Popcorn Only */}
               <button
                 onClick={() => { window.location.href = "/deploy?dataset=__popcorn_only__"; }}
-                className="w-full text-left rounded-xl px-5 py-4 border border-[hsl(var(--forge-amber))]/30 bg-[hsl(var(--forge-amber))]/5 hover:border-[hsl(var(--forge-amber))]/60 hover:bg-[hsl(var(--forge-amber))]/10 transition-all group"
+                className="text-left rounded-xl p-6 border-2 border-[hsl(var(--forge-amber))]/20 hover:border-[hsl(var(--forge-amber))]/60 hover:bg-[hsl(var(--forge-amber))]/5 transition-all group"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-base font-medium text-[hsl(var(--forge-amber))] group-hover:brightness-110 transition-all">🍿 Popcorn Only — No Data Needed</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Densify a base model using only its own knowledge. Zero datasets, zero cloud.
-                    </p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-[hsl(var(--forge-amber))] group-hover:translate-x-1 transition-transform" />
+                <div className="h-12 w-12 rounded-xl bg-[hsl(var(--forge-amber))]/10 flex items-center justify-center mb-3">
+                  <Zap className="h-6 w-6 text-[hsl(var(--forge-amber))]" />
                 </div>
+                <p className="text-lg font-bold text-[hsl(var(--forge-amber))] group-hover:brightness-110 transition-all">🍿 Popcorn Only</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Densify a base model using its own knowledge. Zero datasets, zero cloud.
+                </p>
+                <Badge variant="outline" className="mt-3 text-[10px] border-[hsl(var(--forge-amber))]/30 text-[hsl(var(--forge-amber))]">NO DATA NEEDED</Badge>
               </button>
             </div>
-          ) : (
-            <Step1CreateDataset onCreated={handleDatasetCreated} />
-          )}
+
+            {/* Existing datasets */}
+            {datasets && datasets.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Your Datasets</p>
+                  {datasets.map(ds => (
+                    <button key={ds.id} onClick={() => handleSelectExisting(ds.id)}
+                      className="w-full text-left rounded-lg px-4 py-3 border border-border hover:border-primary/40 hover:bg-primary/5 transition-all group">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium group-hover:text-primary transition-colors">{ds.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="outline" className="text-[10px]">{ds.domain}</Badge>
+                            <span className="text-[11px] text-muted-foreground">{ds.sample_count} samples</span>
+                          </div>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                    </button>
+                  ))}
+                  <Button onClick={() => setStep(1)} variant="ghost" size="sm" className="w-full text-xs text-muted-foreground">
+                    <Plus className="h-3 w-3 mr-1" /> New Dataset
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     );
