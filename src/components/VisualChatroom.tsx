@@ -8,12 +8,14 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords,
+  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords, Coins,
 } from "lucide-react";
 import { CHARACTERS, ChatMessage } from "./visual-chatroom/types";
 import CharacterBar from "./visual-chatroom/CharacterBar";
 import MessageCard from "./visual-chatroom/MessageCard";
 import ImageLightbox from "./visual-chatroom/ImageLightbox";
+import { useCreditsGate } from "@/hooks/useCreditsGate";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Mode = "council" | "duo";
 
