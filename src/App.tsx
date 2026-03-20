@@ -58,6 +58,7 @@ import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
 import DeviceConsolePage from "./pages/DeviceConsolePage";
 import SelfHostPage from "./pages/SelfHostPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
+import ImageForgePage from "./pages/ImageForgePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ const App = () => (
                 <Route path="/inference" element={<InferencePlaygroundPage />} />
                 <Route path="/console" element={<DeviceConsolePage />} />
                 <Route path="/self-host" element={<SelfHostPage />} />
+                <Route path="/image-forge" element={<ImageForgePage />} />
                 <Route path="/training" element={<TrainingProgressPage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
