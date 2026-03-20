@@ -241,8 +241,8 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
               {GPU_PROFILES.map((g) => (
                 <SelectItem key={g.id} value={g.id}>
                   <div className="flex items-center gap-2">
-                    {g.vendor === "nvidia" && <Zap className="h-3 w-3 text-green-500" />}
-                    {g.vendor === "amd" && <Monitor className="h-3 w-3 text-red-500" />}
+                    {g.vendor === "nvidia" && <Zap className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />}
+                    {g.vendor === "amd" && <Monitor className="h-3 w-3 text-[hsl(var(--forge-rose))]" />}
                     {g.vendor === "cpu" && <Cpu className="h-3 w-3 text-muted-foreground" />}
                     {g.name}
                   </div>
