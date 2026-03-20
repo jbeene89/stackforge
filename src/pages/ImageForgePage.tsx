@@ -263,9 +263,25 @@ export default function ImageForgePage() {
           Image Forge
         </h1>
         <p className="text-muted-foreground mt-1">
-          Five minds, one vision. Watch the council collaborate to forge your image.
+          Five minds, one vision — council mode or unrestricted visual chatroom.
         </p>
       </div>
+
+      {/* Mode Tabs */}
+      <Tabs defaultValue="council" className="space-y-4">
+        <TabsList className="bg-muted/50">
+          <TabsTrigger value="council" className="gap-2 font-display text-xs tracking-wider">
+            <Users className="h-3.5 w-3.5" />
+            Council Mode
+          </TabsTrigger>
+          <TabsTrigger value="chatroom" className="gap-2 font-display text-xs tracking-wider">
+            <MessageSquare className="h-3.5 w-3.5" />
+            Free Mode
+            <Badge variant="secondary" className="text-[9px] px-1 py-0 ml-1">NEW</Badge>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="council" className="space-y-6 mt-0">
 
       {/* ─── The Stage: 5 Characters Standing ─── */}
       <Card className="border-border/50 bg-card/80 backdrop-blur overflow-hidden">
