@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Cpu, Zap, Monitor, Copy, AlertTriangle } from "lucide-react";
+import { Cpu, Zap, Monitor, Copy, AlertTriangle, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -185,6 +185,8 @@ interface GPUSetupWizardProps {
 export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSetupWizardProps) {
   const [selectedGPU, setSelectedGPU] = useState<string>("rx580");
   const [selectedModel, setSelectedModel] = useState<string>("llama3.2:3b");
+  const [detecting, setDetecting] = useState(false);
+  const [detectedName, setDetectedName] = useState<string | null>(null);
 
   const gpu = GPU_PROFILES.find((g) => g.id === selectedGPU)!;
   const models = getModelsForGPU(gpu);
@@ -195,10 +197,9 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
     setSelectedGPU(id);
     const g = GPU_PROFILES.find((p) => p.id === id)!;
     onGPUSelected?.(g);
-    // Auto-pick best model for the GPU
     const best = getModelsForGPU(g).filter((m) => m.recommended);
     if (best.length > 0) {
-      const pick = best[best.length - 1]; // largest that fits well
+      const pick = best[best.length - 1];
       setSelectedModel(pick.id);
       onModelSelected?.(pick);
     }
@@ -209,6 +210,56 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
     const m = models.find((x) => x.id === id);
     if (m) onModelSelected?.(m);
   };
+
+  // WebGPU detection
+  const detectGPU = useCallback(async () => {
+    setDetecting(true);
+    try {
+      if (!("gpu" in navigator)) {
+        toast.error("WebGPU not supported in this browser. Try Chrome 113+ or Edge 113+.");
+        return;
+      }
+      const adapter = await (navigator as any).gpu.requestAdapter();
+      if (!adapter) {
+        toast.error("No GPU adapter found. Your browser may be blocking GPU access.");
+        return;
+      }
+      const info = await adapter.requestAdapterInfo?.() ?? (adapter as any).info;
+      const desc = (info?.description || info?.device || "").toLowerCase();
+      const vendor = (info?.vendor || "").toLowerCase();
+      const fullName = info?.description || info?.device || "Unknown GPU";
+      setDetectedName(fullName);
+
+      // Match against known profiles
+      const match = GPU_PROFILES.find((p) => {
+        const pName = p.name.toLowerCase();
+        if (desc.includes("rx 580") || desc.includes("rx580") || desc.includes("polaris")) return p.id === "rx580";
+        if (desc.includes("rx 6600") || desc.includes("rx6600") || desc.includes("navi 23")) return p.id === "rx6600";
+        if (desc.includes("7900") || desc.includes("navi 31")) return p.id === "rx7900xtx";
+        if (desc.includes("3060") || desc.includes("ga106")) return p.id === "rtx3060";
+        if (desc.includes("4090") || desc.includes("ad102")) return p.id === "rtx4090";
+        return false;
+      });
+
+      if (match) {
+        handleGPUChange(match.id);
+        toast.success(`Detected: ${fullName} → matched to ${match.name}`);
+      } else if (vendor.includes("amd") || vendor.includes("ati") || desc.includes("radeon")) {
+        // Generic AMD fallback — pick RX 580 as conservative default
+        handleGPUChange("rx580");
+        toast.info(`Detected AMD GPU: ${fullName}. Defaulted to RX 580 profile — adjust if needed.`);
+      } else if (vendor.includes("nvidia") || desc.includes("geforce") || desc.includes("rtx") || desc.includes("gtx")) {
+        handleGPUChange("rtx3060");
+        toast.info(`Detected NVIDIA GPU: ${fullName}. Defaulted to RTX 3060 profile — adjust if needed.`);
+      } else {
+        toast.info(`Detected: ${fullName}. Couldn't match a profile — please select manually.`);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "GPU detection failed");
+    } finally {
+      setDetecting(false);
+    }
+  }, [onGPUSelected, onModelSelected]);
 
   const setupScript = [
     ...gpu.setupCommands,
@@ -227,7 +278,26 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
 
   return (
     <div className="space-y-4">
-      {/* GPU Selector */}
+      {/* Detect + GPU Selector */}
+      <div className="flex items-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="shrink-0 h-9"
+          onClick={detectGPU}
+          disabled={detecting}
+        >
+          {detecting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Search className="h-3.5 w-3.5 mr-1.5" />}
+          {detecting ? "Detecting…" : "Detect My GPU"}
+        </Button>
+        {detectedName && (
+          <span className="text-[10px] text-muted-foreground truncate">
+            Found: <span className="font-semibold text-foreground">{detectedName}</span>
+          </span>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
