@@ -32,6 +32,7 @@ import {
   ChevronUp,
   Layers,
   Zap,
+  Monitor,
 } from "lucide-react";
 import { toast } from "sonner";
 
