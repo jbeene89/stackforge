@@ -110,12 +110,12 @@ export default function DashboardPage() {
       {/* Status bar */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {[
-          { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald" },
-          { label: "Modules", value: totalModules, icon: Brain, color: "text-forge-amber" },
-          { label: "Stacks", value: totalStacks, icon: Layers, color: "text-forge-rose" },
-          { label: "Last Run", value: lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status },
+          { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald", id: undefined },
+          { label: "Modules", value: totalModules, icon: Brain, color: "text-forge-amber", id: "tour-modules" },
+          { label: "Stacks", value: totalStacks, icon: Layers, color: "text-forge-rose", id: "tour-stacks" },
+          { label: "Last Run", value: lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status, id: undefined },
         ].map((m) => (
-          <div key={m.label} className="glass-hover rounded-xl px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
+          <div key={m.label} id={m.id} className="glass-hover rounded-xl px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
             <div className={cn("w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-card", m.color === "text-forge-emerald" && "bg-forge-emerald/10", m.color === "text-forge-amber" && "bg-forge-amber/10", m.color === "text-forge-rose" && "bg-forge-rose/10", m.color === "text-forge-cyan" && "bg-forge-cyan/10")}>
               <m.icon className={cn("h-4 w-4", m.color)} />
             </div>
