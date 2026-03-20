@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Globe, Smartphone, Brain, Layers, ArrowRight, Zap, Shield, Eye,
   Play, CheckCircle2, ChevronRight, Command, GitBranch, Target, Cpu,
-  FileCode, Workflow, Lock, BarChart3, Wrench
+  FileCode, Workflow, Lock, BarChart3, Wrench, Scissors, Database, FlaskConical, Eraser
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
