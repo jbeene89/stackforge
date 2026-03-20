@@ -332,7 +332,7 @@ export default function VisualChatroom() {
               {!isRunning ? (
                 <>
                   <Button
-                    onClick={startConversation}
+                    onClick={wrappedStartConversation}
                     disabled={!canStart}
                     className="gradient-primary glow-primary text-primary-foreground font-display text-xs tracking-wider"
                   >
