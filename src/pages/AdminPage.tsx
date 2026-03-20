@@ -196,6 +196,59 @@ export default function AdminPage() {
           </div>
         </TabsContent>
 
+        {/* Quick Posts */}
+        <TabsContent value="social" className="flex-1 min-h-0 mt-0 overflow-auto">
+          <div className="space-y-6">
+            {SOCIAL_POSTS.map((platform) => (
+              <div key={platform.platform}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={cn("w-6 h-6 rounded-md flex items-center justify-center text-xs text-white", platform.color)}>
+                    {platform.emoji}
+                  </span>
+                  <h3 className="text-sm font-semibold">{platform.platform}</h3>
+                  <Badge variant="outline" className="text-[10px]">{platform.posts.length} ready</Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {platform.posts.map((post, pi) => (
+                    <motion.div
+                      key={pi}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: pi * 0.06 }}
+                      className="glass rounded-xl p-4 flex flex-col"
+                    >
+                      <p className="text-[11px] font-medium text-muted-foreground mb-2">{post.title}</p>
+                      <pre className="text-sm whitespace-pre-wrap font-sans leading-relaxed flex-1 mb-3 text-foreground/90">{post.body}</pre>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs gap-1.5 flex-1"
+                          onClick={() => {
+                            navigator.clipboard.writeText(post.body);
+                            toast.success("Copied to clipboard!");
+                          }}
+                        >
+                          <Copy className="h-3 w-3" /> Copy
+                        </Button>
+                        {platform.shareUrl && (
+                          <Button
+                            size="sm"
+                            className="text-xs gap-1.5 flex-1"
+                            onClick={() => window.open((platform.shareUrl as Function)(post.body), "_blank")}
+                          >
+                            <ExternalLink className="h-3 w-3" /> Post
+                          </Button>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+
         {/* Feature Flags */}
         <TabsContent value="flags" className="flex-1 min-h-0 mt-0 overflow-auto">
           {["core", "generation", "analytics", "experimental"].map((cat) => {
