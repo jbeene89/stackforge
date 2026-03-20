@@ -956,6 +956,23 @@ export default function DeployPipelinePage() {
 
       {/* Pipeline Steps */}
       <div className="space-y-3">
+        {/* Step 0: GPU Setup */}
+        <StepCard
+          step={0}
+          title="GPU & Model Setup"
+          description="Configure your hardware and pick the right model"
+          icon={Monitor}
+          active={true}
+          completed={!!selectedOllamaModel}
+        >
+          <div className="pt-2">
+            <GPUSetupWizard
+              onGPUSelected={(gpu) => setSelectedGPU(gpu)}
+              onModelSelected={(model) => setSelectedOllamaModel(model)}
+            />
+          </div>
+        </StepCard>
+
         {/* Step 1: Export */}
         <StepCard
           step={1}
