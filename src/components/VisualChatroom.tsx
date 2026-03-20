@@ -1,30 +1,21 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Play, Pause, SkipForward, RotateCcw, Download, Maximize2,
-  Hammer, Heart, Zap, ShieldAlert, Settings2, Sparkles,
+  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords,
 } from "lucide-react";
+import { CHARACTERS, ChatMessage } from "./visual-chatroom/types";
+import CharacterBar from "./visual-chatroom/CharacterBar";
+import MessageCard from "./visual-chatroom/MessageCard";
+import ImageLightbox from "./visual-chatroom/ImageLightbox";
 
-const CHARACTERS = [
-  { id: "builder", name: "Axiom", role: "Builder", icon: Hammer, color: "hsl(var(--forge-cyan))", bgColor: "hsl(var(--forge-cyan) / 0.15)", borderColor: "hsl(var(--forge-cyan) / 0.3)", avatar: "\u2692\uFE0F" },
-  { id: "empath", name: "Lyra", role: "Empath", icon: Heart, color: "hsl(var(--forge-rose))", bgColor: "hsl(var(--forge-rose) / 0.15)", borderColor: "hsl(var(--forge-rose) / 0.3)", avatar: "\uD83C\uDF19" },
-  { id: "frame_breaker", name: "Flux", role: "Frame Breaker", icon: Zap, color: "hsl(var(--forge-amber))", bgColor: "hsl(var(--forge-amber) / 0.15)", borderColor: "hsl(var(--forge-amber) / 0.3)", avatar: "\u26A1" },
-  { id: "red_team", name: "Sentinel", role: "Red Team", icon: ShieldAlert, color: "hsl(var(--forge-emerald))", bgColor: "hsl(var(--forge-emerald) / 0.15)", borderColor: "hsl(var(--forge-emerald) / 0.3)", avatar: "\uD83D\uDEE1\uFE0F" },
-  { id: "systems", name: "Prism", role: "Systems", icon: Settings2, color: "hsl(var(--forge-violet))", bgColor: "hsl(var(--forge-violet) / 0.15)", borderColor: "hsl(var(--forge-violet) / 0.3)", avatar: "\uD83D\uDD2E" },
-];
-
-interface ChatMessage {
-  characterId: string;
-  image: string | null;
-  text?: string;
-  round: number;
-}
+type Mode = "council" | "duo";
 
 export default function VisualChatroom() {
   const [seedPrompt, setSeedPrompt] = useState("");
@@ -34,8 +25,15 @@ export default function VisualChatroom() {
   const [currentSpeaker, setCurrentSpeaker] = useState<number>(-1);
   const [round, setRound] = useState(0);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [mode, setMode] = useState<Mode>("council");
+  const [duoPair, setDuoPair] = useState<[string, string] | null>(null);
+  const [duoRounds, setDuoRounds] = useState(5);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef(false);
+  const pauseRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { pauseRef.current = isPaused; }, [isPaused]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,10 +41,7 @@ export default function VisualChatroom() {
 
   const generateTurn = async (charIndex: number, currentRound: number, allMessages: ChatMessage[]): Promise<ChatMessage | null> => {
     const char = CHARACTERS[charIndex];
-    const previousImages = allMessages
-      .filter(m => m.image)
-      .map(m => m.image!);
-
+    const previousImages = allMessages.filter(m => m.image).map(m => m.image!);
     const isFirst = allMessages.length === 0;
 
     try {
@@ -58,154 +53,177 @@ export default function VisualChatroom() {
           imageModel: "google/gemini-3.1-flash-image-preview",
         },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
-      return {
-        characterId: char.id,
-        image: data.image,
-        text: data.text,
-        round: currentRound,
-      };
+      return { characterId: char.id, image: data.image, text: data.text, round: currentRound };
     } catch (e: any) {
       toast.error(`${char.name} failed: ${e.message}`);
       return null;
     }
   };
 
-  const startConversation = async () => {
+  const waitWhilePaused = async () => {
+    while (pauseRef.current && !abortRef.current) {
+      await new Promise(res => setTimeout(res, 200));
+    }
+  };
+
+  // === Council mode (all 5, 3 rounds) ===
+  const startCouncil = async () => {
     if (!seedPrompt.trim()) { toast.error("Give the council a starting theme"); return; }
-    setIsRunning(true);
-    setIsPaused(false);
-    abortRef.current = false;
-    setMessages([]);
-    setRound(1);
+    setIsRunning(true); setIsPaused(false); abortRef.current = false;
+    setMessages([]); setRound(1);
 
     let allMessages: ChatMessage[] = [];
-    let currentRound = 1;
-
-    // Run 3 rounds of all 5 characters
     for (let r = 0; r < 3 && !abortRef.current; r++) {
-      currentRound = r + 1;
-      setRound(currentRound);
-
+      setRound(r + 1);
       for (let i = 0; i < CHARACTERS.length && !abortRef.current; i++) {
-        // Wait while paused
-        while (isPaused && !abortRef.current) {
-          await new Promise(res => setTimeout(res, 200));
-        }
+        await waitWhilePaused();
         if (abortRef.current) break;
-
         setCurrentSpeaker(i);
-        const msg = await generateTurn(i, currentRound, allMessages);
-
-        if (msg) {
-          allMessages = [...allMessages, msg];
-          setMessages([...allMessages]);
-        }
-
-        // Small delay between turns
+        const msg = await generateTurn(i, r + 1, allMessages);
+        if (msg) { allMessages = [...allMessages, msg]; setMessages([...allMessages]); }
         if (!abortRef.current) await new Promise(res => setTimeout(res, 600));
       }
     }
-
-    setCurrentSpeaker(-1);
-    setIsRunning(false);
+    setCurrentSpeaker(-1); setIsRunning(false);
     if (!abortRef.current) toast.success("Visual conversation complete!");
   };
 
+  // === Duo mode (2 characters, N rounds) ===
+  const startDuo = async () => {
+    if (!duoPair) { toast.error("Click two characters above to pick your duo"); return; }
+    if (!seedPrompt.trim()) { toast.error("Give the duo a starting theme"); return; }
+
+    const charA = CHARACTERS.find(c => c.id === duoPair[0])!;
+    const charB = CHARACTERS.find(c => c.id === duoPair[1])!;
+    const idxA = CHARACTERS.indexOf(charA);
+    const idxB = CHARACTERS.indexOf(charB);
+
+    setIsRunning(true); setIsPaused(false); abortRef.current = false;
+    setMessages([]); setRound(1);
+
+    let allMessages: ChatMessage[] = [];
+    for (let r = 0; r < duoRounds && !abortRef.current; r++) {
+      setRound(r + 1);
+      for (const idx of [idxA, idxB]) {
+        await waitWhilePaused();
+        if (abortRef.current) break;
+        setCurrentSpeaker(idx);
+        const msg = await generateTurn(idx, r + 1, allMessages);
+        if (msg) { allMessages = [...allMessages, msg]; setMessages([...allMessages]); }
+        if (!abortRef.current) await new Promise(res => setTimeout(res, 600));
+      }
+    }
+    setCurrentSpeaker(-1); setIsRunning(false);
+    if (!abortRef.current) toast.success(`${charA.name} × ${charB.name} finished ${duoRounds} rounds of madness!`);
+  };
+
+  const toggleDuoMember = useCallback((id: string) => {
+    if (isRunning) return;
+    setMode("duo");
+    setDuoPair(prev => {
+      if (!prev) return [id, id] as any;
+      if (prev.includes(id)) {
+        const remaining = prev.filter(x => x !== id);
+        return remaining.length === 0 ? null : null;
+      }
+      return [prev[0], id] as [string, string];
+    });
+  }, [isRunning]);
+
+  // === Image injection ===
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      const injection: ChatMessage = {
+        characterId: "user",
+        image: base64,
+        text: "User injected image",
+        round: round || 1,
+        isUserInjection: true,
+      };
+      setMessages(prev => [...prev, injection]);
+      toast.success("Image injected! Next AI turn will respond to it.");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }, [round]);
+
   const stepForward = async () => {
-    if (messages.length === 0 && !seedPrompt.trim()) {
-      toast.error("Enter a starting theme first");
-      return;
-    }
-
-    const nextIndex = messages.length % CHARACTERS.length;
-    const currentRound = Math.floor(messages.length / CHARACTERS.length) + 1;
-
-    setIsRunning(true);
-    setCurrentSpeaker(nextIndex);
-
+    if (messages.length === 0 && !seedPrompt.trim()) { toast.error("Enter a starting theme first"); return; }
+    const nextIndex = messages.filter(m => !m.isUserInjection).length % CHARACTERS.length;
+    const currentRound = Math.floor(messages.filter(m => !m.isUserInjection).length / CHARACTERS.length) + 1;
+    setIsRunning(true); setCurrentSpeaker(nextIndex);
     const msg = await generateTurn(nextIndex, currentRound, messages);
-    if (msg) {
-      setMessages(prev => [...prev, msg]);
-    }
-
-    setCurrentSpeaker(-1);
-    setIsRunning(false);
+    if (msg) setMessages(prev => [...prev, msg]);
+    setCurrentSpeaker(-1); setIsRunning(false);
   };
 
-  const stop = () => {
-    abortRef.current = true;
-    setIsRunning(false);
-    setCurrentSpeaker(-1);
-  };
+  const stop = () => { abortRef.current = true; setIsRunning(false); setCurrentSpeaker(-1); };
+  const reset = () => { stop(); setMessages([]); setRound(0); };
 
-  const reset = () => {
-    stop();
-    setMessages([]);
-    setRound(0);
-  };
+  const startConversation = mode === "duo" && duoPair ? startDuo : startCouncil;
+  const canStart = seedPrompt.trim() && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
 
   return (
     <div className="space-y-4">
-      {/* Character Bar */}
-      <div className="flex justify-center items-end gap-2 sm:gap-4 py-4">
-        {CHARACTERS.map((char, i) => {
-          const isSpeaking = currentSpeaker === i;
-          const hasSpoken = messages.some(m => m.characterId === char.id);
-          const messageCount = messages.filter(m => m.characterId === char.id).length;
-
-          return (
-            <motion.div
-              key={char.id}
-              className="flex flex-col items-center gap-1"
-              animate={{ y: isSpeaking ? -6 : 0, scale: isSpeaking ? 1.1 : 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {isSpeaking && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex gap-0.5"
-                >
-                  {[0, 1, 2].map(j => (
-                    <motion.div
-                      key={j}
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: char.color }}
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ repeat: Infinity, duration: 0.5, delay: j * 0.1 }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-              <div
-                className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all"
-                style={{
-                  backgroundColor: hasSpoken || isSpeaking ? char.bgColor : "hsl(var(--muted) / 0.3)",
-                  borderColor: isSpeaking ? char.color : hasSpoken ? char.borderColor : "transparent",
-                  boxShadow: isSpeaking ? `0 0 16px ${char.color}` : "none",
-                  opacity: hasSpoken || isSpeaking ? 1 : 0.4,
-                }}
-              >
-                {char.avatar}
-                {messageCount > 0 && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center font-bold">
-                    {messageCount}
-                  </div>
-                )}
-              </div>
-              <span className="text-[10px] font-bold font-display" style={{ color: hasSpoken || isSpeaking ? char.color : "hsl(var(--muted-foreground))" }}>
-                {char.name}
-              </span>
-            </motion.div>
-          );
-        })}
+      {/* Mode toggle */}
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          variant={mode === "council" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setMode("council"); setDuoPair(null); }}
+          className="text-xs font-display"
+        >
+          <Play className="h-3 w-3 mr-1" /> Council (5 × 3)
+        </Button>
+        <Button
+          variant={mode === "duo" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setMode("duo")}
+          className="text-xs font-display"
+        >
+          <Swords className="h-3 w-3 mr-1" /> Duo Jam
+        </Button>
       </div>
 
-      {/* Chat Area — Image Gallery */}
+      {mode === "duo" && (
+        <div className="text-center space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {duoPair && duoPair[0] !== duoPair[1]
+              ? `${CHARACTERS.find(c => c.id === duoPair[0])?.name} × ${CHARACTERS.find(c => c.id === duoPair[1])?.name} selected`
+              : "Click two different characters to pair them up"}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-xs text-muted-foreground">Rounds:</span>
+            <Slider
+              value={[duoRounds]}
+              onValueChange={v => setDuoRounds(v[0])}
+              min={2}
+              max={20}
+              step={1}
+              className="w-32"
+            />
+            <Badge variant="secondary" className="text-xs font-mono">{duoRounds}</Badge>
+          </div>
+        </div>
+      )}
+
+      <CharacterBar
+        currentSpeaker={currentSpeaker}
+        messages={messages}
+        selectedDuo={mode === "duo" ? duoPair : null}
+        onToggleDuo={mode === "duo" ? toggleDuoMember : undefined}
+      />
+
+      {/* Chat Area */}
       <Card className="border-border/50 bg-card/80 backdrop-blur">
         <CardContent className="p-0">
           <div className="min-h-[300px] max-h-[500px] overflow-y-auto p-4 space-y-4">
@@ -213,92 +231,28 @@ export default function VisualChatroom() {
               <div className="flex items-center justify-center h-[260px] text-muted-foreground">
                 <div className="text-center space-y-2">
                   <p className="text-lg">Visual Chatroom</p>
-                  <p className="text-xs">The council will cross-talk using images instead of words</p>
-                  <p className="text-xs">Each mind sees the previous images and responds visually</p>
+                  <p className="text-xs">
+                    {mode === "duo"
+                      ? "Pick two characters for a visual jam session — watch them riff off each other"
+                      : "The council will cross-talk using images instead of words"}
+                  </p>
+                  <p className="text-xs">You can inject your own images mid-conversation</p>
                 </div>
               </div>
             )}
 
-            {/* Messages as image cards */}
             <div className="grid gap-4">
-              {messages.map((msg, i) => {
-                const char = CHARACTERS.find(c => c.id === msg.characterId)!;
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex gap-3"
-                  >
-                    {/* Avatar */}
-                    <div className="flex flex-col items-center gap-1 flex-shrink-0 pt-1">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm border"
-                        style={{ backgroundColor: char.bgColor, borderColor: char.borderColor }}
-                      >
-                        {char.avatar}
-                      </div>
-                      <span className="text-[9px] font-bold" style={{ color: char.color }}>{char.name}</span>
-                      <Badge variant="outline" className="text-[8px] px-1 py-0">R{msg.round}</Badge>
-                    </div>
-
-                    {/* Image */}
-                    <div className="flex-1 min-w-0">
-                      {msg.image ? (
-                        <div
-                          className="rounded-xl overflow-hidden border cursor-pointer group relative"
-                          style={{ borderColor: char.borderColor }}
-                          onClick={() => setExpandedImage(msg.image)}
-                        >
-                          <img
-                            src={msg.image}
-                            alt={`${char.name}'s visual response`}
-                            className="w-full max-h-[300px] object-contain bg-black/5 dark:bg-white/5"
-                          />
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button size="sm" variant="secondary" className="h-6 w-6 p-0 backdrop-blur bg-background/80">
-                              <Maximize2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <div className="absolute bottom-2 left-2">
-                            <Badge
-                              className="text-[10px] backdrop-blur"
-                              style={{ backgroundColor: char.bgColor, color: char.color, borderColor: char.borderColor }}
-                            >
-                              {char.role} — Round {msg.round}
-                            </Badge>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          className="rounded-xl p-3 border text-sm text-muted-foreground italic"
-                          style={{ backgroundColor: char.bgColor, borderColor: char.borderColor }}
-                        >
-                          {msg.text || "(could not generate image)"}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {messages.map((msg, i) => (
+                <MessageCard key={i} msg={msg} onExpand={setExpandedImage} />
+              ))}
             </div>
 
-            {/* Currently generating indicator */}
             <AnimatePresence>
               {isRunning && currentSpeaker >= 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex gap-3 items-center"
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex gap-3 items-center">
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-sm border"
-                    style={{
-                      backgroundColor: CHARACTERS[currentSpeaker].bgColor,
-                      borderColor: CHARACTERS[currentSpeaker].borderColor,
-                    }}
+                    style={{ backgroundColor: CHARACTERS[currentSpeaker].bgColor, borderColor: CHARACTERS[currentSpeaker].borderColor }}
                   >
                     {CHARACTERS[currentSpeaker].avatar}
                   </div>
@@ -312,7 +266,6 @@ export default function VisualChatroom() {
                 </motion.div>
               )}
             </AnimatePresence>
-
             <div ref={chatEndRef} />
           </div>
         </CardContent>
@@ -329,16 +282,31 @@ export default function VisualChatroom() {
                 onChange={e => setSeedPrompt(e.target.value)}
                 disabled={isRunning}
                 className="bg-background/60"
-                onKeyDown={e => {
-                  if (e.key === "Enter" && !isRunning) startConversation();
-                }}
+                onKeyDown={e => { if (e.key === "Enter" && !isRunning && canStart) startConversation(); }}
               />
             </div>
             <div className="flex gap-2">
+              {/* Image injection button */}
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                title="Inject your own image into the conversation"
+                disabled={messages.length === 0 && !isRunning}
+              >
+                <ImagePlus className="h-3 w-3" />
+              </Button>
+
               {!isRunning ? (
                 <>
-                  <Button onClick={startConversation} disabled={!seedPrompt.trim()} className="gradient-primary glow-primary text-primary-foreground font-display text-xs tracking-wider">
-                    <Play className="h-3 w-3 mr-1" /> Start (3 rounds)
+                  <Button
+                    onClick={startConversation}
+                    disabled={!canStart}
+                    className="gradient-primary glow-primary text-primary-foreground font-display text-xs tracking-wider"
+                  >
+                    <Play className="h-3 w-3 mr-1" />
+                    {mode === "duo" ? `Duo (${duoRounds}r)` : "Start (3r)"}
                   </Button>
                   <Button variant="outline" size="sm" onClick={stepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
                     <SkipForward className="h-3 w-3" />
@@ -349,67 +317,29 @@ export default function VisualChatroom() {
                   <Button variant="outline" size="sm" onClick={() => setIsPaused(p => !p)}>
                     {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={stop}>
-                    Stop
-                  </Button>
+                  <Button variant="destructive" size="sm" onClick={stop}>Stop</Button>
                 </>
               )}
               {messages.length > 0 && !isRunning && (
-                <Button variant="ghost" size="sm" onClick={reset}>
-                  <RotateCcw className="h-3 w-3" />
-                </Button>
+                <Button variant="ghost" size="sm" onClick={reset}><RotateCcw className="h-3 w-3" /></Button>
               )}
             </div>
           </div>
           {messages.length > 0 && (
             <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-              <span>{messages.length} images</span>
+              <span>{messages.filter(m => !m.isUserInjection).length} AI images</span>
+              <span>|</span>
+              <span>{messages.filter(m => m.isUserInjection).length} injected</span>
               <span>|</span>
               <span>Round {round}</span>
               <span>|</span>
-              <span>{messages.filter(m => m.image).length} successful</span>
+              <span>{messages.filter(m => m.image && !m.isUserInjection).length} successful</span>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {expandedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-            onClick={() => setExpandedImage(null)}
-          >
-            <motion.img
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              src={expandedImage}
-              alt="Expanded view"
-              className="max-w-full max-h-full object-contain rounded-xl"
-            />
-            <div className="absolute top-4 right-4 flex gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                className="backdrop-blur"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const link = document.createElement("a");
-                  link.href = expandedImage;
-                  link.download = `chatroom-${Date.now()}.png`;
-                  link.click();
-                }}
-              >
-                <Download className="h-4 w-4 mr-1" /> Save
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ImageLightbox image={expandedImage} onClose={() => setExpandedImage(null)} />
     </div>
   );
 }
