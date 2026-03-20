@@ -11,8 +11,9 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Shield, Users, Settings, BarChart3, Activity,
   TrendingUp, Zap, Clock, Globe, Cpu, HardDrive, AlertTriangle,
-  Brain, Layers
+  Brain, Layers, Share2, Copy, Check, ExternalLink,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // ------- FEATURE FLAGS (local state, no DB table for these) -------
 const featureFlags = [
