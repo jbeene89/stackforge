@@ -14,6 +14,12 @@ const PRODUCT_TIER_MAP: Record<string, { tier: string; allowance: number }> = {
   prod_U7A4PumaFQmKPQ: { tier: "pro", allowance: 2000 },
 };
 
+const TOPUP_PRODUCT_MAP: Record<string, number> = {
+  prod_UBSxWZJuoZCE7F: 100,
+  prod_UBSygVKYUgUs90: 500,
+  prod_UBSyqxTOHs9qct: 1500,
+};
+
 const FREE_TIER = { tier: "free", allowance: 50 };
 
 const log = (step: string, details?: unknown) => {
@@ -59,8 +65,11 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.mode !== "subscription") break;
-        await syncSubscription(stripe, supabase, session.customer as string);
+        if (session.mode === "subscription") {
+          await syncSubscription(stripe, supabase, session.customer as string);
+        } else if (session.mode === "payment" && session.metadata?.type === "credit_topup") {
+          await fulfillTopup(supabase, session);
+        }
         break;
       }
 
@@ -163,4 +172,43 @@ async function syncSubscription(
   });
 
   log("User credits synced", { userId: user.id, tier: tierConfig.tier });
+}
+
+async function fulfillTopup(
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session
+) {
+  const userId = session.metadata?.user_id;
+  const credits = parseInt(session.metadata?.credits || "0", 10);
+  if (!userId || !credits) {
+    log("Invalid topup metadata", { metadata: session.metadata });
+    return;
+  }
+
+  const { data: current } = await supabase
+    .from("user_credits")
+    .select("credits_balance")
+    .eq("user_id", userId)
+    .single();
+
+  if (!current) {
+    log("No user_credits row for topup", { userId });
+    return;
+  }
+
+  const newBalance = current.credits_balance + credits;
+  await supabase
+    .from("user_credits")
+    .update({ credits_balance: newBalance })
+    .eq("user_id", userId);
+
+  await supabase.from("credit_transactions").insert({
+    user_id: userId,
+    amount: credits,
+    balance_after: newBalance,
+    description: `Top-up: ${credits} credits purchased`,
+    transaction_type: "topup",
+  });
+
+  log("Topup fulfilled", { userId, credits, newBalance });
 }

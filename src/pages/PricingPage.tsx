@@ -10,7 +10,7 @@ import { useCredits, useCreditTransactions } from "@/hooks/useCredits";
 import { toast } from "sonner";
 import {
   Check, X, Zap, CreditCard, ArrowRight, Crown, Sparkles,
-  BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock,
+  BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock, ShoppingCart, Plus,
 } from "lucide-react";
 
 const TIERS = {
@@ -18,6 +18,12 @@ const TIERS = {
   builder: { name: "Builder", product_id: "prod_U7Tj3A5CVbhw4c", price_id: "price_1T9Em0EgO8H7yovMHqTakSkd", credits: 500 },
   pro: { name: "Pro", product_id: "prod_U7A4PumaFQmKPQ", price_id: "price_1T8vkaEgO8H7yovM9bBWWGwU", credits: 2000 },
 };
+
+const TOPUP_PACKS = [
+  { credits: 100, price: 4.99, priceId: "price_1TD61PEgO8H7yovM947iyWTY", label: "Starter" },
+  { credits: 500, price: 19.99, priceId: "price_1TD62JEgO8H7yovM5HSx5vl2", label: "Popular", highlight: true },
+  { credits: 1500, price: 59.99, priceId: "price_1TD62fEgO8H7yovMu0AHTCpt", label: "Best Value" },
+];
 
 const MODEL_COSTS = [
   { model: "Gemini Flash Lite", credits: 1 },
@@ -99,6 +105,7 @@ export default function PricingPage() {
     subscription_end: string | null;
   }>({ subscribed: false, product_id: null, subscription_end: null });
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const [topUpLoading, setTopUpLoading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const checkSubscription = async () => {
@@ -122,6 +129,10 @@ export default function PricingPage() {
       checkSubscription();
       window.history.replaceState({}, "", "/pricing");
     }
+    if (params.get("topup") === "success") {
+      toast.success("Credits purchased! Your balance has been updated.");
+      window.history.replaceState({}, "", "/pricing");
+    }
   }, []);
 
   const currentTier = subscriptionData.subscribed
@@ -142,6 +153,25 @@ export default function PricingPage() {
       toast.error(err.message || "Failed to start checkout");
     } finally {
       setCheckingOut(null);
+    }
+  };
+
+  const handleTopUp = async (priceId: string) => {
+    if (!user) {
+      toast.error("Please sign in to purchase credits");
+      return;
+    }
+    setTopUpLoading(priceId);
+    try {
+      const { data, error } = await supabase.functions.invoke("purchase-credits", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setTopUpLoading(null);
     }
   };
 
@@ -168,6 +198,7 @@ export default function PricingPage() {
           <TabsList className="glass w-fit">
             <TabsTrigger value="plans" className="text-xs gap-1.5"><Crown className="h-3 w-3" /> Plans</TabsTrigger>
             <TabsTrigger value="usage" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Usage & History</TabsTrigger>
+            <TabsTrigger value="topup" className="text-xs gap-1.5"><Plus className="h-3 w-3" /> Top Up</TabsTrigger>
             <TabsTrigger value="costs" className="text-xs gap-1.5"><Coins className="h-3 w-3" /> Credit Costs</TabsTrigger>
           </TabsList>
 
@@ -305,6 +336,66 @@ export default function PricingPage() {
                   <p>No credit activity yet. Run an AI module to see usage here.</p>
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* ── Top Up Tab ── */}
+          <TabsContent value="topup">
+            <div className="space-y-4">
+              <div className="glass rounded-xl p-4">
+                <h3 className="font-semibold flex items-center gap-2 mb-1">
+                  <ShoppingCart className="h-4 w-4 text-primary" /> Buy Credit Packs
+                </h3>
+                <p className="text-sm text-muted-foreground mb-6">Need more credits? Top up instantly — credits never expire.</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {TOPUP_PACKS.map((pack, idx) => (
+                    <motion.div
+                      key={pack.priceId}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.08 }}
+                      className={cn(
+                        "rounded-xl p-5 flex flex-col items-center text-center relative",
+                        pack.highlight ? "glass glow-primary border-primary/30" : "glass"
+                      )}
+                    >
+                      {pack.highlight && (
+                        <Badge className="absolute -top-2.5 gradient-primary text-primary-foreground text-[10px] px-3">
+                          {pack.label}
+                        </Badge>
+                      )}
+                      {!pack.highlight && pack.label === "Best Value" && (
+                        <Badge variant="outline" className="absolute -top-2.5 text-[10px] px-3">
+                          {pack.label}
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-1.5 mb-2 mt-1">
+                        <Coins className="h-5 w-5 text-primary" />
+                        <span className="text-3xl font-extrabold">{pack.credits.toLocaleString()}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-1">credits</p>
+                      <p className="text-lg font-bold mb-1">${pack.price}</p>
+                      <p className="text-[11px] text-muted-foreground mb-4">
+                        ${(pack.price / pack.credits * 100).toFixed(1)}¢ per credit
+                      </p>
+                      <Button
+                        className={cn("w-full", pack.highlight && "gradient-primary text-primary-foreground")}
+                        variant={pack.highlight ? "default" : "outline"}
+                        size="sm"
+                        disabled={topUpLoading === pack.priceId}
+                        onClick={() => handleTopUp(pack.priceId)}
+                      >
+                        {topUpLoading === pack.priceId ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>Buy Now <ArrowRight className="ml-1 h-3 w-3" /></>
+                        )}
+                      </Button>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
           </TabsContent>
 
