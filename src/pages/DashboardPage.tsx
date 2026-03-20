@@ -15,6 +15,7 @@ import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 const typeIcons: Record<ProjectType, React.ElementType> = {
   web: Globe, android: Smartphone, module: Brain, stack: Layers, hybrid: Layers,
@@ -67,16 +68,17 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 animate-fade-in max-w-7xl mx-auto">
+      <OnboardingTour />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+            <h1 id="tour-welcome" className="text-xl sm:text-2xl font-bold">Dashboard</h1>
             {credits && <TierBadge tier={credits.tier} size="md" />}
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">Your projects, modules, and stacks.</p>
         </div>
-        <Button className="gradient-primary text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
+        <Button id="tour-new-project" className="gradient-primary text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
           <Plus className="h-4 w-4 mr-2" /> New Project
         </Button>
       </div>
@@ -108,12 +110,12 @@ export default function DashboardPage() {
       {/* Status bar */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {[
-          { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald" },
-          { label: "Modules", value: totalModules, icon: Brain, color: "text-forge-amber" },
-          { label: "Stacks", value: totalStacks, icon: Layers, color: "text-forge-rose" },
-          { label: "Last Run", value: lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status },
+          { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald", id: undefined },
+          { label: "Modules", value: totalModules, icon: Brain, color: "text-forge-amber", id: "tour-modules" },
+          { label: "Stacks", value: totalStacks, icon: Layers, color: "text-forge-rose", id: "tour-stacks" },
+          { label: "Last Run", value: lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status, id: undefined },
         ].map((m) => (
-          <div key={m.label} className="glass-hover rounded-xl px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
+          <div key={m.label} id={m.id} className="glass-hover rounded-xl px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
             <div className={cn("w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-card", m.color === "text-forge-emerald" && "bg-forge-emerald/10", m.color === "text-forge-amber" && "bg-forge-amber/10", m.color === "text-forge-rose" && "bg-forge-rose/10", m.color === "text-forge-cyan" && "bg-forge-cyan/10")}>
               <m.icon className={cn("h-4 w-4", m.color)} />
             </div>
@@ -159,7 +161,7 @@ export default function DashboardPage() {
           <p className="text-xs text-muted-foreground mt-1">Create your first project to get started.</p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div id="tour-projects" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {filtered.map((project, i) => {
             const Icon = typeIcons[project.type as ProjectType] || Layers;
             return (
