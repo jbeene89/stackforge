@@ -27,6 +27,79 @@ const featureFlags = [
   { name: "Usage Analytics", description: "Detailed per-user and per-project analytics", enabled: true, category: "analytics" },
 ];
 
+const SITE_URL = "https://stackforge.lovable.app";
+
+const SOCIAL_POSTS = [
+  {
+    platform: "LinkedIn",
+    color: "bg-[hsl(210,84%,40%)]",
+    emoji: "💼",
+    posts: [
+      {
+        title: "Launch announcement",
+        body: `I built an AI app — without writing backend code.\n\nStackForge lets you wire up GPT-5, Gemini, and open-source models into pipelines, test them, and ship to Android — all from one dashboard.\n\nNo infra headaches. No API-key juggling.\n\nTry it free 👇\n${SITE_URL}`,
+      },
+      {
+        title: "Builder credibility",
+        body: `Most "AI tools" are just wrappers.\n\nStackForge is different — you design the reasoning chain:\n✦ Pick your models\n✦ Set guardrails & tone\n✦ Wire nodes into stacks\n✦ Deploy to phone or web\n\nIt's Lego for AI builders.\n\n${SITE_URL}`,
+      },
+      {
+        title: "Edge AI angle",
+        body: `Hot take: the future of AI isn't in the cloud — it's on the device.\n\nThat's why I'm building with StackForge. It supports SLM mode so your models can run locally on a phone.\n\nSmaller. Faster. Private.\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}`,
+  },
+  {
+    platform: "Facebook",
+    color: "bg-[hsl(214,89%,52%)]",
+    emoji: "📘",
+    posts: [
+      {
+        title: "Casual share",
+        body: `Been working on something cool — an app that lets you build AI-powered tools without being an ML engineer. Pick models, wire them up, deploy to your phone. Check it out: ${SITE_URL}`,
+      },
+      {
+        title: "Community post",
+        body: `If you've ever wanted to build your own AI app but didn't know where to start — StackForge is free to try. No coding required for basic setups. 50 free credits/month.\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(text)}`,
+  },
+  {
+    platform: "Discord",
+    color: "bg-[hsl(235,86%,65%)]",
+    emoji: "🎮",
+    posts: [
+      {
+        title: "Server drop",
+        body: `yo just shipped something — **StackForge** lets you build AI pipelines visually and deploy them to Android 🤖\n\npick your models (GPT-5, Gemini, etc), set guardrails, chain them together, hit deploy\n\nfree tier has 50 credits/mo\n${SITE_URL}`,
+      },
+      {
+        title: "Dev channel",
+        body: `anyone messing with multi-model AI stacks? built a tool that lets you chain different LLMs together with routing logic, evaluators, critics etc\n\nlike n8n but for AI reasoning\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: null,
+  },
+  {
+    platform: "X / Twitter",
+    color: "bg-foreground",
+    emoji: "𝕏",
+    posts: [
+      {
+        title: "Thread opener",
+        body: `I built an AI builder that lets you ship real AI apps — not toy demos.\n\nPick models. Wire logic. Deploy to Android.\n\nMeet StackForge 🧪\n\n${SITE_URL}`,
+      },
+      {
+        title: "Short banger",
+        body: `GPT-5 + Gemini + your own guardrails + one-click Android deploy = StackForge\n\nFree to start.\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+  },
+];
+
 export default function AdminPage() {
   const [flags, setFlags] = useState(featureFlags.map((f) => ({ ...f })));
 
