@@ -73,15 +73,27 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get("ref") || "";
   const navigate = useNavigate();
 
   const { user, loading, signUp, signInWithGoogle } = useAuth();
 
   useEffect(() => {
     if (!loading && user) {
+      // Process referral after signup
+      if (referralCode) {
+        supabase.functions.invoke("process-referral", {
+          body: { referral_code: referralCode },
+        }).then(({ data }) => {
+          if (data?.success) {
+            toast.success(data.message || "Referral bonus applied!");
+          }
+        }).catch(() => {});
+      }
       navigate("/dashboard", { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, referralCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
