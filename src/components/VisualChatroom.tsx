@@ -356,15 +356,22 @@ export default function VisualChatroom() {
               )}
             </div>
           </div>
-          {messages.length > 0 && (
+          {(messages.length > 0 || true) && (
             <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-              <span>{messages.filter(m => !m.isUserInjection).length} AI images</span>
-              <span>|</span>
-              <span>{messages.filter(m => m.isUserInjection).length} injected</span>
-              <span>|</span>
-              <span>Round {round}</span>
-              <span>|</span>
-              <span>{messages.filter(m => m.image && !m.isUserInjection).length} successful</span>
+              <div className="flex items-center gap-1">
+                <Coins className="h-3 w-3 text-primary" />
+                <span className={balance < 10 ? "text-destructive font-bold" : ""}>{balance} credits</span>
+              </div>
+              {messages.length > 0 && (
+                <>
+                  <span>|</span>
+                  <span>{messages.filter(m => !m.isUserInjection).length} AI images</span>
+                  <span>|</span>
+                  <span>{messages.filter(m => m.isUserInjection).length} injected</span>
+                  <span>|</span>
+                  <span>Round {round}</span>
+                </>
+              )}
             </div>
           )}
         </CardContent>
