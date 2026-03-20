@@ -198,6 +198,7 @@ export default function PricingPage() {
           <TabsList className="glass w-fit">
             <TabsTrigger value="plans" className="text-xs gap-1.5"><Crown className="h-3 w-3" /> Plans</TabsTrigger>
             <TabsTrigger value="usage" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Usage & History</TabsTrigger>
+            <TabsTrigger value="topup" className="text-xs gap-1.5"><Plus className="h-3 w-3" /> Top Up</TabsTrigger>
             <TabsTrigger value="costs" className="text-xs gap-1.5"><Coins className="h-3 w-3" /> Credit Costs</TabsTrigger>
           </TabsList>
 
