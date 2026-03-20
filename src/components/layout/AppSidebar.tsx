@@ -143,11 +143,20 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={item.title + ((item as any).soon ? " (Coming Soon)" : "")}
                   >
                     <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="font-semibold flex items-center gap-1.5">
+                          {item.title}
+                          {(item as any).soon && (
+                            <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
+                              Soon
+                            </Badge>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
