@@ -29,6 +29,7 @@ import {
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
   Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye
 } from "lucide-react";
+import { TerminalPanel } from "@/components/TerminalPanel";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
   useSamples, useCreateSample, useUpdateSample, useDeleteSample,
@@ -3278,6 +3279,7 @@ export default function SLMLabPage() {
   // Landing: pick existing or create new
   if (step === -1) {
     return (
+      <>
       <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
         <div className="flex items-center justify-center gap-3 px-6 py-4 border-b border-border">
           <Brain className="h-5 w-5 text-forge-amber" />
@@ -3362,6 +3364,8 @@ export default function SLMLabPage() {
           </div>
         </div>
       </div>
+      <TerminalPanel />
+      </>
     );
   }
 
@@ -3386,6 +3390,7 @@ export default function SLMLabPage() {
         {step === 3 && activeDataset && <Step3Review dataset={activeDataset} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
         {step === 4 && activeDataset && <Step4Export dataset={activeDataset} onBack={() => setStep(3)} />}
       </div>
+      <TerminalPanel />
     </div>
   );
 }
