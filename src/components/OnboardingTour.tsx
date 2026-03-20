@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ interface TourStep {
   position: "bottom" | "top" | "left" | "right";
 }
 
-const tourSteps: TourStep[] = [
+export const tourSteps: TourStep[] = [
   {
     title: "Welcome to StackForge",
     description: "Let's take a quick tour of the key features that make building AI effortless. This will only take a moment.",
@@ -60,10 +60,21 @@ const tourSteps: TourStep[] = [
 
 const TOUR_STORAGE_KEY = "stackforge-onboarding-tour-completed";
 
-export function OnboardingTour() {
+export interface OnboardingTourHandle {
+  startTour: (stepIndex?: number) => void;
+}
+
+export const OnboardingTour = forwardRef<OnboardingTourHandle>((_props, ref) => {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    startTour: (stepIndex = 0) => {
+      setCurrentStep(stepIndex);
+      setIsActive(true);
+    },
+  }));
 
   useEffect(() => {
     const completed = localStorage.getItem(TOUR_STORAGE_KEY);
@@ -116,7 +127,6 @@ export function OnboardingTour() {
   const step = tourSteps[currentStep];
   const Icon = step.icon;
 
-  // Calculate tooltip position
   const getTooltipStyle = (): React.CSSProperties => {
     if (!targetRect) {
       return {
@@ -136,7 +146,6 @@ export function OnboardingTour() {
 
   return (
     <>
-      {/* Overlay */}
       <AnimatePresence>
         <motion.div
           key="overlay"
@@ -148,7 +157,6 @@ export function OnboardingTour() {
         />
       </AnimatePresence>
 
-      {/* Spotlight cutout */}
       {targetRect && (
         <div
           className="fixed z-[9999] rounded-xl ring-2 ring-primary/50 shadow-[0_0_0_9999px_hsl(var(--background)/0.6)]"
@@ -162,7 +170,6 @@ export function OnboardingTour() {
         />
       )}
 
-      {/* Tooltip */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}
@@ -174,7 +181,6 @@ export function OnboardingTour() {
           style={getTooltipStyle()}
         >
           <div className="rounded-xl border bg-card p-5 shadow-xl">
-            {/* Close button */}
             <button
               onClick={completeTour}
               className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
@@ -182,7 +188,6 @@ export function OnboardingTour() {
               <X className="h-4 w-4" />
             </button>
 
-            {/* Step indicator */}
             <div className="flex items-center gap-1.5 mb-3">
               {tourSteps.map((_, i) => (
                 <div
@@ -199,7 +204,6 @@ export function OnboardingTour() {
               ))}
             </div>
 
-            {/* Content */}
             <div className="flex items-start gap-3 mb-4">
               <div className={cn(
                 "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
@@ -216,7 +220,6 @@ export function OnboardingTour() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-between">
               <button
                 onClick={completeTour}
@@ -241,4 +244,6 @@ export function OnboardingTour() {
       </AnimatePresence>
     </>
   );
-}
+});
+
+OnboardingTour.displayName = "OnboardingTour";

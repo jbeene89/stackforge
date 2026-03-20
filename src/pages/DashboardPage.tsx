@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,8 @@ import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { OnboardingTour } from "@/components/OnboardingTour";
+import { OnboardingTour, type OnboardingTourHandle } from "@/components/OnboardingTour";
+import { TourMenu } from "@/components/TourMenu";
 
 const typeIcons: Record<ProjectType, React.ElementType> = {
   web: Globe, android: Smartphone, module: Brain, stack: Layers, hybrid: Layers,
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   const [search, setSearch] = useState("");
   const [promptValue, setPromptValue] = useState("");
   const navigate = useNavigate();
+  const tourRef = useRef<OnboardingTourHandle>(null);
 
   const { data: projects, isLoading: loadingProjects } = useProjects();
   const { data: modules } = useModules();
@@ -68,13 +70,14 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 animate-fade-in max-w-7xl mx-auto">
-      <OnboardingTour />
+      <OnboardingTour ref={tourRef} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <h1 id="tour-welcome" className="text-xl sm:text-2xl font-bold">Dashboard</h1>
             {credits && <TierBadge tier={credits.tier} size="md" />}
+            <TourMenu tourRef={tourRef} />
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">Your projects, modules, and stacks.</p>
         </div>
