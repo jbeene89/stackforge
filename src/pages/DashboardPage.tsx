@@ -78,7 +78,7 @@ export default function DashboardPage() {
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">Your projects, modules, and stacks.</p>
         </div>
-        <Button className="gradient-primary text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
+        <Button id="tour-new-project" className="gradient-primary text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
           <Plus className="h-4 w-4 mr-2" /> New Project
         </Button>
       </div>
