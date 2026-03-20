@@ -58,6 +58,7 @@ import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
 import DeviceConsolePage from "./pages/DeviceConsolePage";
 import SelfHostPage from "./pages/SelfHostPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
+import ImageForgePage from "./pages/ImageForgePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
