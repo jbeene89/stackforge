@@ -1,47 +1,68 @@
-# SoupyForge
+# StackForge
 
-**AI-Powered Development Platform** — Build, test, and deploy AI modules, multi-agent stacks, web apps, and Android apps from a single workspace.
+**Design AI agents. Wire them into pipelines. Ship to any device.**
 
-🌐 **Live**: [stackforge.lovable.app](https://stackforge.lovable.app)
+StackForge is a full-stack AI development platform for building, testing, and deploying AI-powered applications — all from your browser. No ML expertise required.
+
+🌐 **Live** → [stackforge.lovable.app](https://stackforge.lovable.app)
 
 ---
 
-## What is SoupyForge?
+## Why StackForge?
 
-SoupyForge is a full-stack AI development platform that lets you design AI agents, chain them into multi-agent pipelines, and ship production-ready applications — all from your browser.
+Most AI tools are wrappers around a single model. StackForge is different — you design the **reasoning chain**:
 
-## Key Features
+1. **Pick your models** — GPT-5, Gemini Pro, open-source SLMs
+2. **Set guardrails** — tone, task boundaries, output format, constraints
+3. **Wire nodes into stacks** — multi-agent pipelines with routing, evaluation, and memory
+4. **Deploy anywhere** — web, Android, edge devices, or self-hosted
+
+---
+
+## Core Features
 
 ### 🧠 AI Module Builder
-Create configurable AI agents with system prompts, guardrails, task boundaries, temperature controls, and model selection. Supports 12 module types: specialist, SLM, router, evaluator, critic, comparator, formatter, extractor, classifier, memory-filter, human-gate, and synthesizer.
+Create configurable AI agents with system prompts, guardrails, task boundaries, and model selection. 12 module types: specialist · SLM · router · evaluator · critic · comparator · formatter · extractor · classifier · memory-filter · human-gate · synthesizer.
 
 ### 🔗 Stack Canvas
-Design multi-agent pipelines visually. Connect modules with conditional edges, parallel branches, and data routing to build complex AI workflows.
+Visual multi-agent pipeline editor. Connect modules with conditional edges, parallel branches, and data routing.
 
-### 🚀 Projects
-Full project lifecycle management — create web apps, Android apps, AI modules, stacks, and hybrid projects. Each project includes an AI-powered prompt interface with real-time streaming progress and persistent chat history.
+### 🎨 Image Forge
+Multi-perspective creative studio applying Cognitive Dense Perspective Training (CDPT) to image generation. Council Mode for AI-enriched prompts, Free Mode for interactive visual chatrooms.
+
+### 🚀 Projects & Deploy
+Full project lifecycle — web apps, Android apps, AI modules, stacks, and hybrids. AI-powered prompt interface with streaming progress and persistent chat history. One-click Android deployment pipeline.
 
 ### 🧪 Lab & Slicer Lab
-Experiment with AI modules and stacks in an interactive testing environment. Run test cases, inspect step-by-step execution, and compare outputs.
+Interactive testing environment. Run test cases, inspect step-by-step execution, compare outputs across module configurations.
 
 ### 🏪 Marketplace
-Publish and discover community-built templates. Buy and sell modules, stacks, and project templates using the built-in credit system.
+Publish and discover community-built templates. Buy and sell modules, stacks, and project templates using credits.
 
 ### 📦 Export Studio
-Export your work to external platforms including Unity, Unreal Engine, ROS 2, Arduino, and Python with auto-generated, domain-specific code.
+Export to Unity, Unreal Engine, ROS 2, Arduino, and Python with auto-generated, domain-specific code.
 
-### 🤖 Forge AI Assistant
-Context-aware AI chat for code generation, module configuration, stack architecture, and general development assistance.
+### 📡 Edge & On-Device
+SLM mode for local model execution. On-device templates, edge training, and inference playground for running models directly on phones.
 
-### 📊 Additional Tools
-- **Model Zoo** — Browse and compare AI models
-- **Data Pipelines** — Visual data flow management
-- **Signal Lab** — Signal processing workspace
-- **Robotics** — Robotics integration tools
-- **Edge Training** — On-device model training
-- **Solver Library** — Pre-built optimization solvers
-- **Game Engine** — Game development workspace
-- **Runs** — Execution history and audit logs
+### 📄 White Paper Engine
+Live-streaming academic documentation engine for "Curiosity-Driven Perspective Training" — the methodology behind StackForge's multi-perspective AI approach.
+
+---
+
+## Additional Tools
+
+| Tool | Description |
+|------|-------------|
+| **Forge AI** | Context-aware AI assistant for code gen, config, and architecture |
+| **Model Zoo** | Browse and compare AI models by capability and cost |
+| **Signal Lab** | Signal processing workspace |
+| **Robotics** | Robotics controller integration (Pro tier) |
+| **Data Pipelines** | Visual data flow management |
+| **Solver Library** | Pre-built optimization solvers |
+| **Inference Playground** | Test models with live parameter tuning |
+| **Device Console** | Real-time device monitoring and logs |
+| **Runs** | Full execution audit trail with step-by-step replay |
 
 ---
 
@@ -51,12 +72,12 @@ Context-aware AI chat for code generation, module configuration, stack architect
 |-------|-----------|
 | Frontend | React 18 · TypeScript · Vite · Tailwind CSS |
 | UI | shadcn/ui · Radix Primitives · Framer Motion |
-| Backend | Lovable Cloud (Supabase) · Edge Functions |
-| Auth | Email/password with email verification · Google OAuth |
-| AI | Gemini Flash via Lovable AI Gateway |
-| Payments | Stripe (3-tier: Free / Builder $29 / Pro $79) |
+| Backend | Lovable Cloud · Edge Functions |
+| Auth | Email/password with verification |
+| AI | GPT-5 · Gemini 2.5/3 · Lovable AI Gateway |
+| Payments | Stripe (Free / Builder $29 / Pro $79) + credit top-ups |
 | Mobile | Capacitor (Android/iOS) · PWA |
-| Fonts | Space Grotesk · JetBrains Mono |
+| Fonts | Cinzel · Rajdhani · JetBrains Mono |
 
 ---
 
@@ -64,26 +85,43 @@ Context-aware AI chat for code generation, module configuration, stack architect
 
 ```
 src/
-├── components/       # Shared UI components + layout
-├── hooks/            # Auth, credits, feature gates, data hooks
-├── pages/            # All route pages
-├── providers/        # Theme provider
-├── types/            # Core TypeScript models
-├── integrations/     # Supabase client & types
-└── data/             # Mock data for development
+├── components/         # Shared UI + layout (sidebar, command palette, terminal)
+│   ├── layout/         # AppLayout, AppSidebar, CommandPalette
+│   ├── terminal/       # Terminal panel with themed command system
+│   ├── ui/             # shadcn/ui primitives
+│   └── visual-chatroom/# Image Forge chatroom components
+├── hooks/              # Auth, credits, feature gates, offline sync, data hooks
+├── pages/              # All route pages (~45 pages)
+├── providers/          # Theme + sprite settings
+├── types/              # Core TypeScript models
+├── integrations/       # Supabase client & auto-generated types
+├── lib/                # Utilities, export parsers, offline cache
+└── data/               # Mock data, SLM templates
 
 supabase/
-└── functions/        # Edge functions (ai-generate, deduct-credits, stripe-webhook, etc.)
+└── functions/          # 18 edge functions
+    ├── ai-generate     # AI completions via gateway
+    ├── deduct-credits  # Server-side credit deduction
+    ├── purchase-credits# One-time credit top-up checkout
+    ├── create-checkout # Subscription checkout sessions
+    ├── stripe-webhook  # Subscription + top-up fulfillment
+    ├── check-subscription / check-tier
+    ├── process-referral / process-chat-export
+    ├── founder-interview / cognitive-fingerprint
+    ├── perspective-worker / perspective-image
+    ├── visual-chatroom / scrape-for-training
+    ├── fetch-hf-dataset / manage-api-keys
+    ├── pipeline-modes / analyze-video-frames
+    └── customer-portal
 ```
 
-### Database Tables
-`projects` · `modules` · `stacks` · `runs` · `profiles` · `user_credits` · `credit_transactions` · `marketplace_templates` · `template_purchases` · `discussions` · `project_messages` · `referrals` · `referral_earnings` · `user_api_keys`
+### Database (20 tables, all RLS-protected)
 
-All tables use Row Level Security (RLS) for data isolation.
+`projects` · `modules` · `stacks` · `runs` · `profiles` · `user_credits` · `credit_transactions` · `marketplace_templates` · `template_purchases` · `discussions` · `project_messages` · `training_datasets` · `dataset_samples` · `training_jobs` · `founder_interviews` · `cognitive_fingerprints` · `perspective_jobs` · `deploy_pipeline_status` · `mobile_captures` · `referrals` · `referral_earnings` · `user_api_keys`
 
 ---
 
-## Credit System
+## Credit Economy
 
 | Tier | Monthly Credits | Price |
 |------|----------------|-------|
@@ -91,7 +129,19 @@ All tables use Row Level Security (RLS) for data isolation.
 | Builder | 500 | $29/mo |
 | Pro | 2,000 | $79/mo |
 
-Credits are consumed per AI generation, with costs varying by model (1–10 credits per call).
+**Top-up packs**: 100 credits ($4.99) · 500 credits ($19.99) · 1,500 credits ($59.99)
+
+Credits are consumed per AI run — costs vary by model from 1 credit (Gemini Flash Lite) to 10 credits (GPT-5.2).
+
+---
+
+## Security
+
+- **Row Level Security** on every table — users only see their own data
+- **Server-side credit mutations** — no client-side balance writes
+- **Stripe webhook verification** for all payment fulfillment
+- **SECURITY DEFINER** functions for safe cross-table operations
+- **Tier-protected routes** enforced both client-side and server-side
 
 ---
 
@@ -102,7 +152,7 @@ npm install
 npm run dev
 ```
 
-See [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) for native mobile builds (Capacitor), desktop builds (Electron), and PWA installation instructions.
+See [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) for native mobile builds (Capacitor), desktop builds (Electron), and PWA installation.
 
 ---
 
