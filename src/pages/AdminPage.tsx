@@ -11,8 +11,9 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Shield, Users, Settings, BarChart3, Activity,
   TrendingUp, Zap, Clock, Globe, Cpu, HardDrive, AlertTriangle,
-  Brain, Layers
+  Brain, Layers, Share2, Copy, Check, ExternalLink,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // ------- FEATURE FLAGS (local state, no DB table for these) -------
 const featureFlags = [
@@ -24,6 +25,79 @@ const featureFlags = [
   { name: "Local Model Support", description: "Run models locally via Ollama or LM Studio", enabled: false, category: "experimental" },
   { name: "Auto-versioning", description: "Automatic version snapshots on every save", enabled: true, category: "core" },
   { name: "Usage Analytics", description: "Detailed per-user and per-project analytics", enabled: true, category: "analytics" },
+];
+
+const SITE_URL = "https://stackforge.lovable.app";
+
+const SOCIAL_POSTS = [
+  {
+    platform: "LinkedIn",
+    color: "bg-[hsl(210,84%,40%)]",
+    emoji: "💼",
+    posts: [
+      {
+        title: "Launch announcement",
+        body: `I built an AI app — without writing backend code.\n\nStackForge lets you wire up GPT-5, Gemini, and open-source models into pipelines, test them, and ship to Android — all from one dashboard.\n\nNo infra headaches. No API-key juggling.\n\nTry it free 👇\n${SITE_URL}`,
+      },
+      {
+        title: "Builder credibility",
+        body: `Most "AI tools" are just wrappers.\n\nStackForge is different — you design the reasoning chain:\n✦ Pick your models\n✦ Set guardrails & tone\n✦ Wire nodes into stacks\n✦ Deploy to phone or web\n\nIt's Lego for AI builders.\n\n${SITE_URL}`,
+      },
+      {
+        title: "Edge AI angle",
+        body: `Hot take: the future of AI isn't in the cloud — it's on the device.\n\nThat's why I'm building with StackForge. It supports SLM mode so your models can run locally on a phone.\n\nSmaller. Faster. Private.\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}`,
+  },
+  {
+    platform: "Facebook",
+    color: "bg-[hsl(214,89%,52%)]",
+    emoji: "📘",
+    posts: [
+      {
+        title: "Casual share",
+        body: `Been working on something cool — an app that lets you build AI-powered tools without being an ML engineer. Pick models, wire them up, deploy to your phone. Check it out: ${SITE_URL}`,
+      },
+      {
+        title: "Community post",
+        body: `If you've ever wanted to build your own AI app but didn't know where to start — StackForge is free to try. No coding required for basic setups. 50 free credits/month.\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(text)}`,
+  },
+  {
+    platform: "Discord",
+    color: "bg-[hsl(235,86%,65%)]",
+    emoji: "🎮",
+    posts: [
+      {
+        title: "Server drop",
+        body: `yo just shipped something — **StackForge** lets you build AI pipelines visually and deploy them to Android 🤖\n\npick your models (GPT-5, Gemini, etc), set guardrails, chain them together, hit deploy\n\nfree tier has 50 credits/mo\n${SITE_URL}`,
+      },
+      {
+        title: "Dev channel",
+        body: `anyone messing with multi-model AI stacks? built a tool that lets you chain different LLMs together with routing logic, evaluators, critics etc\n\nlike n8n but for AI reasoning\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: null,
+  },
+  {
+    platform: "X / Twitter",
+    color: "bg-foreground",
+    emoji: "𝕏",
+    posts: [
+      {
+        title: "Thread opener",
+        body: `I built an AI builder that lets you ship real AI apps — not toy demos.\n\nPick models. Wire logic. Deploy to Android.\n\nMeet StackForge 🧪\n\n${SITE_URL}`,
+      },
+      {
+        title: "Short banger",
+        body: `GPT-5 + Gemini + your own guardrails + one-click Android deploy = StackForge\n\nFree to start.\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+  },
 ];
 
 export default function AdminPage() {
@@ -76,6 +150,7 @@ export default function AdminPage() {
       <Tabs defaultValue="metrics" className="flex-1 flex flex-col min-h-0">
         <TabsList className="glass w-fit mb-4">
           <TabsTrigger value="metrics" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Overview</TabsTrigger>
+          <TabsTrigger value="social" className="text-xs gap-1.5"><Share2 className="h-3 w-3" /> Quick Posts</TabsTrigger>
           <TabsTrigger value="flags" className="text-xs gap-1.5"><Settings className="h-3 w-3" /> Feature Flags</TabsTrigger>
           <TabsTrigger value="recent" className="text-xs gap-1.5"><Activity className="h-3 w-3" /> Recent Runs</TabsTrigger>
         </TabsList>
@@ -116,6 +191,59 @@ export default function AdminPage() {
                   <span className="text-sm font-bold">{gauge.value}%</span>
                 </div>
                 <Progress value={gauge.value} className="h-2" />
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Quick Posts */}
+        <TabsContent value="social" className="flex-1 min-h-0 mt-0 overflow-auto">
+          <div className="space-y-6">
+            {SOCIAL_POSTS.map((platform) => (
+              <div key={platform.platform}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={cn("w-6 h-6 rounded-md flex items-center justify-center text-xs text-white", platform.color)}>
+                    {platform.emoji}
+                  </span>
+                  <h3 className="text-sm font-semibold">{platform.platform}</h3>
+                  <Badge variant="outline" className="text-[10px]">{platform.posts.length} ready</Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {platform.posts.map((post, pi) => (
+                    <motion.div
+                      key={pi}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: pi * 0.06 }}
+                      className="glass rounded-xl p-4 flex flex-col"
+                    >
+                      <p className="text-[11px] font-medium text-muted-foreground mb-2">{post.title}</p>
+                      <pre className="text-sm whitespace-pre-wrap font-sans leading-relaxed flex-1 mb-3 text-foreground/90">{post.body}</pre>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs gap-1.5 flex-1"
+                          onClick={() => {
+                            navigator.clipboard.writeText(post.body);
+                            toast.success("Copied to clipboard!");
+                          }}
+                        >
+                          <Copy className="h-3 w-3" /> Copy
+                        </Button>
+                        {platform.shareUrl && (
+                          <Button
+                            size="sm"
+                            className="text-xs gap-1.5 flex-1"
+                            onClick={() => window.open((platform.shareUrl as Function)(post.body), "_blank")}
+                          >
+                            <ExternalLink className="h-3 w-3" /> Post
+                          </Button>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
