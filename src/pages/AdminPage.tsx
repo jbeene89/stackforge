@@ -150,6 +150,7 @@ export default function AdminPage() {
       <Tabs defaultValue="metrics" className="flex-1 flex flex-col min-h-0">
         <TabsList className="glass w-fit mb-4">
           <TabsTrigger value="metrics" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Overview</TabsTrigger>
+          <TabsTrigger value="social" className="text-xs gap-1.5"><Share2 className="h-3 w-3" /> Quick Posts</TabsTrigger>
           <TabsTrigger value="flags" className="text-xs gap-1.5"><Settings className="h-3 w-3" /> Feature Flags</TabsTrigger>
           <TabsTrigger value="recent" className="text-xs gap-1.5"><Activity className="h-3 w-3" /> Recent Runs</TabsTrigger>
         </TabsList>
