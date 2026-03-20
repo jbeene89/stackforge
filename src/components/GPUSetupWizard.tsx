@@ -185,6 +185,8 @@ interface GPUSetupWizardProps {
 export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSetupWizardProps) {
   const [selectedGPU, setSelectedGPU] = useState<string>("rx580");
   const [selectedModel, setSelectedModel] = useState<string>("llama3.2:3b");
+  const [detecting, setDetecting] = useState(false);
+  const [detectedName, setDetectedName] = useState<string | null>(null);
 
   const gpu = GPU_PROFILES.find((g) => g.id === selectedGPU)!;
   const models = getModelsForGPU(gpu);
@@ -195,10 +197,9 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
     setSelectedGPU(id);
     const g = GPU_PROFILES.find((p) => p.id === id)!;
     onGPUSelected?.(g);
-    // Auto-pick best model for the GPU
     const best = getModelsForGPU(g).filter((m) => m.recommended);
     if (best.length > 0) {
-      const pick = best[best.length - 1]; // largest that fits well
+      const pick = best[best.length - 1];
       setSelectedModel(pick.id);
       onModelSelected?.(pick);
     }
@@ -209,6 +210,56 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
     const m = models.find((x) => x.id === id);
     if (m) onModelSelected?.(m);
   };
+
+  // WebGPU detection
+  const detectGPU = useCallback(async () => {
+    setDetecting(true);
+    try {
+      if (!("gpu" in navigator)) {
+        toast.error("WebGPU not supported in this browser. Try Chrome 113+ or Edge 113+.");
+        return;
+      }
+      const adapter = await (navigator as any).gpu.requestAdapter();
+      if (!adapter) {
+        toast.error("No GPU adapter found. Your browser may be blocking GPU access.");
+        return;
+      }
+      const info = await adapter.requestAdapterInfo?.() ?? (adapter as any).info;
+      const desc = (info?.description || info?.device || "").toLowerCase();
+      const vendor = (info?.vendor || "").toLowerCase();
+      const fullName = info?.description || info?.device || "Unknown GPU";
+      setDetectedName(fullName);
+
+      // Match against known profiles
+      const match = GPU_PROFILES.find((p) => {
+        const pName = p.name.toLowerCase();
+        if (desc.includes("rx 580") || desc.includes("rx580") || desc.includes("polaris")) return p.id === "rx580";
+        if (desc.includes("rx 6600") || desc.includes("rx6600") || desc.includes("navi 23")) return p.id === "rx6600";
+        if (desc.includes("7900") || desc.includes("navi 31")) return p.id === "rx7900xtx";
+        if (desc.includes("3060") || desc.includes("ga106")) return p.id === "rtx3060";
+        if (desc.includes("4090") || desc.includes("ad102")) return p.id === "rtx4090";
+        return false;
+      });
+
+      if (match) {
+        handleGPUChange(match.id);
+        toast.success(`Detected: ${fullName} → matched to ${match.name}`);
+      } else if (vendor.includes("amd") || vendor.includes("ati") || desc.includes("radeon")) {
+        // Generic AMD fallback — pick RX 580 as conservative default
+        handleGPUChange("rx580");
+        toast.info(`Detected AMD GPU: ${fullName}. Defaulted to RX 580 profile — adjust if needed.`);
+      } else if (vendor.includes("nvidia") || desc.includes("geforce") || desc.includes("rtx") || desc.includes("gtx")) {
+        handleGPUChange("rtx3060");
+        toast.info(`Detected NVIDIA GPU: ${fullName}. Defaulted to RTX 3060 profile — adjust if needed.`);
+      } else {
+        toast.info(`Detected: ${fullName}. Couldn't match a profile — please select manually.`);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "GPU detection failed");
+    } finally {
+      setDetecting(false);
+    }
+  }, [onGPUSelected, onModelSelected]);
 
   const setupScript = [
     ...gpu.setupCommands,
