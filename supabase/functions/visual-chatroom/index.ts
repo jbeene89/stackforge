@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,7 @@ const corsHeaders = {
 };
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const IMAGE_GEN_COST = 3; // credits per image generation
 
 const CHARACTER_PROMPTS: Record<string, string> = {
   builder: `You are Axiom, a visual architect. You communicate ONLY through images. When you see an image or prompt, you respond by generating a new image that reinterprets it through structural composition, architectural precision, and perfect lighting. Add technical beauty — grids, golden ratios, dramatic perspective. Your response evolves the conversation visually. Generate an image, not text.`,
@@ -15,10 +17,51 @@ const CHARACTER_PROMPTS: Record<string, string> = {
   systems: `You are Prism, a technical art director. You communicate ONLY through images. When you see an image or prompt, you respond by generating a new image in a completely different rendering style — switch from photorealistic to watercolor, from anime to oil painting, from cyberpunk to art nouveau. Your response evolves the conversation visually. Generate an image, not text.`,
 };
 
+async function deductCredits(supabase: ReturnType<typeof createClient>, userId: string, model: string): Promise<{ ok: boolean; balance?: number; error?: string }> {
+  const { data: credits, error: credErr } = await supabase
+    .from("user_credits")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (credErr || !credits) return { ok: false, error: "Credits not found" };
+  if (credits.credits_balance < IMAGE_GEN_COST) {
+    return { ok: false, error: "Insufficient credits", balance: credits.credits_balance };
+  }
+
+  const newBalance = credits.credits_balance - IMAGE_GEN_COST;
+  const newUsed = credits.credits_used + IMAGE_GEN_COST;
+
+  await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
+  await supabase.from("credit_transactions").insert({
+    user_id: userId,
+    amount: -IMAGE_GEN_COST,
+    balance_after: newBalance,
+    description: `Visual Chatroom image (${model})`,
+    transaction_type: "deduction",
+  });
+
+  return { ok: true, balance: newBalance };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   try {
+    // Authenticate user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Not authenticated");
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData.user) throw new Error("Not authenticated");
+    const userId = userData.user.id;
+
     const { characterId, seedPrompt, previousImages, imageModel } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -28,10 +71,22 @@ serve(async (req) => {
 
     const model = imageModel || "google/gemini-3.1-flash-image-preview";
 
+    // Deduct credits BEFORE generating
+    const deduction = await deductCredits(supabase, userId, model);
+    if (!deduction.ok) {
+      return new Response(JSON.stringify({
+        error: deduction.error,
+        balance: deduction.balance,
+        cost: IMAGE_GEN_COST,
+      }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Build the message content
     const userContent: any[] = [];
 
-    // Add text context
     if (seedPrompt) {
       userContent.push({
         type: "text",
@@ -44,7 +99,6 @@ serve(async (req) => {
       });
     }
 
-    // Add the most recent image(s) for context (limit to last 2 to stay within limits)
     const recentImages = (previousImages || []).slice(-2);
     for (const imgUrl of recentImages) {
       if (imgUrl && imgUrl.startsWith("data:image")) {
@@ -78,11 +132,6 @@ serve(async (req) => {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (resp.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Add credits in Settings." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       throw new Error(`AI error [${resp.status}]: ${text}`);
     }
 
@@ -90,20 +139,11 @@ serve(async (req) => {
     const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     const textResponse = data.choices?.[0]?.message?.content || "";
 
-    if (!imageUrl) {
-      return new Response(JSON.stringify({
-        image: null,
-        text: textResponse || "Could not generate image",
-        characterId,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     return new Response(JSON.stringify({
-      image: imageUrl,
-      text: textResponse,
+      image: imageUrl || null,
+      text: textResponse || (imageUrl ? "" : "Could not generate image"),
       characterId,
+      credits_remaining: deduction.balance,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
