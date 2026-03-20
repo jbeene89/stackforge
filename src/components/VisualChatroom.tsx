@@ -339,7 +339,7 @@ export default function VisualChatroom() {
                     <Play className="h-3 w-3 mr-1" />
                     {mode === "duo" ? `Duo (${duoRounds}r)` : "Start (3r)"}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={stepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
+                  <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
                     <SkipForward className="h-3 w-3" />
                   </Button>
                 </>
