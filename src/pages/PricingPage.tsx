@@ -129,6 +129,10 @@ export default function PricingPage() {
       checkSubscription();
       window.history.replaceState({}, "", "/pricing");
     }
+    if (params.get("topup") === "success") {
+      toast.success("Credits purchased! Your balance has been updated.");
+      window.history.replaceState({}, "", "/pricing");
+    }
   }, []);
 
   const currentTier = subscriptionData.subscribed
