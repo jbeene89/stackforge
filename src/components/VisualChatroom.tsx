@@ -20,6 +20,8 @@ import { useQueryClient } from "@tanstack/react-query";
 type Mode = "council" | "duo";
 
 export default function VisualChatroom() {
+  const { hasCredits, balance, requireCredits } = useCreditsGate(3);
+  const queryClient = useQueryClient();
   const [seedPrompt, setSeedPrompt] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isRunning, setIsRunning] = useState(false);
