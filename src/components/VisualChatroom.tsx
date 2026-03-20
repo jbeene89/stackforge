@@ -196,6 +196,25 @@ export default function VisualChatroom() {
   const stop = () => { abortRef.current = true; setIsRunning(false); setCurrentSpeaker(-1); };
   const reset = () => { stop(); setMessages([]); setRound(0); };
 
+  const handleShare = useCallback(async () => {
+    const aiMessages = messages.filter(m => m.image && !m.isUserInjection);
+    if (aiMessages.length === 0) { toast.error("No images to share"); return; }
+
+    // Try native share API first (mobile), fall back to clipboard
+    const shareText = `🎨 Visual Chatroom session on SoupyForge\n\nTheme: "${seedPrompt}"\n${aiMessages.length} AI-generated images across ${round} rounds\n\nTry it: ${window.location.origin}/image-forge`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "SoupyForge Visual Chatroom", text: shareText, url: `${window.location.origin}/image-forge` });
+        toast.success("Shared!");
+        return;
+      } catch { /* user cancelled or unsupported */ }
+    }
+
+    await navigator.clipboard.writeText(shareText);
+    toast.success("Session link copied to clipboard!");
+  }, [messages, seedPrompt, round]);
+
   const wrappedStartConversation = () => requireCredits(() => {
     const fn = mode === "duo" && duoPair ? startDuo : startCouncil;
     fn();
