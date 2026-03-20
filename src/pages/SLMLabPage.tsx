@@ -3279,6 +3279,7 @@ export default function SLMLabPage() {
   // Landing: pick existing or create new
   if (step === -1) {
     return (
+      <>
       <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
         <div className="flex items-center justify-center gap-3 px-6 py-4 border-b border-border">
           <Brain className="h-5 w-5 text-forge-amber" />
@@ -3364,6 +3365,7 @@ export default function SLMLabPage() {
         </div>
       </div>
       <TerminalPanel />
+      </>
     );
   }
 
