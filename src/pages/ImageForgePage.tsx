@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Hammer, Heart, Zap, ShieldAlert, Settings2,
   Loader2, Download, Copy, Image as ImageIcon, Database, Mic, MicOff,
-  ChevronDown, ChevronUp, RotateCcw, Save,
+  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare,
 } from "lucide-react";
+import VisualChatroom from "@/components/VisualChatroom";
 
 // ─── The 5 Perspective Characters ───
 const CHARACTERS = [
