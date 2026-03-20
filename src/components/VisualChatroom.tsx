@@ -313,7 +313,7 @@ export default function VisualChatroom() {
                 onChange={e => setSeedPrompt(e.target.value)}
                 disabled={isRunning}
                 className="bg-background/60"
-                onKeyDown={e => { if (e.key === "Enter" && !isRunning && canStart) startConversation(); }}
+                onKeyDown={e => { if (e.key === "Enter" && !isRunning && canStart) wrappedStartConversation(); }}
               />
             </div>
             <div className="flex gap-2">
