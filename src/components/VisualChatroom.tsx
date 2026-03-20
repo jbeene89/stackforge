@@ -353,7 +353,12 @@ export default function VisualChatroom() {
                 </>
               )}
               {messages.length > 0 && !isRunning && (
-                <Button variant="ghost" size="sm" onClick={reset}><RotateCcw className="h-3 w-3" /></Button>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={handleShare} title="Share session">
+                    <Share2 className="h-3 w-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={reset}><RotateCcw className="h-3 w-3" /></Button>
+                </div>
               )}
             </div>
           </div>
