@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Cpu, Zap, Monitor, Copy, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Cpu, Zap, Monitor, Copy, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -241,8 +241,8 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
               {GPU_PROFILES.map((g) => (
                 <SelectItem key={g.id} value={g.id}>
                   <div className="flex items-center gap-2">
-                    {g.vendor === "nvidia" && <Zap className="h-3 w-3 text-green-500" />}
-                    {g.vendor === "amd" && <Monitor className="h-3 w-3 text-red-500" />}
+                    {g.vendor === "nvidia" && <Zap className="h-3 w-3 text-[hsl(var(--forge-emerald))]" />}
+                    {g.vendor === "amd" && <Monitor className="h-3 w-3 text-[hsl(var(--forge-rose))]" />}
                     {g.vendor === "cpu" && <Cpu className="h-3 w-3 text-muted-foreground" />}
                     {g.name}
                   </div>
@@ -283,8 +283,8 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
           <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Backend</div>
           <div className="text-sm font-bold flex items-center gap-1.5">
             {gpu.backend}
-            {gpu.vendor === "amd" && <Badge variant="outline" className="text-[8px] h-4 border-red-500/40 text-red-400">AMD</Badge>}
-            {gpu.vendor === "nvidia" && <Badge variant="outline" className="text-[8px] h-4 border-green-500/40 text-green-400">NVIDIA</Badge>}
+            {gpu.vendor === "amd" && <Badge variant="outline" className="text-[8px] h-4 border-[hsl(var(--forge-rose))]/40 text-[hsl(var(--forge-rose))]">AMD</Badge>}
+            {gpu.vendor === "nvidia" && <Badge variant="outline" className="text-[8px] h-4 border-[hsl(var(--forge-emerald))]/40 text-[hsl(var(--forge-emerald))]">NVIDIA</Badge>}
           </div>
         </div>
         <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
@@ -308,10 +308,10 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
 
       {/* AMD-specific notes */}
       {gpu.vendor === "amd" && Object.keys(gpu.envVars).length > 0 && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+        <div className="rounded-lg border border-[hsl(var(--forge-rose))]/20 bg-[hsl(var(--forge-rose))]/5 p-3">
           <div className="flex items-center gap-1.5 mb-1.5">
-            <AlertTriangle className="h-3.5 w-3.5 text-red-400" />
-            <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">AMD Config Required</span>
+            <AlertTriangle className="h-3.5 w-3.5 text-[hsl(var(--forge-rose))]" />
+            <span className="text-[10px] font-semibold text-[hsl(var(--forge-rose))] uppercase tracking-wider">AMD Config Required</span>
           </div>
           <p className="text-xs text-foreground/80 mb-2">{gpu.notes}</p>
           <div className="space-y-1">
