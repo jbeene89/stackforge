@@ -19,11 +19,15 @@ const OLLAMA_COMMANDS: Record<string, { description: string; handler: (args: str
       addOutput(`Available commands:
   help              Show this help message
   ollama list       List downloaded models
-  ollama pull <m>   Pull a model (simulated)
+  ollama pull <m>   Pull a model
   ollama show <m>   Show model details
   ollama ps         Show running models
-  ollama run <m>    Start a model (simulated)
-  ollama rm <m>     Remove a model (simulated)
+  ollama run <m>    Start a model
+  ollama rm <m>     Remove a model
+  untrain <m> [b]   Selective unlearning (run twice to confirm)
+  call <m> <prompt> Call a model with a prompt
+  scan              Scan for newest available models
+  guardrails <m>    Test guardrails against NSFW scenarios
   clear             Clear terminal
   echo <text>       Print text
   whoami            Show current context
