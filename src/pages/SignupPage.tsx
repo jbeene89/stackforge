@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X } from "lucide-react";
+import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 function PasswordStrength({ password }: { password: string }) {
@@ -72,15 +73,27 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get("ref") || "";
   const navigate = useNavigate();
 
   const { user, loading, signUp, signInWithGoogle } = useAuth();
 
   useEffect(() => {
     if (!loading && user) {
+      // Process referral after signup
+      if (referralCode) {
+        supabase.functions.invoke("process-referral", {
+          body: { referral_code: referralCode },
+        }).then(({ data }) => {
+          if (data?.success) {
+            toast.success(data.message || "Referral bonus applied!");
+          }
+        }).catch(() => {});
+      }
       navigate("/dashboard", { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, referralCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +172,17 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold">Create your account</h1>
             <p className="text-sm text-muted-foreground mt-1">Start building with SoupyForge</p>
           </div>
+
+          {referralCode && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 rounded-lg border border-forge-emerald/30 bg-forge-emerald/10 px-4 py-3 text-sm"
+            >
+              <Gift className="h-4 w-4 text-forge-emerald shrink-0" />
+              <span>You've been referred! Sign up to get <strong>25 bonus credits</strong>.</span>
+            </motion.div>
+          )}
 
           {/* Social Signup */}
           <div className="space-y-3">
