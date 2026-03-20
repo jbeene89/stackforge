@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
+// Items marked `soon: true` show a "Soon" badge and are not yet functional
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Projects", url: "/projects", icon: FolderOpen },
@@ -62,14 +63,14 @@ const mainItems = [
   { title: "Stacks", url: "/stacks", icon: Layers },
   { title: "Build-a-AI", url: "/build-ai", icon: Cpu },
   { title: "Solvers", url: "/solvers", icon: Atom },
-  { title: "Model Zoo", url: "/models", icon: Box },
+  { title: "Model Zoo", url: "/models", icon: Box, soon: true },
   { title: "Pipelines", url: "/pipelines", icon: Workflow },
-  { title: "Signal Lab", url: "/signals", icon: Radio },
-  { title: "Robotics", url: "/robotics", icon: Joystick },
-  { title: "Game Engine", url: "/engine", icon: Gamepad2 },
+  { title: "Signal Lab", url: "/signals", icon: Radio, soon: true },
+  { title: "Robotics", url: "/robotics", icon: Joystick, soon: true },
+  { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true },
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
   { title: "Image Forge", url: "/image-forge", icon: Image },
-  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard },
+  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true },
   { title: "SLM Lab", url: "/slm-lab", icon: Sparkles },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
   { title: "Marketplace", url: "/marketplace", icon: Store },
@@ -83,7 +84,7 @@ const toolItems = [
   { title: "Deploy Pipeline", url: "/deploy", icon: Rocket },
   { title: "Phone Guide", url: "/deploy/phone", icon: TabletSmartphone },
   { title: "Inference", url: "/inference", icon: Terminal },
-  { title: "Device Console", url: "/console", icon: Smartphone },
+  { title: "Device Console", url: "/console", icon: Smartphone, soon: true },
   { title: "Self-Host", url: "/self-host", icon: Server },
   { title: "Export Studio", url: "/export", icon: ScrollText },
   { title: "White Paper", url: "/white-paper", icon: BookOpen },
