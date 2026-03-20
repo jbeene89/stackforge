@@ -339,6 +339,66 @@ export default function PricingPage() {
             </div>
           </TabsContent>
 
+          {/* ── Top Up Tab ── */}
+          <TabsContent value="topup">
+            <div className="space-y-4">
+              <div className="glass rounded-xl p-4">
+                <h3 className="font-semibold flex items-center gap-2 mb-1">
+                  <ShoppingCart className="h-4 w-4 text-primary" /> Buy Credit Packs
+                </h3>
+                <p className="text-sm text-muted-foreground mb-6">Need more credits? Top up instantly — credits never expire.</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {TOPUP_PACKS.map((pack, idx) => (
+                    <motion.div
+                      key={pack.priceId}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.08 }}
+                      className={cn(
+                        "rounded-xl p-5 flex flex-col items-center text-center relative",
+                        pack.highlight ? "glass glow-primary border-primary/30" : "glass"
+                      )}
+                    >
+                      {pack.highlight && (
+                        <Badge className="absolute -top-2.5 gradient-primary text-primary-foreground text-[10px] px-3">
+                          {pack.label}
+                        </Badge>
+                      )}
+                      {!pack.highlight && pack.label === "Best Value" && (
+                        <Badge variant="outline" className="absolute -top-2.5 text-[10px] px-3">
+                          {pack.label}
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-1.5 mb-2 mt-1">
+                        <Coins className="h-5 w-5 text-primary" />
+                        <span className="text-3xl font-extrabold">{pack.credits.toLocaleString()}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-1">credits</p>
+                      <p className="text-lg font-bold mb-1">${pack.price}</p>
+                      <p className="text-[11px] text-muted-foreground mb-4">
+                        ${(pack.price / pack.credits * 100).toFixed(1)}¢ per credit
+                      </p>
+                      <Button
+                        className={cn("w-full", pack.highlight && "gradient-primary text-primary-foreground")}
+                        variant={pack.highlight ? "default" : "outline"}
+                        size="sm"
+                        disabled={topUpLoading === pack.priceId}
+                        onClick={() => handleTopUp(pack.priceId)}
+                      >
+                        {topUpLoading === pack.priceId ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>Buy Now <ArrowRight className="ml-1 h-3 w-3" /></>
+                        )}
+                      </Button>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
           {/* ── Costs Tab ── */}
           <TabsContent value="costs">
             <div className="glass rounded-xl p-6">
