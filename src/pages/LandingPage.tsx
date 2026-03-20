@@ -198,6 +198,8 @@ const deepCustomization = [
     bgColor: "bg-forge-violet/10 border-forge-violet/20",
   },
 ];
+
+const realUseCases = [
   {
     industry: "Marine Construction",
     title: "Estimation Pipeline",
