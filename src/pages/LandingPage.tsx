@@ -332,11 +332,11 @@ export default function LandingPage() {
         <div className="absolute inset-0 gradient-mesh" />
         <PyreflyBackground count={50} />
 
-        {/* Decorative rune circles */}
-        <div className="absolute top-20 -left-16 opacity-30">
+        {/* Decorative rune circles - hidden on mobile to prevent overflow */}
+        <div className="absolute top-20 -left-16 opacity-30 hidden sm:block">
           <RuneCircle size={200} />
         </div>
-        <div className="absolute bottom-0 -right-20 opacity-20">
+        <div className="absolute bottom-0 -right-20 opacity-20 hidden sm:block">
           <RuneCircle size={260} />
         </div>
 
