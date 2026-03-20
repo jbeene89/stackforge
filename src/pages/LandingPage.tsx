@@ -264,6 +264,8 @@ const realUseCases = [
 // ------- PAGE -------
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
       {/* Companion Sprites - they follow you everywhere */}
@@ -286,14 +288,42 @@ export default function LandingPage() {
             <Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/login"><Button variant="ghost" size="sm" className="font-semibold">Log in</Button></Link>
-            <Link to="/signup">
+            <Link to="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="font-semibold">Log in</Button></Link>
+            <Link to="/signup" className="hidden sm:block">
               <Button size="sm" className="gradient-primary text-primary-foreground font-semibold glow-primary">
                 Start Building
               </Button>
             </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden glass-strong border-t border-border/50 px-4 py-4 space-y-3"
+          >
+            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">How It Works</a>
+            <a href="#use-cases" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Use Cases</a>
+            <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+            <div className="flex gap-2 pt-2 border-t border-border/30">
+              <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full font-semibold">Log in</Button>
+              </Link>
+              <Link to="/signup" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="w-full gradient-primary text-primary-foreground font-semibold">Start Building</Button>
+              </Link>
+            </div>
+          </motion.div>
+        )}
       </nav>
 
       {/* ════════════════════ HERO ════════════════════ */}
