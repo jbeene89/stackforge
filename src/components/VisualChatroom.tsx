@@ -196,7 +196,11 @@ export default function VisualChatroom() {
   const stop = () => { abortRef.current = true; setIsRunning(false); setCurrentSpeaker(-1); };
   const reset = () => { stop(); setMessages([]); setRound(0); };
 
-  const startConversation = mode === "duo" && duoPair ? startDuo : startCouncil;
+  const wrappedStartConversation = () => requireCredits(() => {
+    const fn = mode === "duo" && duoPair ? startDuo : startCouncil;
+    fn();
+  });
+  const wrappedStepForward = () => requireCredits(stepForward);
   const canStart = seedPrompt.trim() && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
 
   return (
