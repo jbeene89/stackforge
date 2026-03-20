@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Globe, Smartphone, Brain, Layers, ArrowRight, Zap, Shield, Eye,
   Play, CheckCircle2, ChevronRight, Command, GitBranch, Target, Cpu,
-  FileCode, Workflow, Lock, BarChart3, Wrench, Scissors, Database, FlaskConical, Eraser
+  FileCode, Workflow, Lock, BarChart3, Wrench, Scissors, Database, FlaskConical, Eraser,
+  Menu, X
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
@@ -87,45 +88,71 @@ function ArchitectureDiagram() {
   ];
 
   return (
-    <div className="relative w-full max-w-[640px] h-[100px] mx-auto hidden sm:block">
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 640 100" fill="none">
-        {/* Glowing connection lines */}
-        <defs>
-          <linearGradient id="edge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--primary) / 0.6)" />
-            <stop offset="100%" stopColor="hsl(var(--forge-cyan) / 0.6)" />
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <motion.path d="M140,50 L210,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} />
-        <motion.path d="M300,50 L370,30" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
-        <motion.path d="M300,50 L370,70" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
-        <motion.path d="M460,30 L520,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
-        <motion.path d="M460,70 L520,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
-      </svg>
-      {nodes.map((node, i) => (
-        <motion.div
-          key={node.label}
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.12 }}
-          className={`absolute px-3 py-1.5 rounded-lg border text-[11px] font-semibold ${node.color} backdrop-blur-sm`}
-          style={{ left: node.x, top: node.y, transform: "translate(-50%, -50%)" }}
-        >
-          {node.label}
-        </motion.div>
-      ))}
-    </div>
+    <>
+      {/* Desktop diagram */}
+      <div className="relative w-full max-w-[640px] h-[100px] mx-auto hidden sm:block">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 640 100" fill="none">
+          <defs>
+            <linearGradient id="edge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--primary) / 0.6)" />
+              <stop offset="100%" stopColor="hsl(var(--forge-cyan) / 0.6)" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <motion.path d="M140,50 L210,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} />
+          <motion.path d="M300,50 L370,30" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
+          <motion.path d="M300,50 L370,70" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} />
+          <motion.path d="M460,30 L520,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
+          <motion.path d="M460,70 L520,50" stroke="url(#edge-grad)" strokeWidth="1.5" filter="url(#glow)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }} />
+        </svg>
+        {nodes.map((node, i) => (
+          <motion.div
+            key={node.label}
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.12 }}
+            className={`absolute px-3 py-1.5 rounded-lg border text-[11px] font-semibold ${node.color} backdrop-blur-sm`}
+            style={{ left: node.x, top: node.y, transform: "translate(-50%, -50%)" }}
+          >
+            {node.label}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Mobile diagram — vertical flow */}
+      <div className="flex sm:hidden flex-col items-center gap-2 w-full">
+        {nodes.map((node, i) => (
+          <motion.div
+            key={node.label}
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+            className="flex items-center gap-2 w-full"
+          >
+            {i > 0 && (
+              <div className="w-4 flex flex-col items-center">
+                <div className="w-px h-3 bg-primary/30" />
+                <ChevronRight className="h-3 w-3 text-primary/50 -rotate-90" />
+              </div>
+            )}
+            {i === 0 && <div className="w-4" />}
+            <div className={`flex-1 px-3 py-2 rounded-lg border text-[11px] font-semibold text-center ${node.color} backdrop-blur-sm`}>
+              {node.label}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </>
   );
 }
-
 // ------- DATA -------
 
 const differentiators = [
@@ -237,6 +264,8 @@ const realUseCases = [
 // ------- PAGE -------
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
       {/* Companion Sprites - they follow you everywhere */}
@@ -259,14 +288,42 @@ export default function LandingPage() {
             <Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/login"><Button variant="ghost" size="sm" className="font-semibold">Log in</Button></Link>
-            <Link to="/signup">
+            <Link to="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="font-semibold">Log in</Button></Link>
+            <Link to="/signup" className="hidden sm:block">
               <Button size="sm" className="gradient-primary text-primary-foreground font-semibold glow-primary">
                 Start Building
               </Button>
             </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden glass-strong border-t border-border/50 px-4 py-4 space-y-3"
+          >
+            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">How It Works</a>
+            <a href="#use-cases" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Use Cases</a>
+            <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+            <div className="flex gap-2 pt-2 border-t border-border/30">
+              <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full font-semibold">Log in</Button>
+              </Link>
+              <Link to="/signup" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="w-full gradient-primary text-primary-foreground font-semibold">Start Building</Button>
+              </Link>
+            </div>
+          </motion.div>
+        )}
       </nav>
 
       {/* ════════════════════ HERO ════════════════════ */}
@@ -275,11 +332,11 @@ export default function LandingPage() {
         <div className="absolute inset-0 gradient-mesh" />
         <PyreflyBackground count={50} />
 
-        {/* Decorative rune circles */}
-        <div className="absolute top-20 -left-16 opacity-30">
+        {/* Decorative rune circles - hidden on mobile to prevent overflow */}
+        <div className="absolute top-20 -left-16 opacity-30 hidden sm:block">
           <RuneCircle size={200} />
         </div>
-        <div className="absolute bottom-0 -right-20 opacity-20">
+        <div className="absolute bottom-0 -right-20 opacity-20 hidden sm:block">
           <RuneCircle size={260} />
         </div>
 
@@ -488,9 +545,9 @@ export default function LandingPage() {
                     <item.icon className={`h-5 w-5 ${item.color}`} />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
                       <h3 className="text-sm sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono">{item.tag}</Badge>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
                   </div>
