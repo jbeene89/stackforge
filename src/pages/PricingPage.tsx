@@ -10,7 +10,7 @@ import { useCredits, useCreditTransactions } from "@/hooks/useCredits";
 import { toast } from "sonner";
 import {
   Check, X, Zap, CreditCard, ArrowRight, Crown, Sparkles,
-  BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock,
+  BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock, ShoppingCart, Plus,
 } from "lucide-react";
 
 const TIERS = {
