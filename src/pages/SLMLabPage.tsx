@@ -3363,6 +3363,7 @@ export default function SLMLabPage() {
           </div>
         </div>
       </div>
+      <TerminalPanel />
     );
   }
 
