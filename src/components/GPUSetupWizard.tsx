@@ -283,8 +283,8 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
           <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Backend</div>
           <div className="text-sm font-bold flex items-center gap-1.5">
             {gpu.backend}
-            {gpu.vendor === "amd" && <Badge variant="outline" className="text-[8px] h-4 border-red-500/40 text-red-400">AMD</Badge>}
-            {gpu.vendor === "nvidia" && <Badge variant="outline" className="text-[8px] h-4 border-green-500/40 text-green-400">NVIDIA</Badge>}
+            {gpu.vendor === "amd" && <Badge variant="outline" className="text-[8px] h-4 border-[hsl(var(--forge-rose))]/40 text-[hsl(var(--forge-rose))]">AMD</Badge>}
+            {gpu.vendor === "nvidia" && <Badge variant="outline" className="text-[8px] h-4 border-[hsl(var(--forge-emerald))]/40 text-[hsl(var(--forge-emerald))]">NVIDIA</Badge>}
           </div>
         </div>
         <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
