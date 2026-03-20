@@ -278,7 +278,26 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
 
   return (
     <div className="space-y-4">
-      {/* GPU Selector */}
+      {/* Detect + GPU Selector */}
+      <div className="flex items-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="shrink-0 h-9"
+          onClick={detectGPU}
+          disabled={detecting}
+        >
+          {detecting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Search className="h-3.5 w-3.5 mr-1.5" />}
+          {detecting ? "Detecting…" : "Detect My GPU"}
+        </Button>
+        {detectedName && (
+          <span className="text-[10px] text-muted-foreground truncate">
+            Found: <span className="font-semibold text-foreground">{detectedName}</span>
+          </span>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
