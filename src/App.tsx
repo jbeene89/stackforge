@@ -120,6 +120,7 @@ const App = () => (
                 <Route path="/inference" element={<InferencePlaygroundPage />} />
                 <Route path="/console" element={<DeviceConsolePage />} />
                 <Route path="/self-host" element={<SelfHostPage />} />
+                <Route path="/image-forge" element={<ImageForgePage />} />
                 <Route path="/training" element={<TrainingProgressPage />} />
                 <Route path="/runs" element={<RunsPage />} />
                 <Route path="/admin" element={<AdminPage />} />

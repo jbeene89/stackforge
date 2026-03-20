@@ -68,6 +68,7 @@ const mainItems = [
   { title: "Robotics", url: "/robotics", icon: Joystick },
   { title: "Game Engine", url: "/engine", icon: Gamepad2 },
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
+  { title: "Image Forge", url: "/image-forge", icon: Image },
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard },
   { title: "SLM Lab", url: "/slm-lab", icon: Sparkles },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
