@@ -45,8 +45,6 @@ export default function DashboardPage() {
   const [promptValue, setPromptValue] = useState("");
   const navigate = useNavigate();
   const tourRef = useRef<OnboardingTourHandle>(null);
-  const [promptValue, setPromptValue] = useState("");
-  const navigate = useNavigate();
 
   const { data: projects, isLoading: loadingProjects } = useProjects();
   const { data: modules } = useModules();
