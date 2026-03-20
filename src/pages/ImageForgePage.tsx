@@ -667,6 +667,12 @@ export default function ImageForgePage() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        <TabsContent value="chatroom" className="mt-0">
+          <VisualChatroom />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
