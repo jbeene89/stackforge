@@ -15,6 +15,7 @@ import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 const typeIcons: Record<ProjectType, React.ElementType> = {
   web: Globe, android: Smartphone, module: Brain, stack: Layers, hybrid: Layers,
