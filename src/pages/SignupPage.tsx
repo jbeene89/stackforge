@@ -173,6 +173,17 @@ export default function SignupPage() {
             <p className="text-sm text-muted-foreground mt-1">Start building with SoupyForge</p>
           </div>
 
+          {referralCode && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 rounded-lg border border-forge-emerald/30 bg-forge-emerald/10 px-4 py-3 text-sm"
+            >
+              <Gift className="h-4 w-4 text-forge-emerald shrink-0" />
+              <span>You've been referred! Sign up to get <strong>25 bonus credits</strong>.</span>
+            </motion.div>
+          )}
+
           {/* Social Signup */}
           <div className="space-y-3">
             <Button
