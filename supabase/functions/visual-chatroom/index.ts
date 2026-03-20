@@ -44,6 +44,18 @@ async function deductCredits(supabase: ReturnType<typeof createClient>, userId: 
   return { ok: true, balance: newBalance };
 }
 
+async function refundCredits(supabase: ReturnType<typeof createClient>, userId: string, reason: string): Promise<void> {
+  const { data: credits } = await supabase.from("user_credits").select("*").eq("user_id", userId).single();
+  if (!credits) return;
+  const newBalance = credits.credits_balance + IMAGE_GEN_COST;
+  const newUsed = Math.max(0, credits.credits_used - IMAGE_GEN_COST);
+  await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
+  await supabase.from("credit_transactions").insert({
+    user_id: userId, amount: IMAGE_GEN_COST, balance_after: newBalance,
+    description: `Refund: ${reason}`, transaction_type: "refund",
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
