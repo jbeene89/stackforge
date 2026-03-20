@@ -13,6 +13,8 @@ const MODEL_COSTS: Record<string, number> = {
   "gemini-2.5-flash": 2,
   "gpt-5-nano": 2,
   "gemini-3-flash-preview": 2,
+  "gemini-3.1-flash-image-preview": 3,
+  "gemini-3-pro-image-preview": 5,
   "gpt-5-mini": 3,
   "gemini-2.5-pro": 5,
   "gemini-3.1-pro-preview": 5,

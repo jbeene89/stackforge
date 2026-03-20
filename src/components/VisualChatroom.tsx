@@ -8,16 +8,20 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords,
+  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords, Coins,
 } from "lucide-react";
 import { CHARACTERS, ChatMessage } from "./visual-chatroom/types";
 import CharacterBar from "./visual-chatroom/CharacterBar";
 import MessageCard from "./visual-chatroom/MessageCard";
 import ImageLightbox from "./visual-chatroom/ImageLightbox";
+import { useCreditsGate } from "@/hooks/useCreditsGate";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Mode = "council" | "duo";
 
 export default function VisualChatroom() {
+  const { hasCredits, balance, requireCredits } = useCreditsGate(3);
+  const queryClient = useQueryClient();
   const [seedPrompt, setSeedPrompt] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -53,8 +57,31 @@ export default function VisualChatroom() {
           imageModel: "google/gemini-3.1-flash-image-preview",
         },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        // Check for 402 insufficient credits
+        if (error.message?.includes("402") || error.message?.includes("Insufficient")) {
+          toast.error("Out of credits! Upgrade your plan to continue.", {
+            action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+          });
+          abortRef.current = true;
+          queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+          return null;
+        }
+        throw error;
+      }
+      if (data?.error) {
+        if (data.error.includes("Insufficient")) {
+          toast.error("Out of credits!", {
+            action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+          });
+          abortRef.current = true;
+          queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+          return null;
+        }
+        throw new Error(data.error);
+      }
+      // Refresh credit balance after successful generation
+      queryClient.invalidateQueries({ queryKey: ["user-credits"] });
       return { characterId: char.id, image: data.image, text: data.text, round: currentRound };
     } catch (e: any) {
       toast.error(`${char.name} failed: ${e.message}`);
@@ -169,7 +196,11 @@ export default function VisualChatroom() {
   const stop = () => { abortRef.current = true; setIsRunning(false); setCurrentSpeaker(-1); };
   const reset = () => { stop(); setMessages([]); setRound(0); };
 
-  const startConversation = mode === "duo" && duoPair ? startDuo : startCouncil;
+  const wrappedStartConversation = () => requireCredits(() => {
+    const fn = mode === "duo" && duoPair ? startDuo : startCouncil;
+    fn();
+  });
+  const wrappedStepForward = () => requireCredits(stepForward);
   const canStart = seedPrompt.trim() && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
 
   return (
@@ -282,7 +313,7 @@ export default function VisualChatroom() {
                 onChange={e => setSeedPrompt(e.target.value)}
                 disabled={isRunning}
                 className="bg-background/60"
-                onKeyDown={e => { if (e.key === "Enter" && !isRunning && canStart) startConversation(); }}
+                onKeyDown={e => { if (e.key === "Enter" && !isRunning && canStart) wrappedStartConversation(); }}
               />
             </div>
             <div className="flex gap-2">
@@ -301,14 +332,14 @@ export default function VisualChatroom() {
               {!isRunning ? (
                 <>
                   <Button
-                    onClick={startConversation}
+                    onClick={wrappedStartConversation}
                     disabled={!canStart}
                     className="gradient-primary glow-primary text-primary-foreground font-display text-xs tracking-wider"
                   >
                     <Play className="h-3 w-3 mr-1" />
                     {mode === "duo" ? `Duo (${duoRounds}r)` : "Start (3r)"}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={stepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
+                  <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
                     <SkipForward className="h-3 w-3" />
                   </Button>
                 </>
@@ -325,15 +356,22 @@ export default function VisualChatroom() {
               )}
             </div>
           </div>
-          {messages.length > 0 && (
+          {(messages.length > 0 || true) && (
             <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-              <span>{messages.filter(m => !m.isUserInjection).length} AI images</span>
-              <span>|</span>
-              <span>{messages.filter(m => m.isUserInjection).length} injected</span>
-              <span>|</span>
-              <span>Round {round}</span>
-              <span>|</span>
-              <span>{messages.filter(m => m.image && !m.isUserInjection).length} successful</span>
+              <div className="flex items-center gap-1">
+                <Coins className="h-3 w-3 text-primary" />
+                <span className={balance < 10 ? "text-destructive font-bold" : ""}>{balance} credits</span>
+              </div>
+              {messages.length > 0 && (
+                <>
+                  <span>|</span>
+                  <span>{messages.filter(m => !m.isUserInjection).length} AI images</span>
+                  <span>|</span>
+                  <span>{messages.filter(m => m.isUserInjection).length} injected</span>
+                  <span>|</span>
+                  <span>Round {round}</span>
+                </>
+              )}
             </div>
           )}
         </CardContent>
