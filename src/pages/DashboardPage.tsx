@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,8 @@ import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import type { ProjectType } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { OnboardingTour } from "@/components/OnboardingTour";
+import { OnboardingTour, type OnboardingTourHandle } from "@/components/OnboardingTour";
+import { TourMenu } from "@/components/TourMenu";
 
 const typeIcons: Record<ProjectType, React.ElementType> = {
   web: Globe, android: Smartphone, module: Brain, stack: Layers, hybrid: Layers,
