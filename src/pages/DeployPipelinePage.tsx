@@ -73,12 +73,23 @@ def check_deps():
         ])
 
 def detect_hardware():
-    """Auto-detect GPU vs CPU."""
+    """Auto-detect GPU vs CPU — supports NVIDIA CUDA and AMD ROCm."""
     try:
         import torch
         if torch.cuda.is_available():
             name = torch.cuda.get_device_name(0)
             print(f"GPU detected: {name}")
+            # Check for AMD ROCm
+            if hasattr(torch.version, 'hip') and torch.version.hip is not None:
+                print(f"  Backend: ROCm (HIP {torch.version.hip})")
+            else:
+                print(f"  Backend: CUDA {torch.version.cuda}")
+            return "cuda"
+        # Check for ROCm without torch.cuda (some AMD setups)
+        import subprocess
+        result = subprocess.run(["rocm-smi"], capture_output=True, text=True)
+        if result.returncode == 0:
+            print("AMD GPU detected via rocm-smi (install PyTorch ROCm for GPU training)")
             return "cuda"
     except Exception:
         pass
