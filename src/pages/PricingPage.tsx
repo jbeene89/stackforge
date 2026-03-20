@@ -105,6 +105,7 @@ export default function PricingPage() {
     subscription_end: string | null;
   }>({ subscribed: false, product_id: null, subscription_end: null });
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const [topUpLoading, setTopUpLoading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const checkSubscription = async () => {
