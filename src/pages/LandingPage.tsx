@@ -164,7 +164,40 @@ const architecturePoints = [
   { icon: Workflow, label: "Compose, don't prompt", desc: "Build systems, not conversations" },
 ];
 
-const realUseCases = [
+const deepCustomization = [
+  {
+    icon: Eraser,
+    title: "Selective Unlearning",
+    desc: "Surgically remove unwanted behaviors from base models — corporate tone, hallucination patterns, hedging. Generate DPO-format training data with weighted rejection pairs.",
+    tag: "Task Vector Subtraction",
+    color: "text-forge-rose",
+    bgColor: "bg-forge-rose/10 border-forge-rose/20",
+  },
+  {
+    icon: Database,
+    title: "Dataset Engineering",
+    desc: "Build training datasets from scratch — scrape, interview, capture from mobile, import from HuggingFace. Every sample gets multi-perspective AI review before it enters your model.",
+    tag: "5-Perspective Council",
+    color: "text-forge-cyan",
+    bgColor: "bg-forge-cyan/10 border-forge-cyan/20",
+  },
+  {
+    icon: FlaskConical,
+    title: "Perspective Training (CDPT)",
+    desc: "Each data point is enriched through five cognitive lenses: Builder, Red Team, Systems Thinker, Empath, and Frame Breaker. Your model learns nuance, not just patterns.",
+    tag: "Cognitive Dense Perspective",
+    color: "text-forge-gold",
+    bgColor: "bg-forge-gold/10 border-forge-gold/20",
+  },
+  {
+    icon: Scissors,
+    title: "Popcorn Injection",
+    desc: "Densify specific traits into your model — inject curiosity, domain expertise, or reasoning style. Combine with selective unlearning for surgical personality control.",
+    tag: "Trait Densification",
+    color: "text-forge-violet",
+    bgColor: "bg-forge-violet/10 border-forge-violet/20",
+  },
+];
   {
     industry: "Marine Construction",
     title: "Estimation Pipeline",
