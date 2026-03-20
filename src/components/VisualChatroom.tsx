@@ -57,8 +57,31 @@ export default function VisualChatroom() {
           imageModel: "google/gemini-3.1-flash-image-preview",
         },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        // Check for 402 insufficient credits
+        if (error.message?.includes("402") || error.message?.includes("Insufficient")) {
+          toast.error("Out of credits! Upgrade your plan to continue.", {
+            action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+          });
+          abortRef.current = true;
+          queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+          return null;
+        }
+        throw error;
+      }
+      if (data?.error) {
+        if (data.error.includes("Insufficient")) {
+          toast.error("Out of credits!", {
+            action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+          });
+          abortRef.current = true;
+          queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+          return null;
+        }
+        throw new Error(data.error);
+      }
+      // Refresh credit balance after successful generation
+      queryClient.invalidateQueries({ queryKey: ["user-credits"] });
       return { characterId: char.id, image: data.image, text: data.text, round: currentRound };
     } catch (e: any) {
       toast.error(`${char.name} failed: ${e.message}`);
