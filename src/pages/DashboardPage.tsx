@@ -70,13 +70,14 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 animate-fade-in max-w-7xl mx-auto">
-      <OnboardingTour />
+      <OnboardingTour ref={tourRef} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <h1 id="tour-welcome" className="text-xl sm:text-2xl font-bold">Dashboard</h1>
             {credits && <TierBadge tier={credits.tier} size="md" />}
+            <TourMenu tourRef={tourRef} />
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">Your projects, modules, and stacks.</p>
         </div>
