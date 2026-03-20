@@ -29,6 +29,7 @@ import {
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
   Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye
 } from "lucide-react";
+import { TerminalPanel } from "@/components/TerminalPanel";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
   useSamples, useCreateSample, useUpdateSample, useDeleteSample,
