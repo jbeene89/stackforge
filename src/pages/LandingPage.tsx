@@ -545,9 +545,9 @@ export default function LandingPage() {
                     <item.icon className={`h-5 w-5 ${item.color}`} />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
                       <h3 className="text-sm sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono">{item.tag}</Badge>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
                   </div>
