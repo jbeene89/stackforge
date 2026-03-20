@@ -156,6 +156,25 @@ export default function PricingPage() {
     }
   };
 
+  const handleTopUp = async (priceId: string) => {
+    if (!user) {
+      toast.error("Please sign in to purchase credits");
+      return;
+    }
+    setTopUpLoading(priceId);
+    try {
+      const { data, error } = await supabase.functions.invoke("purchase-credits", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setTopUpLoading(null);
+    }
+  };
+
   const handleManage = async () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
