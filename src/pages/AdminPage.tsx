@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 import { useProjects, useModules, useStacks, useRuns, useProfile } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  Shield, Users, Settings, BarChart3, Activity,
-  TrendingUp, Zap, Clock, Globe, Cpu, HardDrive, AlertTriangle,
-  Brain, Layers, Share2, Copy, Check, ExternalLink,
+  Shield, Settings, BarChart3, Activity,
+  Zap, Clock, Globe, Cpu, AlertTriangle,
+  Brain, Layers, Share2, Copy, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
