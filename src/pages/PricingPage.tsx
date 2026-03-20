@@ -302,40 +302,83 @@ export default function PricingPage() {
 
           {/* ── Usage Tab ── */}
           <TabsContent value="usage">
-            <div className="glass rounded-xl p-6 space-y-4">
-              <h3 className="font-semibold flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" /> Credit History
-              </h3>
-              {transactions && transactions.length > 0 ? (
-                <div className="space-y-2">
-                  {transactions.map((tx: any) => {
-                    const TxIcon = TX_ICONS[tx.transaction_type] || Coins;
-                    const isPositive = tx.amount > 0;
-                    return (
-                      <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-background/50">
-                        <div className="flex items-center gap-3">
-                          <TxIcon className={cn("h-4 w-4", isPositive ? "text-forge-emerald" : "text-muted-foreground")} />
-                          <div>
-                            <p className="text-sm">{tx.description}</p>
-                            <p className="text-[11px] text-muted-foreground">{new Date(tx.created_at).toLocaleString()}</p>
+            <div className="space-y-6">
+              {/* Breakdown Summary */}
+              {transactions && transactions.length > 0 && (() => {
+                const summary = transactions.reduce((acc: Record<string, { total: number; count: number }>, tx: any) => {
+                  const type = tx.transaction_type || "other";
+                  if (!acc[type]) acc[type] = { total: 0, count: 0 };
+                  acc[type].total += tx.amount;
+                  acc[type].count += 1;
+                  return acc;
+                }, {});
+                const totalSpent = Object.entries(summary)
+                  .filter(([, v]) => (v as { total: number }).total < 0)
+                  .reduce((s, [, v]) => s + Math.abs((v as { total: number }).total), 0);
+
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {Object.entries(summary).map(([type, vals]) => {
+                      const v = vals as { total: number; count: number };
+                      const TxIcon = TX_ICONS[type] || Coins;
+                      const isPositive = v.total >= 0;
+                      return (
+                        <div key={type} className="glass rounded-xl p-4 text-center">
+                          <TxIcon className={cn("h-4 w-4 mx-auto mb-1.5", isPositive ? "text-forge-emerald" : "text-muted-foreground")} />
+                          <p className={cn("text-lg font-bold", isPositive ? "text-forge-emerald" : "text-foreground")}>
+                            {isPositive ? "+" : ""}{v.total}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground capitalize">{type} · {v.count} tx</p>
+                        </div>
+                      );
+                    })}
+                    {totalSpent > 0 && (
+                      <div className="glass rounded-xl p-4 text-center">
+                        <BarChart3 className="h-4 w-4 mx-auto mb-1.5 text-primary" />
+                        <p className="text-lg font-bold">{totalSpent}</p>
+                        <p className="text-[11px] text-muted-foreground">Total spent</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Transaction List */}
+              <div className="glass rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" /> Credit History
+                </h3>
+                {transactions && transactions.length > 0 ? (
+                  <div className="space-y-2">
+                    {transactions.map((tx: any) => {
+                      const TxIcon = TX_ICONS[tx.transaction_type] || Coins;
+                      const isPositive = tx.amount > 0;
+                      return (
+                        <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-background/50">
+                          <div className="flex items-center gap-3">
+                            <TxIcon className={cn("h-4 w-4", isPositive ? "text-forge-emerald" : "text-muted-foreground")} />
+                            <div>
+                              <p className="text-sm">{tx.description}</p>
+                              <p className="text-[11px] text-muted-foreground">{new Date(tx.created_at).toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn("text-sm font-medium", isPositive ? "text-forge-emerald" : "text-muted-foreground")}>
+                              {isPositive ? "+" : ""}{tx.amount}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">bal: {tx.balance_after}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className={cn("text-sm font-medium", isPositive ? "text-forge-emerald" : "text-muted-foreground")}>
-                            {isPositive ? "+" : ""}{tx.amount}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground">bal: {tx.balance_after}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  <Coins className="h-8 w-8 mx-auto mb-3 opacity-50" />
-                  <p>No credit activity yet. Run an AI module to see usage here.</p>
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    <Coins className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                    <p>No credit activity yet. Run an AI module to see usage here.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
 
