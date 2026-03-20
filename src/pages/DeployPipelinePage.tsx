@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useDatasets, useSamples, exportDatasetAsJsonl, generateInjectionScript, type DatasetSample } from "@/hooks/useTrainingData";
 import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
 import { onDeviceSLMTemplates } from "@/data/on-device-slm-templates";
+import GPUSetupWizard, { GPU_PROFILES, type GPUProfile, type OllamaModel } from "@/components/GPUSetupWizard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
