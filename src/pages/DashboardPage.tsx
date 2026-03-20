@@ -73,7 +73,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+            <h1 id="tour-welcome" className="text-xl sm:text-2xl font-bold">Dashboard</h1>
             {credits && <TierBadge tier={credits.tier} size="md" />}
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">Your projects, modules, and stacks.</p>
