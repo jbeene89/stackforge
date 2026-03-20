@@ -161,7 +161,7 @@ export default function DashboardPage() {
           <p className="text-xs text-muted-foreground mt-1">Create your first project to get started.</p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div id="tour-projects" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {filtered.map((project, i) => {
             const Icon = typeIcons[project.type as ProjectType] || Layers;
             return (
