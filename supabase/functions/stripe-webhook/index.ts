@@ -65,8 +65,11 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.mode !== "subscription") break;
-        await syncSubscription(stripe, supabase, session.customer as string);
+        if (session.mode === "subscription") {
+          await syncSubscription(stripe, supabase, session.customer as string);
+        } else if (session.mode === "payment" && session.metadata?.type === "credit_topup") {
+          await fulfillTopup(supabase, session);
+        }
         break;
       }
 
