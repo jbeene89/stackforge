@@ -335,9 +335,10 @@ export default function VisualChatroom() {
                     onClick={wrappedStartConversation}
                     disabled={!canStart}
                     className="gradient-primary glow-primary text-primary-foreground font-display text-xs tracking-wider"
+                    title={mode === "duo" ? `Costs ~${duoRounds * 2 * 3} credits` : "Costs ~45 credits"}
                   >
-                    <Play className="h-3 w-3 mr-1" />
-                    {mode === "duo" ? `Duo (${duoRounds}r)` : "Start (3r)"}
+                    <Coins className="h-3 w-3 mr-1" />
+                    {mode === "duo" ? `Duo · ${duoRounds * 2 * 3}cr` : "Start · 45cr"}
                   </Button>
                   <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
                     <SkipForward className="h-3 w-3" />
