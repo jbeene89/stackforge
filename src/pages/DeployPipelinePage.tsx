@@ -1211,11 +1211,6 @@ export default function DeployPipelinePage() {
                 </p>
               </div>
             </div>
-                <p className="text-[10px] text-muted-foreground">
-                  ~2.5-3 hrs for 165 samples. Works on any modern laptop. ~154s/step.
-                </p>
-              </div>
-            </div>
 
             <p className="text-[10px] text-muted-foreground italic">
               Output: <code className="bg-secondary/50 px-1 rounded">output-*/merged/</code> — a
