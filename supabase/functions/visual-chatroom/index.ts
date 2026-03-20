@@ -139,6 +139,8 @@ serve(async (req) => {
 
     if (!resp.ok) {
       const text = await resp.text();
+      // Refund credits on AI failure
+      await refundCredits(supabase, userId, resp.status === 429 ? "Rate limited" : `AI error ${resp.status}`);
       if (resp.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
