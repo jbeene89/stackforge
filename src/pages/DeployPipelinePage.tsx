@@ -1173,26 +1173,44 @@ export default function DeployPipelinePage() {
             <p className="text-xs text-muted-foreground">
               Unzip the training kit, open a terminal, and run:
             </p>
+            {selectedGPU.vendor === "amd" && Object.keys(selectedGPU.envVars).length > 0 && (
+              <CodeBlock
+                label={`AMD Setup (${selectedGPU.name})`}
+                code={Object.entries(selectedGPU.envVars).map(([k, v]) => `export ${k}=${v}`).join("\n")}
+              />
+            )}
             <CodeBlock
               label="Terminal"
               code={`cd ${selectedDataset?.name.toLowerCase().replace(/\\s+/g, "-") ?? "training-kit"}\npython train.py`}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+              <div className={`rounded-lg border p-3 ${selectedGPU.vendor !== "cpu" ? "border-[hsl(var(--forge-emerald))]/30 bg-[hsl(var(--forge-emerald))]/5" : "border-border/40 bg-secondary/20"}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Zap className="h-3.5 w-3.5 text-[hsl(var(--forge-emerald))]" />
-                  <span className="text-xs font-semibold">With GPU</span>
+                  <span className="text-xs font-semibold">
+                    {selectedGPU.vendor === "cpu" ? "With GPU" : `Your GPU: ${selectedGPU.name}`}
+                  </span>
+                  {selectedGPU.vendor !== "cpu" && <Badge variant="outline" className="text-[8px] h-4">Selected</Badge>}
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                  ~15-30 min on RTX 3060+. Auto-detected, uses 8-bit quantized loading + LoRA.
+                  {selectedGPU.vendor === "amd"
+                    ? `${selectedGPU.backend} backend. ${selectedGPU.notes}`
+                    : selectedGPU.vendor === "nvidia"
+                    ? `CUDA backend. ~15-30 min. Auto-detected, uses 8-bit quantized loading + LoRA.`
+                    : `~15-30 min on RTX 3060+. Auto-detected, uses 8-bit quantized loading + LoRA.`}
                 </p>
               </div>
-              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+              <div className={`rounded-lg border p-3 ${selectedGPU.vendor === "cpu" ? "border-[hsl(var(--forge-amber))]/30 bg-[hsl(var(--forge-amber))]/5" : "border-border/40 bg-secondary/20"}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Cpu className="h-3.5 w-3.5 text-[hsl(var(--forge-amber))]" />
-                  <span className="text-xs font-semibold">CPU Only</span>
+                  <span className="text-xs font-semibold">CPU Fallback</span>
                 </div>
+                <p className="text-[10px] text-muted-foreground">
+                  ~2.5-3 hrs for 165 samples. Works on any modern laptop. ~154s/step.
+                </p>
+              </div>
+            </div>
                 <p className="text-[10px] text-muted-foreground">
                   ~2.5-3 hrs for 165 samples. Works on any modern laptop. ~154s/step.
                 </p>
