@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useDatasets, useSamples, exportDatasetAsJsonl, generateInjectionScript, type DatasetSample } from "@/hooks/useTrainingData";
 import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
 import { onDeviceSLMTemplates } from "@/data/on-device-slm-templates";
+import GPUSetupWizard, { GPU_PROFILES, type GPUProfile, type OllamaModel } from "@/components/GPUSetupWizard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ import {
   ChevronUp,
   Layers,
   Zap,
+  Monitor,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,12 +73,23 @@ def check_deps():
         ])
 
 def detect_hardware():
-    """Auto-detect GPU vs CPU."""
+    """Auto-detect GPU vs CPU — supports NVIDIA CUDA and AMD ROCm."""
     try:
         import torch
         if torch.cuda.is_available():
             name = torch.cuda.get_device_name(0)
             print(f"GPU detected: {name}")
+            # Check for AMD ROCm
+            if hasattr(torch.version, 'hip') and torch.version.hip is not None:
+                print(f"  Backend: ROCm (HIP {torch.version.hip})")
+            else:
+                print(f"  Backend: CUDA {torch.version.cuda}")
+            return "cuda"
+        # Check for ROCm without torch.cuda (some AMD setups)
+        import subprocess
+        result = subprocess.run(["rocm-smi"], capture_output=True, text=True)
+        if result.returncode == 0:
+            print("AMD GPU detected via rocm-smi (install PyTorch ROCm for GPU training)")
             return "cuda"
     except Exception:
         pass
@@ -753,6 +766,8 @@ export default function DeployPipelinePage() {
   const [loraRank, setLoraRank] = useState(16);
   const [lr] = useState(0.0002);
   const [downloading, setDownloading] = useState(false);
+  const [selectedGPU, setSelectedGPU] = useState<GPUProfile>(GPU_PROFILES[0]);
+  const [selectedOllamaModel, setSelectedOllamaModel] = useState<OllamaModel | null>(null);
 
   const isPopcornOnly = selectedDatasetId === POPCORN_ONLY_ID;
   const selectedDataset = isPopcornOnly ? null : datasets?.find((d) => d.id === selectedDatasetId);
@@ -941,6 +956,23 @@ export default function DeployPipelinePage() {
 
       {/* Pipeline Steps */}
       <div className="space-y-3">
+        {/* Step 0: GPU Setup */}
+        <StepCard
+          step={0}
+          title="GPU & Model Setup"
+          description="Configure your hardware and pick the right model"
+          icon={Monitor}
+          active={true}
+          completed={!!selectedOllamaModel}
+        >
+          <div className="pt-2">
+            <GPUSetupWizard
+              onGPUSelected={(gpu) => setSelectedGPU(gpu)}
+              onModelSelected={(model) => setSelectedOllamaModel(model)}
+            />
+          </div>
+        </StepCard>
+
         {/* Step 1: Export */}
         <StepCard
           step={1}
@@ -1141,25 +1173,38 @@ export default function DeployPipelinePage() {
             <p className="text-xs text-muted-foreground">
               Unzip the training kit, open a terminal, and run:
             </p>
+            {selectedGPU.vendor === "amd" && Object.keys(selectedGPU.envVars).length > 0 && (
+              <CodeBlock
+                label={`AMD Setup (${selectedGPU.name})`}
+                code={Object.entries(selectedGPU.envVars).map(([k, v]) => `export ${k}=${v}`).join("\n")}
+              />
+            )}
             <CodeBlock
               label="Terminal"
               code={`cd ${selectedDataset?.name.toLowerCase().replace(/\\s+/g, "-") ?? "training-kit"}\npython train.py`}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+              <div className={`rounded-lg border p-3 ${selectedGPU.vendor !== "cpu" ? "border-[hsl(var(--forge-emerald))]/30 bg-[hsl(var(--forge-emerald))]/5" : "border-border/40 bg-secondary/20"}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Zap className="h-3.5 w-3.5 text-[hsl(var(--forge-emerald))]" />
-                  <span className="text-xs font-semibold">With GPU</span>
+                  <span className="text-xs font-semibold">
+                    {selectedGPU.vendor === "cpu" ? "With GPU" : `Your GPU: ${selectedGPU.name}`}
+                  </span>
+                  {selectedGPU.vendor !== "cpu" && <Badge variant="outline" className="text-[8px] h-4">Selected</Badge>}
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                  ~15-30 min on RTX 3060+. Auto-detected, uses 8-bit quantized loading + LoRA.
+                  {selectedGPU.vendor === "amd"
+                    ? `${selectedGPU.backend} backend. ${selectedGPU.notes}`
+                    : selectedGPU.vendor === "nvidia"
+                    ? `CUDA backend. ~15-30 min. Auto-detected, uses 8-bit quantized loading + LoRA.`
+                    : `~15-30 min on RTX 3060+. Auto-detected, uses 8-bit quantized loading + LoRA.`}
                 </p>
               </div>
-              <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+              <div className={`rounded-lg border p-3 ${selectedGPU.vendor === "cpu" ? "border-[hsl(var(--forge-amber))]/30 bg-[hsl(var(--forge-amber))]/5" : "border-border/40 bg-secondary/20"}`}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Cpu className="h-3.5 w-3.5 text-[hsl(var(--forge-amber))]" />
-                  <span className="text-xs font-semibold">CPU Only</span>
+                  <span className="text-xs font-semibold">CPU Fallback</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground">
                   ~2.5-3 hrs for 165 samples. Works on any modern laptop. ~154s/step.
