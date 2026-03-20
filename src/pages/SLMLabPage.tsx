@@ -3387,6 +3387,7 @@ export default function SLMLabPage() {
         {step === 3 && activeDataset && <Step3Review dataset={activeDataset} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
         {step === 4 && activeDataset && <Step4Export dataset={activeDataset} onBack={() => setStep(3)} />}
       </div>
+      <TerminalPanel />
     </div>
   );
 }
