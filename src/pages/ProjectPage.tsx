@@ -268,8 +268,8 @@ export default function ProjectPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="chat" className="flex-1 m-0 mt-2 px-6 pb-4">
-          <div className="glass rounded-xl p-4 h-full">
+        <TabsContent value="chat" className="flex-1 m-0 mt-2 px-6 pb-4 overflow-hidden">
+          <div className="glass rounded-xl p-4 h-full overflow-hidden flex flex-col">
             <ChatHistory
               messages={chatMessages || []}
               isLoading={chatLoading}

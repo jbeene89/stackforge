@@ -519,23 +519,23 @@ export default function LandingPage() {
                 <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
                   <div><Link to="/templates" className="hover:text-primary transition-colors duration-300">Templates</Link></div>
                   <div><Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link></div>
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Changelog</a></div>
+                  <div><Link to="/marketplace" className="hover:text-primary transition-colors duration-300">Marketplace</Link></div>
                 </div>
               </div>
               <div>
                 <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Resources</div>
                 <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Documentation</a></div>
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">API Reference</a></div>
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Community</a></div>
+                  <div><Link to="/white-paper" className="hover:text-primary transition-colors duration-300">White Paper</Link></div>
+                  <div><Link to="/self-host" className="hover:text-primary transition-colors duration-300">Self-Host Guide</Link></div>
+                  <div><Link to="/deploy/phone" className="hover:text-primary transition-colors duration-300">Phone Deploy</Link></div>
                 </div>
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Company</div>
+                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Legal</div>
                 <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">About</a></div>
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Blog</a></div>
-                  <div><a href="#" className="hover:text-primary transition-colors duration-300">Careers</a></div>
+                  <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy Policy</Link></div>
+                  <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms of Service</Link></div>
+                  <div><a href="mailto:support@soupyforge.com" className="hover:text-primary transition-colors duration-300">Contact</a></div>
                 </div>
               </div>
             </div>
@@ -546,7 +546,7 @@ export default function LandingPage() {
             <div className="flex gap-6">
               <Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link>
               <Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link>
-              <a href="#" className="hover:text-primary transition-colors duration-300">Status</a>
+              <span className="text-muted-foreground/50 cursor-default">Status</span>
             </div>
           </div>
         </div>
