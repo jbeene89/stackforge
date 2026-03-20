@@ -173,3 +173,42 @@ async function syncSubscription(
 
   log("User credits synced", { userId: user.id, tier: tierConfig.tier });
 }
+
+async function fulfillTopup(
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session
+) {
+  const userId = session.metadata?.user_id;
+  const credits = parseInt(session.metadata?.credits || "0", 10);
+  if (!userId || !credits) {
+    log("Invalid topup metadata", { metadata: session.metadata });
+    return;
+  }
+
+  const { data: current } = await supabase
+    .from("user_credits")
+    .select("credits_balance")
+    .eq("user_id", userId)
+    .single();
+
+  if (!current) {
+    log("No user_credits row for topup", { userId });
+    return;
+  }
+
+  const newBalance = current.credits_balance + credits;
+  await supabase
+    .from("user_credits")
+    .update({ credits_balance: newBalance })
+    .eq("user_id", userId);
+
+  await supabase.from("credit_transactions").insert({
+    user_id: userId,
+    amount: credits,
+    balance_after: newBalance,
+    description: `Top-up: ${credits} credits purchased`,
+    transaction_type: "topup",
+  });
+
+  log("Topup fulfilled", { userId, credits, newBalance });
+}

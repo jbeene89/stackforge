@@ -19,6 +19,12 @@ const TIERS = {
   pro: { name: "Pro", product_id: "prod_U7A4PumaFQmKPQ", price_id: "price_1T8vkaEgO8H7yovM9bBWWGwU", credits: 2000 },
 };
 
+const TOPUP_PACKS = [
+  { credits: 100, price: 4.99, priceId: "price_1TD61PEgO8H7yovM947iyWTY", label: "Starter" },
+  { credits: 500, price: 19.99, priceId: "price_1TD62JEgO8H7yovM5HSx5vl2", label: "Popular", highlight: true },
+  { credits: 1500, price: 59.99, priceId: "price_1TD62fEgO8H7yovMu0AHTCpt", label: "Best Value" },
+];
+
 const MODEL_COSTS = [
   { model: "Gemini Flash Lite", credits: 1 },
   { model: "Gemini Flash", credits: 2 },
