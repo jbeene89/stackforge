@@ -766,6 +766,8 @@ export default function DeployPipelinePage() {
   const [loraRank, setLoraRank] = useState(16);
   const [lr] = useState(0.0002);
   const [downloading, setDownloading] = useState(false);
+  const [selectedGPU, setSelectedGPU] = useState<GPUProfile>(GPU_PROFILES[0]);
+  const [selectedOllamaModel, setSelectedOllamaModel] = useState<OllamaModel | null>(null);
 
   const isPopcornOnly = selectedDatasetId === POPCORN_ONLY_ID;
   const selectedDataset = isPopcornOnly ? null : datasets?.find((d) => d.id === selectedDatasetId);
