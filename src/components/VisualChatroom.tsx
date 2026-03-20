@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords, Coins,
+  Loader2, Play, Pause, SkipForward, RotateCcw, Upload, ImagePlus, Swords, Coins, Share2,
 } from "lucide-react";
 import { CHARACTERS, ChatMessage } from "./visual-chatroom/types";
 import CharacterBar from "./visual-chatroom/CharacterBar";
