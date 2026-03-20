@@ -308,10 +308,10 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
 
       {/* AMD-specific notes */}
       {gpu.vendor === "amd" && Object.keys(gpu.envVars).length > 0 && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+        <div className="rounded-lg border border-[hsl(var(--forge-rose))]/20 bg-[hsl(var(--forge-rose))]/5 p-3">
           <div className="flex items-center gap-1.5 mb-1.5">
-            <AlertTriangle className="h-3.5 w-3.5 text-red-400" />
-            <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">AMD Config Required</span>
+            <AlertTriangle className="h-3.5 w-3.5 text-[hsl(var(--forge-rose))]" />
+            <span className="text-[10px] font-semibold text-[hsl(var(--forge-rose))] uppercase tracking-wider">AMD Config Required</span>
           </div>
           <p className="text-xs text-foreground/80 mb-2">{gpu.notes}</p>
           <div className="space-y-1">
