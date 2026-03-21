@@ -269,6 +269,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
+      <SEOHead
+        title="No-Code AI Agent & Pipeline Builder"
+        description="StackForge is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
+      />
       {/* Companion Sprites - they follow you everywhere */}
       <CompanionSprites />
 
