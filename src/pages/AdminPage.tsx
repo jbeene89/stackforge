@@ -111,6 +111,7 @@ export default function AdminPage() {
   const { data: modules } = useModules();
   const { data: stacks } = useStacks();
   const { data: runs } = useRuns();
+  const { data: analytics, isLoading: analyticsLoading } = useAnalytics(7);
 
   const projectCount = projects?.length || 0;
   const moduleCount = modules?.length || 0;
