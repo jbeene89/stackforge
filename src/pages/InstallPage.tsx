@@ -92,6 +92,7 @@ export default function InstallPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Install StackForge App" description="Install StackForge as a native app on your phone or desktop. Works on iOS, Android, and desktop browsers with offline support." />
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
