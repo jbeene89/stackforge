@@ -195,6 +195,100 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+          {/* Site Analytics Summary */}
+          <div className="mt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Eye className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold">Site Analytics</h3>
+              <Badge variant="outline" className="text-[10px]">Last 7 days</Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              {[
+                { label: "Visitors", value: "3", icon: Users, change: "+2 this week" },
+                { label: "Page Views", value: "4", icon: Eye, change: "1.33 per visit" },
+                { label: "Bounce Rate", value: "50%", icon: TrendingDown, change: "2 of 3 engaged" },
+                { label: "Avg Session", value: "5.2s", icon: Clock, change: "1 active session" },
+              ].map((stat, i) => {
+                const Icon = stat.icon;
+                return (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + i * 0.05 }}
+                    className="glass rounded-xl p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</div>
+                    <div className="text-[9px] text-primary/70 mt-1">{stat.change}</div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Top Pages */}
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-semibold">Top Pages</span>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { page: "/", views: 3 },
+                    { page: "/login", views: 1 },
+                  ].map((p) => (
+                    <div key={p.page} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground font-mono text-xs truncate">{p.page}</span>
+                      <Badge variant="secondary" className="text-[10px]">{p.views}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Traffic Sources */}
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-semibold">Traffic Sources</span>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { source: "Direct", visits: 2 },
+                    { source: "google.com", visits: 1 },
+                  ].map((s) => (
+                    <div key={s.source} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground text-xs">{s.source}</span>
+                      <Badge variant="secondary" className="text-[10px]">{s.visits}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Devices & Geo */}
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-semibold">Devices & Regions</span>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { label: "Desktop", value: 2 },
+                    { label: "Mobile", value: 1 },
+                    { label: "🇺🇸 US", value: 3 },
+                  ].map((d) => (
+                    <div key={d.label} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground text-xs">{d.label}</span>
+                      <Badge variant="secondary" className="text-[10px]">{d.value}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
         {/* Quick Posts */}
