@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useProjects, useModules, useStacks, useRuns, useProfile } from "@/hooks/useSupabaseData";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Shield, Settings, BarChart3, Activity,
@@ -110,6 +111,7 @@ export default function AdminPage() {
   const { data: modules } = useModules();
   const { data: stacks } = useStacks();
   const { data: runs } = useRuns();
+  const { data: analytics, isLoading: analyticsLoading } = useAnalytics(7);
 
   const projectCount = projects?.length || 0;
   const moduleCount = modules?.length || 0;
@@ -200,14 +202,14 @@ export default function AdminPage() {
             <div className="flex items-center gap-2 mb-3">
               <Eye className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold">Site Analytics</h3>
-              <Badge variant="outline" className="text-[10px]">Last 7 days</Badge>
+              <Badge variant="outline" className="text-[10px]">Last 7 days{analyticsLoading ? " · loading…" : ""}</Badge>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {[
-                { label: "Visitors", value: "3", icon: Users, change: "+2 this week" },
-                { label: "Page Views", value: "4", icon: Eye, change: "1.33 per visit" },
-                { label: "Bounce Rate", value: "50%", icon: TrendingDown, change: "2 of 3 engaged" },
-                { label: "Avg Session", value: "5.2s", icon: Clock, change: "1 active session" },
+                { label: "Visitors", value: String(analytics?.totalVisitors ?? 0), icon: Users, change: `${analytics?.totalPageViews ?? 0} total views` },
+                { label: "Page Views", value: String(analytics?.totalPageViews ?? 0), icon: Eye, change: analytics?.totalVisitors ? `${(analytics.totalPageViews / analytics.totalVisitors).toFixed(1)} per visit` : "—" },
+                { label: "Bounce Rate", value: `${analytics?.bounceRate ?? 0}%`, icon: TrendingDown, change: analytics?.totalVisitors ? `${analytics.totalVisitors - Math.round(analytics.totalVisitors * analytics.bounceRate / 100)} engaged` : "—" },
+                { label: "Avg Session", value: analytics?.avgSessionDuration ?? "—", icon: Clock, change: `${analytics?.totalVisitors ?? 0} sessions` },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
@@ -237,10 +239,10 @@ export default function AdminPage() {
                   <span className="text-xs font-semibold">Top Pages</span>
                 </div>
                 <div className="space-y-2">
-                  {[
-                    { page: "/", views: 3 },
-                    { page: "/login", views: 1 },
-                  ].map((p) => (
+                  {(analytics?.topPages ?? []).length === 0 && (
+                    <p className="text-xs text-muted-foreground">No data yet</p>
+                  )}
+                  {(analytics?.topPages ?? []).map((p) => (
                     <div key={p.page} className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground font-mono text-xs truncate">{p.page}</span>
                       <Badge variant="secondary" className="text-[10px]">{p.views}</Badge>
@@ -256,10 +258,10 @@ export default function AdminPage() {
                   <span className="text-xs font-semibold">Traffic Sources</span>
                 </div>
                 <div className="space-y-2">
-                  {[
-                    { source: "Direct", visits: 2 },
-                    { source: "google.com", visits: 1 },
-                  ].map((s) => (
+                  {(analytics?.topSources ?? []).length === 0 && (
+                    <p className="text-xs text-muted-foreground">No data yet</p>
+                  )}
+                  {(analytics?.topSources ?? []).map((s) => (
                     <div key={s.source} className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground text-xs">{s.source}</span>
                       <Badge variant="secondary" className="text-[10px]">{s.visits}</Badge>
@@ -268,20 +270,19 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Devices & Geo */}
+              {/* Devices */}
               <div className="glass rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold">Devices & Regions</span>
+                  <span className="text-xs font-semibold">Devices</span>
                 </div>
                 <div className="space-y-2">
-                  {[
-                    { label: "Desktop", value: 2 },
-                    { label: "Mobile", value: 1 },
-                    { label: "🇺🇸 US", value: 3 },
-                  ].map((d) => (
+                  {(analytics?.devices ?? []).length === 0 && (
+                    <p className="text-xs text-muted-foreground">No data yet</p>
+                  )}
+                  {(analytics?.devices ?? []).map((d) => (
                     <div key={d.label} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground text-xs">{d.label}</span>
+                      <span className="text-muted-foreground text-xs capitalize">{d.label}</span>
                       <Badge variant="secondary" className="text-[10px]">{d.value}</Badge>
                     </div>
                   ))}
