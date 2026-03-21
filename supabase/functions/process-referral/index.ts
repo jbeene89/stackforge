@@ -31,35 +31,35 @@ serve(async (req) => {
     if (!newUser) throw new Error("Not authenticated");
 
     const { referral_code } = await req.json();
-    if (!referral_code || referral_code.length < 6) {
+    if (!referral_code || referral_code.length < 6 || referral_code.length > 20) {
       return new Response(JSON.stringify({ error: "Invalid referral code" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
 
-    // Find referrer by matching first 8 chars of their user_id
-    const { data: profiles } = await supabase
+    // Look up referrer by referral_code column (indexed)
+    const { data: referrerProfile, error: lookupErr } = await supabase
       .from("profiles")
       .select("user_id")
-      .neq("user_id", newUser.id);
+      .eq("referral_code", referral_code)
+      .neq("user_id", newUser.id)
+      .maybeSingle();
 
-    const referrer = (profiles || []).find(
-      (p: any) => p.user_id.slice(0, 8) === referral_code
-    );
-
-    if (!referrer) {
+    if (lookupErr || !referrerProfile) {
       return new Response(JSON.stringify({ error: "Referral code not found" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
 
+    const referrerId = referrerProfile.user_id;
+
     // Check if referral already exists
     const { data: existing } = await supabase
       .from("referrals")
       .select("id")
-      .eq("referrer_id", referrer.user_id)
+      .eq("referrer_id", referrerId)
       .eq("referred_user_id", newUser.id)
       .maybeSingle();
 
@@ -71,7 +71,7 @@ serve(async (req) => {
 
     // Create referral record
     await supabase.from("referrals").insert({
-      referrer_id: referrer.user_id,
+      referrer_id: referrerId,
       referred_user_id: newUser.id,
     });
 
@@ -102,7 +102,7 @@ serve(async (req) => {
     const { data: referrerCredits } = await supabase
       .from("user_credits")
       .select("*")
-      .eq("user_id", referrer.user_id)
+      .eq("user_id", referrerId)
       .single();
 
     if (referrerCredits) {
@@ -110,10 +110,10 @@ serve(async (req) => {
       await supabase
         .from("user_credits")
         .update({ credits_balance: refBalance })
-        .eq("user_id", referrer.user_id);
+        .eq("user_id", referrerId);
 
       await supabase.from("credit_transactions").insert({
-        user_id: referrer.user_id,
+        user_id: referrerId,
         amount: REFERRAL_BONUS_REFERRER,
         balance_after: refBalance,
         description: "Referral bonus — new user signed up",
@@ -122,7 +122,7 @@ serve(async (req) => {
 
       // Log earning
       await supabase.from("referral_earnings").insert({
-        referrer_id: referrer.user_id,
+        referrer_id: referrerId,
         referred_user_id: newUser.id,
         amount: REFERRAL_BONUS_REFERRER,
         source_type: "signup_bonus",
@@ -137,7 +137,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An error occurred processing the referral" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
