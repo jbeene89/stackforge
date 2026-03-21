@@ -38,10 +38,41 @@ Your drive: Who is impacted by this knowledge? What are they afraid of that the 
 At the end, generate 1-2 <FOLLOW_UP> questions — the voices you heard but couldn't fully articulate. The human dimension that needs deeper exploration.`,
 };
 
+/** Authenticate the caller via JWT and return user ID, or null for failure */
+async function authenticateUser(req: Request): Promise<{ userId: string; error?: never } | { userId?: never; error: Response }> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return {
+      error: new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }),
+    };
+  }
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return {
+      error: new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }),
+    };
+  }
+
+  return { userId: user.id };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const supabase = createClient(
+  const adminClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
@@ -50,13 +81,16 @@ serve(async (req) => {
   const action = url.searchParams.get("action") || "";
 
   try {
-    // GET ?action=poll — Tablet polls for next available job
+    // GET ?action=poll — Authenticated user's tablet polls for their own next job
     if (req.method === "GET" && action === "poll") {
-      // Atomically claim a pending job
-      const { data: jobs, error } = await supabase
+      const auth = await authenticateUser(req);
+      if (auth.error) return auth.error;
+
+      const { data: jobs, error } = await adminClient
         .from("perspective_jobs")
         .select("*")
         .eq("status", "pending")
+        .eq("user_id", auth.userId)
         .order("created_at", { ascending: true })
         .limit(1);
 
@@ -69,12 +103,11 @@ serve(async (req) => {
 
       const job = jobs[0];
 
-      // Mark as processing
-      await supabase
+      await adminClient
         .from("perspective_jobs")
         .update({ status: "processing", updated_at: new Date().toISOString() })
         .eq("id", job.id)
-        .eq("status", "pending"); // optimistic lock
+        .eq("status", "pending");
 
       const systemPrompt = PERSPECTIVE_PROMPTS[job.perspective];
 
@@ -92,14 +125,38 @@ serve(async (req) => {
       });
     }
 
-    // POST ?action=submit — Tablet submits completed result
+    // POST ?action=submit — Authenticated user submits result for their own job
     if (req.method === "POST" && action === "submit") {
+      const auth = await authenticateUser(req);
+      if (auth.error) return auth.error;
+
       const { job_id, result, error: jobError } = await req.json();
 
       if (!job_id) throw new Error("job_id is required");
 
+      // Verify the job belongs to the authenticated user
+      const { data: job, error: fetchErr } = await adminClient
+        .from("perspective_jobs")
+        .select("user_id")
+        .eq("id", job_id)
+        .single();
+
+      if (fetchErr || !job) {
+        return new Response(JSON.stringify({ error: "Job not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (job.user_id !== auth.userId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       if (jobError) {
-        await supabase
+        await adminClient
           .from("perspective_jobs")
           .update({
             status: "failed",
@@ -115,7 +172,7 @@ serve(async (req) => {
 
       if (!result) throw new Error("result is required");
 
-      await supabase
+      await adminClient
         .from("perspective_jobs")
         .update({
           status: "completed",
@@ -129,15 +186,19 @@ serve(async (req) => {
       });
     }
 
-    // GET ?action=status&batch_id=xxx — Check batch completion
+    // GET ?action=status&batch_id=xxx — Check batch completion (user can only see own batches)
     if (req.method === "GET" && action === "status") {
+      const auth = await authenticateUser(req);
+      if (auth.error) return auth.error;
+
       const batchId = url.searchParams.get("batch_id");
       if (!batchId) throw new Error("batch_id is required");
 
-      const { data: jobs, error } = await supabase
+      const { data: jobs, error } = await adminClient
         .from("perspective_jobs")
-        .select("id, perspective, status, result, error_message")
-        .eq("batch_id", batchId);
+        .select("id, perspective, status, result, error_message, user_id")
+        .eq("batch_id", batchId)
+        .eq("user_id", auth.userId);
 
       if (error) throw error;
 
@@ -159,76 +220,17 @@ serve(async (req) => {
       });
     }
 
-    // GET ?action=info — Show connection info / instructions for the tablet
+    // GET ?action=info — Return only generic usage instructions (no secrets)
     if (req.method === "GET" && (action === "info" || action === "")) {
       return new Response(JSON.stringify({
         service: "SoupyForge Perspective Worker",
-        version: "1.0",
+        version: "1.1",
+        note: "All endpoints require a valid Authorization: Bearer <JWT> header. Poll and submit are scoped to the authenticated user's jobs only.",
         endpoints: {
-          poll: "GET ?action=poll — Get next available perspective job",
+          poll: "GET ?action=poll — Get your next available perspective job",
           submit: "POST ?action=submit — Submit result { job_id, result }",
-          status: "GET ?action=status&batch_id=xxx — Check batch progress",
+          status: "GET ?action=status&batch_id=xxx — Check your batch progress",
         },
-        tablet_script: `#!/bin/bash
-# SoupyForge Tablet Worker — runs on your secondary device
-# Polls for perspective jobs and processes them locally using Ollama
-#
-# Prerequisites: Install Ollama and pull a small model:
-#   curl -fsSL https://ollama.com/install.sh | sh
-#   ollama pull llama3.2:1b
-#
-# Usage: chmod +x tablet_worker.sh && ./tablet_worker.sh
-
-API_URL="${Deno.env.get("SUPABASE_URL")}/functions/v1/perspective-worker"
-ANON_KEY="${Deno.env.get("SUPABASE_ANON_KEY")}"
-MODEL="llama3.2:1b"
-POLL_INTERVAL=5
-
-echo "🔗 SoupyForge Tablet Worker"
-echo "   Polling for perspective jobs..."
-echo ""
-
-while true; do
-  # Poll for a job
-  RESPONSE=$(curl -s "\${API_URL}?action=poll" \\
-    -H "apikey: \${ANON_KEY}" \\
-    -H "Content-Type: application/json")
-  
-  JOB_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('job',{}).get('id','') if d.get('job') else '')" 2>/dev/null)
-  
-  if [ -z "$JOB_ID" ]; then
-    sleep $POLL_INTERVAL
-    continue
-  fi
-  
-  PERSPECTIVE=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['job']['perspective'])")
-  PROMPT=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['job']['system_prompt'])")
-  CONTENT=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['job']['input_content'])")
-  
-  echo "📋 Processing: $PERSPECTIVE (job: $JOB_ID)"
-  
-  # Run through local Ollama
-  RESULT=$(echo "$CONTENT" | ollama run "$MODEL" "$PROMPT
-
-$CONTENT" 2>/dev/null)
-  
-  if [ $? -eq 0 ] && [ -n "$RESULT" ]; then
-    # Submit result
-    curl -s -X POST "\${API_URL}?action=submit" \\
-      -H "apikey: \${ANON_KEY}" \\
-      -H "Content-Type: application/json" \\
-      -d "{\\"job_id\\": \\"$JOB_ID\\", \\"result\\": $(echo "$RESULT" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")}" \\
-      > /dev/null
-    echo "  ✅ Done"
-  else
-    curl -s -X POST "\${API_URL}?action=submit" \\
-      -H "apikey: \${ANON_KEY}" \\
-      -H "Content-Type: application/json" \\
-      -d "{\\"job_id\\": \\"$JOB_ID\\", \\"error\\": \\"Ollama processing failed\\"}" \\
-      > /dev/null
-    echo "  ❌ Failed"
-  fi
-done`,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -240,8 +242,8 @@ done`,
     });
   } catch (e) {
     console.error("perspective-worker error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 400,
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
