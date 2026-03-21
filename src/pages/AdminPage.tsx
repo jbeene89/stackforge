@@ -12,6 +12,7 @@ import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
+  Users, Eye, TrendingDown, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
