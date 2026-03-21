@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +10,29 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Authenticate user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { frames, domain_hint, dataset_id, captions } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -26,6 +50,40 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Deduct credits (5 credits for vision model)
+    const cost = 5;
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
+    const { data: credits, error: credErr } = await adminClient
+      .from("user_credits")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (credErr || !credits) throw new Error("Credits not found");
+    if (credits.credits_balance < cost) {
+      return new Response(JSON.stringify({ error: "Insufficient credits", balance: credits.credits_balance, cost }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const newBalance = credits.credits_balance - cost;
+    const newUsed = credits.credits_used + cost;
+
+    await adminClient.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", user.id);
+    await adminClient.from("credit_transactions").insert({
+      user_id: user.id,
+      amount: -cost,
+      balance_after: newBalance,
+      description: `Video frame analysis (${frames.length} frames)`,
+      transaction_type: "deduction",
+    });
 
     const systemPrompt = `You are a visual content analyst for AI training data extraction.
 Your job is to analyze video frames and extract meaningful, structured text content from them.
