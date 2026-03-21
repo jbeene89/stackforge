@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SEOHead } from "@/components/SEOHead";
 import { ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +9,7 @@ const LAST_UPDATED = "March 10, 2026";
 export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Terms of Service" description="StackForge terms of service. Read the terms and conditions for using our AI development platform, including usage rights and limitations." />
       <div className="max-w-3xl mx-auto px-6 py-12">
         <Button variant="ghost" size="sm" asChild className="mb-6">
           <Link to="/"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Home</Link>
