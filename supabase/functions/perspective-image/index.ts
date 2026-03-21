@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,21 +90,78 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // --- Authentication ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = userData.user.id;
+
+    // --- Credit check & deduction ---
+    const CREDIT_COST = 5;
+    const { data: credits, error: credErr } = await supabase
+      .from("user_credits")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (credErr || !credits) {
+      return new Response(JSON.stringify({ error: "Credits not found" }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (credits.credits_balance < CREDIT_COST) {
+      return new Response(JSON.stringify({ error: "Insufficient credits", balance: credits.credits_balance, cost: CREDIT_COST }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const newBalance = credits.credits_balance - CREDIT_COST;
+    const newUsed = credits.credits_used + CREDIT_COST;
+    await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
+    await supabase.from("credit_transactions").insert({
+      user_id: userId,
+      amount: -CREDIT_COST,
+      balance_after: newBalance,
+      description: "Perspective image generation",
+      transaction_type: "deduction",
+    });
+
+    // --- Process request ---
     const { prompt, selectedPerspectives, imageModel } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
     if (!prompt) throw new Error("Prompt is required");
 
     const textModel = "google/gemini-3-flash-preview";
     const imgModel = imageModel || "google/gemini-3.1-flash-image-preview";
 
-    // Filter perspectives based on user selection
     const activePerspectives = selectedPerspectives?.length
       ? PERSPECTIVES.filter((p) => selectedPerspectives.includes(p.id))
       : PERSPECTIVES;
 
-    // Step 1: Run all perspectives in parallel
     const perspectiveResults = await Promise.allSettled(
       activePerspectives.map((p) =>
         callAI(LOVABLE_API_KEY, p.system, `Enhance this image prompt: "${prompt}"`, textModel).then((result) => ({
@@ -122,7 +180,6 @@ serve(async (req) => {
       throw new Error("All perspective analyses failed");
     }
 
-    // Step 2: Synthesize all perspectives into one mega-prompt
     const synthesisInput = successfulPerspectives
       .map((p) => `[${p.name}]: ${p.enhancement}`)
       .join("\n\n");
@@ -134,7 +191,6 @@ serve(async (req) => {
       textModel
     );
 
-    // Step 3: Generate the image
     const imageDataUrl = await generateImage(LOVABLE_API_KEY, synthesisPrompt, imgModel);
 
     return new Response(
