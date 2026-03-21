@@ -172,13 +172,20 @@ export function useReferralStats() {
         .eq("referrer_id", user!.id)
         .order("created_at", { ascending: false });
 
+      // Fetch the user's unique referral code from their profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("user_id", user!.id)
+        .single();
+
       const totalEarned = (earnings as any[] || []).reduce((sum: number, e: any) => sum + e.amount, 0);
 
       return {
         referralCount: (referrals as any[] || []).length,
         totalEarned,
         earnings: (earnings as any[] || []),
-        referralCode: user!.id.slice(0, 8),
+        referralCode: (profile as any)?.referral_code || "",
       };
     },
   });
