@@ -9,6 +9,7 @@ const LAST_UPDATED = "March 10, 2026";
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Privacy Policy" description="StackForge privacy policy. Learn how we collect, use, and protect your data when you use our AI development platform." />
       <div className="max-w-3xl mx-auto px-6 py-12">
         <Button variant="ghost" size="sm" asChild className="mb-6">
           <Link to="/"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Home</Link>
