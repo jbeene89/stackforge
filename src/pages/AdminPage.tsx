@@ -100,6 +100,22 @@ const SOCIAL_POSTS = [
     ],
     shareUrl: (text: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
   },
+  {
+    platform: "Reddit",
+    color: "bg-[hsl(16,100%,50%)]",
+    emoji: "🔴",
+    posts: [
+      {
+        title: "r/microsaas launch",
+        body: `Title: I built a visual AI platform that lets you design agents, chain models, and deploy to Android — no ML experience needed\n\nHey r/microsaas 👋\n\nI've been building Soupy Lab — a no-code platform for designing AI agents and multi-model pipelines.\n\nThe idea: instead of wrapping one API, you wire together specialists (GPT-5, Gemini, open-source SLMs) into reasoning chains with guardrails, evaluators, and routing logic.\n\nWhat it does:\n• Visual module builder — define role, tone, boundaries, output format\n• Stack canvas — drag-and-drop pipeline editor (like n8n but for AI reasoning)\n• Dataset engineering — build training data from chat exports, web scrapes, founder interviews\n• Perspective training — reshape model behavior with multi-lens analysis\n• One-click deploy to web or Android\n• Marketplace — sell your trained modules to other builders\n\nMonetization: freemium credits model (50 free/mo), paid tiers unlock more credits + features. Creators earn when their templates sell on the marketplace.\n\nStack: React + Supabase + Edge Functions. No backend servers to manage.\n\nWould love feedback from other builders here. What would make this useful to you?\n\n${SITE_URL}`,
+      },
+      {
+        title: "r/microsaas traction update",
+        body: `Title: Soupy Lab — building a modular AI platform, here's what I learned\n\nQuick update on Soupy Lab (${SITE_URL}).\n\nThe core insight: most AI tools are monolithic wrappers. We let users build *modular* AI systems — each piece has a defined role, explicit boundaries, and traceable output.\n\nKey differentiators:\n• Selective Unlearning — surgically remove behaviors from models\n• Popcorn Injection — knowledge densification technique\n• CDPT (Cognitive Diversity Perspective Training) — train from multiple reasoning angles\n• Full ownership — your trained model is yours forever, sell it on our marketplace\n\nWould love to hear what the r/microsaas community thinks about the positioning.\n\n${SITE_URL}`,
+      },
+    ],
+    shareUrl: (text: string) => `https://www.reddit.com/submit?url=${encodeURIComponent(SITE_URL)}&title=${encodeURIComponent(text.split('\n')[0] || 'Soupy Lab')}`,
+  },
 ];
 
 export default function AdminPage() {
