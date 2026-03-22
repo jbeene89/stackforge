@@ -958,7 +958,7 @@ export default function LandingPage() {
                   <Badge variant="outline" className="text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
                 </div>
                 <h3 className="font-display font-bold text-base sm:text-lg mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
                 {uc.modules > 0 && (
                   <div className="mt-3 text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
                 )}
