@@ -687,7 +687,7 @@ export default function LandingPage() {
                   <item.icon className={`h-7 w-7 ${item.color}`} />
                 </div>
                 <h3 className={`text-lg sm:text-xl font-display font-bold mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
               </motion.div>
             ))}
           </div>
