@@ -367,15 +367,6 @@ export default function LandingPage() {
       <section className="relative pt-24 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
         {/* Background layers */}
         <div className="absolute inset-0 gradient-mesh" />
-        <PyreflyBackground count={50} />
-
-        {/* Decorative rune circles - hidden on mobile to prevent overflow */}
-        <div className="absolute top-20 -left-16 opacity-30 hidden sm:block">
-          <RuneCircle size={200} />
-        </div>
-        <div className="absolute bottom-0 -right-20 opacity-20 hidden sm:block">
-          <RuneCircle size={260} />
-        </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
