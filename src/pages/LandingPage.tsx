@@ -6,7 +6,7 @@ import {
   Sparkles, Globe, Smartphone, Brain, Layers, ArrowRight, Zap, Shield, Eye,
   Play, CheckCircle2, ChevronRight, Command, GitBranch, Target, Cpu,
   FileCode, Workflow, Lock, BarChart3, Wrench, Scissors, Database, FlaskConical, Eraser,
-  Menu, X, Moon
+  Menu, X, Moon, HardDrive, Upload, Fingerprint, Server
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
