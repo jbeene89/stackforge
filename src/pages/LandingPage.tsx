@@ -229,6 +229,14 @@ const deepCustomization = [
     color: "text-forge-violet",
     bgColor: "bg-forge-violet/10 border-forge-violet/20",
   },
+  {
+    icon: Moon,
+    title: "Idle Self-Training",
+    desc: "Your model remembers corrections and learnings in RAM during a session. When idle, it autonomously generates training data from those corrections and fine-tunes itself — a closed-loop that gets smarter while you sleep.",
+    tag: "Session Memory → Auto-Train",
+    color: "text-forge-emerald",
+    bgColor: "bg-forge-emerald/10 border-forge-emerald/20",
+  },
 ];
 
 const realUseCases = [
