@@ -10,7 +10,7 @@ interface SpriteSettings {
 }
 
 const SpriteSettingsContext = createContext<SpriteSettings>({
-  visible: true,
+  visible: false,
   setVisible: () => {},
   sizeMultiplier: 1.4,
   setSizeMultiplier: () => {},
@@ -23,7 +23,7 @@ export const useSpriteSettings = () => useContext(SpriteSettingsContext);
 const STORAGE_KEY = "soupy-sprite-settings";
 
 export function SpriteSettingsProvider({ children }: { children: ReactNode }) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [sizeMultiplier, setSizeMultiplier] = useState(1.4);
   const [spellsEnabled, setSpellsEnabled] = useState(true);
 

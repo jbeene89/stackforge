@@ -12,8 +12,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Rajdhani", "system-ui", "sans-serif"],
-        display: ["Cinzel", "serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Exo 2", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
