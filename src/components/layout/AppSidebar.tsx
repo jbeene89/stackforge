@@ -143,79 +143,115 @@ export function AppSidebar() {
       <div className="mx-3 ffx-divider" />
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Main</SidebarGroupLabel>
+        {/* ══ SLM Lab — Hero Feature ══ */}
+        <SidebarGroup defaultOpen>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-primary/80">
+            🔥 SLM Lab
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title + ((item as any).soon ? " (Coming Soon)" : "")}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && (
-                        <span className="font-semibold flex items-center gap-1.5">
-                          {item.title}
-                          {(item as any).soon && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
-                              Soon
-                            </Badge>
-                          )}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Tools</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {toolItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title + ((item as any).soon ? " (Coming Soon)" : "")}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && (
-                        <span className="font-semibold flex items-center gap-1.5">
-                          {item.title}
-                          {(item as any).soon && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
-                              Soon
-                            </Badge>
-                          )}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">System</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminItems.map((item) => (
+              {slmLabItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
+                    <NavLink to={item.url}>
+                      <item.icon className={`h-4 w-4 ${(item as any).hero ? "text-primary" : ""}`} />
+                      {!collapsed && (
+                        <span className={`font-semibold ${(item as any).hero ? "text-primary" : ""}`}>
+                          {item.title}
+                        </span>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* ══ Build ══ */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Build</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {buildItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-semibold">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ══ Deploy & Run ══ */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Deploy & Run</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {deployItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-semibold">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ══ Explore ══ */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">Explore</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {exploreItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title + ((item as any).soon ? " (Coming Soon)" : "")}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && (
+                        <span className="font-semibold flex items-center gap-1.5">
+                          {item.title}
+                          {(item as any).soon && (
+                            <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
+                              Soon
+                            </Badge>
+                          )}
+                        </span>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ══ System ══ */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-muted-foreground/60">System</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-semibold">{item.title}</span>}
