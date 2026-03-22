@@ -521,7 +521,6 @@ export default function LandingPage() {
       <section className="relative py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
         {/* Subtle background */}
         <div className="absolute inset-0 gradient-mesh opacity-50" />
-        <PyreflyBackground count={20} />
 
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
