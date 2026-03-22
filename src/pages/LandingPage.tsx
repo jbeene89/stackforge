@@ -372,12 +372,14 @@ export default function LandingPage() {
               Serve Android apps for the field. Taste-test every step.
             </p>
 
-            <p className="text-xs sm:text-sm text-forge-gold/80 font-semibold mb-6 sm:mb-8">
+             <p className="text-xs sm:text-sm text-forge-gold/80 font-semibold mb-6 sm:mb-8">
               ⚡ 50 free credits/month — no credit card needed
             </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
               <Link to="/signup" className="w-full sm:w-auto">
                 <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold group w-full sm:w-auto glow-primary">
-                  Start Building <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  Start Building Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/dashboard" className="w-full sm:w-auto">
@@ -388,6 +390,7 @@ export default function LandingPage() {
             </div>
 
             <TypewriterDemo />
+            <TrustBar />
           </motion.div>
         </div>
 
