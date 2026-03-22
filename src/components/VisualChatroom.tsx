@@ -54,7 +54,8 @@ export default function VisualChatroom() {
       const { data, error } = await supabase.functions.invoke("visual-chatroom", {
         body: {
           characterId: char.id,
-          seedPrompt: isFirst ? seedPrompt : null,
+          seedPrompt: isFirst ? (seedPrompt || null) : null,
+          seedImage: isFirst ? seedImage : null,
           previousImages,
           imageModel: "google/gemini-3.1-flash-image-preview",
         },
