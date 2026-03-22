@@ -46,7 +46,7 @@ Export to Unity, Unreal Engine, ROS 2, Arduino, and Python with auto-generated, 
 SLM mode for local model execution. On-device templates, edge training, and inference playground for running models directly on phones.
 
 ### 📄 White Paper Engine
-Live-streaming academic documentation engine for "Curiosity-Driven Perspective Training" — the methodology behind StackForge's multi-perspective AI approach.
+Live-streaming academic documentation engine for "Curiosity-Driven Perspective Training" — the methodology behind Soupy Lab's multi-perspective AI approach.
 
 ---
 
