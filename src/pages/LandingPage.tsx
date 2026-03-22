@@ -597,7 +597,7 @@ export default function LandingPage() {
                       <h3 className="text-sm sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
                       <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
                   </div>
                 </div>
               </motion.div>
