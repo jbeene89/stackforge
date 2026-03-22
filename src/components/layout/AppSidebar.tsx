@@ -100,7 +100,7 @@ const exploreItems = [
   { title: "Capture", url: "/capture", icon: Smartphone, tip: "Capture training data from your phone — photos, voice, text" },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical, tip: "Benchmark and test modules in isolation" },
   { title: "Experimental", url: "/experimental", icon: Flame, tip: "Bleeding-edge features and prototypes" },
-  { title: "Model Zoo", url: "/models", icon: Box, soon: true, tip: "Browse and download pre-trained model checkpoints" },
+  { title: "Model Zoo", url: "/models", icon: Box, tip: "Browse and download pre-trained model checkpoints" },
   { title: "Signal Lab", url: "/signals", icon: Radio, soon: true, tip: "Real-time signal processing and analysis" },
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train models directly on edge hardware" },
   { title: "Robotics", url: "/robotics", icon: Joystick, soon: true, tip: "AI controllers for robotic systems" },
