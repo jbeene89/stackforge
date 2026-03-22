@@ -588,6 +588,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ════════════════════ HOW IT WORKS VIDEOS ════════════════════ */}
+      <HowItWorksVideos />
+
       {/* ════════════════════ REAL USE CASES ════════════════════ */}
       <section id="use-cases" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
