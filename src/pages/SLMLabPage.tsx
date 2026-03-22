@@ -3300,6 +3300,9 @@ export default function SLMLabPage() {
               </p>
             </div>
 
+            {/* Credit Cost Estimator */}
+            <CreditCostEstimator />
+
             {/* Two paths */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Path 1: Use My Data */}
