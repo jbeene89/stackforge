@@ -10,9 +10,8 @@ import {
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { PyreflyBackground } from "@/components/PyreflyBackground";
-import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
-import { CompanionSprites } from "@/components/CompanionSprites";
+import { FFXDivider } from "@/components/FFXOrnament";
+
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { TrustBar } from "@/components/landing/TrustBar";
@@ -308,8 +307,6 @@ export default function LandingPage() {
         title="No-Code AI Agent & Pipeline Builder"
         description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
       />
-      {/* Companion Sprites - they follow you everywhere */}
-      <CompanionSprites />
 
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
@@ -370,15 +367,6 @@ export default function LandingPage() {
       <section className="relative pt-24 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
         {/* Background layers */}
         <div className="absolute inset-0 gradient-mesh" />
-        <PyreflyBackground count={50} />
-
-        {/* Decorative rune circles - hidden on mobile to prevent overflow */}
-        <div className="absolute top-20 -left-16 opacity-30 hidden sm:block">
-          <RuneCircle size={200} />
-        </div>
-        <div className="absolute bottom-0 -right-20 opacity-20 hidden sm:block">
-          <RuneCircle size={260} />
-        </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
@@ -533,7 +521,6 @@ export default function LandingPage() {
       <section className="relative py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
         {/* Subtle background */}
         <div className="absolute inset-0 gradient-mesh opacity-50" />
-        <PyreflyBackground count={20} />
 
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
@@ -622,7 +609,6 @@ export default function LandingPage() {
       {/* ════════════════════ YOUR BRAIN YOUR MODEL ════════════════════ */}
       <section className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-60" />
-        <PyreflyBackground count={40} />
 
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
@@ -983,7 +969,6 @@ export default function LandingPage() {
       {/* ════════════════════ CTA ════════════════════ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-40" />
-        <PyreflyBackground count={30} />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
