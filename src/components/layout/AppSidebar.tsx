@@ -157,20 +157,29 @@ export function AppSidebar() {
             <SidebarMenu>
               {slmLabItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className={`h-4 w-4 ${(item as any).hero ? "text-primary" : ""}`} />
-                      {!collapsed && (
-                        <span className={`font-semibold ${(item as any).hero ? "text-primary" : ""}`}>
-                          {item.title}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.url)}
+                        tooltip={collapsed ? item.title : undefined}
+                      >
+                        <NavLink to={item.url}>
+                          <item.icon className={`h-4 w-4 ${(item as any).hero ? "text-primary" : ""}`} />
+                          {!collapsed && (
+                            <span className={`font-semibold ${(item as any).hero ? "text-primary" : ""}`}>
+                              {item.title}
+                            </span>
+                          )}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -186,12 +195,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {buildItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={collapsed ? item.title : undefined}>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span className="font-semibold">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -205,12 +223,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {deployItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={collapsed ? item.title : undefined}>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span className="font-semibold">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -224,25 +251,34 @@ export function AppSidebar() {
             <SidebarMenu>
               {exploreItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title + ((item as any).soon ? " (Coming Soon)" : "")}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && (
-                        <span className="font-semibold flex items-center gap-1.5">
-                          {item.title}
-                          {(item as any).soon && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
-                              Soon
-                            </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.url)}
+                        tooltip={collapsed ? item.title + ((item as any).soon ? " (Coming Soon)" : "") : undefined}
+                      >
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && (
+                            <span className="font-semibold flex items-center gap-1.5">
+                              {item.title}
+                              {(item as any).soon && (
+                                <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
+                                  Soon
+                                </Badge>
+                              )}
+                            </span>
                           )}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -256,12 +292,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {adminItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={collapsed ? item.title : undefined}>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span className="font-semibold">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
