@@ -100,7 +100,7 @@ export default function VisualChatroom() {
 
   // === Council mode (all 5, 3 rounds) ===
   const startCouncil = async () => {
-    if (!seedPrompt.trim()) { toast.error("Give the council a starting theme"); return; }
+    if (!seedPrompt.trim() && !seedImage) { toast.error("Give the council a starting theme or image"); return; }
     setIsRunning(true); setIsPaused(false); abortRef.current = false;
     setMessages([]); setRound(1);
 
