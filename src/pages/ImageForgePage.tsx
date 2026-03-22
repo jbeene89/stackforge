@@ -651,11 +651,18 @@ export default function ImageForgePage() {
               </div>
               <div className="flex flex-col gap-2">
                 <Select value={imageModel} onValueChange={setImageModel}>
-                  <SelectTrigger className="w-[130px] h-8 text-xs bg-background/60">
+                  <SelectTrigger className="w-[140px] h-8 text-xs bg-background/60">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {IMAGE_MODELS.map(m => (
+                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Gemini</div>
+                    {IMAGE_MODELS.filter(m => m.provider === "gemini").map(m => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <span className="text-xs">{m.name}</span>
+                      </SelectItem>
+                    ))}
+                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-1 border-t border-border/30 pt-2">Stable Diffusion</div>
+                    {IMAGE_MODELS.filter(m => m.provider === "stability").map(m => (
                       <SelectItem key={m.id} value={m.id}>
                         <span className="text-xs">{m.name}</span>
                       </SelectItem>
