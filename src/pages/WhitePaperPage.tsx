@@ -218,11 +218,12 @@ Write the complete white paper with these sections:
 10. The Curiosity-Distance Metric
 11. Dream Mode Synthesis
 12. Cross-Domain Gap Sensing: Preemptive Intelligence (flagship section)
-13. Experimental Framework (proposed evaluation methodology — include metrics for measuring gap-chain depth and cross-domain bridge quality)
-14. Expected Impact & Applications
-15. Limitations & Future Work
-16. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
-17. References
+13. Idle Self-Training: Session Memory → Autonomous Refinement (how models retain corrections in RAM during use, generate training data from mistakes when idle, and micro-fine-tune themselves overnight — the closed-loop self-improvement cycle)
+14. Experimental Framework (proposed evaluation methodology — include metrics for measuring gap-chain depth and cross-domain bridge quality)
+15. Expected Impact & Applications
+16. Limitations & Future Work
+17. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
+18. References
 
 Make it rigorous, novel, and compelling. This is a genuine methodological breakthrough in training data generation for small language models. The central thesis is preemptive intelligence — not better reasoning, but complete knowledge. The recursive gap-fill loop is the mechanism that makes preemptive intelligence possible: gaps are not just detected but filled, and each fill is self-inspected for its own gaps, creating chains of completeness that cross multiple domain boundaries.`;
 
