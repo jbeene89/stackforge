@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { PyreflyBackground } from "@/components/PyreflyBackground";
-import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
+import { FFXDivider } from "@/components/FFXOrnament";
 import { CompanionSprites } from "@/components/CompanionSprites";
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { SocialProof } from "@/components/landing/SocialProof";
