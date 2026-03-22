@@ -339,9 +339,20 @@ export default function VisualChatroom() {
       <Card className="border-border/50 bg-card/80 backdrop-blur">
         <CardContent className="p-4">
           <div className="flex gap-3 items-end">
+            {/* Seed image preview */}
+            {seedImage && (
+              <div className="relative group shrink-0">
+                <img src={seedImage} alt="Seed" className="h-10 w-10 rounded-md object-cover border border-border" />
+                <button
+                  onClick={() => setSeedImage(null)}
+                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={isRunning}
+                >×</button>
+              </div>
+            )}
             <div className="flex-1">
               <Input
-                placeholder="Starting theme... (e.g. 'fire and ice colliding in space')"
+                placeholder={seedImage ? "Optional: add a text theme too..." : "Starting theme... (e.g. 'fire and ice colliding in space')"}
                 value={seedPrompt}
                 onChange={e => setSeedPrompt(e.target.value)}
                 disabled={isRunning}
@@ -350,7 +361,19 @@ export default function VisualChatroom() {
               />
             </div>
             <div className="flex gap-2">
-              {/* Image injection button */}
+              {/* Seed image upload */}
+              <input ref={seedImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleSeedImageUpload} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seedImageInputRef.current?.click()}
+                title="Start with an image"
+                disabled={isRunning}
+              >
+                <Upload className="h-3 w-3" />
+              </Button>
+
+              {/* Mid-conversation image injection */}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               <Button
                 variant="outline"
