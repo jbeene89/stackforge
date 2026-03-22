@@ -8,7 +8,6 @@ import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X, Gift } from "lucide-
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 function PasswordStrength({ password }: { password: string }) {
