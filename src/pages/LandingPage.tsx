@@ -319,7 +319,7 @@ export default function LandingPage() {
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-base font-bold font-display tracking-wider">
-              Soupy<span className="gradient-text">Forge</span>
+              Soupy<span className="gradient-text">Lab</span>
             </span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground font-medium">
