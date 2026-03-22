@@ -102,10 +102,10 @@ const exploreItems = [
   { title: "Experimental", url: "/experimental", icon: Flame, tip: "Bleeding-edge features and prototypes" },
   { title: "Model Zoo", url: "/models", icon: Box, soon: true, tip: "Browse and download pre-trained model checkpoints" },
   { title: "Signal Lab", url: "/signals", icon: Radio, soon: true, tip: "Real-time signal processing and analysis" },
-  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true, tip: "Train models directly on edge hardware" },
+  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train models directly on edge hardware" },
   { title: "Robotics", url: "/robotics", icon: Joystick, soon: true, tip: "AI controllers for robotic systems" },
   { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true, tip: "AI-powered game logic and NPC behavior" },
-  { title: "Device Console", url: "/console", icon: Smartphone, soon: true, tip: "Monitor and debug on-device model performance" },
+  { title: "Device Console", url: "/console", icon: Smartphone, tip: "Monitor and debug on-device model performance" },
 ];
 
 const adminItems = [
