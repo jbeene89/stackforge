@@ -9,7 +9,7 @@ import {
   Menu, X, Moon, HardDrive, Upload, Fingerprint, Server, Store, Coins, Crown, Repeat
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { PyreflyBackground } from "@/components/PyreflyBackground";
 import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
 import { CompanionSprites } from "@/components/CompanionSprites";
@@ -17,6 +17,29 @@ import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { TrustBar } from "@/components/landing/TrustBar";
 import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
+
+// ------- ANIMATED COUNT-UP -------
+
+function CountUp({ value, prefix = "", suffix = "", duration = 2000 }: { value: number; prefix?: string; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(value * eased));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [inView, value, duration]);
+
+  return <span ref={ref}>{prefix}{inView ? display.toLocaleString() : 0}{suffix}</span>;
+}
 
 // ------- HERO TYPEWRITER -------
 
@@ -532,7 +555,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div className="text-sm font-bold font-display tracking-wide">{p.label}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
+                  <div className="text-sm text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
                 </div>
               </motion.div>
             ))}
@@ -574,7 +597,7 @@ export default function LandingPage() {
                       <h3 className="text-sm sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
                       <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -664,7 +687,7 @@ export default function LandingPage() {
                   <item.icon className={`h-7 w-7 ${item.color}`} />
                 </div>
                 <h3 className={`text-lg sm:text-xl font-display font-bold mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -720,15 +743,17 @@ export default function LandingPage() {
 
             <div className="mt-12 sm:mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
               {[
-                { label: "Zero to Model", value: "< 5 min", sub: "Personality-only deploy" },
-                { label: "Full CDPT Run", value: "13 calls", sub: "Per data point" },
-                { label: "Local Training", value: "100% offline", sub: "Your hardware, your data" },
-                { label: "Device Target", value: "2–16 GB RAM", sub: "Phone to workstation" },
+                { label: "Zero to Model", numVal: 5, prefix: "< ", suffix: " min", display: null, sub: "Personality-only deploy" },
+                { label: "Full CDPT Run", numVal: 13, prefix: "", suffix: " calls", display: null, sub: "Per data point" },
+                { label: "Local Training", numVal: 100, prefix: "", suffix: "% offline", display: null, sub: "Your hardware, your data" },
+                { label: "Device Target", numVal: null, prefix: "", suffix: "", display: "2–16 GB RAM", sub: "Phone to workstation" },
               ].map((s) => (
                 <div key={s.label} className="glass rounded-xl p-3 sm:p-4">
-                  <p className="text-lg sm:text-2xl font-display font-bold gradient-text">{s.value}</p>
-                  <p className="text-[10px] sm:text-xs font-bold text-foreground mt-1">{s.label}</p>
-                  <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{s.sub}</p>
+                  <p className="text-lg sm:text-2xl font-display font-bold gradient-text">
+                    {s.numVal !== null ? <CountUp value={s.numVal} prefix={s.prefix} suffix={s.suffix} /> : s.display}
+                  </p>
+                  <p className="text-xs sm:text-sm font-bold text-foreground mt-1">{s.label}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">{s.sub}</p>
                 </div>
               ))}
             </div>
@@ -829,7 +854,7 @@ export default function LandingPage() {
                   <item.icon className={`h-6 w-6 ${item.color}`} />
                 </div>
                 <h3 className={`text-base sm:text-lg font-display font-bold mb-2 ${item.color} tracking-wide`}>{item.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -861,7 +886,7 @@ export default function LandingPage() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.4 + i * 0.08 }}
-                      className="flex items-start gap-3 text-xs sm:text-sm text-muted-foreground font-medium"
+                      className="flex items-start gap-3 text-sm text-muted-foreground font-medium"
                     >
                       <point.icon className="h-4 w-4 text-forge-gold shrink-0 mt-0.5" />
                       <span>{point.text}</span>
@@ -872,15 +897,17 @@ export default function LandingPage() {
 
               <div className="grid grid-cols-2 gap-4 text-center">
                 {[
-                  { value: "100%", label: "Yours", sub: "No lock-in, no expiry" },
-                  { value: "$0", label: "API Costs", sub: "Runs on your hardware" },
-                  { value: "10%", label: "Referral Cut", sub: "Passive credit income" },
-                  { value: "∞", label: "Resale", sub: "Sell the same template forever" },
+                  { numValue: 100, suffix: "%", display: null, label: "Yours", sub: "No lock-in, no expiry" },
+                  { numValue: 0, suffix: "", display: "$0", label: "API Costs", sub: "Runs on your hardware" },
+                  { numValue: 10, suffix: "%", display: null, label: "Referral Cut", sub: "Passive credit income" },
+                  { numValue: null, suffix: "", display: "∞", label: "Resale", sub: "Sell the same template forever" },
                 ].map((s) => (
                   <div key={s.label} className="glass rounded-xl p-3 sm:p-4">
-                    <p className="text-xl sm:text-2xl font-display font-bold gradient-text">{s.value}</p>
-                    <p className="text-[10px] sm:text-xs font-bold text-foreground mt-1">{s.label}</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{s.sub}</p>
+                    <p className="text-xl sm:text-2xl font-display font-bold gradient-text">
+                      {s.numValue !== null ? <CountUp value={s.numValue} suffix={s.suffix} prefix={s.display === "$0" ? "$" : ""} /> : s.display}
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-foreground mt-1">{s.label}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">{s.sub}</p>
                   </div>
                 ))}
               </div>
@@ -933,7 +960,7 @@ export default function LandingPage() {
                   <Badge variant="outline" className="text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
                 </div>
                 <h3 className="font-display font-bold text-base sm:text-lg mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
                 {uc.modules > 0 && (
                   <div className="mt-3 text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
                 )}
