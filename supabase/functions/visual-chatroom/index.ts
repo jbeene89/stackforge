@@ -74,7 +74,7 @@ serve(async (req) => {
     if (userError || !userData.user) throw new Error("Not authenticated");
     const userId = userData.user.id;
 
-    const { characterId, seedPrompt, previousImages, imageModel } = await req.json();
+    const { characterId, seedPrompt, seedImage, previousImages, imageModel } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
