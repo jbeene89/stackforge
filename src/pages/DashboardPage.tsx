@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { usePendingReferral } from "@/hooks/usePendingReferral";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

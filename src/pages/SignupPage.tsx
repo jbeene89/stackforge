@@ -91,17 +91,6 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      const pendingRef = localStorage.getItem("pending_referral_code");
-      if (pendingRef) {
-        localStorage.removeItem("pending_referral_code");
-        supabase.functions.invoke("process-referral", {
-          body: { referral_code: pendingRef },
-        }).then(({ data }) => {
-          if (data?.success) {
-            toast.success(data.message || "Referral bonus applied!");
-          }
-        }).catch(() => {});
-      }
       navigate("/dashboard", { replace: true });
     }
   }, [user, loading, navigate]);
