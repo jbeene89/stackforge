@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://soupy.lovable.app/sitemap.xml
+Sitemap: https://soupylab.com/sitemap.xml

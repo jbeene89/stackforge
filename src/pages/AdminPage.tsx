@@ -29,7 +29,7 @@ const featureFlags = [
   { name: "Usage Analytics", description: "Detailed per-user and per-project analytics", enabled: true, category: "analytics" },
 ];
 
-const SITE_URL = "https://soupy.lovable.app";
+const SITE_URL = "https://soupylab.com";
 
 const SOCIAL_POSTS = [
   {
