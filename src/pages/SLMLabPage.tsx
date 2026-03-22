@@ -30,6 +30,7 @@ import {
   Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye
 } from "lucide-react";
 import { TerminalPanel } from "@/components/TerminalPanel";
+import { CreditCostEstimator } from "@/components/CreditCostEstimator";
 import {
   useDatasets, useCreateDataset, useDeleteDataset,
   useSamples, useCreateSample, useUpdateSample, useDeleteSample,
@@ -3298,6 +3299,9 @@ export default function SLMLabPage() {
                 Choose your path. Use your own data for a grounded model, or Popcorn to densify stock knowledge — zero data needed.
               </p>
             </div>
+
+            {/* Credit Cost Estimator */}
+            <CreditCostEstimator />
 
             {/* Two paths */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
