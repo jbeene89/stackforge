@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://soupy.lovable.app/</loc>
+    <loc>https://soupylab.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://soupy.lovable.app/pricing</loc>
+    <loc>https://soupylab.com/pricing</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://soupy.lovable.app/login</loc>
+    <loc>https://soupylab.com/login</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://soupy.lovable.app/signup</loc>
+    <loc>https://soupylab.com/signup</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://soupy.lovable.app/privacy</loc>
+    <loc>https://soupylab.com/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://soupy.lovable.app/terms</loc>
+    <loc>https://soupylab.com/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://soupy.lovable.app/install</loc>
+    <loc>https://soupylab.com/install</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
