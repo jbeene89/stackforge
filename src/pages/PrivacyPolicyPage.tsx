@@ -4,7 +4,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-const LAST_UPDATED = "March 10, 2026";
+const LAST_UPDATED = "March 22, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
