@@ -1,4 +1,4 @@
-# SoupyForge — Local Development Guide
+# Soupy Lab — Local Development Guide
 
 ## 🚀 Quick Start (Web)
 
