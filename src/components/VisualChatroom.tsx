@@ -19,6 +19,14 @@ import { useQueryClient } from "@tanstack/react-query";
 
 type Mode = "council" | "duo";
 
+const processDrop = (file: File, onSuccess: (base64: string) => void) => {
+  if (!file.type.startsWith("image/")) { toast.error("Please drop an image file"); return; }
+  if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+  const reader = new FileReader();
+  reader.onload = () => onSuccess(reader.result as string);
+  reader.readAsDataURL(file);
+};
+
 export default function VisualChatroom() {
   const { hasCredits, balance, requireCredits } = useCreditsGate(3);
   const queryClient = useQueryClient();
