@@ -56,42 +56,51 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
-// Items marked `soon: true` show a "Soon" badge and are not yet functional
-const mainItems = [
+// SLM Lab — the hero feature, gets its own top-level group
+const slmLabItems = [
+  { title: "SLM Lab", url: "/slm-lab", icon: Sparkles, hero: true },
+  { title: "Swipe Review", url: "/review", icon: SwatchBook },
+  { title: "Training Jobs", url: "/training", icon: Activity },
+  { title: "On-Device SLMs", url: "/on-device", icon: TabletSmartphone },
+  { title: "White Paper", url: "/white-paper", icon: BookOpen },
+];
+
+// Build — creating AI modules, stacks, and apps
+const buildItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Projects", url: "/projects", icon: FolderOpen },
   { title: "AI Modules", url: "/modules", icon: Brain },
   { title: "Stacks", url: "/stacks", icon: Layers },
   { title: "Build-a-AI", url: "/build-ai", icon: Cpu },
-  { title: "Solvers", url: "/solvers", icon: Atom },
-  { title: "Model Zoo", url: "/models", icon: Box, soon: true },
-  { title: "Pipelines", url: "/pipelines", icon: Workflow },
-  { title: "Signal Lab", url: "/signals", icon: Radio, soon: true },
-  { title: "Robotics", url: "/robotics", icon: Joystick, soon: true },
-  { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true },
   { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
   { title: "Image Forge", url: "/image-forge", icon: Image },
-  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true },
-  { title: "SLM Lab", url: "/slm-lab", icon: Sparkles },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
   { title: "Marketplace", url: "/marketplace", icon: Store },
-  { title: "Experimental", url: "/experimental", icon: Flame },
 ];
 
-const toolItems = [
-  { title: "Capture", url: "/capture", icon: Smartphone },
-  { title: "Swipe Review", url: "/review", icon: SwatchBook },
-  { title: "On-Device SLMs", url: "/on-device", icon: Smartphone },
+// Deploy & Run — testing, deployment, inference
+const deployItems = [
+  { title: "Pipelines", url: "/pipelines", icon: Workflow },
   { title: "Deploy Pipeline", url: "/deploy", icon: Rocket },
-  { title: "Phone Guide", url: "/deploy/phone", icon: TabletSmartphone },
+  { title: "Phone Guide", url: "/deploy/phone", icon: Smartphone },
   { title: "Inference", url: "/inference", icon: Terminal },
-  { title: "Device Console", url: "/console", icon: Smartphone, soon: true },
   { title: "Self-Host", url: "/self-host", icon: Server },
   { title: "Export Studio", url: "/export", icon: ScrollText },
-  { title: "White Paper", url: "/white-paper", icon: BookOpen },
-  { title: "Testing Lab", url: "/lab", icon: FlaskConical },
-  { title: "Training Jobs", url: "/training", icon: Activity },
   { title: "Runs", url: "/runs", icon: Activity },
+];
+
+// Explore — experimental and future features
+const exploreItems = [
+  { title: "Solvers", url: "/solvers", icon: Atom },
+  { title: "Capture", url: "/capture", icon: Smartphone },
+  { title: "Testing Lab", url: "/lab", icon: FlaskConical },
+  { title: "Experimental", url: "/experimental", icon: Flame },
+  { title: "Model Zoo", url: "/models", icon: Box, soon: true },
+  { title: "Signal Lab", url: "/signals", icon: Radio, soon: true },
+  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true },
+  { title: "Robotics", url: "/robotics", icon: Joystick, soon: true },
+  { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true },
+  { title: "Device Console", url: "/console", icon: Smartphone, soon: true },
 ];
 
 const adminItems = [
