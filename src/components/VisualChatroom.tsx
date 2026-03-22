@@ -19,6 +19,14 @@ import { useQueryClient } from "@tanstack/react-query";
 
 type Mode = "council" | "duo";
 
+const processDrop = (file: File, onSuccess: (base64: string) => void) => {
+  if (!file.type.startsWith("image/")) { toast.error("Please drop an image file"); return; }
+  if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
+  const reader = new FileReader();
+  reader.onload = () => onSuccess(reader.result as string);
+  reader.readAsDataURL(file);
+};
+
 export default function VisualChatroom() {
   const { hasCredits, balance, requireCredits } = useCreditsGate(3);
   const queryClient = useQueryClient();
@@ -228,16 +236,67 @@ export default function VisualChatroom() {
   const handleSeedImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setSeedImage(reader.result as string);
-    reader.readAsDataURL(file);
+    processDrop(file, (base64) => setSeedImage(base64));
     e.target.value = "";
   }, []);
 
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isRunning) setIsDragging(true);
+  }, [isRunning]);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (isRunning) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) processDrop(file, (base64) => {
+      if (messages.length > 0) {
+        // Mid-conversation injection
+        const injection: ChatMessage = { characterId: "user", image: base64, text: "User dropped image", round: round || 1, isUserInjection: true };
+        setMessages(prev => [...prev, injection]);
+        toast.success("Image injected!");
+      } else {
+        setSeedImage(base64);
+        toast.success("Seed image set!");
+      }
+    });
+  }, [isRunning, messages, round]);
+
   return (
-    <div className="space-y-4">
+    <div
+      className={`space-y-4 relative ${isDragging ? 'ring-2 ring-primary/50 rounded-xl' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drop overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-primary/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-primary/40 flex items-center justify-center pointer-events-none"
+          >
+            <div className="text-center">
+              <Upload className="h-8 w-8 text-primary mx-auto mb-2" />
+              <p className="text-sm font-display font-bold text-primary">Drop image here</p>
+              <p className="text-xs text-muted-foreground">{messages.length > 0 ? "Inject into conversation" : "Use as seed image"}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Mode toggle */}
       <div className="flex items-center justify-center gap-2">
         <Button
@@ -396,7 +455,7 @@ export default function VisualChatroom() {
                     <Coins className="h-3 w-3 mr-1" />
                     {mode === "duo" ? `Duo · ${duoRounds * 2 * 3}cr` : "Start · 45cr"}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
+                  <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim() && !seedImage} title="Generate one turn">
                     <SkipForward className="h-3 w-3" />
                   </Button>
                 </>
