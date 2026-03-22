@@ -105,7 +105,7 @@ const exploreItems = [
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train models directly on edge hardware" },
   { title: "Robotics", url: "/robotics", icon: Joystick, soon: true, tip: "AI controllers for robotic systems" },
   { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true, tip: "AI-powered game logic and NPC behavior" },
-  { title: "Device Console", url: "/console", icon: Smartphone, soon: true, tip: "Monitor and debug on-device model performance" },
+  { title: "Device Console", url: "/console", icon: Smartphone, tip: "Monitor and debug on-device model performance" },
 ];
 
 const adminItems = [
