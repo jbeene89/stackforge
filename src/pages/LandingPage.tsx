@@ -596,6 +596,165 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ════════════════════ YOUR BRAIN YOUR MODEL ════════════════════ */}
+      <section className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+        <div className="absolute inset-0 gradient-mesh opacity-60" />
+        <PyreflyBackground count={40} />
+
+        <div className="max-w-5xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-14 sm:mb-20"
+          >
+            <Badge variant="outline" className="text-[10px] mb-5 border-primary/30 text-primary font-semibold tracking-wider">
+              THE REAL POWER
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-wide leading-[1.15] mb-6">
+              Put <span className="gradient-text">your brain</span> inside a model.
+              <br className="hidden sm:block" />
+              Train it on <span className="text-forge-gold">anything</span>. Run it on <span className="text-forge-cyan">any device</span>.
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
+              Your knowledge. Your domain expertise. Your reasoning style. Your corrections.
+              Inject it all into a small language model — then train on <span className="text-foreground font-bold">0 to 100,000+ data points</span>,
+              on whatever hardware you have.
+            </p>
+          </motion.div>
+
+          {/* The big stats / flex row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-14">
+            {[
+              {
+                icon: Upload,
+                stat: "Any Knowledge",
+                desc: "Conversations, PDFs, voice memos, URLs, photos, HuggingFace datasets, browser history — if it's yours, it goes in.",
+                color: "text-forge-gold",
+                bgColor: "bg-forge-gold/10 border-forge-gold/20",
+                glow: "hover:shadow-[0_0_30px_hsl(var(--forge-gold)/0.15)]",
+              },
+              {
+                icon: Fingerprint,
+                stat: "Your Reasoning",
+                desc: "Cognitive Fingerprinting extracts how you think — your heuristics, domain bridges, reasoning patterns — and bakes them into training.",
+                color: "text-primary",
+                bgColor: "bg-primary/10 border-primary/20",
+                glow: "hover:shadow-[0_0_30px_hsl(var(--primary)/0.15)]",
+              },
+              {
+                icon: HardDrive,
+                stat: "Any Device",
+                desc: "Laptop CPU, AMD GPU, NVIDIA, Raspberry Pi, phone. If it can run Ollama or llama.cpp, it can run your model.",
+                color: "text-forge-cyan",
+                bgColor: "bg-forge-cyan/10 border-forge-cyan/20",
+                glow: "hover:shadow-[0_0_30px_hsl(var(--forge-cyan)/0.15)]",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.stat}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
+                className={`ffx-card glass-strong rounded-2xl p-7 sm:p-8 text-center border ${item.bgColor} ${item.glow} transition-all duration-500`}
+              >
+                <div className={`w-14 h-14 rounded-xl ${item.bgColor} border flex items-center justify-center mx-auto mb-5`}>
+                  <item.icon className={`h-7 w-7 ${item.color}`} />
+                </div>
+                <h3 className={`text-lg sm:text-xl font-display font-bold mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Data points scale visual */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="ffx-card glass-strong rounded-2xl p-8 sm:p-10 glow-primary"
+          >
+            <div className="text-center mb-8">
+              <h3 className="text-base sm:text-lg font-display font-bold tracking-wide mb-2">Scale as you go</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                Start with zero training data and a personality. Or bring 100K samples. Soupy handles both.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-4 max-w-3xl mx-auto">
+              <span className="text-[10px] sm:text-xs font-mono font-bold text-muted-foreground shrink-0">0</span>
+              <div className="flex-1 relative h-10 sm:h-12 rounded-full overflow-hidden bg-secondary/30 border border-border/30">
+                {/* Gradient fill */}
+                <motion.div
+                  initial={{ width: "0%" }}
+                  whileInView={{ width: "100%" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{ background: "linear-gradient(90deg, hsl(var(--forge-gold)/0.4), hsl(var(--primary)/0.6), hsl(var(--forge-cyan)/0.8))" }}
+                />
+                {/* Milestone markers */}
+                {[
+                  { pct: "5%", label: "Personality\nOnly", mobile: "5" },
+                  { pct: "20%", label: "50\nSamples", mobile: "50" },
+                  { pct: "45%", label: "500\nSamples", mobile: "500" },
+                  { pct: "70%", label: "5,000\nSamples", mobile: "5K" },
+                  { pct: "92%", label: "50K+\nSamples", mobile: "50K+" },
+                ].map((m) => (
+                  <div key={m.pct} className="absolute top-0 bottom-0 flex flex-col items-center justify-center" style={{ left: m.pct }}>
+                    <div className="w-px h-full bg-background/40" />
+                    <span className="absolute -bottom-6 text-[8px] sm:text-[9px] font-mono font-semibold text-muted-foreground whitespace-pre-wrap text-center leading-tight hidden sm:block">
+                      {m.label}
+                    </span>
+                    <span className="absolute -bottom-5 text-[8px] font-mono font-semibold text-muted-foreground sm:hidden">
+                      {m.mobile}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <span className="text-[10px] sm:text-xs font-mono font-bold text-forge-cyan shrink-0">∞</span>
+            </div>
+
+            <div className="mt-12 sm:mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              {[
+                { label: "Zero to Model", value: "< 5 min", sub: "Personality-only deploy" },
+                { label: "Full CDPT Run", value: "13 calls", sub: "Per data point" },
+                { label: "Local Training", value: "100% offline", sub: "Your hardware, your data" },
+                { label: "Device Target", value: "2–16 GB RAM", sub: "Phone to workstation" },
+              ].map((s) => (
+                <div key={s.label} className="glass rounded-xl p-3 sm:p-4">
+                  <p className="text-lg sm:text-2xl font-display font-bold gradient-text">{s.value}</p>
+                  <p className="text-[10px] sm:text-xs font-bold text-foreground mt-1">{s.label}</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{s.sub}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Closing punch */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="mt-10 sm:mt-12 text-center"
+          >
+            <p className="text-sm sm:text-base text-muted-foreground font-semibold mb-6">
+              <span className="text-foreground font-bold">This isn't fine-tuning a chatbot.</span>{" "}
+              This is building a version of AI that thinks like you — runs on your hardware — and never phones home.
+            </p>
+            <Link to="/slm-lab">
+              <Button size="lg" className="gradient-primary text-primary-foreground font-bold glow-primary px-8">
+                <Brain className="h-4 w-4 mr-2" /> Open SLM Lab <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ════════════════════ HOW IT WORKS VIDEOS ════════════════════ */}
       <HowItWorksVideos />
 
