@@ -120,6 +120,9 @@ export default function ImageForgePage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [spokenResults, stage, result]);
 
+  const selectedModelInfo = IMAGE_MODELS.find(m => m.id === imageModel);
+  const isStability = selectedModelInfo?.provider === "stability";
+
   const generate = async () => {
     if (!prompt.trim()) { toast.error("Enter a vision first"); return; }
     setStage("speaking");
@@ -128,19 +131,19 @@ export default function ImageForgePage() {
     setActiveSpeaker(0);
 
     try {
-      const { data, error } = await supabase.functions.invoke("perspective-image", {
+      // Step 1: Always run the council perspectives (text-based, uses Gemini)
+      const { data: perspData, error: perspError } = await supabase.functions.invoke("perspective-image", {
         body: {
           prompt: prompt.trim(),
           selectedPerspectives: CHARACTERS.map(c => c.id),
-          imageModel,
+          imageModel: isStability ? "__skip_image__" : imageModel,
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (perspError) throw perspError;
+      if (perspData?.error) throw new Error(perspData.error);
 
-      // Simulate each character "speaking" in sequence
-      const perspectives: PerspectiveResult[] = data.perspectives || [];
+      const perspectives: PerspectiveResult[] = perspData.perspectives || [];
       for (let i = 0; i < perspectives.length; i++) {
         setActiveSpeaker(i);
         await new Promise(r => setTimeout(r, 800));
@@ -148,12 +151,33 @@ export default function ImageForgePage() {
         await new Promise(r => setTimeout(r, 400));
       }
 
-      // Sketching phase
       setActiveSpeaker(-1);
       setStage("sketching");
       await new Promise(r => setTimeout(r, 1200));
 
-      setResult(data);
+      let finalImage = perspData.image;
+      let synthesizedPrompt = perspData.synthesizedPrompt;
+
+      // Step 2: If Stability model selected, generate image via Stability API
+      if (isStability) {
+        const { data: sdData, error: sdError } = await supabase.functions.invoke("stability-generate", {
+          body: {
+            prompt: synthesizedPrompt,
+            model: imageModel,
+            negative_prompt: "blurry, low quality, distorted, deformed",
+          },
+        });
+
+        if (sdError) throw sdError;
+        if (sdData?.error) throw new Error(sdData.error);
+        finalImage = sdData.image;
+      }
+
+      setResult({
+        image: finalImage,
+        synthesizedPrompt,
+        perspectives,
+      });
       setStage("done");
       toast.success("The council has forged your image!");
     } catch (e: any) {
