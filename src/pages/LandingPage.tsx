@@ -895,15 +895,17 @@ export default function LandingPage() {
 
               <div className="grid grid-cols-2 gap-4 text-center">
                 {[
-                  { value: "100%", label: "Yours", sub: "No lock-in, no expiry" },
-                  { value: "$0", label: "API Costs", sub: "Runs on your hardware" },
-                  { value: "10%", label: "Referral Cut", sub: "Passive credit income" },
-                  { value: "∞", label: "Resale", sub: "Sell the same template forever" },
+                  { numValue: 100, suffix: "%", display: null, label: "Yours", sub: "No lock-in, no expiry" },
+                  { numValue: 0, suffix: "", display: "$0", label: "API Costs", sub: "Runs on your hardware" },
+                  { numValue: 10, suffix: "%", display: null, label: "Referral Cut", sub: "Passive credit income" },
+                  { numValue: null, suffix: "", display: "∞", label: "Resale", sub: "Sell the same template forever" },
                 ].map((s) => (
                   <div key={s.label} className="glass rounded-xl p-3 sm:p-4">
-                    <p className="text-xl sm:text-2xl font-display font-bold gradient-text">{s.value}</p>
-                    <p className="text-[10px] sm:text-xs font-bold text-foreground mt-1">{s.label}</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{s.sub}</p>
+                    <p className="text-xl sm:text-2xl font-display font-bold gradient-text">
+                      {s.numValue !== null ? <CountUp value={s.numValue} suffix={s.suffix} prefix={s.display === "$0" ? "$" : ""} /> : s.display}
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-foreground mt-1">{s.label}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">{s.sub}</p>
                   </div>
                 ))}
               </div>
