@@ -9,7 +9,7 @@ import {
   Menu, X, Moon, HardDrive, Upload, Fingerprint, Server, Store, Coins, Crown, Repeat
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { PyreflyBackground } from "@/components/PyreflyBackground";
 import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
 import { CompanionSprites } from "@/components/CompanionSprites";
