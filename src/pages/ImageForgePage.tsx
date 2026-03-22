@@ -81,8 +81,12 @@ const CHARACTERS = [
 ];
 
 const IMAGE_MODELS = [
-  { id: "google/gemini-3.1-flash-image-preview", name: "Flash (Fast)", desc: "Quick, pro quality" },
-  { id: "google/gemini-3-pro-image-preview", name: "Pro (Best)", desc: "Highest quality" },
+  { id: "google/gemini-3.1-flash-image-preview", name: "Flash (Fast)", desc: "Quick, pro quality", provider: "gemini" },
+  { id: "google/gemini-3-pro-image-preview", name: "Pro (Best)", desc: "Highest quality", provider: "gemini" },
+  { id: "sd3-large-turbo", name: "SD3 Turbo", desc: "Fast Stable Diffusion", provider: "stability" },
+  { id: "sd3-large", name: "SD3 Large", desc: "Best SD quality", provider: "stability" },
+  { id: "stable-image-core", name: "SD Core", desc: "Balanced speed/quality", provider: "stability" },
+  { id: "stable-image-ultra", name: "SD Ultra", desc: "Photorealistic", provider: "stability" },
 ];
 
 interface PerspectiveResult {
@@ -116,6 +120,9 @@ export default function ImageForgePage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [spokenResults, stage, result]);
 
+  const selectedModelInfo = IMAGE_MODELS.find(m => m.id === imageModel);
+  const isStability = selectedModelInfo?.provider === "stability";
+
   const generate = async () => {
     if (!prompt.trim()) { toast.error("Enter a vision first"); return; }
     setStage("speaking");
@@ -124,19 +131,19 @@ export default function ImageForgePage() {
     setActiveSpeaker(0);
 
     try {
-      const { data, error } = await supabase.functions.invoke("perspective-image", {
+      // Step 1: Always run the council perspectives (text-based, uses Gemini)
+      const { data: perspData, error: perspError } = await supabase.functions.invoke("perspective-image", {
         body: {
           prompt: prompt.trim(),
           selectedPerspectives: CHARACTERS.map(c => c.id),
-          imageModel,
+          imageModel: isStability ? "__skip_image__" : imageModel,
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (perspError) throw perspError;
+      if (perspData?.error) throw new Error(perspData.error);
 
-      // Simulate each character "speaking" in sequence
-      const perspectives: PerspectiveResult[] = data.perspectives || [];
+      const perspectives: PerspectiveResult[] = perspData.perspectives || [];
       for (let i = 0; i < perspectives.length; i++) {
         setActiveSpeaker(i);
         await new Promise(r => setTimeout(r, 800));
@@ -144,12 +151,33 @@ export default function ImageForgePage() {
         await new Promise(r => setTimeout(r, 400));
       }
 
-      // Sketching phase
       setActiveSpeaker(-1);
       setStage("sketching");
       await new Promise(r => setTimeout(r, 1200));
 
-      setResult(data);
+      let finalImage = perspData.image;
+      let synthesizedPrompt = perspData.synthesizedPrompt;
+
+      // Step 2: If Stability model selected, generate image via Stability API
+      if (isStability) {
+        const { data: sdData, error: sdError } = await supabase.functions.invoke("stability-generate", {
+          body: {
+            prompt: synthesizedPrompt,
+            model: imageModel,
+            negative_prompt: "blurry, low quality, distorted, deformed",
+          },
+        });
+
+        if (sdError) throw sdError;
+        if (sdData?.error) throw new Error(sdData.error);
+        finalImage = sdData.image;
+      }
+
+      setResult({
+        image: finalImage,
+        synthesizedPrompt,
+        perspectives,
+      });
       setStage("done");
       toast.success("The council has forged your image!");
     } catch (e: any) {
@@ -623,11 +651,18 @@ export default function ImageForgePage() {
               </div>
               <div className="flex flex-col gap-2">
                 <Select value={imageModel} onValueChange={setImageModel}>
-                  <SelectTrigger className="w-[130px] h-8 text-xs bg-background/60">
+                  <SelectTrigger className="w-[140px] h-8 text-xs bg-background/60">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {IMAGE_MODELS.map(m => (
+                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Gemini</div>
+                    {IMAGE_MODELS.filter(m => m.provider === "gemini").map(m => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <span className="text-xs">{m.name}</span>
+                      </SelectItem>
+                    ))}
+                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-1 border-t border-border/30 pt-2">Stable Diffusion</div>
+                    {IMAGE_MODELS.filter(m => m.provider === "stability").map(m => (
                       <SelectItem key={m.id} value={m.id}>
                         <span className="text-xs">{m.name}</span>
                       </SelectItem>

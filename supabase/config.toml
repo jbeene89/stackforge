@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.pipeline-modes]
 verify_jwt = false
+
+[functions.stability-generate]
+verify_jwt = false

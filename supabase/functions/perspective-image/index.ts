@@ -157,6 +157,7 @@ serve(async (req) => {
 
     const textModel = "google/gemini-3-flash-preview";
     const imgModel = imageModel || "google/gemini-3.1-flash-image-preview";
+    const skipImage = imgModel === "__skip_image__";
 
     const activePerspectives = selectedPerspectives?.length
       ? PERSPECTIVES.filter((p) => selectedPerspectives.includes(p.id))
@@ -191,7 +192,10 @@ serve(async (req) => {
       textModel
     );
 
-    const imageDataUrl = await generateImage(LOVABLE_API_KEY, synthesisPrompt, imgModel);
+    let imageDataUrl: string | null = null;
+    if (!skipImage) {
+      imageDataUrl = await generateImage(LOVABLE_API_KEY, synthesisPrompt, imgModel);
+    }
 
     return new Response(
       JSON.stringify({
