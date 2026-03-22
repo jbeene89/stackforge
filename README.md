@@ -1,16 +1,16 @@
-# StackForge
+# Soupy Lab
 
 **Design AI agents. Wire them into pipelines. Ship to any device.**
 
-StackForge is a full-stack AI development platform for building, testing, and deploying AI-powered applications — all from your browser. No ML expertise required.
+Soupy Lab is a visual, full-stack AI platform for building, testing, and deploying AI-powered applications — all from your browser. No ML expertise required.
 
-🌐 **Live** → [stackforge.lovable.app](https://stackforge.lovable.app)
+🌐 **Live** → [soupylab.com](https://soupylab.com)
 
 ---
 
-## Why StackForge?
+## Why Soupy Lab?
 
-Most AI tools are wrappers around a single model. StackForge is different — you design the **reasoning chain**:
+Most AI tools are wrappers around a single model. Soupy Lab is different — you design the **reasoning chain**:
 
 1. **Pick your models** — GPT-5, Gemini Pro, open-source SLMs
 2. **Set guardrails** — tone, task boundaries, output format, constraints
@@ -46,7 +46,7 @@ Export to Unity, Unreal Engine, ROS 2, Arduino, and Python with auto-generated, 
 SLM mode for local model execution. On-device templates, edge training, and inference playground for running models directly on phones.
 
 ### 📄 White Paper Engine
-Live-streaming academic documentation engine for "Curiosity-Driven Perspective Training" — the methodology behind StackForge's multi-perspective AI approach.
+Live-streaming academic documentation engine for "Curiosity-Driven Perspective Training" — the methodology behind Soupy Lab's multi-perspective AI approach.
 
 ---
 
