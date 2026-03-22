@@ -151,6 +151,16 @@ Actively seek where common assumptions are wrong.
 ### 6. Domain Bridging (now formalized as Cross-Domain Gap Sensing)
 Force at least one connection to a completely unrelated field per perspective. This is where genuine creative leaps live in the training data — and where preemptive intelligence is born.
 
+### 7. Idle Self-Training (Session Memory → Autonomous Refinement)
+During active use, the model retains corrections, user feedback, and learned patterns in RAM as a session memory buffer. When the device becomes idle (screen off, charging, low usage), the system autonomously:
+1. **Harvests corrections**: Every time a user corrects, rephrases, or rejects a model output, the correction pair (original → corrected) is stored in a volatile session buffer.
+2. **Generates training data**: The correction pairs are expanded through a lightweight CDPT micro-pass — each correction is analyzed from Builder and Red Team perspectives to extract the underlying principle, not just the surface fix.
+3. **Runs selective unlearning**: If the correction reveals a systematic bad behavior (e.g., repeated hallucination pattern), the system generates DPO rejection pairs targeting that specific behavior for task vector subtraction.
+4. **Micro-fine-tunes**: Using LoRA with minimal rank (r=4), the model applies the generated training data in a short fine-tuning burst, then validates against a held-out set of previous corrections to prevent catastrophic forgetting.
+5. **Commits or rolls back**: If validation passes, the LoRA adapter is merged. If regression is detected, the update is discarded and the correction data is queued for the next full training cycle.
+
+This creates a **closed-loop self-improvement cycle**: the model gets corrected during use → stores corrections in RAM → generates enriched training data when idle → fine-tunes itself → wakes up measurably better. The user's model improves overnight, every night, from its own mistakes — without any cloud dependency or manual retraining.
+
 ## THE DEBATE ROUND & GAP CHAIN
 After initial analysis (including each perspective's recursive gap-fill loop), all five perspectives read each other's outputs. The debate round has two functions:
 
@@ -208,11 +218,12 @@ Write the complete white paper with these sections:
 10. The Curiosity-Distance Metric
 11. Dream Mode Synthesis
 12. Cross-Domain Gap Sensing: Preemptive Intelligence (flagship section)
-13. Experimental Framework (proposed evaluation methodology — include metrics for measuring gap-chain depth and cross-domain bridge quality)
-14. Expected Impact & Applications
-15. Limitations & Future Work
-16. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
-17. References
+13. Idle Self-Training: Session Memory → Autonomous Refinement (how models retain corrections in RAM during use, generate training data from mistakes when idle, and micro-fine-tune themselves overnight — the closed-loop self-improvement cycle)
+14. Experimental Framework (proposed evaluation methodology — include metrics for measuring gap-chain depth and cross-domain bridge quality)
+15. Expected Impact & Applications
+16. Limitations & Future Work
+17. Conclusion (end with: "The perspectives reason so the model doesn't have to.")
+18. References
 
 Make it rigorous, novel, and compelling. This is a genuine methodological breakthrough in training data generation for small language models. The central thesis is preemptive intelligence — not better reasoning, but complete knowledge. The recursive gap-fill loop is the mechanism that makes preemptive intelligence possible: gaps are not just detected but filled, and each fill is self-inspected for its own gaps, creating chains of completeness that cross multiple domain boundaries.`;
 
