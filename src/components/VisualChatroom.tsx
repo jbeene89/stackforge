@@ -23,6 +23,7 @@ export default function VisualChatroom() {
   const { hasCredits, balance, requireCredits } = useCreditsGate(3);
   const queryClient = useQueryClient();
   const [seedPrompt, setSeedPrompt] = useState("");
+  const [seedImage, setSeedImage] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
