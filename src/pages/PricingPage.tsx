@@ -188,7 +188,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Pricing — Free, Builder & Pro Plans" description="Compare StackForge pricing plans. Start free with 50 credits, upgrade to Builder or Pro for more AI modules, pipeline runs, and advanced features. No credit card required." />
+      <SEOHead title="Pricing — Free, Builder & Pro Plans" description="Compare Soupy pricing plans. Start free with 50 credits, upgrade to Builder or Pro for more AI modules, pipeline runs, and advanced features. No credit card required." />
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-center gap-3 mb-2">
           <CreditCard className="h-5 w-5 text-primary" />

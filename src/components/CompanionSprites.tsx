@@ -73,7 +73,7 @@ const PAGE_TIPS: Record<string, { sprite: string; tips: string[] }> = {
   "/": {
     sprite: "mochi",
     tips: [
-      "Welcome to SoupyForge! Sign up to start building.",
+      "Welcome to Soupy! Sign up to start building.",
       "We build specialist AIs, not chatbots.",
       "Try the demo — no account needed!",
     ],

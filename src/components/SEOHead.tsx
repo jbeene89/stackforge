@@ -7,13 +7,13 @@ interface SEOHeadProps {
 
 /**
  * Sets per-page <title> and <meta name="description"> for SEO.
- * Appends " | StackForge" to titles automatically.
+ * Appends " | Soupy" to titles automatically.
  */
 export function SEOHead({ title, description }: SEOHeadProps) {
   useEffect(() => {
     const fullTitle = title
-      ? `${title} | StackForge`
-      : "StackForge — Build AI Modules & Stacks from Plain English";
+      ? `${title} | Soupy`
+      : "Soupy — Build AI Modules & Stacks from Plain English";
     document.title = fullTitle;
 
     let meta = document.querySelector('meta[name="description"]');

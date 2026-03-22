@@ -709,7 +709,7 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
 
   return `#!/usr/bin/env python3
 """
-SoupyForge Local Training Script - Five Perspective Pipeline
+Soupy Local Training Script - Five Perspective Pipeline
 Model: ${hfModelId}
 Method: ${job.method}
 Dataset: ${dataset.name}
@@ -1115,7 +1115,7 @@ def train_cpu_fallback():
 
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-    print(f"SoupyForge Local Trainer - Five Perspective Pipeline")
+    print(f"Soupy Local Trainer - Five Perspective Pipeline")
     print(f"   Model: {BASE_MODEL}")
     print(f"   Method: ${job.method}")
     print(f"   Hardware: ${hwProfile}")
@@ -1193,7 +1193,7 @@ export function generateInjectionScript(
 
   return `#!/usr/bin/env python3
 """
-SoupyForge CDPT Popcorn Injection - Pure Heat, Zero Extract
+Soupy CDPT Popcorn Injection - Pure Heat, Zero Extract
 ============================================================
 The base model is a bag of popcorn. Its stock knowledge is the kernels.
 The ${perspectives.length} CDPT perspectives are the HEAT.
@@ -1518,7 +1518,7 @@ export function generateUnlearnScript(
 
   return `#!/usr/bin/env python3
 """
-SoupyForge Selective Unlearning Script - Local Only (Ollama)
+Soupy Selective Unlearning Script - Local Only (Ollama)
 ============================================================
 Generates DPO suppression pairs to selectively remove base model behaviors.
 NO cloud calls. Everything runs through your local Ollama instance.
@@ -1648,7 +1648,7 @@ def generate_task_vector_data(target, n=10):
     return extract_json(raw) or []
 
 def main():
-    parser = argparse.ArgumentParser(description="SoupyForge Selective Unlearning")
+    parser = argparse.ArgumentParser(description="Soupy Selective Unlearning")
     parser.add_argument("--pairs-per-target", type=int, default=DEFAULT_PAIRS_PER_TARGET,
                         help="Number of DPO pairs to generate per target behavior")
     parser.add_argument("--negative-lora", action="store_true",
@@ -1659,7 +1659,7 @@ def main():
     Path(args.output).mkdir(parents=True, exist_ok=True)
 
     print("=" * 60)
-    print("SoupyForge Selective Unlearning - 100%% Local")
+    print("Soupy Selective Unlearning - 100%% Local")
     print("=" * 60)
     print(f"  Ollama Model: {OLLAMA_MODEL}")
     print(f"  Base Model:   {BASE_MODEL}")

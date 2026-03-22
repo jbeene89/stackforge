@@ -223,7 +223,7 @@ serve(async (req) => {
     // GET ?action=info — Return only generic usage instructions (no secrets)
     if (req.method === "GET" && (action === "info" || action === "")) {
       return new Response(JSON.stringify({
-        service: "SoupyForge Perspective Worker",
+        service: "Soupy Perspective Worker",
         version: "1.1",
         note: "All endpoints require a valid Authorization: Bearer <JWT> header. Poll and submit are scoped to the authenticated user's jobs only.",
         endpoints: {

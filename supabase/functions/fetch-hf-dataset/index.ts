@@ -36,7 +36,7 @@ serve(async (req) => {
       // Search HF datasets, filter for instruction/chat/qa datasets
       const searchUrl = `${HF_DATASETS_API}?search=${encodeURIComponent(query)}&sort=downloads&direction=-1&limit=${limit}`;
       const resp = await fetch(searchUrl, {
-        headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" },
+        headers: { "User-Agent": "Soupy-DatasetBot/1.0" },
       });
       if (!resp.ok) throw new Error(`HuggingFace API error: ${resp.status}`);
 
@@ -73,14 +73,14 @@ serve(async (req) => {
       });
 
       const resp = await fetch(`${HF_ROWS_API}?${params}`, {
-        headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" },
+        headers: { "User-Agent": "Soupy-DatasetBot/1.0" },
       });
 
       if (!resp.ok) {
         // Try without config
         params.delete("config");
         const retry = await fetch(`${HF_ROWS_API}?${params}`, {
-          headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" },
+          headers: { "User-Agent": "Soupy-DatasetBot/1.0" },
         });
         if (!retry.ok) throw new Error(`Could not fetch dataset rows: ${retry.status}`);
         const retryData = await retry.json();
@@ -120,14 +120,14 @@ serve(async (req) => {
       });
 
       const resp = await fetch(`${HF_ROWS_API}?${params}`, {
-        headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" },
+        headers: { "User-Agent": "Soupy-DatasetBot/1.0" },
       });
 
       if (!resp.ok) {
         // Try without config
         params.delete("config");
         const retry = await fetch(`${HF_ROWS_API}?${params}`, {
-          headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" },
+          headers: { "User-Agent": "Soupy-DatasetBot/1.0" },
         });
         if (!retry.ok) throw new Error(`Could not fetch dataset rows: ${retry.status}`);
         const data = await retry.json();

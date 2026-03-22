@@ -17,7 +17,7 @@ interface TourStep {
 
 export const tourSteps: TourStep[] = [
   {
-    title: "Welcome to StackForge",
+    title: "Welcome to Soupy",
     description: "Let's take a quick tour of the key features that make building AI effortless. This will only take a moment.",
     icon: Sparkles,
     color: "text-primary",
@@ -58,7 +58,7 @@ export const tourSteps: TourStep[] = [
   },
 ];
 
-const TOUR_STORAGE_KEY = "stackforge-onboarding-tour-completed";
+const TOUR_STORAGE_KEY = "soupy-onboarding-tour-completed";
 
 export interface OnboardingTourHandle {
   startTour: (stepIndex?: number) => void;

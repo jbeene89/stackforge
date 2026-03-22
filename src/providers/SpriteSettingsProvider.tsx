@@ -20,7 +20,7 @@ const SpriteSettingsContext = createContext<SpriteSettings>({
 
 export const useSpriteSettings = () => useContext(SpriteSettingsContext);
 
-const STORAGE_KEY = "soupyforge-sprite-settings";
+const STORAGE_KEY = "soupy-sprite-settings";
 
 export function SpriteSettingsProvider({ children }: { children: ReactNode }) {
   const [visible, setVisible] = useState(true);

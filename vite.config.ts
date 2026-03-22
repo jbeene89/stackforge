@@ -24,8 +24,8 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       },
       manifest: {
-        name: "SoupyForge",
-        short_name: "SoupyForge",
+        name: "Soupy",
+        short_name: "Soupy",
         description: "Cook up apps, AI modules & intelligent stacks from plain English",
         theme_color: "#e85d04",
         background_color: "#1a1008",

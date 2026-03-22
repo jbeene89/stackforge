@@ -179,7 +179,7 @@ serve(async (req) => {
     // Step 1: Fetch webpage
     let pageContent = "";
     try {
-      const resp = await fetch(url, { headers: { "User-Agent": "SoupyForge-DatasetBot/1.0" } });
+      const resp = await fetch(url, { headers: { "User-Agent": "Soupy-DatasetBot/1.0" } });
       if (!resp.ok) throw new Error(`Failed to fetch: ${resp.status}`);
       const html = await resp.text();
       pageContent = html
