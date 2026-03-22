@@ -455,7 +455,7 @@ export default function VisualChatroom() {
                     <Coins className="h-3 w-3 mr-1" />
                     {mode === "duo" ? `Duo · ${duoRounds * 2 * 3}cr` : "Start · 45cr"}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim()} title="Generate one turn">
+                  <Button variant="outline" size="sm" onClick={wrappedStepForward} disabled={!seedPrompt.trim() && !seedImage} title="Generate one turn">
                     <SkipForward className="h-3 w-3" />
                   </Button>
                 </>
