@@ -187,7 +187,7 @@ export default function VisualChatroom() {
   }, [round]);
 
   const stepForward = async () => {
-    if (messages.length === 0 && !seedPrompt.trim()) { toast.error("Enter a starting theme first"); return; }
+    if (messages.length === 0 && !seedPrompt.trim() && !seedImage) { toast.error("Enter a starting theme or upload an image first"); return; }
     const nextIndex = messages.filter(m => !m.isUserInjection).length % CHARACTERS.length;
     const currentRound = Math.floor(messages.filter(m => !m.isUserInjection).length / CHARACTERS.length) + 1;
     setIsRunning(true); setCurrentSpeaker(nextIndex);
