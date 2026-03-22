@@ -16,6 +16,7 @@ import { CompanionSprites } from "@/components/CompanionSprites";
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { TrustBar } from "@/components/landing/TrustBar";
+import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 
 // ------- HERO TYPEWRITER -------
 
@@ -586,6 +587,9 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ════════════════════ HOW IT WORKS VIDEOS ════════════════════ */}
+      <HowItWorksVideos />
 
       {/* ════════════════════ REAL USE CASES ════════════════════ */}
       <section id="use-cases" className="py-16 sm:py-24 px-4 sm:px-6">
