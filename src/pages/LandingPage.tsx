@@ -626,6 +626,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ════════════════════ SOCIAL PROOF ════════════════════ */}
+      <SocialProof />
+
       {/* ════════════════════ CTA ════════════════════ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-40" />
