@@ -609,7 +609,6 @@ export default function LandingPage() {
       {/* ════════════════════ YOUR BRAIN YOUR MODEL ════════════════════ */}
       <section className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-60" />
-        <PyreflyBackground count={40} />
 
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
