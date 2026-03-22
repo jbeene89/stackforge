@@ -1027,7 +1027,7 @@ export default function LandingPage() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Forge</span></span>
+                <span className="text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Lab</span></span>
               </Link>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-xs font-medium">The modular AI development kitchen for specialist systems.</p>
             </div>
