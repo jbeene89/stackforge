@@ -8,7 +8,7 @@ import {
   Plus, ChevronRight, CheckCircle2, Sparkles, Zap,
   Wifi, WifiOff, Bell, Shield
 } from "lucide-react";
-import logo from "@/assets/soupyforge-logo.png";
+import logo from "/soupy-logo.png";
 
 type Platform = "ios" | "android" | "desktop" | "unknown";
 
