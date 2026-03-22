@@ -23,6 +23,7 @@ export default function VisualChatroom() {
   const { hasCredits, balance, requireCredits } = useCreditsGate(3);
   const queryClient = useQueryClient();
   const [seedPrompt, setSeedPrompt] = useState("");
+  const [seedImage, setSeedImage] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -36,6 +37,7 @@ export default function VisualChatroom() {
   const abortRef = useRef(false);
   const pauseRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const seedImageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { pauseRef.current = isPaused; }, [isPaused]);
 
@@ -52,7 +54,8 @@ export default function VisualChatroom() {
       const { data, error } = await supabase.functions.invoke("visual-chatroom", {
         body: {
           characterId: char.id,
-          seedPrompt: isFirst ? seedPrompt : null,
+          seedPrompt: isFirst ? (seedPrompt || null) : null,
+          seedImage: isFirst ? seedImage : null,
           previousImages,
           imageModel: "google/gemini-3.1-flash-image-preview",
         },
@@ -97,7 +100,7 @@ export default function VisualChatroom() {
 
   // === Council mode (all 5, 3 rounds) ===
   const startCouncil = async () => {
-    if (!seedPrompt.trim()) { toast.error("Give the council a starting theme"); return; }
+    if (!seedPrompt.trim() && !seedImage) { toast.error("Give the council a starting theme or image"); return; }
     setIsRunning(true); setIsPaused(false); abortRef.current = false;
     setMessages([]); setRound(1);
 
@@ -120,7 +123,7 @@ export default function VisualChatroom() {
   // === Duo mode (2 characters, N rounds) ===
   const startDuo = async () => {
     if (!duoPair) { toast.error("Click two characters above to pick your duo"); return; }
-    if (!seedPrompt.trim()) { toast.error("Give the duo a starting theme"); return; }
+    if (!seedPrompt.trim() && !seedImage) { toast.error("Give the duo a starting theme or image"); return; }
 
     const charA = CHARACTERS.find(c => c.id === duoPair[0])!;
     const charB = CHARACTERS.find(c => c.id === duoPair[1])!;
@@ -184,7 +187,7 @@ export default function VisualChatroom() {
   }, [round]);
 
   const stepForward = async () => {
-    if (messages.length === 0 && !seedPrompt.trim()) { toast.error("Enter a starting theme first"); return; }
+    if (messages.length === 0 && !seedPrompt.trim() && !seedImage) { toast.error("Enter a starting theme or upload an image first"); return; }
     const nextIndex = messages.filter(m => !m.isUserInjection).length % CHARACTERS.length;
     const currentRound = Math.floor(messages.filter(m => !m.isUserInjection).length / CHARACTERS.length) + 1;
     setIsRunning(true); setCurrentSpeaker(nextIndex);
@@ -194,7 +197,7 @@ export default function VisualChatroom() {
   };
 
   const stop = () => { abortRef.current = true; setIsRunning(false); setCurrentSpeaker(-1); };
-  const reset = () => { stop(); setMessages([]); setRound(0); };
+  const reset = () => { stop(); setMessages([]); setRound(0); setSeedImage(null); };
 
   const handleShare = useCallback(async () => {
     const aiMessages = messages.filter(m => m.image && !m.isUserInjection);
@@ -220,7 +223,18 @@ export default function VisualChatroom() {
     fn();
   });
   const wrappedStepForward = () => requireCredits(stepForward);
-  const canStart = seedPrompt.trim() && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
+  const canStart = (seedPrompt.trim() || seedImage) && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
+
+  const handleSeedImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setSeedImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -286,7 +300,7 @@ export default function VisualChatroom() {
                       ? "Pick two characters for a visual jam session — watch them riff off each other"
                       : "The council will cross-talk using images instead of words"}
                   </p>
-                  <p className="text-xs">You can inject your own images mid-conversation</p>
+                   <p className="text-xs">You can start with text, an image, or both</p>
                 </div>
               </div>
             )}
@@ -325,9 +339,20 @@ export default function VisualChatroom() {
       <Card className="border-border/50 bg-card/80 backdrop-blur">
         <CardContent className="p-4">
           <div className="flex gap-3 items-end">
+            {/* Seed image preview */}
+            {seedImage && (
+              <div className="relative group shrink-0">
+                <img src={seedImage} alt="Seed" className="h-10 w-10 rounded-md object-cover border border-border" />
+                <button
+                  onClick={() => setSeedImage(null)}
+                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={isRunning}
+                >×</button>
+              </div>
+            )}
             <div className="flex-1">
               <Input
-                placeholder="Starting theme... (e.g. 'fire and ice colliding in space')"
+                placeholder={seedImage ? "Optional: add a text theme too..." : "Starting theme... (e.g. 'fire and ice colliding in space')"}
                 value={seedPrompt}
                 onChange={e => setSeedPrompt(e.target.value)}
                 disabled={isRunning}
@@ -336,7 +361,19 @@ export default function VisualChatroom() {
               />
             </div>
             <div className="flex gap-2">
-              {/* Image injection button */}
+              {/* Seed image upload */}
+              <input ref={seedImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleSeedImageUpload} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seedImageInputRef.current?.click()}
+                title="Start with an image"
+                disabled={isRunning}
+              >
+                <Upload className="h-3 w-3" />
+              </Button>
+
+              {/* Mid-conversation image injection */}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               <Button
                 variant="outline"

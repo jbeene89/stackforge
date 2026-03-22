@@ -74,7 +74,7 @@ serve(async (req) => {
     if (userError || !userData.user) throw new Error("Not authenticated");
     const userId = userData.user.id;
 
-    const { characterId, seedPrompt, previousImages, imageModel } = await req.json();
+    const { characterId, seedPrompt, seedImage, previousImages, imageModel } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -99,7 +99,25 @@ serve(async (req) => {
     // Build the message content
     const userContent: any[] = [];
 
-    if (seedPrompt) {
+    if (seedPrompt && seedImage) {
+      userContent.push({
+        type: "text",
+        text: `Starting theme: "${seedPrompt}". Use this reference image as inspiration. Respond with your unique visual interpretation. Generate an image.`,
+      });
+      userContent.push({
+        type: "image_url",
+        image_url: { url: seedImage },
+      });
+    } else if (seedImage) {
+      userContent.push({
+        type: "text",
+        text: "Use this reference image as your starting point. Respond with YOUR unique visual reinterpretation — transform it through your perspective. Generate an image.",
+      });
+      userContent.push({
+        type: "image_url",
+        image_url: { url: seedImage },
+      });
+    } else if (seedPrompt) {
       userContent.push({
         type: "text",
         text: `Starting theme: "${seedPrompt}". Respond with your unique visual interpretation. Generate an image.`,
