@@ -1,10 +1,10 @@
-# StackForge
+# Soupy Lab
 
 **Design AI agents. Wire them into pipelines. Ship to any device.**
 
-StackForge is a full-stack AI development platform for building, testing, and deploying AI-powered applications — all from your browser. No ML expertise required.
+Soupy Lab is a visual, full-stack AI platform for building, testing, and deploying AI-powered applications — all from your browser. No ML expertise required.
 
-🌐 **Live** → [stackforge.lovable.app](https://stackforge.lovable.app)
+🌐 **Live** → [soupylab.com](https://soupylab.com)
 
 ---
 
