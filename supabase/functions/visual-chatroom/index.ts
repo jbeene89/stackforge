@@ -99,7 +99,25 @@ serve(async (req) => {
     // Build the message content
     const userContent: any[] = [];
 
-    if (seedPrompt) {
+    if (seedPrompt && seedImage) {
+      userContent.push({
+        type: "text",
+        text: `Starting theme: "${seedPrompt}". Use this reference image as inspiration. Respond with your unique visual interpretation. Generate an image.`,
+      });
+      userContent.push({
+        type: "image_url",
+        image_url: { url: seedImage },
+      });
+    } else if (seedImage) {
+      userContent.push({
+        type: "text",
+        text: "Use this reference image as your starting point. Respond with YOUR unique visual reinterpretation — transform it through your perspective. Generate an image.",
+      });
+      userContent.push({
+        type: "image_url",
+        image_url: { url: seedImage },
+      });
+    } else if (seedPrompt) {
       userContent.push({
         type: "text",
         text: `Starting theme: "${seedPrompt}". Respond with your unique visual interpretation. Generate an image.`,
