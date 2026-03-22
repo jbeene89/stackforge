@@ -307,8 +307,6 @@ export default function LandingPage() {
         title="No-Code AI Agent & Pipeline Builder"
         description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
       />
-      {/* Companion Sprites - they follow you everywhere */}
-      <CompanionSprites />
 
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
