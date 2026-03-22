@@ -13,6 +13,9 @@ import { useRef, useState, useEffect } from "react";
 import { PyreflyBackground } from "@/components/PyreflyBackground";
 import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
 import { CompanionSprites } from "@/components/CompanionSprites";
+import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
+import { SocialProof } from "@/components/landing/SocialProof";
+import { TrustBar } from "@/components/landing/TrustBar";
 
 // ------- HERO TYPEWRITER -------
 
@@ -364,15 +367,19 @@ export default function LandingPage() {
               <span className="text-foreground/80"> not chatbots</span>
             </h1>
 
-            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed text-balance font-medium">
+            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed text-balance font-medium">
               Brew narrow-purpose AI modules. Stir them into multi-step pipelines.
               Serve Android apps for the field. Taste-test every step.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
+             <p className="text-xs sm:text-sm text-forge-gold/80 font-semibold mb-6 sm:mb-8">
+              ⚡ 50 free credits/month — no credit card needed
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
               <Link to="/signup" className="w-full sm:w-auto">
                 <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold group w-full sm:w-auto glow-primary">
-                  Start Building <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  Start Building Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/dashboard" className="w-full sm:w-auto">
@@ -383,6 +390,7 @@ export default function LandingPage() {
             </div>
 
             <TypewriterDemo />
+            <TrustBar />
           </motion.div>
         </div>
 
@@ -401,6 +409,9 @@ export default function LandingPage() {
         </div>
         <FFXDivider className="mt-6" />
       </section>
+
+      {/* ════════════════════ INTERACTIVE DEMO ════════════════════ */}
+      <InteractiveDemo />
 
       {/* ════════════════════ THREE DIFFERENTIATORS ════════════════════ */}
       <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 relative">
@@ -614,6 +625,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ════════════════════ SOCIAL PROOF ════════════════════ */}
+      <SocialProof />
 
       {/* ════════════════════ CTA ════════════════════ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
