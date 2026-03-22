@@ -55,57 +55,62 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // SLM Lab — the hero feature, gets its own top-level group
 const slmLabItems = [
-  { title: "SLM Lab", url: "/slm-lab", icon: Sparkles, hero: true },
-  { title: "Swipe Review", url: "/review", icon: SwatchBook },
-  { title: "Training Jobs", url: "/training", icon: Activity },
-  { title: "On-Device SLMs", url: "/on-device", icon: TabletSmartphone },
-  { title: "White Paper", url: "/white-paper", icon: BookOpen },
+  { title: "SLM Lab", url: "/slm-lab", icon: Sparkles, hero: true, tip: "Train small language models with the 5-perspective CDPT pipeline" },
+  { title: "Swipe Review", url: "/review", icon: SwatchBook, tip: "Tinder-style approve/reject curation for training samples" },
+  { title: "Training Jobs", url: "/training", icon: Activity, tip: "Monitor active LoRA fine-tuning and training progress" },
+  { title: "On-Device SLMs", url: "/on-device", icon: TabletSmartphone, tip: "Templates for deploying models to phones and edge devices" },
+  { title: "White Paper", url: "/white-paper", icon: BookOpen, tip: "Generate the academic CDPT research paper" },
 ];
 
 // Build — creating AI modules, stacks, and apps
 const buildItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Projects", url: "/projects", icon: FolderOpen },
-  { title: "AI Modules", url: "/modules", icon: Brain },
-  { title: "Stacks", url: "/stacks", icon: Layers },
-  { title: "Build-a-AI", url: "/build-ai", icon: Cpu },
-  { title: "Forge AI", url: "/forge-ai", icon: Wand2 },
-  { title: "Image Forge", url: "/image-forge", icon: Image },
-  { title: "Templates", url: "/templates", icon: LayoutTemplate },
-  { title: "Marketplace", url: "/marketplace", icon: Store },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Overview of your projects, modules, and recent activity" },
+  { title: "Projects", url: "/projects", icon: FolderOpen, tip: "Manage web, Android, and hybrid app projects" },
+  { title: "AI Modules", url: "/modules", icon: Brain, tip: "Build single-purpose AI specialists with guardrails" },
+  { title: "Stacks", url: "/stacks", icon: Layers, tip: "Wire modules into multi-step intelligent pipelines" },
+  { title: "Build-a-AI", url: "/build-ai", icon: Cpu, tip: "Describe what you need in plain English and generate it" },
+  { title: "Forge AI", url: "/forge-ai", icon: Wand2, tip: "AI-powered code and content generation workspace" },
+  { title: "Image Forge", url: "/image-forge", icon: Image, tip: "Generate and edit images with AI" },
+  { title: "Templates", url: "/templates", icon: LayoutTemplate, tip: "Pre-built module and stack templates to get started fast" },
+  { title: "Marketplace", url: "/marketplace", icon: Store, tip: "Browse and share community-built modules and templates" },
 ];
 
 // Deploy & Run — testing, deployment, inference
 const deployItems = [
-  { title: "Pipelines", url: "/pipelines", icon: Workflow },
-  { title: "Deploy Pipeline", url: "/deploy", icon: Rocket },
-  { title: "Phone Guide", url: "/deploy/phone", icon: Smartphone },
-  { title: "Inference", url: "/inference", icon: Terminal },
-  { title: "Self-Host", url: "/self-host", icon: Server },
-  { title: "Export Studio", url: "/export", icon: ScrollText },
-  { title: "Runs", url: "/runs", icon: Activity },
+  { title: "Pipelines", url: "/pipelines", icon: Workflow, tip: "Create and manage data processing pipelines" },
+  { title: "Deploy Pipeline", url: "/deploy", icon: Rocket, tip: "Step-by-step guide to deploy your trained model" },
+  { title: "Phone Guide", url: "/deploy/phone", icon: Smartphone, tip: "Deploy models to Android/iOS with Capacitor" },
+  { title: "Inference", url: "/inference", icon: Terminal, tip: "Test your models with live inference playground" },
+  { title: "Self-Host", url: "/self-host", icon: Server, tip: "Run everything locally with zero cloud dependency" },
+  { title: "Export Studio", url: "/export", icon: ScrollText, tip: "Export datasets, models, and configs in various formats" },
+  { title: "Runs", url: "/runs", icon: Activity, tip: "Execution history and step-by-step run traces" },
 ];
 
 // Explore — experimental and future features
 const exploreItems = [
-  { title: "Solvers", url: "/solvers", icon: Atom },
-  { title: "Capture", url: "/capture", icon: Smartphone },
-  { title: "Testing Lab", url: "/lab", icon: FlaskConical },
-  { title: "Experimental", url: "/experimental", icon: Flame },
-  { title: "Model Zoo", url: "/models", icon: Box, soon: true },
-  { title: "Signal Lab", url: "/signals", icon: Radio, soon: true },
-  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true },
-  { title: "Robotics", url: "/robotics", icon: Joystick, soon: true },
-  { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true },
-  { title: "Device Console", url: "/console", icon: Smartphone, soon: true },
+  { title: "Solvers", url: "/solvers", icon: Atom, tip: "Library of reusable problem-solving patterns" },
+  { title: "Capture", url: "/capture", icon: Smartphone, tip: "Capture training data from your phone — photos, voice, text" },
+  { title: "Testing Lab", url: "/lab", icon: FlaskConical, tip: "Benchmark and test modules in isolation" },
+  { title: "Experimental", url: "/experimental", icon: Flame, tip: "Bleeding-edge features and prototypes" },
+  { title: "Model Zoo", url: "/models", icon: Box, soon: true, tip: "Browse and download pre-trained model checkpoints" },
+  { title: "Signal Lab", url: "/signals", icon: Radio, soon: true, tip: "Real-time signal processing and analysis" },
+  { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true, tip: "Train models directly on edge hardware" },
+  { title: "Robotics", url: "/robotics", icon: Joystick, soon: true, tip: "AI controllers for robotic systems" },
+  { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true, tip: "AI-powered game logic and NPC behavior" },
+  { title: "Device Console", url: "/console", icon: Smartphone, soon: true, tip: "Monitor and debug on-device model performance" },
 ];
 
 const adminItems = [
-  { title: "Admin", url: "/admin", icon: Shield },
-  { title: "Settings", url: "/account", icon: Settings },
+  { title: "Admin", url: "/admin", icon: Shield, tip: "Platform administration and user management" },
+  { title: "Settings", url: "/account", icon: Settings, tip: "Account settings, API keys, and preferences" },
 ];
 
 export function AppSidebar() {
@@ -152,20 +157,29 @@ export function AppSidebar() {
             <SidebarMenu>
               {slmLabItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className={`h-4 w-4 ${(item as any).hero ? "text-primary" : ""}`} />
-                      {!collapsed && (
-                        <span className={`font-semibold ${(item as any).hero ? "text-primary" : ""}`}>
-                          {item.title}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.url)}
+                        tooltip={collapsed ? item.title : undefined}
+                      >
+                        <NavLink to={item.url}>
+                          <item.icon className={`h-4 w-4 ${(item as any).hero ? "text-primary" : ""}`} />
+                          {!collapsed && (
+                            <span className={`font-semibold ${(item as any).hero ? "text-primary" : ""}`}>
+                              {item.title}
+                            </span>
+                          )}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -181,12 +195,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {buildItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={collapsed ? item.title : undefined}>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span className="font-semibold">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -200,12 +223,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {deployItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={collapsed ? item.title : undefined}>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span className="font-semibold">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -219,25 +251,34 @@ export function AppSidebar() {
             <SidebarMenu>
               {exploreItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title + ((item as any).soon ? " (Coming Soon)" : "")}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && (
-                        <span className="font-semibold flex items-center gap-1.5">
-                          {item.title}
-                          {(item as any).soon && (
-                            <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
-                              Soon
-                            </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.url)}
+                        tooltip={collapsed ? item.title + ((item as any).soon ? " (Coming Soon)" : "") : undefined}
+                      >
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && (
+                            <span className="font-semibold flex items-center gap-1.5">
+                              {item.title}
+                              {(item as any).soon && (
+                                <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 font-mono text-muted-foreground border-muted-foreground/30">
+                                  Soon
+                                </Badge>
+                              )}
+                            </span>
                           )}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -251,12 +292,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {adminItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={collapsed ? item.title : undefined}>
+                        <NavLink to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          {!collapsed && <span className="font-semibold">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {!collapsed && (
+                      <TooltipContent side="right" className="max-w-[220px] text-xs">
+                        {item.tip}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
