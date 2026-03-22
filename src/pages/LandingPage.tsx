@@ -969,7 +969,6 @@ export default function LandingPage() {
       {/* ════════════════════ CTA ════════════════════ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-40" />
-        <PyreflyBackground count={30} />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
