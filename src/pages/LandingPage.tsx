@@ -555,7 +555,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div className="text-sm font-bold font-display tracking-wide">{p.label}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
+                  <div className="text-sm text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
                 </div>
               </motion.div>
             ))}
