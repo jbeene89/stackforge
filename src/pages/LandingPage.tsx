@@ -6,7 +6,7 @@ import {
   Sparkles, Globe, Smartphone, Brain, Layers, ArrowRight, Zap, Shield, Eye,
   Play, CheckCircle2, ChevronRight, Command, GitBranch, Target, Cpu,
   FileCode, Workflow, Lock, BarChart3, Wrench, Scissors, Database, FlaskConical, Eraser,
-  Menu, X, Moon, HardDrive, Upload, Fingerprint, Server
+  Menu, X, Moon, HardDrive, Upload, Fingerprint, Server, Store, Coins, Crown, Repeat
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
@@ -751,6 +751,159 @@ export default function LandingPage() {
                 <Brain className="h-4 w-4 mr-2" /> Open SLM Lab <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ════════════════════ MONETIZE YOUR INTELLIGENCE ════════════════════ */}
+      <section className="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/20 to-transparent" />
+
+        <div className="max-w-5xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-14 sm:mb-20"
+          >
+            <Badge variant="outline" className="text-[10px] mb-5 border-forge-gold/40 text-forge-gold font-semibold tracking-wider">
+              OWN IT · SELL IT · KEEP THE PROFITS
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-wide leading-[1.15] mb-6">
+              Your model. <span className="gradient-text">Your revenue stream.</span>
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
+              Once you build and train an SLM with Soupy, <span className="text-foreground font-bold">it's yours forever</span>.
+              Package it as a marketplace template, sell it to other builders, and earn credits every time someone buys your expertise.
+              No royalties. No lock-in. No permission needed.
+            </p>
+          </motion.div>
+
+          {/* Ownership lifecycle */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6 mb-14">
+            {[
+              {
+                icon: Brain,
+                step: "01",
+                title: "Train It",
+                desc: "Feed your knowledge — conversations, docs, domain expertise — into a small language model using our 5-perspective pipeline.",
+                color: "text-primary",
+                bgColor: "bg-primary/10 border-primary/20",
+              },
+              {
+                icon: HardDrive,
+                step: "02",
+                title: "Own It",
+                desc: "The trained model runs on your hardware. No cloud dependency, no API bills, no expiry date. It's a file on your machine.",
+                color: "text-forge-cyan",
+                bgColor: "bg-forge-cyan/10 border-forge-cyan/20",
+              },
+              {
+                icon: Store,
+                step: "03",
+                title: "Sell It",
+                desc: "Package your module, stack, or full project as a marketplace template. Set your tier, write a description, hit publish.",
+                color: "text-forge-gold",
+                bgColor: "bg-forge-gold/10 border-forge-gold/20",
+              },
+              {
+                icon: Coins,
+                step: "04",
+                title: "Earn Forever",
+                desc: "Every purchase sends credits straight to your account. Refer other builders and earn 10% of their marketplace spend too.",
+                color: "text-forge-emerald",
+                bgColor: "bg-forge-emerald/10 border-forge-emerald/20",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12, duration: 0.5 }}
+                className={`ffx-card glass-strong rounded-2xl p-6 sm:p-7 border ${item.bgColor} hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] transition-all duration-500 relative`}
+              >
+                <span className="absolute top-4 right-4 text-[10px] font-mono font-bold text-muted-foreground/40">{item.step}</span>
+                <div className={`w-12 h-12 rounded-xl ${item.bgColor} border flex items-center justify-center mb-4`}>
+                  <item.icon className={`h-6 w-6 ${item.color}`} />
+                </div>
+                <h3 className={`text-base sm:text-lg font-display font-bold mb-2 ${item.color} tracking-wide`}>{item.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* The "why this matters" punch */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="ffx-card glass-strong rounded-2xl p-8 sm:p-10 border border-forge-gold/20 glow-primary"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-lg sm:text-xl font-display font-bold tracking-wide mb-4">
+                  Why builders are switching to <span className="text-forge-gold">owned AI</span>
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    { icon: Lock, text: "No API keys = no surprise bills. Run your model offline, indefinitely." },
+                    { icon: Crown, text: "You keep 100% of template sales. No platform cut on your work." },
+                    { icon: Repeat, text: "Referral revenue: 10% of every credit your network spends on the marketplace." },
+                    { icon: Shield, text: "Your training data never leaves your machine. Zero telemetry." },
+                    { icon: Fingerprint, text: "Cognitive Fingerprinting means your model actually thinks like you — not a generic LLM." },
+                  ].map((point, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -15 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.4 + i * 0.08 }}
+                      className="flex items-start gap-3 text-xs sm:text-sm text-muted-foreground font-medium"
+                    >
+                      <point.icon className="h-4 w-4 text-forge-gold shrink-0 mt-0.5" />
+                      <span>{point.text}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-center">
+                {[
+                  { value: "100%", label: "Yours", sub: "No lock-in, no expiry" },
+                  { value: "$0", label: "API Costs", sub: "Runs on your hardware" },
+                  { value: "10%", label: "Referral Cut", sub: "Passive credit income" },
+                  { value: "∞", label: "Resale", sub: "Sell the same template forever" },
+                ].map((s) => (
+                  <div key={s.label} className="glass rounded-xl p-3 sm:p-4">
+                    <p className="text-xl sm:text-2xl font-display font-bold gradient-text">{s.value}</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-foreground mt-1">{s.label}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{s.sub}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-border/20 text-center">
+              <p className="text-xs sm:text-sm text-muted-foreground font-semibold mb-5">
+                <span className="text-foreground font-bold">Other platforms rent you access.</span>{" "}
+                Soupy gives you the training kit, the model, and the marketplace — then gets out of the way.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link to="/marketplace">
+                  <Button variant="outline" className="font-bold border-forge-gold/30 hover:border-forge-gold/60 hover:glow-primary transition-all">
+                    <Store className="h-4 w-4 mr-2" /> Browse Marketplace <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/slm-lab">
+                  <Button size="lg" className="gradient-primary text-primary-foreground font-bold glow-primary px-8">
+                    <Brain className="h-4 w-4 mr-2" /> Start Building <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
