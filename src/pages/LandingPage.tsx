@@ -18,6 +18,29 @@ import { SocialProof } from "@/components/landing/SocialProof";
 import { TrustBar } from "@/components/landing/TrustBar";
 import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 
+// ------- ANIMATED COUNT-UP -------
+
+function CountUp({ value, prefix = "", suffix = "", duration = 2000 }: { value: number; prefix?: string; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(value * eased));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [inView, value, duration]);
+
+  return <span ref={ref}>{prefix}{inView ? display.toLocaleString() : 0}{suffix}</span>;
+}
+
 // ------- HERO TYPEWRITER -------
 
 function TypewriterDemo() {
