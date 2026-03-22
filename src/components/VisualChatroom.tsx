@@ -37,6 +37,7 @@ export default function VisualChatroom() {
   const abortRef = useRef(false);
   const pauseRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const seedImageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { pauseRef.current = isPaused; }, [isPaused]);
 
