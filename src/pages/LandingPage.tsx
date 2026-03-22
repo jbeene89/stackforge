@@ -13,6 +13,10 @@ import { useRef, useState, useEffect } from "react";
 import { PyreflyBackground } from "@/components/PyreflyBackground";
 import { FFXDivider, RuneCircle } from "@/components/FFXOrnament";
 import { CompanionSprites } from "@/components/CompanionSprites";
+import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
+import { SocialProof } from "@/components/landing/SocialProof";
+import { TrustBar } from "@/components/landing/TrustBar";
+import { CompanionSprites } from "@/components/CompanionSprites";
 
 // ------- HERO TYPEWRITER -------
 
