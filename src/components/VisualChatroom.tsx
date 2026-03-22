@@ -123,7 +123,7 @@ export default function VisualChatroom() {
   // === Duo mode (2 characters, N rounds) ===
   const startDuo = async () => {
     if (!duoPair) { toast.error("Click two characters above to pick your duo"); return; }
-    if (!seedPrompt.trim()) { toast.error("Give the duo a starting theme"); return; }
+    if (!seedPrompt.trim() && !seedImage) { toast.error("Give the duo a starting theme or image"); return; }
 
     const charA = CHARACTERS.find(c => c.id === duoPair[0])!;
     const charB = CHARACTERS.find(c => c.id === duoPair[1])!;
