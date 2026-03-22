@@ -136,7 +136,7 @@
     border-color: hsl(var(--primary) / 0.12);
   }
   .glass-hover {
-    @apply glass transition-all duration-400;
+    @apply glass transition-all duration-300;
   }
   .glass-hover:hover {
     border-color: hsl(var(--primary) / 0.3);
