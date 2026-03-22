@@ -8,7 +8,7 @@ import {
   Plus, ChevronRight, CheckCircle2, Sparkles, Zap,
   Wifi, WifiOff, Bell, Shield
 } from "lucide-react";
-import logo from "@/assets/soupyforge-logo.png";
+import logo from "@/assets/soupy-logo.png";
 
 type Platform = "ios" | "android" | "desktop" | "unknown";
 
@@ -80,10 +80,10 @@ export default function InstallPage() {
           </div>
           <h1 className="text-3xl font-bold">You're all set!</h1>
           <p className="text-muted-foreground">
-            SoupyForge is installed on your device. Open it from your home screen anytime.
+            Soupy is installed on your device. Open it from your home screen anytime.
           </p>
           <Button onClick={() => window.location.href = "/dashboard"} className="gradient-primary text-primary-foreground">
-            Open SoupyForge
+            Open Soupy
           </Button>
         </motion.div>
       </div>
@@ -92,7 +92,7 @@ export default function InstallPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Install StackForge App" description="Install StackForge as a native app on your phone or desktop. Works on iOS, Android, and desktop browsers with offline support." />
+      <SEOHead title="Install Soupy App" description="Install Soupy as a native app on your phone or desktop. Works on iOS, Android, and desktop browsers with offline support." />
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
@@ -104,7 +104,7 @@ export default function InstallPage() {
             className="space-y-6"
           >
             <div className="flex justify-center">
-              <img src={logo} alt="SoupyForge" className="h-20 w-20 rounded-2xl shadow-lg" />
+              <img src={logo} alt="Soupy" className="h-20 w-20 rounded-2xl shadow-lg" />
             </div>
 
             <div>
@@ -112,10 +112,10 @@ export default function InstallPage() {
                 <Sparkles className="h-3 w-3 mr-1" /> Free to install
               </Badge>
               <h1 className="text-4xl font-bold tracking-tight mb-3">
-                Install SoupyForge
+                Install Soupy
               </h1>
               <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                Get the full app experience. Add SoupyForge to your home screen for instant access.
+                Get the full app experience. Add Soupy to your home screen for instant access.
               </p>
             </div>
 
@@ -206,7 +206,7 @@ export default function InstallPage() {
             Or continue in your browser
           </p>
           <Button variant="ghost" onClick={() => window.location.href = "/"}>
-            Go to SoupyForge <ChevronRight className="h-4 w-4 ml-1" />
+            Go to Soupy <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
       </div>

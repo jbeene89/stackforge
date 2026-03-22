@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 const WHITE_PAPER_SYSTEM_PROMPT = `You are an academic research writer specializing in artificial intelligence, machine learning, and cognitive science. Write in formal academic tone with proper structure. Use precise technical language while remaining accessible. Include citations in [Author, Year] format where appropriate (you may fabricate plausible references for a draft). Be thorough, rigorous, and insightful.`;
 
-const WHITE_PAPER_USER_PROMPT = `Write a comprehensive academic white paper (15-25 pages equivalent in markdown) on the following breakthrough methodology. This is a real system built in the SoupyForge platform.
+const WHITE_PAPER_USER_PROMPT = `Write a comprehensive academic white paper (15-25 pages equivalent in markdown) on the following breakthrough methodology. This is a real system built in the Soupy platform.
 
 ---
 
@@ -176,7 +176,7 @@ Each training pair carries a numeric measure of how far the curiosity wandered f
 2. Domain-aware pruning: The user's domain steers which branches to explore
 
 ## TECHNICAL ARCHITECTURE
-- Platform: SoupyForge SLM Lab
+- Platform: Soupy SLM Lab
 - Pipeline: 5-Perspective + Debate Round + Dream Mode Synthesis
 - Processing: Edge functions + optional local Ollama processing via tablet worker
 - Export Format: JSONL with XML-style cognitive tokens

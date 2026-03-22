@@ -114,7 +114,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex">
-      <SEOHead title="Sign Up Free" description="Create your free StackForge account. Build AI agents, design multi-model pipelines, and deploy apps to web or Android — no coding required." />
+      <SEOHead title="Sign Up Free" description="Create your free Soupy account. Build AI agents, design multi-model pipelines, and deploy apps to web or Android — no coding required." />
       {/* Left: Brand Panel */}
       <div className="hidden lg:flex lg:w-1/2 gradient-primary p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -123,7 +123,7 @@ export default function SignupPage() {
             <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">SoupyForge</span>
+            <span className="text-xl font-bold text-white">Soupy</span>
           </Link>
         </div>
         <motion.div
@@ -150,7 +150,7 @@ export default function SignupPage() {
           </div>
         </motion.div>
         <div className="relative text-white/50 text-sm">
-          © 2026 SoupyForge
+          © 2026 Soupy
         </div>
       </div>
 
@@ -170,7 +170,7 @@ export default function SignupPage() {
           </div>
           <div className="lg:text-left text-center">
             <h1 className="text-2xl font-bold">Create your account</h1>
-            <p className="text-sm text-muted-foreground mt-1">Start building with SoupyForge</p>
+            <p className="text-sm text-muted-foreground mt-1">Start building with Soupy</p>
           </div>
 
           {referralCode && (

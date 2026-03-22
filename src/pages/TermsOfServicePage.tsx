@@ -9,7 +9,7 @@ const LAST_UPDATED = "March 10, 2026";
 export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Terms of Service" description="StackForge terms of service. Read the terms and conditions for using our AI development platform, including usage rights and limitations." />
+      <SEOHead title="Terms of Service" description="Soupy terms of service. Read the terms and conditions for using our AI development platform, including usage rights and limitations." />
       <div className="max-w-3xl mx-auto px-6 py-12">
         <Button variant="ghost" size="sm" asChild className="mb-6">
           <Link to="/"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Home</Link>
@@ -25,7 +25,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              By accessing or using SoupyForge ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. We reserve the right to modify these terms at any time; continued use constitutes acceptance.
+              By accessing or using Soupy ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. We reserve the right to modify these terms at any time; continued use constitutes acceptance.
             </p>
           </section>
 
@@ -107,7 +107,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">9. Limitation of Liability</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              To the maximum extent permitted by law, SoupyForge shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.
+              To the maximum extent permitted by law, Soupy shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues. Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.
             </p>
           </section>
 
@@ -125,7 +125,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">11. Governing Law</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              These Terms are governed by the laws of the jurisdiction in which SoupyForge operates, without regard to conflict of law principles. Any disputes shall be resolved through binding arbitration.
+              These Terms are governed by the laws of the jurisdiction in which Soupy operates, without regard to conflict of law principles. Any disputes shall be resolved through binding arbitration.
             </p>
           </section>
         </div>

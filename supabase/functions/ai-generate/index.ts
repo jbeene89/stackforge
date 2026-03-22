@@ -76,10 +76,10 @@ serve(async (req) => {
     });
 
     const systemPrompts: Record<string, string> = {
-      code: "You are SoupyForge's code generation assistant. Generate clean, production-ready code based on user requirements. Support web apps, Android apps, AI modules, and data pipelines. Always include helpful comments and follow best practices.",
-      module: "You are SoupyForge's module builder assistant. Help users create AI module configurations including system prompts, parameters, guardrails, and task boundaries. Output structured JSON configurations.",
-      stack: "You are SoupyForge's stack architect. Help users design multi-agent AI pipelines by suggesting node types, connections, and configurations. Think about data flow, error handling, and optimization.",
-      general: "You are SoupyForge's helpful assistant. Answer questions about AI development, software engineering, signal processing, robotics, and game development. Be concise and actionable.",
+      code: "You are Soupy's code generation assistant. Generate clean, production-ready code based on user requirements. Support web apps, Android apps, AI modules, and data pipelines. Always include helpful comments and follow best practices.",
+      module: "You are Soupy's module builder assistant. Help users create AI module configurations including system prompts, parameters, guardrails, and task boundaries. Output structured JSON configurations.",
+      stack: "You are Soupy's stack architect. Help users design multi-agent AI pipelines by suggesting node types, connections, and configurations. Think about data flow, error handling, and optimization.",
+      general: "You are Soupy's helpful assistant. Answer questions about AI development, software engineering, signal processing, robotics, and game development. Be concise and actionable.",
     };
 
     const systemPrompt = systemPrompts[mode] || systemPrompts.general;

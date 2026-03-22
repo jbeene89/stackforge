@@ -144,7 +144,7 @@ Shortcuts:
   },
   whoami: {
     description: "Show current context",
-    handler: async (_args, out) => { out("stackforge-slm-lab @ local-device", "output"); },
+    handler: async (_args, out) => { out("soupy-slm-lab @ local-device", "output"); },
   },
   status: {
     description: "Check Ollama status",

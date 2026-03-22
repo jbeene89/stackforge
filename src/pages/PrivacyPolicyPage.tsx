@@ -9,7 +9,7 @@ const LAST_UPDATED = "March 10, 2026";
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Privacy Policy" description="StackForge privacy policy. Learn how we collect, use, and protect your data when you use our AI development platform." />
+      <SEOHead title="Privacy Policy" description="Soupy privacy policy. Learn how we collect, use, and protect your data when you use our AI development platform." />
       <div className="max-w-3xl mx-auto px-6 py-12">
         <Button variant="ghost" size="sm" asChild className="mb-6">
           <Link to="/"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Home</Link>
@@ -48,7 +48,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">3. AI-Generated Content</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              SoupyForge processes your prompts and inputs through third-party AI models to generate outputs. Your inputs may be sent to AI model providers for processing. We do not use your inputs or outputs to train AI models. AI-generated content is provided "as-is" and may contain errors or inaccuracies.
+              Soupy processes your prompts and inputs through third-party AI models to generate outputs. Your inputs may be sent to AI model providers for processing. We do not use your inputs or outputs to train AI models. AI-generated content is provided "as-is" and may contain errors or inaccuracies.
             </p>
           </section>
 
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
             </ul>
             <p className="text-sm text-muted-foreground mt-2">
-              To exercise these rights, contact us at <span className="text-primary">privacy@soupyforge.ai</span>.
+              To exercise these rights, contact us at <span className="text-primary">privacy@soupy.ai</span>.
             </p>
           </section>
 

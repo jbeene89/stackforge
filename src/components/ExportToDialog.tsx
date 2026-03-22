@@ -29,8 +29,8 @@ const gameEngineTargets: ExportTarget[] = [
     id: "unity", name: "Unity", icon: "🎮",
     description: "Export scene as Unity package with GameObjects, materials, physics settings, and AI scripts.",
     formats: [".unitypackage", "C# scripts", "Prefabs"],
-    setupSteps: ["Open Unity Hub → New 3D project", "Assets → Import Package → Custom Package", "Select exported .unitypackage", "Scene auto-populates from SoupyForge layout"],
-    exportCode: `// Unity C# — Auto-generated from SoupyForge Scene
+    setupSteps: ["Open Unity Hub → New 3D project", "Assets → Import Package → Custom Package", "Select exported .unitypackage", "Scene auto-populates from Soupy layout"],
+    exportCode: `// Unity C# — Auto-generated from Soupy Scene
 using UnityEngine;
 
 public class SceneLoader : MonoBehaviour {
@@ -72,12 +72,12 @@ public class SceneLoader : MonoBehaviour {
     id: "unreal", name: "Unreal Engine 5", icon: "⚡",
     description: "Export as Unreal DataTable + Blueprint actors with physics presets, materials, and AI behavior trees.",
     formats: [".uasset", "Blueprints", "DataTable CSV"],
-    setupSteps: ["Open Unreal Editor → New Blank project", "Import DataTable CSV via Content Browser", "Run 'SoupyForge Scene Importer' editor utility", "Actors spawn with physics & AI components"],
+    setupSteps: ["Open Unreal Editor → New Blank project", "Import DataTable CSV via Content Browser", "Run 'Soupy Scene Importer' editor utility", "Actors spawn with physics & AI components"],
     exportCode: `// Unreal C++ — Auto-generated Actor Spawner
-#include "SoupyForgeSceneLoader.h"
+#include "SoupySceneLoader.h"
 #include "Engine/World.h"
 
-void ASoupyForgeSceneLoader::BeginPlay() {
+void ASoupySceneLoader::BeginPlay() {
     Super::BeginPlay();
     
     // Ground Plane
@@ -114,7 +114,7 @@ void ASoupyForgeSceneLoader::BeginPlay() {
     exportCode: `# Godot 4 — Auto-generated Scene (scene.tscn)
 [gd_scene load_steps=5 format=3]
 
-[node name="SoupyForgeScene" type="Node3D"]
+[node name="SoupyScene" type="Node3D"]
 
 [node name="GroundPlane" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -145,7 +145,7 @@ light_energy = 1.2`
     description: "Export as standalone Three.js scene or R3F JSX component with Cannon.js physics.",
     formats: [".jsx", ".glTF", "JSON scene"],
     setupSteps: ["npx create-react-app my-scene --template typescript", "npm install three @react-three/fiber @react-three/cannon", "Paste exported component into src/", "npm start"],
-    exportCode: `// React Three Fiber — Auto-generated from SoupyForge
+    exportCode: `// React Three Fiber — Auto-generated from Soupy
 import { Canvas } from '@react-three/fiber';
 import { Physics, useBox, usePlane, useSphere } from '@react-three/cannon';
 import { OrbitControls, Environment } from '@react-three/drei';
@@ -191,13 +191,13 @@ const solverTargets: ExportTarget[] = [
     setupSteps: ["pip install jupyter numpy scipy matplotlib", "jupyter notebook", "Open exported .ipynb", "Run All Cells"],
     exportCode: `{
  "cells": [
-  {"cell_type": "markdown", "source": ["# SoupyForge Solver Export\\n", "Auto-generated notebook"]},
+  {"cell_type": "markdown", "source": ["# Soupy Solver Export\\n", "Auto-generated notebook"]},
   {"cell_type": "code", "source": [
     "import numpy as np\\n",
     "from scipy.integrate import solve_ivp\\n",
     "import matplotlib.pyplot as plt\\n",
     "\\n",
-    "# Solver parameters (from SoupyForge config)\\n",
+    "# Solver parameters (from Soupy config)\\n",
     "dt = 0.001\\n",
     "t_end = 10.0\\n",
     "initial_state = [0.0, 1.0, 0.0, 0.0]\\n"
@@ -225,8 +225,8 @@ const solverTargets: ExportTarget[] = [
     description: "Export as .m script or Simulink .slx model with ODE solver configuration and plotting.",
     formats: [".m", ".slx", ".mat"],
     setupSteps: ["Open MATLAB R2024+", "Run exported .m script", "Or open .slx for Simulink block diagram", "Adjust parameters in workspace"],
-    exportCode: `% SoupyForge Solver Export — MATLAB
-% Auto-generated from SoupyForge
+    exportCode: `% Soupy Solver Export — MATLAB
+% Auto-generated from Soupy
 
 clear; clc; close all;
 
@@ -257,7 +257,7 @@ subplot(1,2,2);
 plot(t, y(:,3), 'LineWidth', 1.5, 'Color', [0.85 0.33 0.1]); grid on;
 xlabel('Time (s)'); ylabel('\\theta(t)'); title('Angle');
 
-sgtitle('SoupyForge Solver Results');`
+sgtitle('Soupy Solver Results');`
   },
   {
     id: "comsol", name: "COMSOL Multiphysics", icon: "🔬",
@@ -268,9 +268,9 @@ sgtitle('SoupyForge Solver Results');`
 import com.comsol.model.*;
 import com.comsol.model.util.*;
 
-public class SoupyForgeSolver {
+public class SoupySolver {
     public static Model run() {
-        Model model = ModelUtil.create("SoupyForge_Export");
+        Model model = ModelUtil.create("Soupy_Export");
         
         model.param().set("dt", "0.001[s]");
         model.param().set("t_end", "10[s]");
@@ -310,7 +310,7 @@ public class SoupyForgeSolver {
     formats: [".py", "requirements.txt"],
     setupSteps: ["pip install numpy scipy matplotlib", "python solver_export.py", "Results saved to output/"],
     exportCode: `#!/usr/bin/env python3
-"""SoupyForge Solver Export — Standalone Python"""
+"""Soupy Solver Export — Standalone Python"""
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -318,7 +318,7 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# ── Parameters (from SoupyForge config) ──
+# ── Parameters (from Soupy config) ──
 config = {
     "dt": 0.001,
     "t_end": 10.0,
@@ -362,7 +362,7 @@ const aiBuilderTargets: ExportTarget[] = [
     description: "Export as Ollama Modelfile with system prompt, parameters, and template for local deployment.",
     formats: ["Modelfile", "GGUF config"],
     setupSteps: ["curl -fsSL https://ollama.com/install.sh | sh", "ollama create mymodel -f Modelfile", "ollama run mymodel"],
-    exportCode: `# Ollama Modelfile — Auto-generated from SoupyForge Build-a-AI
+    exportCode: `# Ollama Modelfile — Auto-generated from Soupy Build-a-AI
 FROM phi3:mini
 
 PARAMETER temperature 0.3
@@ -375,7 +375,7 @@ PARAMETER stop "<|end|>"
 PARAMETER stop "<|user|>"
 
 SYSTEM """
-You are a specialized AI assistant built with SoupyForge.
+You are a specialized AI assistant built with Soupy.
 
 Role: Classification and extraction specialist.
 Behavior: Respond only with structured JSON output.
@@ -407,9 +407,9 @@ TEMPLATE """{{ if .System }}<|system|>
     formats: [".json preset", "GGUF config"],
     setupSteps: ["Download LM Studio from lmstudio.ai", "File → Import Preset", "Load the matching GGUF model", "Start chatting or use the API server"],
     exportCode: `{
-   "name": "SoupyForge Export",
+   "name": "Soupy Export",
   "model": "phi-3-mini-4k-instruct.Q4_K_M.gguf",
-  "systemPrompt": "You are a specialized AI assistant built with SoupyForge. Respond with structured JSON. Never fabricate data.",
+  "systemPrompt": "You are a specialized AI assistant built with Soupy. Respond with structured JSON. Never fabricate data.",
   "parameters": {
     "temperature": 0.3,
     "topP": 0.9,
@@ -428,12 +428,12 @@ TEMPLATE """{{ if .System }}<|system|>
     description: "Export as HF model card, tokenizer config, and adapter weights for Hub upload.",
     formats: ["model_card.md", "config.json", "adapter_config.json"],
     setupSteps: ["pip install huggingface_hub transformers", "huggingface-cli login", "python upload_to_hub.py", "Model card auto-populated on Hub"],
-    exportCode: `# upload_to_hub.py — Auto-generated from SoupyForge
+    exportCode: `# upload_to_hub.py — Auto-generated from Soupy
 from huggingface_hub import HfApi, create_repo
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Config from SoupyForge Build-a-AI
-MODEL_NAME = "soupyforge-phi3-specialist"
+# Config from Soupy Build-a-AI
+MODEL_NAME = "soupy-phi3-specialist"
 BASE_MODEL = "microsoft/phi-3-mini-4k-instruct"
 HF_REPO = f"your-org/{MODEL_NAME}"
 
@@ -445,7 +445,7 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype="auto",
 )
 
-# Apply SoupyForge config
+# Apply Soupy config
 generation_config = {
     "temperature": 0.3,
     "top_p": 0.9,
@@ -466,7 +466,7 @@ print(f"✓ Uploaded to https://huggingface.co/{HF_REPO}")`
     description: "Export quantized ONNX model with optimized graph for cross-platform inference.",
     formats: [".onnx", "config.json", "tokenizer.json"],
     setupSteps: ["pip install onnxruntime optimum", "python export_onnx.py", "Copy model.onnx to target device", "Run with onnxruntime in any language"],
-    exportCode: `# export_onnx.py — Auto-generated from SoupyForge
+    exportCode: `# export_onnx.py — Auto-generated from Soupy
 from optimum.onnxruntime import ORTModelForCausalLM
 from transformers import AutoTokenizer
 
@@ -499,8 +499,8 @@ const edgeTrainingTargets: ExportTarget[] = [
     id: "ros2", name: "ROS 2 (Humble/Iron)", icon: "🤖",
     description: "Export as ROS 2 package with sensor nodes, TF2 transforms, and inference service.",
     formats: ["ROS 2 package", "launch.py", "CMakeLists.txt"],
-    setupSteps: ["source /opt/ros/humble/setup.bash", "colcon build --packages-select soupyforge_pkg", "ros2 launch soupyforge_pkg inference.launch.py", "ros2 topic echo /detections"],
-    exportCode: `# ROS 2 Node — Auto-generated from SoupyForge Edge AI
+    setupSteps: ["source /opt/ros/humble/setup.bash", "colcon build --packages-select soupy_pkg", "ros2 launch soupy_pkg inference.launch.py", "ros2 topic echo /detections"],
+    exportCode: `# ROS 2 Node — Auto-generated from Soupy Edge AI
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan, Image, Imu
@@ -509,9 +509,9 @@ from vision_msgs.msg import Detection3DArray, Detection3D
 import numpy as np
 import tflite_runtime.interpreter as tflite
 
-class SoupyForgeInferenceNode(Node):
+class SoupyInferenceNode(Node):
     def __init__(self):
-        super().__init__('soupyforge_inference')
+        super().__init__('soupy_inference')
         
         # Load TFLite model
         self.interpreter = tflite.Interpreter(
@@ -532,7 +532,7 @@ class SoupyForgeInferenceNode(Node):
         self.pose_pub = self.create_publisher(
             PoseStamped, '/estimated_pose', 10)
         
-        self.get_logger().info('SoupyForge Inference Node started')
+        self.get_logger().info('Soupy Inference Node started')
     
     def lidar_callback(self, msg: LaserScan):
         ranges = np.array(msg.ranges, dtype=np.float32)
@@ -561,7 +561,7 @@ class SoupyForgeInferenceNode(Node):
 
 def main():
     rclpy.init()
-    node = SoupyForgeInferenceNode()
+    node = SoupyInferenceNode()
     rclpy.spin(node)
     rclpy.shutdown()
 
@@ -573,7 +573,7 @@ if __name__ == '__main__':
     description: "Export sensor reading code as Arduino sketch with I2C/SPI/UART driver integration.",
     formats: [".ino", "platformio.ini", "lib/"],
     setupSteps: ["Open Arduino IDE or PlatformIO", "File → Open exported sketch", "Select board (ESP32/Arduino Mega)", "Upload to device"],
-    exportCode: `// Arduino Sketch — Auto-generated from SoupyForge Edge AI
+    exportCode: `// Arduino Sketch — Auto-generated from Soupy Edge AI
 #include <Wire.h>
 #include <Adafruit_BNO08x.h>
 
@@ -604,7 +604,7 @@ void setup() {
         pinMode(ECHO_PINS[i], INPUT);
     }
     
-    Serial.println("SoupyForge sensor array initialized");
+    Serial.println("Soupy sensor array initialized");
 }
 
 float readUltrasonic(int idx) {
@@ -643,7 +643,7 @@ void loop() {
     description: "Export optimized TFLite model with metadata, label map, and benchmark config for Pi deployment.",
     formats: [".tflite", "metadata.json", "labels.txt"],
     setupSteps: ["pip install tflite-runtime", "Copy .tflite to target device", "Run benchmark: python benchmark.py", "Integrate into inference pipeline"],
-    exportCode: `# TFLite Deployment — Auto-generated from SoupyForge
+    exportCode: `# TFLite Deployment — Auto-generated from Soupy
 import tflite_runtime.interpreter as tflite
 import numpy as np
 import time
@@ -723,15 +723,15 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
       
-    soupyforge_controller:
+    soupy_controller:
       type: forward_command_controller/ForwardCommandController
       
-soupyforge_controller:
+soupy_controller:
   ros__parameters:
     joints: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
     interface_name: effort
     
-    # PID gains from SoupyForge tuning
+    # PID gains from Soupy tuning
     gains:
       joint_1: {p: 10.0, i: 0.1, d: 1.0}
       joint_2: {p: 10.0, i: 0.1, d: 1.0}
@@ -745,9 +745,9 @@ soupyforge_controller:
     description: "Export as Isaac Sim USD scene with physics materials and RL training config.",
     formats: [".usd", ".yaml", "Python extension"],
     setupSteps: ["Open Isaac Sim from Omniverse Launcher", "File → Open USD", "Load RL config", "Start training"],
-    exportCode: `# Isaac Sim task config — Auto-generated from SoupyForge
+    exportCode: `# Isaac Sim task config — Auto-generated from Soupy
 task:
-  name: SoupyForgeRobot
+  name: SoupyRobot
   physics_engine: physx
   env:
     numEnvs: 4096
@@ -776,14 +776,14 @@ const signalTargets: ExportTarget[] = [
 from gnuradio import gr, blocks, filter, analog, fft
 import numpy as np
 
-class SoupyForgeFlowgraph(gr.top_block):
+class SoupyFlowgraph(gr.top_block):
     def __init__(self, sample_rate=48000):
-        gr.top_block.__init__(self, "SoupyForge Signal Chain")
+        gr.top_block.__init__(self, "Soupy Signal Chain")
         
         # Source
         self.source = blocks.file_source(gr.sizeof_float, "input.raw", True)
         
-        # Butterworth LPF (from SoupyForge config)
+        # Butterworth LPF (from Soupy config)
         self.lpf = filter.iir_filter_ffd(
             filter.firdes.low_pass(1, sample_rate, 1000, 100),
             [1.0])
@@ -799,7 +799,7 @@ class SoupyForgeFlowgraph(gr.top_block):
         self.connect(self.lpf, self.sink)
 
 if __name__ == '__main__':
-    fg = SoupyForgeFlowgraph()
+    fg = SoupyFlowgraph()
     fg.run()`
   },
   {
@@ -808,14 +808,14 @@ if __name__ == '__main__':
     formats: [".txt macro", "sox_pipeline.sh"],
     setupSteps: ["Open Audacity", "Tools → Apply Macro", "Select exported macro", "Process audio files"],
     exportCode: `#!/bin/bash
-# SoX Pipeline — Auto-generated from SoupyForge Signal Lab
+# SoX Pipeline — Auto-generated from Soupy Signal Lab
 
 INPUT="input.wav"
 OUTPUT="output.wav"
 
 sox "$INPUT" "$OUTPUT" \\
   highpass 80 \\               # DC removal
-  lowpass 4000 \\              # Anti-alias filter (from SoupyForge)
+  lowpass 4000 \\              # Anti-alias filter (from Soupy)
   sinc -n 127 1000 \\          # FIR bandpass
   compand 0.3,1 6:-70,-60,-20 \\  # Dynamic range compression
   norm -1 \\                   # Normalize to -1dB
@@ -833,26 +833,26 @@ const pipelineTargets: ExportTarget[] = [
     description: "Export as Airflow DAG with operators, dependencies, and schedule configuration.",
     formats: [".py DAG", "connections.json"],
     setupSteps: ["Copy DAG to $AIRFLOW_HOME/dags/", "airflow db migrate", "airflow dags list", "Enable DAG in UI"],
-    exportCode: `# Airflow DAG — Auto-generated from SoupyForge Pipelines
+    exportCode: `# Airflow DAG — Auto-generated from Soupy Pipelines
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
 
 default_args = {
-    'owner': 'soupyforge',
+    'owner': 'soupy',
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
     'email_on_failure': True,
 }
 
 with DAG(
-    'soupyforge_pipeline',
+    'soupy_pipeline',
     default_args=default_args,
     schedule_interval='@hourly',
     start_date=datetime(2024, 1, 1),
     catchup=False,
-    tags=['soupyforge', 'etl'],
+    tags=['soupy', 'etl'],
 ) as dag:
 
     extract = PythonOperator(
@@ -883,13 +883,13 @@ with DAG(
     description: "Export pipeline as Docker Compose stack with all services, volumes, and networking.",
     formats: ["docker-compose.yml", "Dockerfile", ".env"],
     setupSteps: ["docker compose up -d", "docker compose logs -f", "docker compose ps"],
-    exportCode: `# docker-compose.yml — Auto-generated from SoupyForge
+    exportCode: `# docker-compose.yml — Auto-generated from Soupy
 version: '3.9'
 services:
   pipeline:
     build: .
     environment:
-      - PIPELINE_ID=soupyforge_export
+      - PIPELINE_ID=soupy_export
       - BATCH_SIZE=1000
     volumes:
       - ./data:/app/data
@@ -900,7 +900,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: soupyforge
+      POSTGRES_DB: soupy
       POSTGRES_PASSWORD: \${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -940,7 +940,7 @@ interface ExportToDialogProps {
   triggerSize?: "default" | "sm" | "icon";
 }
 
-export function ExportToDialog({ context, projectName = "SoupyForge Project", triggerLabel = "Export To…", triggerVariant = "outline", triggerSize = "sm" }: ExportToDialogProps) {
+export function ExportToDialog({ context, projectName = "Soupy Project", triggerLabel = "Export To…", triggerVariant = "outline", triggerSize = "sm" }: ExportToDialogProps) {
   const [selected, setSelected] = useState<ExportTarget | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState<string[]>([]);

@@ -9,8 +9,8 @@ import { TERMINAL_THEMES, THEME_ORDER } from "./terminal/themes";
 import { ActionCard } from "./terminal/ActionCard";
 import type { TerminalLine, ActionCardData } from "./terminal/types";
 
-const SESSION_KEY = "stackforge-terminal-session";
-const THEME_KEY = "stackforge-terminal-theme";
+const SESSION_KEY = "soupy-terminal-session";
+const THEME_KEY = "soupy-terminal-theme";
 
 export function TerminalPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,12 +24,12 @@ export function TerminalPanel() {
         return parsed.map((l: any) => ({ ...l, timestamp: new Date(l.timestamp) }));
       }
     } catch {}
-    return [{ id: 0, type: "system" as const, content: "StackForge Terminal v2.0 — type 'help' for commands  ·  Ctrl+T theme  ·  Tab autocomplete", timestamp: new Date() }];
+    return [{ id: 0, type: "system" as const, content: "Soupy Terminal v2.0 — type 'help' for commands  ·  Ctrl+T theme  ·  Tab autocomplete", timestamp: new Date() }];
   });
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem("stackforge-terminal-history") || "[]");
+      return JSON.parse(localStorage.getItem("soupy-terminal-history") || "[]");
     } catch { return []; }
   });
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -57,7 +57,7 @@ export function TerminalPanel() {
   }, [lines]);
 
   useEffect(() => {
-    localStorage.setItem("stackforge-terminal-history", JSON.stringify(history.slice(0, 50)));
+    localStorage.setItem("soupy-terminal-history", JSON.stringify(history.slice(0, 50)));
   }, [history]);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export function TerminalPanel() {
       const prefix = l.type === "input" ? "$ " : l.type === "error" ? "ERROR: " : l.type === "system" ? "// " : "";
       return `${prefix}${l.content}`;
     }).join("\n");
-    const blob = new Blob([`# StackForge Terminal Session\n# Exported: ${new Date().toISOString()}\n\n${md}`], { type: "text/markdown" });
+    const blob = new Blob([`# Soupy Terminal Session\n# Exported: ${new Date().toISOString()}\n\n${md}`], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -283,7 +283,7 @@ export function TerminalPanel() {
                     <div className="h-2.5 w-2.5 rounded-full bg-[hsl(42,95%,55%)]" />
                     <div className="h-2.5 w-2.5 rounded-full bg-[hsl(155,65%,42%)]" />
                   </div>
-                  <span className={cn("text-[10px] font-mono", theme.system)}>stackforge@local</span>
+                  <span className={cn("text-[10px] font-mono", theme.system)}>soupy@local</span>
                   <span className="text-[9px] px-1 rounded" style={{ background: theme.accent + "20", color: theme.accent }}>
                     {theme.name}
                   </span>

@@ -44,7 +44,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <SEOHead title="Log In" description="Sign in to your StackForge account to build AI modules, design multi-model pipelines, and deploy smart apps." />
+      <SEOHead title="Log In" description="Sign in to your Soupy account to build AI modules, design multi-model pipelines, and deploy smart apps." />
       {/* Left: Brand Panel */}
       <div className="hidden lg:flex lg:w-1/2 gradient-primary p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -53,7 +53,7 @@ export default function LoginPage() {
             <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">SoupyForge</span>
+            <span className="text-xl font-bold text-white">Soupy</span>
           </Link>
         </div>
         <motion.div
@@ -78,11 +78,11 @@ export default function LoginPage() {
                 </div>
               ))}
             </div>
-            <span className="text-white/70 text-sm">12,000+ builders trust SoupyForge</span>
+            <span className="text-white/70 text-sm">12,000+ builders trust Soupy</span>
           </div>
         </motion.div>
         <div className="relative text-white/50 text-sm">
-          © 2026 SoupyForge
+          © 2026 Soupy
         </div>
       </div>
 

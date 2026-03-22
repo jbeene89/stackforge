@@ -2,7 +2,7 @@
 // Caches: training_datasets, dataset_samples, training_jobs
 // Syncs pending mutations when back online with conflict detection
 
-const DB_NAME = "soupyforge-offline";
+const DB_NAME = "soupy-offline";
 const DB_VERSION = 2;
 
 type StoreName = "training_datasets" | "dataset_samples" | "training_jobs" | "pending_mutations" | "sync_conflicts";

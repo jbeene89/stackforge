@@ -57,7 +57,7 @@ function TypewriterDemo() {
           <div className="w-2.5 h-2.5 rounded-full bg-forge-gold/50" />
           <div className="w-2.5 h-2.5 rounded-full bg-forge-emerald/50" />
         </div>
-        <span className="text-[10px] text-muted-foreground ml-2 font-mono">soupyforge prompt</span>
+        <span className="text-[10px] text-muted-foreground ml-2 font-mono">soupy prompt</span>
       </div>
       <div className="font-mono text-xs sm:text-sm text-foreground min-h-[24px]">
         <span className="text-primary">❯ </span>
@@ -271,7 +271,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background overflow-hidden relative">
       <SEOHead
         title="No-Code AI Agent & Pipeline Builder"
-        description="StackForge is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
+        description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
       />
       {/* Companion Sprites - they follow you everywhere */}
       <CompanionSprites />
@@ -395,7 +395,7 @@ export default function LandingPage() {
         <FFXDivider className="mb-6" />
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs sm:text-sm text-muted-foreground font-medium">
-            <span className="font-bold text-foreground font-display tracking-wide">SoupyForge is not a wrapper around ChatGPT.</span>{" "}
+            <span className="font-bold text-foreground font-display tracking-wide">Soupy is not a wrapper around ChatGPT.</span>{" "}
             It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
           </p>
         </div>
@@ -407,7 +407,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-20">
             <Badge variant="outline" className="text-[10px] mb-4 border-forge-gold/30 text-forge-gold font-semibold">
-              What makes SoupyForge different
+              What makes Soupy different
             </Badge>
             <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
               Three things we do that nobody else does
@@ -495,7 +495,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
             <h2 className="text-lg sm:text-xl md:text-3xl font-display font-bold tracking-wide">Architecture Principles</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-3 font-medium">How SoupyForge thinks about AI systems.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-3 font-medium">How Soupy thinks about AI systems.</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
             {architecturePoints.map((p, i) => (
@@ -531,7 +531,7 @@ export default function LandingPage() {
               Control what your model <span className="gradient-text">learns — and unlearns</span>
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-4 max-w-2xl mx-auto font-medium leading-relaxed">
-              Most platforms let you prompt a model. SoupyForge lets you <span className="text-foreground font-semibold">reshape</span> one — engineer datasets, inject reasoning styles, and surgically remove behaviors you don't want.
+              Most platforms let you prompt a model. Soupy lets you <span className="text-foreground font-semibold">reshape</span> one — engineer datasets, inject reasoning styles, and surgically remove behaviors you don't want.
             </p>
           </motion.div>
 
@@ -688,14 +688,14 @@ export default function LandingPage() {
                 <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
                   <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy Policy</Link></div>
                   <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms of Service</Link></div>
-                  <div><a href="mailto:support@soupyforge.com" className="hover:text-primary transition-colors duration-300">Contact</a></div>
+                  <div><a href="mailto:support@soupy.com" className="hover:text-primary transition-colors duration-300">Contact</a></div>
                 </div>
               </div>
             </div>
           </div>
           <FFXDivider className="mb-6" />
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-muted-foreground font-medium">
-            <span>© 2026 SoupyForge. All rights reserved.</span>
+            <span>© 2026 Soupy. All rights reserved.</span>
             <div className="flex gap-6">
               <Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link>
               <Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link>

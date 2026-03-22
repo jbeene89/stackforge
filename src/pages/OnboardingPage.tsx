@@ -133,7 +133,7 @@ export default function OnboardingPage() {
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold">SoupyForge</span>
+            <span className="font-bold">Soupy</span>
           </div>
           <div className="flex items-center gap-2">
             {steps.map((s, i) => (
