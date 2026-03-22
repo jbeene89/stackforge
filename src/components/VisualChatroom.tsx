@@ -197,7 +197,7 @@ export default function VisualChatroom() {
   };
 
   const stop = () => { abortRef.current = true; setIsRunning(false); setCurrentSpeaker(-1); };
-  const reset = () => { stop(); setMessages([]); setRound(0); };
+  const reset = () => { stop(); setMessages([]); setRound(0); setSeedImage(null); };
 
   const handleShare = useCallback(async () => {
     const aiMessages = messages.filter(m => m.image && !m.isUserInjection);
