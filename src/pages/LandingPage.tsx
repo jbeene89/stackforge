@@ -367,12 +367,14 @@ export default function LandingPage() {
               <span className="text-foreground/80"> not chatbots</span>
             </h1>
 
-            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed text-balance font-medium">
+            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed text-balance font-medium">
               Brew narrow-purpose AI modules. Stir them into multi-step pipelines.
               Serve Android apps for the field. Taste-test every step.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
+            <p className="text-xs sm:text-sm text-forge-gold/80 font-semibold mb-6 sm:mb-8">
+              ⚡ 50 free credits/month — no credit card needed
+            </p>
               <Link to="/signup" className="w-full sm:w-auto">
                 <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold group w-full sm:w-auto glow-primary">
                   Start Building <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
