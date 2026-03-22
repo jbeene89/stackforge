@@ -16,6 +16,7 @@ import { CompanionSprites } from "@/components/CompanionSprites";
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { TrustBar } from "@/components/landing/TrustBar";
+import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 
 // ------- HERO TYPEWRITER -------
 
