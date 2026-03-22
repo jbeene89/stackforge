@@ -300,7 +300,7 @@ export default function VisualChatroom() {
                       ? "Pick two characters for a visual jam session — watch them riff off each other"
                       : "The council will cross-talk using images instead of words"}
                   </p>
-                  <p className="text-xs">You can inject your own images mid-conversation</p>
+                   <p className="text-xs">You can start with text, an image, or both</p>
                 </div>
               </div>
             )}
