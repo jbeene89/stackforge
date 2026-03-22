@@ -236,13 +236,42 @@ export default function VisualChatroom() {
   const handleSeedImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setSeedImage(reader.result as string);
-    reader.readAsDataURL(file);
+    processDrop(file, (base64) => setSeedImage(base64));
     e.target.value = "";
   }, []);
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isRunning) setIsDragging(true);
+  }, [isRunning]);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (isRunning) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) processDrop(file, (base64) => {
+      if (messages.length > 0) {
+        // Mid-conversation injection
+        const injection: ChatMessage = { characterId: "user", image: base64, text: "User dropped image", round: round || 1, isUserInjection: true };
+        setMessages(prev => [...prev, injection]);
+        toast.success("Image injected!");
+      } else {
+        setSeedImage(base64);
+        toast.success("Seed image set!");
+      }
+    });
+  }, [isRunning, messages, round]);
 
   return (
     <div className="space-y-4">
