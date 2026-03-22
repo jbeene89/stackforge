@@ -4,11 +4,9 @@
 export function FFXDivider({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center justify-center gap-3 ${className}`}>
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-forge-gold/30 to-forge-cyan/20" />
-      <svg width="24" height="24" viewBox="0 0 24 24" className="text-forge-gold/50 shrink-0">
-        <path d="M12 2L14 8L20 8L15 12L17 18L12 14L7 18L9 12L4 8L10 8Z" fill="currentColor" />
-      </svg>
-      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-forge-gold/30 to-forge-cyan/20" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+      <div className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-border/60 to-transparent" />
     </div>
   );
 }
