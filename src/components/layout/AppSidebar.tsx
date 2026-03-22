@@ -144,7 +144,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         {/* ══ SLM Lab — Hero Feature ══ */}
-        <SidebarGroup defaultOpen>
+        <SidebarGroup>
           <SidebarGroupLabel className="font-display text-[10px] tracking-[0.15em] uppercase text-primary/80">
             🔥 SLM Lab
           </SidebarGroupLabel>
