@@ -274,7 +274,29 @@ export default function VisualChatroom() {
   }, [isRunning, messages, round]);
 
   return (
-    <div className="space-y-4">
+    <div
+      className={`space-y-4 relative ${isDragging ? 'ring-2 ring-primary/50 rounded-xl' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drop overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-primary/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-primary/40 flex items-center justify-center pointer-events-none"
+          >
+            <div className="text-center">
+              <Upload className="h-8 w-8 text-primary mx-auto mb-2" />
+              <p className="text-sm font-display font-bold text-primary">Drop image here</p>
+              <p className="text-xs text-muted-foreground">{messages.length > 0 ? "Inject into conversation" : "Use as seed image"}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Mode toggle */}
       <div className="flex items-center justify-center gap-2">
         <Button
