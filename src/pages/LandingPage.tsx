@@ -410,6 +410,9 @@ export default function LandingPage() {
         <FFXDivider className="mt-6" />
       </section>
 
+      {/* ════════════════════ INTERACTIVE DEMO ════════════════════ */}
+      <InteractiveDemo />
+
       {/* ════════════════════ THREE DIFFERENTIATORS ════════════════════ */}
       <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="max-w-5xl mx-auto">
