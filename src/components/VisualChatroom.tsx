@@ -223,7 +223,18 @@ export default function VisualChatroom() {
     fn();
   });
   const wrappedStepForward = () => requireCredits(stepForward);
-  const canStart = seedPrompt.trim() && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
+  const canStart = (seedPrompt.trim() || seedImage) && (mode === "council" || (mode === "duo" && duoPair && duoPair[0] !== duoPair[1]));
+
+  const handleSeedImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setSeedImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }, []);
 
   return (
     <div className="space-y-4">
