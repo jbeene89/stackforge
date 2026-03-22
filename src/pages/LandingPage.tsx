@@ -743,15 +743,17 @@ export default function LandingPage() {
 
             <div className="mt-12 sm:mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
               {[
-                { label: "Zero to Model", value: "< 5 min", sub: "Personality-only deploy" },
-                { label: "Full CDPT Run", value: "13 calls", sub: "Per data point" },
-                { label: "Local Training", value: "100% offline", sub: "Your hardware, your data" },
-                { label: "Device Target", value: "2–16 GB RAM", sub: "Phone to workstation" },
+                { label: "Zero to Model", numVal: 5, prefix: "< ", suffix: " min", display: null, sub: "Personality-only deploy" },
+                { label: "Full CDPT Run", numVal: 13, prefix: "", suffix: " calls", display: null, sub: "Per data point" },
+                { label: "Local Training", numVal: 100, prefix: "", suffix: "% offline", display: null, sub: "Your hardware, your data" },
+                { label: "Device Target", numVal: null, prefix: "", suffix: "", display: "2–16 GB RAM", sub: "Phone to workstation" },
               ].map((s) => (
                 <div key={s.label} className="glass rounded-xl p-3 sm:p-4">
-                  <p className="text-lg sm:text-2xl font-display font-bold gradient-text">{s.value}</p>
-                  <p className="text-[10px] sm:text-xs font-bold text-foreground mt-1">{s.label}</p>
-                  <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{s.sub}</p>
+                  <p className="text-lg sm:text-2xl font-display font-bold gradient-text">
+                    {s.numVal !== null ? <CountUp value={s.numVal} prefix={s.prefix} suffix={s.suffix} /> : s.display}
+                  </p>
+                  <p className="text-xs sm:text-sm font-bold text-foreground mt-1">{s.label}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">{s.sub}</p>
                 </div>
               ))}
             </div>
