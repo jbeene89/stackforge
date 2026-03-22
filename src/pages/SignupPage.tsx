@@ -75,17 +75,27 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
-  const referralCode = searchParams.get("ref") || "";
+  const referralCodeFromUrl = searchParams.get("ref") || "";
   const navigate = useNavigate();
 
   const { user, loading, signUp, signInWithGoogle } = useAuth();
 
+  // Persist referral code so it survives email confirmation redirect
+  useEffect(() => {
+    if (referralCodeFromUrl) {
+      localStorage.setItem("pending_referral_code", referralCodeFromUrl);
+    }
+  }, [referralCodeFromUrl]);
+
+  const referralCode = referralCodeFromUrl || localStorage.getItem("pending_referral_code") || "";
+
   useEffect(() => {
     if (!loading && user) {
-      // Process referral after signup
-      if (referralCode) {
+      const pendingRef = localStorage.getItem("pending_referral_code");
+      if (pendingRef) {
+        localStorage.removeItem("pending_referral_code");
         supabase.functions.invoke("process-referral", {
-          body: { referral_code: referralCode },
+          body: { referral_code: pendingRef },
         }).then(({ data }) => {
           if (data?.success) {
             toast.success(data.message || "Referral bonus applied!");
@@ -94,7 +104,7 @@ export default function SignupPage() {
       }
       navigate("/dashboard", { replace: true });
     }
-  }, [user, loading, navigate, referralCode]);
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
