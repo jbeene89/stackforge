@@ -10,7 +10,7 @@ interface SpriteSettings {
 }
 
 const SpriteSettingsContext = createContext<SpriteSettings>({
-  visible: true,
+  visible: false,
   setVisible: () => {},
   sizeMultiplier: 1.4,
   setSizeMultiplier: () => {},
