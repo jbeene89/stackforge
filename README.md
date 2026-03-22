@@ -8,9 +8,9 @@ Soupy Lab is a visual, full-stack AI platform for building, testing, and deployi
 
 ---
 
-## Why StackForge?
+## Why Soupy Lab?
 
-Most AI tools are wrappers around a single model. StackForge is different — you design the **reasoning chain**:
+Most AI tools are wrappers around a single model. Soupy Lab is different — you design the **reasoning chain**:
 
 1. **Pick your models** — GPT-5, Gemini Pro, open-source SLMs
 2. **Set guardrails** — tone, task boundaries, output format, constraints
