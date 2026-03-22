@@ -884,7 +884,7 @@ export default function LandingPage() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.4 + i * 0.08 }}
-                      className="flex items-start gap-3 text-xs sm:text-sm text-muted-foreground font-medium"
+                      className="flex items-start gap-3 text-sm text-muted-foreground font-medium"
                     >
                       <point.icon className="h-4 w-4 text-forge-gold shrink-0 mt-0.5" />
                       <span>{point.text}</span>
