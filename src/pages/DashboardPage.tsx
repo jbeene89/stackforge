@@ -1,251 +1,582 @@
 import { useState, useRef } from "react";
 import { usePendingReferral } from "@/hooks/usePendingReferral";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
-  Plus, Search, Globe, Smartphone, Brain, Layers, Send,
-  Sparkles, ArrowRight, Star, Clock, CheckCircle2, AlertCircle,
-  Zap, BarChart3, GitBranch
+  Plus,
+  Search,
+  Globe,
+  Smartphone,
+  Brain,
+  Layers,
+  Send,
+  ArrowRight,
+  CheckCircle2,
+  Zap,
+  GitBranch,
+  Activity,
+  Cpu,
+  Rocket,
+  Terminal,
 } from "lucide-react";
 import { useProjects, useModules, useStacks, useRuns } from "@/hooks/useSupabaseData";
 import { useCredits } from "@/hooks/useCredits";
 import { TierBadge } from "@/components/TierBadge";
 import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import type { ProjectType } from "@/types";
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { OnboardingTour, type OnboardingTourHandle } from "@/components/OnboardingTour";
 import { TourMenu } from "@/components/TourMenu";
 
-const typeIcons: Record<ProjectType, React.ElementType> = {
-  web: Globe, android: Smartphone, module: Brain, stack: Layers, hybrid: Layers,
+// ── FONTS ────────────────────────────────────────────────────────────────────
+const DashFonts = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@300;400;600;700&display=swap');
+    .sl-dash { font-family: 'Chakra Petch', sans-serif; color: #FAFCFF; }
+    .sl-dash h1, .sl-dash .sl-heading { font-family: 'Orbitron', monospace; }
+    .sl-dash .sl-mono { font-family: 'Space Mono', monospace; }
+    .sl-dash .sl-btn-slash {
+      clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+    }
+    .sl-dash .sl-btn-slash-sm {
+      clip-path: polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);
+    }
+    .sl-card-hover { transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s; }
+    .sl-card-hover:hover { transform: translateY(-2px); }
+    @keyframes sl-blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .sl-blink { animation: sl-blink 1.5s ease-in-out infinite; }
+  `}</style>
+);
+
+// ── ICON MAP ─────────────────────────────────────────────────────────────────
+const TYPE_ICONS: Record<ProjectType, React.ElementType> = {
+  web: Globe,
+  android: Smartphone,
+  module: Brain,
+  stack: Layers,
+  hybrid: Layers,
 };
 
-const typeColors: Record<ProjectType, string> = {
-  web: "text-primary", android: "text-forge-cyan", module: "text-forge-amber", stack: "text-forge-rose", hybrid: "text-forge-emerald",
+const TYPE_ACCENTS: Record<ProjectType, string> = {
+  web: "#00E5FF",
+  android: "#7FFF00",
+  module: "#FF6B35",
+  stack: "#B44FFF",
+  hybrid: "#0066FF",
 };
 
-const statusColors: Record<string, string> = {
-  draft: "bg-muted text-muted-foreground", building: "bg-forge-amber/15 text-forge-amber",
-  testing: "bg-primary/15 text-primary", deployed: "bg-forge-emerald/15 text-forge-emerald", archived: "bg-muted text-muted-foreground",
+const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
+  draft: { bg: "rgba(136,153,187,0.1)", color: "#8899BB", label: "DRAFT" },
+  building: { bg: "rgba(255,107,53,0.1)", color: "#FF6B35", label: "BUILDING" },
+  testing: { bg: "rgba(0,229,255,0.1)", color: "#00E5FF", label: "TESTING" },
+  deployed: { bg: "rgba(127,255,0,0.1)", color: "#7FFF00", label: "DEPLOYED" },
+  archived: { bg: "rgba(136,153,187,0.08)", color: "#8899BB", label: "ARCHIVED" },
 };
 
-const filterTabs = [
-  { label: "All", value: "all" },
-  { label: "Stacks", value: "stack" },
-  { label: "Modules", value: "module" },
-  { label: "Web", value: "web" },
-  { label: "Android", value: "android" },
-];
+const FILTERS = ["ALL", "STACK", "MODULE", "WEB", "ANDROID"];
 
+// ── STAT CARD ────────────────────────────────────────────────────────────────
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+  id,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ElementType;
+  accent: string;
+  id?: string;
+}) {
+  return (
+    <div
+      id={id}
+      className="sl-card-hover"
+      style={{
+        background: "#0D0F1A",
+        border: "1px solid rgba(255,255,255,0.06)",
+        padding: "20px 20px 16px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: accent }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <span className="sl-mono" style={{ fontSize: 9, letterSpacing: "0.3em", color: "#8899BB" }}>
+          {label}
+        </span>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",
+            background: `${accent}18`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon style={{ width: 12, height: 12, color: accent }} />
+        </div>
+      </div>
+      <div className="sl-heading" style={{ fontSize: 28, fontWeight: 900, color: "#FAFCFF", lineHeight: 1 }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+// ── PROJECT CARD ─────────────────────────────────────────────────────────────
+function ProjectCard({ project, index }: { project: any; index: number }) {
+  const Icon = TYPE_ICONS[project.type as ProjectType] || Layers;
+  const accent = TYPE_ACCENTS[project.type as ProjectType] || "#00E5FF";
+  const status = STATUS_STYLES[project.status] || STATUS_STYLES.draft;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }}>
+      <Link
+        to={`/projects/${project.id}`}
+        className="sl-card-hover group block"
+        style={{
+          background: "#0D0F1A",
+          border: "1px solid rgba(255,255,255,0.06)",
+          padding: "24px",
+          position: "relative",
+          overflow: "hidden",
+          textDecoration: "none",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = `${accent}30`;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
+        }}
+      >
+        {/* Top accent line */}
+        <div
+          style={{ position: "absolute", top: 0, left: 0, width: 4, height: "100%", background: accent, opacity: 0.6 }}
+        />
+
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",
+              background: `${accent}18`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon style={{ width: 14, height: 14, color: accent }} />
+          </div>
+          <span
+            className="sl-mono sl-btn-slash-sm"
+            style={{
+              fontSize: 8,
+              letterSpacing: "0.2em",
+              padding: "3px 8px",
+              background: status.bg,
+              color: status.color,
+              border: `1px solid ${status.color}25`,
+            }}
+          >
+            {status.label}
+          </span>
+        </div>
+
+        <div
+          className="sl-heading"
+          style={{ fontSize: 13, fontWeight: 700, color: "#FAFCFF", marginBottom: 6, letterSpacing: "0.03em" }}
+        >
+          {project.name}
+        </div>
+        <p
+          className="sl-chakra"
+          style={{
+            fontSize: 11,
+            color: "#8899BB",
+            lineHeight: 1.6,
+            marginBottom: 16,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            fontWeight: 300,
+          }}
+        >
+          {project.description}
+        </p>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span
+            className="sl-mono"
+            style={{ fontSize: 9, color: "#8899BB", letterSpacing: "0.1em", textTransform: "uppercase" }}
+          >
+            {project.type}
+          </span>
+          <ArrowRight
+            style={{ width: 12, height: 12, color: accent, opacity: 0.6, transition: "transform 0.2s" }}
+            className="group-hover:translate-x-1"
+          />
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+// ── PAGE ─────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
-  const [promptValue, setPromptValue] = useState("");
+  const [prompt, setPrompt] = useState("");
   const navigate = useNavigate();
   const tourRef = useRef<OnboardingTourHandle>(null);
   usePendingReferral();
 
-  const { data: projects, isLoading: loadingProjects } = useProjects();
+  const { data: projects, isLoading } = useProjects();
   const { data: modules } = useModules();
   const { data: stacks } = useStacks();
   const { data: runs } = useRuns();
   const { data: credits } = useCredits();
 
   const filtered = (projects || []).filter((p) => {
-    if (filter !== "all" && p.type !== filter) return false;
+    if (filter !== "ALL" && p.type.toUpperCase() !== filter) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
-  const handleQuickPrompt = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (promptValue.trim()) navigate("/onboarding");
-  };
-
   const deployedCount = (projects || []).filter((p) => p.status === "deployed").length;
-  const totalModules = modules?.length || 0;
-  const totalStacks = stacks?.length || 0;
   const lastRun = runs?.[0];
 
+  const handlePrompt = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (prompt.trim()) navigate("/onboarding");
+  };
+
   return (
-    <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 animate-fade-in max-w-7xl mx-auto">
+    <div className="sl-dash" style={{ padding: "32px", maxWidth: 1400, margin: "0 auto" }}>
+      <DashFonts />
       <OnboardingTour ref={tourRef} />
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+      {/* ── HEADER ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          marginBottom: 32,
+          flexWrap: "wrap",
+          gap: 16,
+        }}
+      >
         <div>
-          <div className="flex items-center gap-2">
-            <h1 id="tour-welcome" className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+            <div
+              className="sl-mono"
+              style={{
+                fontSize: 9,
+                letterSpacing: "0.4em",
+                color: "#00E5FF",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <div style={{ width: 24, height: 2, background: "#00E5FF" }} />
+              SOUPY LAB
+            </div>
             {credits && <TierBadge tier={credits.tier} size="md" />}
             <TourMenu tourRef={tourRef} />
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground">Your projects, modules, and stacks.</p>
+          <h1
+            id="tour-welcome"
+            style={{ fontSize: "clamp(28px, 4vw, 48px)", lineHeight: 0.9, letterSpacing: "-0.01em", marginBottom: 8 }}
+          >
+            DASHBOARD
+          </h1>
+          <p className="sl-mono" style={{ fontSize: 10, color: "#8899BB", letterSpacing: "0.15em" }}>
+            YOUR PROJECTS · MODULES · STACKS
+          </p>
         </div>
-        <Button id="tour-new-project" className="gradient-primary text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
-          <Plus className="h-4 w-4 mr-2" /> New Project
-        </Button>
+        <button
+          id="tour-new-project"
+          className="sl-btn-slash"
+          onClick={() => navigate("/onboarding")}
+          style={{
+            background: "#050810",
+            color: "#FAFCFF",
+            padding: "14px 28px",
+            fontSize: 11,
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "#00E5FF";
+            (e.currentTarget as HTMLElement).style.color = "#050810";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "#050810";
+            (e.currentTarget as HTMLElement).style.color = "#FAFCFF";
+          }}
+        >
+          <Plus style={{ width: 14, height: 14 }} /> NEW PROJECT
+        </button>
       </div>
 
-      {/* Quick Prompt */}
+      {/* ── PROMPT BAR ── */}
       <motion.form
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        onSubmit={handleQuickPrompt}
-        className="glass-strong rounded-xl p-3 sm:p-4"
+        onSubmit={handlePrompt}
+        style={{
+          background: "#0A0C14",
+          border: "1px solid rgba(0,229,255,0.15)",
+          borderTop: "3px solid #00E5FF",
+          padding: "0",
+          marginBottom: 32,
+          display: "flex",
+          alignItems: "center",
+        }}
       >
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Sparkles className="h-5 w-5 text-primary shrink-0" />
-          <Input
-            placeholder="Describe what you want to build…"
-            value={promptValue}
-            onChange={(e) => setPromptValue(e.target.value)}
-            className="flex-1 border-0 bg-transparent focus-visible:ring-0 text-sm sm:text-base placeholder:text-muted-foreground/50"
-          />
-          <Button type="submit" size="sm" className="gradient-primary text-primary-foreground shrink-0" disabled={!promptValue.trim()}>
-            <Send className="h-4 w-4" />
-          </Button>
+        <div style={{ padding: "14px 18px", borderRight: "1px solid rgba(0,229,255,0.1)" }}>
+          <Terminal style={{ width: 16, height: 16, color: "#00E5FF" }} />
         </div>
+        <input
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Describe what you want to build…"
+          style={{
+            flex: 1,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            fontFamily: "Space Mono, monospace",
+            fontSize: 11,
+            letterSpacing: "0.1em",
+            color: "#FAFCFF",
+            padding: "14px 18px",
+          }}
+        />
+        <button
+          type="submit"
+          disabled={!prompt.trim()}
+          style={{
+            background: prompt.trim() ? "#00E5FF" : "transparent",
+            color: prompt.trim() ? "#050810" : "#8899BB",
+            border: "none",
+            padding: "14px 20px",
+            cursor: prompt.trim() ? "pointer" : "default",
+            transition: "all 0.2s",
+            borderLeft: "1px solid rgba(0,229,255,0.1)",
+          }}
+        >
+          <Send style={{ width: 14, height: 14 }} />
+        </button>
       </motion.form>
 
-      {/* Independence Scorecard */}
-      <IndependenceScorecard compact />
-
-      {/* Status bar */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-        {[
-          { label: "Deployed", value: deployedCount, icon: CheckCircle2, color: "text-forge-emerald", id: undefined },
-          { label: "Modules", value: totalModules, icon: Brain, color: "text-forge-amber", id: "tour-modules" },
-          { label: "Stacks", value: totalStacks, icon: Layers, color: "text-forge-rose", id: "tour-stacks" },
-          { label: "Last Run", value: lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—", icon: Zap, color: "text-forge-cyan", sub: lastRun?.status, id: undefined },
-        ].map((m) => (
-          <div key={m.label} id={m.id} className="glass-hover rounded-xl px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
-            <div className={cn("w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-card", m.color === "text-forge-emerald" && "bg-forge-emerald/10", m.color === "text-forge-amber" && "bg-forge-amber/10", m.color === "text-forge-rose" && "bg-forge-rose/10", m.color === "text-forge-cyan" && "bg-forge-cyan/10")}>
-              <m.icon className={cn("h-4 w-4", m.color)} />
-            </div>
-            <div>
-              <div className="text-base sm:text-lg font-bold leading-none">{m.value}</div>
-              <div className="text-[10px] sm:text-xs text-muted-foreground">{m.label}</div>
-            </div>
-          </div>
-        ))}
+      {/* ── INDEPENDENCE SCORECARD ── */}
+      <div style={{ marginBottom: 32 }}>
+        <IndependenceScorecard compact />
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-        <div className="flex gap-1 p-1 rounded-lg bg-secondary/50 overflow-x-auto no-scrollbar">
-          {filterTabs.map((tab) => (
+      {/* ── STAT GRID ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, marginBottom: 32 }}>
+        <StatCard id={undefined} label="DEPLOYED" value={deployedCount} icon={CheckCircle2} accent="#7FFF00" />
+        <StatCard id="tour-modules" label="MODULES" value={modules?.length || 0} icon={Cpu} accent="#FF6B35" />
+        <StatCard id="tour-stacks" label="STACKS" value={stacks?.length || 0} icon={Layers} accent="#B44FFF" />
+        <StatCard
+          id={undefined}
+          label="LAST RUN"
+          value={lastRun ? `${(lastRun.total_duration_ms / 1000).toFixed(1)}s` : "—"}
+          icon={Zap}
+          accent="#00E5FF"
+        />
+      </div>
+
+      {/* ── FILTER + SEARCH ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 2,
+            background: "#0D0F1A",
+            padding: 3,
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          {FILTERS.map((f) => (
             <button
-              key={tab.value}
-              onClick={() => setFilter(tab.value)}
-              className={cn(
-                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap",
-                filter === tab.value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
+              key={f}
+              onClick={() => setFilter(f)}
+              className="sl-mono sl-btn-slash-sm"
+              style={{
+                fontSize: 9,
+                letterSpacing: "0.2em",
+                padding: "7px 14px",
+                background: filter === f ? "#FAFCFF" : "transparent",
+                color: filter === f ? "#050810" : "#8899BB",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
             >
-              {tab.label}
+              {f}
             </button>
           ))}
         </div>
-        <div className="relative flex-1 max-w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm" />
+        <div style={{ flex: 1, maxWidth: 300, position: "relative", display: "flex", alignItems: "center" }}>
+          <Search style={{ position: "absolute", left: 12, width: 12, height: 12, color: "#8899BB" }} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="SEARCH PROJECTS…"
+            style={{
+              width: "100%",
+              background: "#0D0F1A",
+              border: "1px solid rgba(255,255,255,0.06)",
+              outline: "none",
+              padding: "8px 12px 8px 32px",
+              fontFamily: "Space Mono, monospace",
+              fontSize: 9,
+              letterSpacing: "0.2em",
+              color: "#FAFCFF",
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(0,229,255,0.25)")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}
+          />
         </div>
       </div>
 
-      {/* Project Grid */}
-      {loadingProjects ? (
-        <div className="text-center py-16 text-muted-foreground text-sm">Loading…</div>
+      {/* ── PROJECTS GRID ── */}
+      {isLoading ? (
+        <div
+          className="sl-mono"
+          style={{ textAlign: "center", padding: "80px 0", color: "#8899BB", fontSize: 10, letterSpacing: "0.3em" }}
+        >
+          LOADING…
+        </div>
       ) : filtered.length === 0 && !search ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 text-muted-foreground">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/5 flex items-center justify-center">
-            <Plus className="h-8 w-8 opacity-40" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{ textAlign: "center", padding: "80px 0", border: "1px dashed rgba(0,229,255,0.12)" }}
+        >
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              margin: "0 auto 20px",
+              clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",
+              background: "rgba(0,229,255,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Plus style={{ width: 20, height: 20, color: "rgba(0,229,255,0.4)" }} />
           </div>
-          <p className="text-sm font-medium">No projects yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Create your first project to get started.</p>
+          <p className="sl-heading" style={{ fontSize: 14, color: "#FAFCFF", marginBottom: 8 }}>
+            NO PROJECTS YET
+          </p>
+          <p className="sl-mono" style={{ fontSize: 9, color: "#8899BB", letterSpacing: "0.2em", marginBottom: 24 }}>
+            CREATE YOUR FIRST PROJECT TO GET STARTED
+          </p>
+          <button
+            className="sl-btn-slash sl-mono"
+            onClick={() => navigate("/onboarding")}
+            style={{
+              background: "#00E5FF",
+              color: "#050810",
+              border: "none",
+              padding: "12px 28px",
+              fontSize: 9,
+              letterSpacing: "0.2em",
+              cursor: "pointer",
+            }}
+          >
+            START BUILDING
+          </button>
         </motion.div>
       ) : (
-        <div id="tour-projects" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {filtered.map((project, i) => {
-            const Icon = typeIcons[project.type as ProjectType] || Layers;
-            return (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
+        <div
+          id="tour-projects"
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 2 }}
+        >
+          {filtered.map((project, i) => (
+            <ProjectCard key={project.id} project={project} index={i} />
+          ))}
+        </div>
+      )}
+
+      {/* ── QUICK LAUNCH STRIP ── */}
+      <div
+        style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 2 }}
+      >
+        {[
+          { label: "NEW MODULE", desc: "Single-purpose AI", href: "/modules", accent: "#FF6B35", icon: Cpu },
+          { label: "NEW STACK", desc: "Multi-agent pipeline", href: "/stacks", accent: "#B44FFF", icon: Layers },
+          { label: "SLM LAB", desc: "Train your model", href: "/slm-lab", accent: "#00E5FF", icon: Brain },
+          { label: "DEPLOY", desc: "Ship to production", href: "/deploy", accent: "#7FFF00", icon: Rocket },
+        ].map(({ label, desc, href, accent, icon: Icon }) => (
+          <Link key={label} to={href} style={{ textDecoration: "none" }}>
+            <div
+              className="sl-card-hover"
+              style={{
+                background: "#0D0F1A",
+                border: "1px solid rgba(255,255,255,0.06)",
+                padding: "20px",
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                borderTop: `2px solid ${accent}`,
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = `${accent}40`;
+                (e.currentTarget as HTMLElement).style.borderTopColor = accent;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
+                (e.currentTarget as HTMLElement).style.borderTopColor = accent;
+              }}
+            >
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  flexShrink: 0,
+                  clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)",
+                  background: `${accent}15`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <Link
-                  to={`/projects/${project.id}`}
-                  className="glass-hover rounded-xl p-4 sm:p-5 group block"
+                <Icon style={{ width: 14, height: 14, color: accent }} />
+              </div>
+              <div>
+                <div
+                  className="sl-heading"
+                  style={{ fontSize: 11, letterSpacing: "0.1em", color: "#FAFCFF", marginBottom: 3 }}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={cn(
-                      "w-9 h-9 rounded-lg flex items-center justify-center",
-                      project.type === "web" && "bg-primary/10",
-                      project.type === "android" && "bg-forge-cyan/10",
-                      project.type === "module" && "bg-forge-amber/10",
-                      project.type === "stack" && "bg-forge-rose/10",
-                      project.type === "hybrid" && "bg-forge-emerald/10",
-                    )}>
-                      <Icon className={cn("h-4 w-4", typeColors[project.type as ProjectType] || "text-primary")} />
-                    </div>
-                    <Badge variant="secondary" className={cn("text-[10px]", statusColors[project.status] || "")}>
-                      {project.status}
-                    </Badge>
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">{project.name}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>v{project.version_count}</span>
-                    <span>{new Date(project.updated_at).toLocaleDateString()}</span>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-
-          <motion.button
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: filtered.length * 0.04 }}
-            onClick={() => navigate("/onboarding")}
-            className="glass rounded-xl p-5 border-2 border-dashed border-border hover:border-primary/30 transition-all flex flex-col items-center justify-center min-h-[160px] group"
-          >
-            <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
-            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">New project</span>
-          </motion.button>
-        </div>
-      )}
-
-      {/* Recent runs */}
-      {runs && runs.length > 0 && (
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-primary" /> Recent Runs
-            </h2>
-            <Link to="/runs">
-              <Button variant="ghost" size="sm" className="text-xs">View all <ArrowRight className="h-3 w-3 ml-1" /></Button>
-            </Link>
-          </div>
-          <div className="glass rounded-xl divide-y divide-border/50 overflow-hidden">
-            {runs.slice(0, 5).map((run) => (
-              <Link to="/runs" key={run.id} className="flex items-center gap-3 p-3 hover:bg-secondary/20 transition-colors">
-                <CheckCircle2 className={cn("h-4 w-4 shrink-0", run.status === "success" ? "text-forge-emerald" : "text-destructive")} />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium truncate block">{run.target_name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {(Array.isArray(run.steps) ? run.steps : []).length} steps · {(run.total_duration_ms / 1000).toFixed(1)}s
-                  </span>
+                  {label}
                 </div>
-                <span className="text-xs text-muted-foreground hidden sm:block">{new Date(run.started_at).toLocaleDateString()}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+                <div className="sl-mono" style={{ fontSize: 9, color: "#8899BB", letterSpacing: "0.1em" }}>
+                  {desc}
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
