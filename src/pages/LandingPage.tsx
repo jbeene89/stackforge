@@ -301,6 +301,12 @@ const realUseCases = [
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const isDark = theme === "system" ? resolvedTheme === "dark" : theme === "dark";
+
+  const toggleTheme = useCallback(() => {
+    setTheme(isDark ? "light" : "dark");
+  }, [isDark, setTheme]);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden relative">
@@ -326,6 +332,15 @@ export default function LandingPage() {
             <Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="hidden sm:inline-flex"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Link to="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="font-semibold">Log in</Button></Link>
             <Link to="/signup" className="hidden sm:block">
               <Button size="sm" className="gradient-primary text-primary-foreground font-semibold glow-primary">
@@ -352,6 +367,18 @@ export default function LandingPage() {
             <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">How It Works</a>
             <a href="#use-cases" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Use Cases</a>
             <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                toggleTheme();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full justify-start gap-2 font-semibold"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              Switch to {isDark ? "light" : "dark"} mode
+            </Button>
             <div className="flex gap-2 pt-2 border-t border-border/30">
               <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="outline" size="sm" className="w-full font-semibold">Log in</Button>
