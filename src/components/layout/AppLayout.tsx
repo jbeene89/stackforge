@@ -2,13 +2,42 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
-import { Button } from "@/components/ui/button";
-import { Search, Command } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CompanionSprites } from "@/components/CompanionSprites";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, User, Settings } from "lucide-react";
+import { LogOut, Settings, Search, Command } from "lucide-react";
+
+const LayoutFonts = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600&display=swap');
+    .sl-layout { font-family: 'Chakra Petch', sans-serif; }
+    .sl-layout .sl-header { font-family: 'Space Mono', monospace; }
+    .sl-layout .sl-search {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      background: rgba(0,229,255,0.04);
+      border: 1px solid rgba(0,229,255,0.12);
+      color: rgba(136,153,187,0.8);
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 14px; cursor: pointer;
+      clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+      transition: border-color 0.2s, color 0.2s;
+      max-width: 320px; width: 100%;
+    }
+    .sl-layout .sl-search:hover {
+      border-color: rgba(0,229,255,0.3);
+      color: rgba(250,252,255,0.8);
+    }
+  `}</style>
+);
 
 export function AppLayout() {
   const { open, setOpen } = useCommandPalette();
@@ -17,7 +46,12 @@ export function AppLayout() {
 
   const displayName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email || "User";
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-  const initials = displayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   const handleSignOut = async () => {
     await signOut();
@@ -26,50 +60,135 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <LayoutFonts />
+      <div className="sl-layout min-h-screen flex w-full" style={{ background: "#07090F" }}>
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center border-b px-3 sm:px-4 glass-strong" style={{ borderColor: 'hsl(var(--primary) / 0.1)' }}>
-            <SidebarTrigger className="mr-2 sm:mr-4" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 max-w-md justify-start text-muted-foreground font-medium h-8 border-primary/10 hover:border-primary/30"
-              onClick={() => setOpen(true)}
-            >
-              <Search className="h-3.5 w-3.5 mr-2" />
-              <span className="text-xs sm:text-sm">Search…</span>
-              <kbd className="ml-auto hidden sm:inline-flex items-center gap-0.5 rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono">
-                <Command className="h-3 w-3" />K
-              </kbd>
-            </Button>
-            <div className="flex-1" />
+          {/* ── HEADER ── */}
+          <header
+            className="sl-header flex items-center h-12 px-4 gap-3"
+            style={{
+              background: "rgba(7,9,15,0.95)",
+              borderBottom: "1px solid rgba(0,229,255,0.08)",
+              backdropFilter: "blur(8px)",
+              flexShrink: 0,
+            }}
+          >
+            <SidebarTrigger style={{ color: "#8899BB" }} />
+
+            {/* Search bar */}
+            <button className="sl-search" onClick={() => setOpen(true)}>
+              <Search style={{ width: 12, height: 12, flexShrink: 0 }} />
+              <span style={{ flex: 1, textAlign: "left" }}>SEARCH…</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 2, opacity: 0.4, fontSize: 9 }}>
+                <Command style={{ width: 10, height: 10 }} />K
+              </span>
+            </button>
+
+            <div style={{ flex: 1 }} />
+
+            {/* User menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                  <Avatar className="h-7 w-7">
+                <button
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    border: "1px solid rgba(0,229,255,0.2)",
+                    padding: 0,
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    background: "transparent",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Avatar style={{ width: 30, height: 30 }}>
                     {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-                    <AvatarFallback className="text-xs bg-primary/15 text-primary font-bold">{initials}</AvatarFallback>
+                    <AvatarFallback
+                      style={{
+                        background: "rgba(0,229,255,0.1)",
+                        color: "#00E5FF",
+                        fontSize: 10,
+                        fontFamily: "Space Mono, monospace",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {initials}
+                    </AvatarFallback>
                   </Avatar>
-                </Button>
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 glass-strong">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm font-bold truncate">{displayName}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              <DropdownMenuContent
+                align="end"
+                className="w-52"
+                style={{ background: "#0A0C14", border: "1px solid rgba(0,229,255,0.12)", borderRadius: 0 }}
+              >
+                <div style={{ padding: "12px 14px", borderBottom: "1px solid rgba(0,229,255,0.08)" }}>
+                  <p
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "#FAFCFF",
+                      fontFamily: "Orbitron, monospace",
+                      letterSpacing: "0.05em",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {displayName.toUpperCase()}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 10,
+                      color: "#8899BB",
+                      fontFamily: "Space Mono, monospace",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginTop: 2,
+                    }}
+                  >
+                    {user?.email}
+                  </p>
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/account")} className="font-semibold">
-                  <Settings className="h-4 w-4 mr-2" /> Settings
+                <DropdownMenuSeparator style={{ background: "rgba(0,229,255,0.08)" }} />
+                <DropdownMenuItem
+                  onClick={() => navigate("/account")}
+                  style={{
+                    fontFamily: "Space Mono, monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.15em",
+                    color: "#8899BB",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FAFCFF")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#8899BB")}
+                >
+                  <Settings style={{ width: 12, height: 12, marginRight: 8 }} /> SETTINGS
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive font-semibold">
-                  <LogOut className="h-4 w-4 mr-2" /> Sign Out
+                <DropdownMenuSeparator style={{ background: "rgba(0,229,255,0.08)" }} />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  style={{
+                    fontFamily: "Space Mono, monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.15em",
+                    color: "#FF6B35",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF4500")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                >
+                  <LogOut style={{ width: 12, height: 12, marginRight: 8 }} /> SIGN OUT
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </header>
-          <main className="flex-1 overflow-auto">
+
+          {/* ── MAIN CONTENT ── */}
+          <main className="flex-1 overflow-auto" style={{ background: "#07090F" }}>
             <Outlet />
           </main>
         </div>
