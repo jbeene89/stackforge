@@ -209,12 +209,14 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
       font-family: 'Orbitron', monospace;
       font-size: ${isMobile ? '10px' : '11px'};
       font-weight: 900; letter-spacing: 0.2em;
-      padding: ${isMobile ? '14px 24px' : '16px 32px'};
+      padding: ${isMobile ? '16px 24px' : '16px 32px'};
+      min-height: ${isMobile ? '52px' : 'auto'};
       border: none; cursor: pointer;
       clip-path: polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
       display: flex; align-items: center; gap: 10px;
       transition: all 0.2s; width: 100%; justify-content: center;
       text-decoration: none; color: #050810;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .fr-scroll-hint {
