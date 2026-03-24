@@ -75,7 +75,8 @@ const plans = [
   },
   {
     tier: "pro" as const,
-    monthlyPrice: 79,
+    monthlyPrice: 39.50,
+    originalPrice: 79,
     desc: "For teams building at scale.",
     credits: 2000,
     features: [
