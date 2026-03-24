@@ -283,18 +283,24 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
 
     /* ── MOBILE BOTTOM DOTS ── */
     .fr-mobile-dots {
-      position: fixed; bottom: 56px; left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%); z-index: 25;
-      display: flex; gap: 10px; align-items: center;
+      display: flex; gap: 16px; align-items: center;
+      padding: 8px 16px;
+      background: rgba(5,8,16,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
     }
     .fr-mobile-dot {
-      width: 8px; height: 8px; border-radius: 50%;
+      width: 12px; height: 12px; border-radius: 50%;
       border: 1.5px solid rgba(255,255,255,0.25);
       background: transparent; cursor: pointer;
       transition: all 0.3s;
+      -webkit-tap-highlight-color: transparent;
     }
     .fr-mobile-dot.active {
-      width: 10px; height: 10px; border-width: 2px;
+      width: 14px; height: 14px; border-width: 2px;
     }
 
     /* ── MOBILE BADGE ── */
