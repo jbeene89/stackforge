@@ -257,8 +257,14 @@ export default function PricingPage() {
                       <h3 className="text-lg font-bold">{TIERS[plan.tier]?.name}</h3>
                     </div>
                     <div className="flex items-baseline gap-1 mb-1">
+                      {(plan as any).originalPrice && (
+                        <span className="text-lg text-muted-foreground/60 line-through mr-1">${(plan as any).originalPrice}</span>
+                      )}
                       <span className="text-4xl font-extrabold">${plan.monthlyPrice}</span>
                       {plan.monthlyPrice > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
+                      {(plan as any).originalPrice && (
+                        <Badge className="ml-2 bg-destructive text-destructive-foreground text-[10px] px-2">50% OFF</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-1 mb-4">
                       <Coins className="h-3 w-3 text-primary" />
