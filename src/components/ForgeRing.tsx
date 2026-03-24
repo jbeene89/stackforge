@@ -158,12 +158,14 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     .fr-action-item {
       display: flex; align-items: center;
       gap: ${isMobile ? '10px' : '14px'};
-      padding: ${isMobile ? '12px 14px' : '16px 20px'};
+      padding: ${isMobile ? '14px 16px' : '16px 20px'};
+      min-height: ${isMobile ? '56px' : 'auto'};
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.06);
       cursor: pointer; transition: all 0.2s;
       position: relative; overflow: hidden;
       text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .fr-action-item::before {
       content: ''; position: absolute;
