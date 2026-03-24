@@ -16,8 +16,8 @@ import {
 
 const TIERS = {
   free: { name: "Free", product_id: null, price_id: null, credits: 50 },
-  builder: { name: "Builder", product_id: "prod_U7Tj3A5CVbhw4c", price_id: "price_1T9Em0EgO8H7yovMHqTakSkd", credits: 500 },
-  pro: { name: "Pro", product_id: "prod_U7A4PumaFQmKPQ", price_id: "price_1T8vkaEgO8H7yovM9bBWWGwU", credits: 2000 },
+  builder: { name: "Builder", product_id: "prod_UD3IB1GkdTytBl", price_id: "price_1TEdBUEgO8H7yovM7UbhKdvP", credits: 500 },
+  pro: { name: "Pro", product_id: "prod_UD4fLliAe5KKKE", price_id: "price_1TEeVhEgO8H7yovMxXABYtzr", credits: 2000 },
 };
 
 const TOPUP_PACKS = [
@@ -55,7 +55,8 @@ const plans = [
   },
   {
     tier: "builder" as const,
-    monthlyPrice: 29,
+    monthlyPrice: 14.50,
+    originalPrice: 29,
     desc: "For builders shipping real products.",
     credits: 500,
     features: [
@@ -74,7 +75,8 @@ const plans = [
   },
   {
     tier: "pro" as const,
-    monthlyPrice: 79,
+    monthlyPrice: 39.50,
+    originalPrice: 79,
     desc: "For teams building at scale.",
     credits: 2000,
     features: [
@@ -255,8 +257,14 @@ export default function PricingPage() {
                       <h3 className="text-lg font-bold">{TIERS[plan.tier]?.name}</h3>
                     </div>
                     <div className="flex items-baseline gap-1 mb-1">
+                      {(plan as any).originalPrice && (
+                        <span className="text-lg text-muted-foreground/60 line-through mr-1">${(plan as any).originalPrice}</span>
+                      )}
                       <span className="text-4xl font-extrabold">${plan.monthlyPrice}</span>
                       {plan.monthlyPrice > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
+                      {(plan as any).originalPrice && (
+                        <Badge className="ml-2 bg-destructive text-destructive-foreground text-[10px] px-2">50% OFF</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-1 mb-4">
                       <Coins className="h-3 w-3 text-primary" />

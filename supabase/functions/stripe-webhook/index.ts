@@ -12,6 +12,9 @@ const corsHeaders = {
 const PRODUCT_TIER_MAP: Record<string, { tier: string; allowance: number }> = {
   prod_U7Tj3A5CVbhw4c: { tier: "builder", allowance: 500 },
   prod_U7A4PumaFQmKPQ: { tier: "pro", allowance: 2000 },
+  // Sale products (50% off)
+  prod_UD3IB1GkdTytBl: { tier: "builder", allowance: 500 },
+  prod_UD4fLliAe5KKKE: { tier: "pro", allowance: 2000 },
 };
 
 const TOPUP_PRODUCT_MAP: Record<string, number> = {
