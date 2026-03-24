@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -17,6 +17,9 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
       inset: 0;
       z-index: 50;
       overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .fr-bg {
@@ -46,16 +49,17 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
 
     .fr-scroll {
       position: fixed; inset: 0; z-index: 5;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
+      overflow-y: ${isMobile ? 'hidden' : 'scroll'};
+      scroll-snap-type: ${isMobile ? 'none' : 'y mandatory'};
       scrollbar-width: none;
+      touch-action: ${isMobile ? 'none' : 'auto'};
     }
     .fr-scroll::-webkit-scrollbar { display: none; }
 
     .fr-snap-section {
       height: 100vh;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
+      scroll-snap-align: ${isMobile ? 'none' : 'start'};
+      scroll-snap-stop: ${isMobile ? 'normal' : 'always'};
       display: flex;
       align-items: center;
       justify-content: center;
@@ -91,7 +95,10 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     .fr-panel {
       position: relative; z-index: 15;
       width: ${isMobile ? '100vw' : 'min(680px, 90vw)'};
-      padding: ${isMobile ? '0 12px' : '0'};
+      padding: ${isMobile ? '0 20px' : '0'};
+      max-height: ${isMobile ? 'calc(100vh - 120px)' : 'none'};
+      overflow-y: ${isMobile ? 'auto' : 'visible'};
+      -webkit-overflow-scrolling: touch;
     }
 
     .fr-panel-inner {
@@ -101,7 +108,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     }
 
     .fr-station-header {
-      padding: ${isMobile ? '20px 20px 16px' : '32px 40px 28px'};
+      padding: ${isMobile ? '16px 16px 14px' : '32px 40px 28px'};
       border-bottom: 1px solid rgba(255,255,255,0.06);
       display: flex; align-items: flex-start;
       gap: ${isMobile ? '14px' : '20px'};
@@ -139,7 +146,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     }
 
     .fr-station-body {
-      padding: ${isMobile ? '16px 16px 20px' : '32px 40px'};
+      padding: ${isMobile ? '14px 16px 24px' : '32px 40px'};
     }
 
     .fr-action-list {
@@ -151,12 +158,14 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     .fr-action-item {
       display: flex; align-items: center;
       gap: ${isMobile ? '10px' : '14px'};
-      padding: ${isMobile ? '12px 14px' : '16px 20px'};
+      padding: ${isMobile ? '14px 16px' : '16px 20px'};
+      min-height: ${isMobile ? '56px' : 'auto'};
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.06);
       cursor: pointer; transition: all 0.2s;
       position: relative; overflow: hidden;
       text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .fr-action-item::before {
       content: ''; position: absolute;
@@ -200,16 +209,18 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
       font-family: 'Orbitron', monospace;
       font-size: ${isMobile ? '10px' : '11px'};
       font-weight: 900; letter-spacing: 0.2em;
-      padding: ${isMobile ? '14px 24px' : '16px 32px'};
+      padding: ${isMobile ? '16px 24px' : '16px 32px'};
+      min-height: ${isMobile ? '52px' : 'auto'};
       border: none; cursor: pointer;
       clip-path: polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
       display: flex; align-items: center; gap: 10px;
       transition: all 0.2s; width: 100%; justify-content: center;
       text-decoration: none; color: #050810;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .fr-scroll-hint {
-      position: fixed; bottom: ${isMobile ? '20px' : '32px'};
+      position: fixed; bottom: ${isMobile ? '80px' : '32px'};
       left: 50%; transform: translateX(-50%); z-index: 20;
       display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
@@ -272,18 +283,24 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
 
     /* ── MOBILE BOTTOM DOTS ── */
     .fr-mobile-dots {
-      position: fixed; bottom: 56px; left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%); z-index: 25;
-      display: flex; gap: 10px; align-items: center;
+      display: flex; gap: 16px; align-items: center;
+      padding: 8px 16px;
+      background: rgba(5,8,16,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
     }
     .fr-mobile-dot {
-      width: 8px; height: 8px; border-radius: 50%;
+      width: 12px; height: 12px; border-radius: 50%;
       border: 1.5px solid rgba(255,255,255,0.25);
       background: transparent; cursor: pointer;
       transition: all 0.3s;
+      -webkit-tap-highlight-color: transparent;
     }
     .fr-mobile-dot.active {
-      width: 10px; height: 10px; border-width: 2px;
+      width: 14px; height: 14px; border-width: 2px;
     }
 
     /* ── MOBILE BADGE ── */
@@ -614,7 +631,30 @@ export function ForgeRing() {
   const lastScrollTime = useRef(0);
   const isMobile = useIsMobile();
 
+  // Touch swipe state
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
+  const touchStartTime = useRef(0);
+  const isSwiping = useRef(false);
+  const swipeLock = useRef(false);
+
+  const goToStation = useCallback((idx: number) => {
+    const clamped = Math.max(0, Math.min(STATIONS.length - 1, idx));
+    if (clamped === activeIndex) return;
+    const dir = clamped > activeIndex ? 1 : -1;
+    setPrevIndex(activeIndex);
+    setDirection(dir);
+    setActiveIndex(clamped);
+
+    // Desktop: also scroll the container
+    if (!isMobile && scrollRef.current) {
+      scrollRef.current.scrollTo({ top: clamped * window.innerHeight, behavior: "smooth" });
+    }
+  }, [activeIndex, isMobile]);
+
+  // Desktop scroll-snap handler
   useEffect(() => {
+    if (isMobile) return;
     const el = scrollRef.current;
     if (!el) return;
 
@@ -636,22 +676,89 @@ export function ForgeRing() {
 
     el.addEventListener("scroll", handleScroll, { passive: true });
     return () => el.removeEventListener("scroll", handleScroll);
-  }, [activeIndex]);
+  }, [activeIndex, isMobile]);
 
+  // Mobile touch swipe handler
+  useEffect(() => {
+    if (!isMobile) return;
+    const root = scrollRef.current?.parentElement;
+    if (!root) return;
+
+    const SWIPE_THRESHOLD = 50;
+    const SWIPE_VELOCITY = 0.3; // px/ms
+
+    const onTouchStart = (e: TouchEvent) => {
+      // Allow taps on interactive elements
+      const target = e.target as HTMLElement;
+      if (target.closest('a, button, .fr-action-item, .fr-cta, .fr-mobile-dot')) {
+        isSwiping.current = false;
+        return;
+      }
+      if (swipeLock.current) return;
+      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0].clientX;
+      touchStartTime.current = Date.now();
+      isSwiping.current = true;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isSwiping.current) return;
+      // Prevent default scroll/zoom
+      e.preventDefault();
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!isSwiping.current || swipeLock.current) return;
+      isSwiping.current = false;
+
+      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+      const deltaX = touchStartX.current - e.changedTouches[0].clientX;
+      const elapsed = Date.now() - touchStartTime.current;
+      const velocity = Math.abs(deltaY) / elapsed;
+
+      // Only vertical swipes (ignore horizontal)
+      if (Math.abs(deltaX) > Math.abs(deltaY)) return;
+
+      const meetsThreshold = Math.abs(deltaY) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY;
+      if (!meetsThreshold) return;
+
+      // Lock to prevent rapid fire
+      swipeLock.current = true;
+      setTimeout(() => { swipeLock.current = false; }, 500);
+
+      if (deltaY > 0) {
+        // Swiped up → next
+        goToStation(activeIndex + 1);
+      } else {
+        // Swiped down → prev
+        goToStation(activeIndex - 1);
+      }
+    };
+
+    root.addEventListener("touchstart", onTouchStart, { passive: true });
+    root.addEventListener("touchmove", onTouchMove, { passive: false });
+    root.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      root.removeEventListener("touchstart", onTouchStart);
+      root.removeEventListener("touchmove", onTouchMove);
+      root.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isMobile, activeIndex, goToStation]);
+
+  // Keyboard nav
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === "ArrowRight") scrollToStation(Math.min(activeIndex + 1, STATIONS.length - 1));
-      if (e.key === "ArrowUp" || e.key === "ArrowLeft") scrollToStation(Math.max(activeIndex - 1, 0));
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") goToStation(activeIndex + 1);
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft") goToStation(activeIndex - 1);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [activeIndex]);
+  }, [activeIndex, goToStation]);
 
-  const scrollToStation = (idx: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: idx * window.innerHeight, behavior: "smooth" });
-  };
+  const scrollToStation = useCallback((idx: number) => {
+    goToStation(idx);
+  }, [goToStation]);
 
   const station = STATIONS[activeIndex];
 
@@ -733,13 +840,21 @@ export function ForgeRing() {
         {station.name}
       </div>
 
-      {/* ── SCROLL CONTAINER ── */}
+      {/* ── SCROLL CONTAINER / SWIPE ZONE ── */}
       <div ref={scrollRef} className="fr-scroll">
-        {STATIONS.map((s, i) => (
-          <div key={s.id} className="fr-snap-section">
-            <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} />
+        {isMobile ? (
+          /* Mobile: single panel, no scroll sections — swipe gestures handle nav */
+          <div className="fr-snap-section">
+            <StationPanel station={station} isActive={true} direction={direction} isMobile={isMobile} />
           </div>
-        ))}
+        ) : (
+          /* Desktop: scroll-snap sections */
+          STATIONS.map((s, i) => (
+            <div key={s.id} className="fr-snap-section">
+              <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} />
+            </div>
+          ))
+        )}
       </div>
 
       {/* ── TOP NAV BAR ── */}
@@ -750,7 +865,8 @@ export function ForgeRing() {
         backdropFilter: "blur(12px)",
         borderBottom: `1px solid ${station.accent}15`,
         display: "flex", alignItems: "center",
-        padding: isMobile ? "0 12px" : "0 24px",
+        padding: isMobile ? "0 16px" : "0 24px",
+        paddingTop: isMobile ? "env(safe-area-inset-top, 0px)" : "0",
         gap: isMobile ? 8 : 16,
         transition: "border-color 0.8s",
       }}>
