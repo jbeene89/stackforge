@@ -17,6 +17,9 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
       inset: 0;
       z-index: 50;
       overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .fr-bg {
