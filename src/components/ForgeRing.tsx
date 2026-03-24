@@ -631,7 +631,30 @@ export function ForgeRing() {
   const lastScrollTime = useRef(0);
   const isMobile = useIsMobile();
 
+  // Touch swipe state
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
+  const touchStartTime = useRef(0);
+  const isSwiping = useRef(false);
+  const swipeLock = useRef(false);
+
+  const goToStation = useCallback((idx: number) => {
+    const clamped = Math.max(0, Math.min(STATIONS.length - 1, idx));
+    if (clamped === activeIndex) return;
+    const dir = clamped > activeIndex ? 1 : -1;
+    setPrevIndex(activeIndex);
+    setDirection(dir);
+    setActiveIndex(clamped);
+
+    // Desktop: also scroll the container
+    if (!isMobile && scrollRef.current) {
+      scrollRef.current.scrollTo({ top: clamped * window.innerHeight, behavior: "smooth" });
+    }
+  }, [activeIndex, isMobile]);
+
+  // Desktop scroll-snap handler
   useEffect(() => {
+    if (isMobile) return;
     const el = scrollRef.current;
     if (!el) return;
 
@@ -653,22 +676,89 @@ export function ForgeRing() {
 
     el.addEventListener("scroll", handleScroll, { passive: true });
     return () => el.removeEventListener("scroll", handleScroll);
-  }, [activeIndex]);
+  }, [activeIndex, isMobile]);
 
+  // Mobile touch swipe handler
+  useEffect(() => {
+    if (!isMobile) return;
+    const root = scrollRef.current?.parentElement;
+    if (!root) return;
+
+    const SWIPE_THRESHOLD = 50;
+    const SWIPE_VELOCITY = 0.3; // px/ms
+
+    const onTouchStart = (e: TouchEvent) => {
+      // Allow taps on interactive elements
+      const target = e.target as HTMLElement;
+      if (target.closest('a, button, .fr-action-item, .fr-cta, .fr-mobile-dot')) {
+        isSwiping.current = false;
+        return;
+      }
+      if (swipeLock.current) return;
+      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0].clientX;
+      touchStartTime.current = Date.now();
+      isSwiping.current = true;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isSwiping.current) return;
+      // Prevent default scroll/zoom
+      e.preventDefault();
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!isSwiping.current || swipeLock.current) return;
+      isSwiping.current = false;
+
+      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+      const deltaX = touchStartX.current - e.changedTouches[0].clientX;
+      const elapsed = Date.now() - touchStartTime.current;
+      const velocity = Math.abs(deltaY) / elapsed;
+
+      // Only vertical swipes (ignore horizontal)
+      if (Math.abs(deltaX) > Math.abs(deltaY)) return;
+
+      const meetsThreshold = Math.abs(deltaY) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY;
+      if (!meetsThreshold) return;
+
+      // Lock to prevent rapid fire
+      swipeLock.current = true;
+      setTimeout(() => { swipeLock.current = false; }, 500);
+
+      if (deltaY > 0) {
+        // Swiped up → next
+        goToStation(activeIndex + 1);
+      } else {
+        // Swiped down → prev
+        goToStation(activeIndex - 1);
+      }
+    };
+
+    root.addEventListener("touchstart", onTouchStart, { passive: true });
+    root.addEventListener("touchmove", onTouchMove, { passive: false });
+    root.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      root.removeEventListener("touchstart", onTouchStart);
+      root.removeEventListener("touchmove", onTouchMove);
+      root.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isMobile, activeIndex, goToStation]);
+
+  // Keyboard nav
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === "ArrowRight") scrollToStation(Math.min(activeIndex + 1, STATIONS.length - 1));
-      if (e.key === "ArrowUp" || e.key === "ArrowLeft") scrollToStation(Math.max(activeIndex - 1, 0));
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") goToStation(activeIndex + 1);
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft") goToStation(activeIndex - 1);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [activeIndex]);
+  }, [activeIndex, goToStation]);
 
-  const scrollToStation = (idx: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: idx * window.innerHeight, behavior: "smooth" });
-  };
+  const scrollToStation = useCallback((idx: number) => {
+    goToStation(idx);
+  }, [goToStation]);
 
   const station = STATIONS[activeIndex];
 
