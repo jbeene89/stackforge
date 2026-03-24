@@ -55,7 +55,8 @@ const plans = [
   },
   {
     tier: "builder" as const,
-    monthlyPrice: 29,
+    monthlyPrice: 14.50,
+    originalPrice: 29,
     desc: "For builders shipping real products.",
     credits: 500,
     features: [
