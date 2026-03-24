@@ -146,7 +146,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     }
 
     .fr-station-body {
-      padding: ${isMobile ? '16px 16px 20px' : '32px 40px'};
+      padding: ${isMobile ? '14px 16px 24px' : '32px 40px'};
     }
 
     .fr-action-list {
