@@ -1,0 +1,1 @@
+UPDATE user_credits SET tier = 'admin' WHERE user_id = '110174ca-2e67-4d46-9732-6fea5a9ab59a';
