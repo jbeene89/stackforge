@@ -49,16 +49,17 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
 
     .fr-scroll {
       position: fixed; inset: 0; z-index: 5;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
+      overflow-y: ${isMobile ? 'hidden' : 'scroll'};
+      scroll-snap-type: ${isMobile ? 'none' : 'y mandatory'};
       scrollbar-width: none;
+      touch-action: ${isMobile ? 'none' : 'auto'};
     }
     .fr-scroll::-webkit-scrollbar { display: none; }
 
     .fr-snap-section {
       height: 100vh;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
+      scroll-snap-align: ${isMobile ? 'none' : 'start'};
+      scroll-snap-stop: ${isMobile ? 'normal' : 'always'};
       display: flex;
       align-items: center;
       justify-content: center;
