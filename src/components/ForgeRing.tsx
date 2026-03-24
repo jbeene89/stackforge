@@ -108,7 +108,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     }
 
     .fr-station-header {
-      padding: ${isMobile ? '20px 20px 16px' : '32px 40px 28px'};
+      padding: ${isMobile ? '16px 16px 14px' : '32px 40px 28px'};
       border-bottom: 1px solid rgba(255,255,255,0.06);
       display: flex; align-items: flex-start;
       gap: ${isMobile ? '14px' : '20px'};
