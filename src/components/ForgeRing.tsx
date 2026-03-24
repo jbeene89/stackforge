@@ -840,13 +840,21 @@ export function ForgeRing() {
         {station.name}
       </div>
 
-      {/* ── SCROLL CONTAINER ── */}
+      {/* ── SCROLL CONTAINER / SWIPE ZONE ── */}
       <div ref={scrollRef} className="fr-scroll">
-        {STATIONS.map((s, i) => (
-          <div key={s.id} className="fr-snap-section">
-            <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} />
+        {isMobile ? (
+          /* Mobile: single panel, no scroll sections — swipe gestures handle nav */
+          <div className="fr-snap-section">
+            <StationPanel station={station} isActive={true} direction={direction} isMobile={isMobile} />
           </div>
-        ))}
+        ) : (
+          /* Desktop: scroll-snap sections */
+          STATIONS.map((s, i) => (
+            <div key={s.id} className="fr-snap-section">
+              <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} />
+            </div>
+          ))
+        )}
       </div>
 
       {/* ── TOP NAV BAR ── */}
