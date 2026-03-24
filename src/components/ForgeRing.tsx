@@ -95,7 +95,10 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     .fr-panel {
       position: relative; z-index: 15;
       width: ${isMobile ? '100vw' : 'min(680px, 90vw)'};
-      padding: ${isMobile ? '0 12px' : '0'};
+      padding: ${isMobile ? '0 20px' : '0'};
+      max-height: ${isMobile ? 'calc(100vh - 120px)' : 'none'};
+      overflow-y: ${isMobile ? 'auto' : 'visible'};
+      -webkit-overflow-scrolling: touch;
     }
 
     .fr-panel-inner {
