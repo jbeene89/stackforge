@@ -865,7 +865,8 @@ export function ForgeRing() {
         backdropFilter: "blur(12px)",
         borderBottom: `1px solid ${station.accent}15`,
         display: "flex", alignItems: "center",
-        padding: isMobile ? "0 12px" : "0 24px",
+        padding: isMobile ? "0 16px" : "0 24px",
+        paddingTop: isMobile ? "env(safe-area-inset-top, 0px)" : "0",
         gap: isMobile ? 8 : 16,
         transition: "border-color 0.8s",
       }}>
