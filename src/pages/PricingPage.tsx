@@ -16,8 +16,8 @@ import {
 
 const TIERS = {
   free: { name: "Free", product_id: null, price_id: null, credits: 50 },
-  builder: { name: "Builder", product_id: "prod_U7Tj3A5CVbhw4c", price_id: "price_1T9Em0EgO8H7yovMHqTakSkd", credits: 500 },
-  pro: { name: "Pro", product_id: "prod_U7A4PumaFQmKPQ", price_id: "price_1T8vkaEgO8H7yovM9bBWWGwU", credits: 2000 },
+  builder: { name: "Builder", product_id: "prod_UD3IB1GkdTytBl", price_id: "price_1TEdBUEgO8H7yovM7UbhKdvP", credits: 500 },
+  pro: { name: "Pro", product_id: "prod_UD4fLliAe5KKKE", price_id: "price_1TEeVhEgO8H7yovMxXABYtzr", credits: 2000 },
 };
 
 const TOPUP_PACKS = [
