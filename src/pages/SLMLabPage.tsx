@@ -44,6 +44,7 @@ import {
   type PipelineMode,
 } from "@/hooks/useTrainingData";
 import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } from "@/lib/chatExportParsers";
+import { ForgeRing } from "@/components/ForgeRing";
 
 // ── Perspective config ──
 const PERSPECTIVE_CONFIG = {
