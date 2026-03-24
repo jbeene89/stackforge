@@ -220,7 +220,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
     }
 
     .fr-scroll-hint {
-      position: fixed; bottom: ${isMobile ? '20px' : '32px'};
+      position: fixed; bottom: ${isMobile ? '80px' : '32px'};
       left: 50%; transform: translateX(-50%); z-index: 20;
       display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
