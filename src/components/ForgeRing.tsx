@@ -12,9 +12,10 @@ const Fonts = () => (
       font-family: 'Chakra Petch', sans-serif;
       background: #050810;
       color: #FAFCFF;
-      height: 100vh;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
       overflow: hidden;
-      position: relative;
     }
 
     /* ── FIXED AMBIENT BACKGROUND ── */
