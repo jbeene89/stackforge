@@ -16,6 +16,8 @@ import ReferralSection from "@/components/ReferralSection";
 import { TierBadge } from "@/components/TierBadge";
 import { useCredits } from "@/hooks/useCredits";
 import { useSpriteSettings } from "@/providers/SpriteSettingsProvider";
+import { CancelFlowDialog } from "@/components/CancelFlowDialog";
+import { Pause, Settings2 } from "lucide-react";
 
 interface ApiKey {
   id: string;
