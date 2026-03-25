@@ -299,6 +299,44 @@ export function CancelFlowDialog({ open, onOpenChange, tier, onStatusChange }: P
           </>
         )}
 
+        {step === "downgrade_offer" && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ArrowDown className="h-5 w-5 text-primary" />
+                Downgrade to Builder
+              </DialogTitle>
+              <DialogDescription>
+                Switch to the Builder plan at $14.50/mo. You'll keep most features at a lower price.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 mt-2">
+              <div className="text-center py-4">
+                <p className="text-muted-foreground line-through text-sm">$39.50/mo (Pro)</p>
+                <p className="text-3xl font-extrabold text-primary">$14.50<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                <Badge className="mt-2 bg-primary">SAVE 63%</Badge>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1.5">
+                <p>✓ 500 credits/month (down from 2,000)</p>
+                <p>✓ Unlimited projects & modules</p>
+                <p>✓ Export Studio & version history</p>
+                <p>✓ Priority support</p>
+              </div>
+              <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm space-y-1.5">
+                <p className="font-medium text-destructive">You'll lose access to:</p>
+                <p>• Edge Training</p>
+                <p>• Robotics Controllers</p>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleDowngrade} disabled={loading} className="flex-1">
+                  {loading ? "Switching…" : "Switch to Builder"}
+                </Button>
+                <Button variant="ghost" onClick={() => setStep("options")}>Back</Button>
+              </div>
+            </div>
+          </>
+        )}
+
         {step === "confirm_cancel" && (
           <>
             <DialogHeader>
