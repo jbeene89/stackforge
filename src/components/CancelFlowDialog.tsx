@@ -189,6 +189,26 @@ export function CancelFlowDialog({ open, onOpenChange, tier, onStatusChange }: P
                 </div>
               )}
 
+              {/* Downgrade option (Pro only) */}
+              {isPro && (
+                <button
+                  onClick={() => setStep("downgrade_offer")}
+                  className="w-full text-left border border-border rounded-xl p-4 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Downgrade to Builder</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Keep 500 credits/mo & Export Studio at $14.50/mo
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              )}
+
               {/* Cancel option */}
               <button
                 onClick={() => setStep("confirm_cancel")}
