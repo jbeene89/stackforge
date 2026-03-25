@@ -42,7 +42,8 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { action } = await req.json();
+    const body = await req.json();
+    const { action } = body;
     log("Action requested", { action, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
@@ -112,6 +113,22 @@ serve(async (req) => {
         return respond({
           success: true,
           message: "25% discount applied for the next 3 months!",
+        });
+      }
+
+      case "downgrade": {
+        const target_price_id = body.target_price_id;
+        if (!target_price_id) throw new Error("target_price_id required");
+
+        const itemId = activeSub.items.data[0].id;
+        await stripe.subscriptions.update(subId, {
+          items: [{ id: itemId, price: target_price_id }],
+          proration_behavior: "create_prorations",
+        });
+        log("Subscription downgraded", { subId, target_price_id });
+        return respond({
+          success: true,
+          message: "You've been downgraded to Builder — changes take effect now",
         });
       }
 

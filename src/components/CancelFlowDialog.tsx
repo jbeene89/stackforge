@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Pause, Play, Gift, HeartCrack, Sparkles, Clock, Shield } from "lucide-react";
+import { Pause, Play, Gift, HeartCrack, Sparkles, Clock, Shield, ArrowDown } from "lucide-react";
 
-type Step = "options" | "discount_offer" | "pause_offer" | "confirm_cancel" | "done";
+type Step = "options" | "discount_offer" | "pause_offer" | "downgrade_offer" | "confirm_cancel" | "done";
+
+const BUILDER_PRICE_ID = "price_1TEdBUEgO8H7yovM7UbhKdvP";
 
 interface SubStatus {
   is_paused: boolean;
@@ -77,6 +79,21 @@ export function CancelFlowDialog({ open, onOpenChange, tier, onStatusChange }: P
   const handleDiscount = async () => {
     const ok = await invoke("apply_retention_discount");
     if (ok) { setStep("done"); }
+  };
+
+  const handleDowngrade = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke("manage-subscription", {
+      body: { action: "downgrade", target_price_id: BUILDER_PRICE_ID },
+    });
+    setLoading(false);
+    if (error || !data?.success) {
+      toast.error(data?.message || error?.message || "Something went wrong");
+      return;
+    }
+    toast.success(data.message);
+    onStatusChange?.();
+    setStep("done");
   };
 
   const handleCancel = async () => {
@@ -172,6 +189,26 @@ export function CancelFlowDialog({ open, onOpenChange, tier, onStatusChange }: P
                 </div>
               )}
 
+              {/* Downgrade option (Pro only) */}
+              {isPro && (
+                <button
+                  onClick={() => setStep("downgrade_offer")}
+                  className="w-full text-left border border-border rounded-xl p-4 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Downgrade to Builder</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Keep 500 credits/mo & Export Studio at $14.50/mo
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              )}
+
               {/* Cancel option */}
               <button
                 onClick={() => setStep("confirm_cancel")}
@@ -255,6 +292,44 @@ export function CancelFlowDialog({ open, onOpenChange, tier, onStatusChange }: P
               <div className="flex gap-2">
                 <Button onClick={handleDiscount} disabled={loading} className="flex-1">
                   {loading ? "Applying…" : "Claim 25% Off"}
+                </Button>
+                <Button variant="ghost" onClick={() => setStep("options")}>Back</Button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === "downgrade_offer" && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ArrowDown className="h-5 w-5 text-primary" />
+                Downgrade to Builder
+              </DialogTitle>
+              <DialogDescription>
+                Switch to the Builder plan at $14.50/mo. You'll keep most features at a lower price.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 mt-2">
+              <div className="text-center py-4">
+                <p className="text-muted-foreground line-through text-sm">$39.50/mo (Pro)</p>
+                <p className="text-3xl font-extrabold text-primary">$14.50<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                <Badge className="mt-2 bg-primary">SAVE 63%</Badge>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1.5">
+                <p>✓ 500 credits/month (down from 2,000)</p>
+                <p>✓ Unlimited projects & modules</p>
+                <p>✓ Export Studio & version history</p>
+                <p>✓ Priority support</p>
+              </div>
+              <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm space-y-1.5">
+                <p className="font-medium text-destructive">You'll lose access to:</p>
+                <p>• Edge Training</p>
+                <p>• Robotics Controllers</p>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleDowngrade} disabled={loading} className="flex-1">
+                  {loading ? "Switching…" : "Switch to Builder"}
                 </Button>
                 <Button variant="ghost" onClick={() => setStep("options")}>Back</Button>
               </div>
