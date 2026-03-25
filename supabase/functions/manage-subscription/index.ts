@@ -117,7 +117,7 @@ serve(async (req) => {
       }
 
       case "downgrade": {
-        const { target_price_id } = await req.json().catch(() => ({}));
+        const target_price_id = body.target_price_id;
         if (!target_price_id) throw new Error("target_price_id required");
 
         const itemId = activeSub.items.data[0].id;
