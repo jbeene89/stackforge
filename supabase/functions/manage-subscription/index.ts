@@ -115,6 +115,22 @@ serve(async (req) => {
         });
       }
 
+      case "downgrade": {
+        const { target_price_id } = await req.json().catch(() => ({}));
+        if (!target_price_id) throw new Error("target_price_id required");
+
+        const itemId = activeSub.items.data[0].id;
+        await stripe.subscriptions.update(subId, {
+          items: [{ id: itemId, price: target_price_id }],
+          proration_behavior: "create_prorations",
+        });
+        log("Subscription downgraded", { subId, target_price_id });
+        return respond({
+          success: true,
+          message: "You've been downgraded to Builder — changes take effect now",
+        });
+      }
+
       case "cancel": {
         // Cancel at end of period (not immediately)
         await stripe.subscriptions.update(subId, {

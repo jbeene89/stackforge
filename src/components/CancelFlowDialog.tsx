@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Pause, Play, Gift, HeartCrack, Sparkles, Clock, Shield } from "lucide-react";
+import { Pause, Play, Gift, HeartCrack, Sparkles, Clock, Shield, ArrowDown } from "lucide-react";
 
-type Step = "options" | "discount_offer" | "pause_offer" | "confirm_cancel" | "done";
+type Step = "options" | "discount_offer" | "pause_offer" | "downgrade_offer" | "confirm_cancel" | "done";
+
+const BUILDER_PRICE_ID = "price_1TEdBUEgO8H7yovM7UbhKdvP";
 
 interface SubStatus {
   is_paused: boolean;
