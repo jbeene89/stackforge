@@ -53,6 +53,7 @@ export default function AccountPage() {
   const [newKey, setNewKey] = useState("");
   // visibleKeys removed — keys are encrypted and only shown masked
   const [savingKey, setSavingKey] = useState(false);
+  const [cancelFlowOpen, setCancelFlowOpen] = useState(false);
 
   if (profile && !initialized) {
     setName(profile.display_name || "");
@@ -277,6 +278,41 @@ export default function AccountPage() {
 
       <Separator />
 
+      {/* Subscription Management */}
+      {credits && credits.tier !== "free" && (
+        <>
+          <div className="glass rounded-xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings2 className="h-4 w-4 text-primary" />
+                <h2 className="font-semibold font-display tracking-wide">Membership</h2>
+              </div>
+              <TierBadge tier={credits.tier} size="sm" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {credits.monthly_allowance} credits/month · {credits.credits_balance} remaining
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={() => setCancelFlowOpen(true)}>
+                <Pause className="h-3 w-3 mr-1.5" />
+                Pause or Cancel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const { data } = await supabase.functions.invoke("customer-portal");
+                  if (data?.url) window.open(data.url, "_blank");
+                }}
+              >
+                Manage Billing
+              </Button>
+            </div>
+          </div>
+          <Separator />
+        </>
+      )}
+
       <div className="glass rounded-xl p-6 space-y-4">
         <h2 className="font-semibold font-display tracking-wide">Session</h2>
         <p className="text-sm text-muted-foreground">
@@ -284,6 +320,13 @@ export default function AccountPage() {
         </p>
         <Button variant="destructive" size="sm" onClick={handleSignOut}>Sign Out</Button>
       </div>
+
+      <CancelFlowDialog
+        open={cancelFlowOpen}
+        onOpenChange={setCancelFlowOpen}
+        tier={credits?.tier || "free"}
+        onStatusChange={() => {/* credits auto-refresh */}}
+      />
     </div>
   );
 }
