@@ -81,6 +81,21 @@ export function CancelFlowDialog({ open, onOpenChange, tier, onStatusChange }: P
     if (ok) { setStep("done"); }
   };
 
+  const handleDowngrade = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke("manage-subscription", {
+      body: { action: "downgrade", target_price_id: BUILDER_PRICE_ID },
+    });
+    setLoading(false);
+    if (error || !data?.success) {
+      toast.error(data?.message || error?.message || "Something went wrong");
+      return;
+    }
+    toast.success(data.message);
+    onStatusChange?.();
+    setStep("done");
+  };
+
   const handleCancel = async () => {
     const ok = await invoke("cancel");
     if (ok) { setStep("done"); }
