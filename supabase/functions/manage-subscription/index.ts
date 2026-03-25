@@ -42,7 +42,8 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { action } = await req.json();
+    const body = await req.json();
+    const { action } = body;
     log("Action requested", { action, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
