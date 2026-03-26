@@ -606,8 +606,9 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
               </div>
 
               {/* CTA */}
-              <motion.a href={ctaHref}
-                style={{ textDecoration: "none" }}
+              <motion.div
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(ctaHref)}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}>
@@ -618,7 +619,7 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
                   {station.emoji} {cta}
                   <span style={{ fontFamily: "Space Mono, monospace", fontSize: 14 }}>→</span>
                 </button>
-              </motion.a>
+              </motion.div>
             </div>
           </div>
         </motion.div>
