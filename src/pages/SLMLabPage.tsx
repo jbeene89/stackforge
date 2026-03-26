@@ -3312,7 +3312,12 @@ export default function SLMLabPage() {
 
   // Landing: ForgeRing station navigator
   if (step === -1) {
-    return <ForgeRing />;
+    return (
+      <>
+        {!user && <SignupBanner />}
+        <ForgeRing />
+      </>
+    );
   }
 
   return (
