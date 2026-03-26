@@ -92,6 +92,9 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/install" element={<InstallPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/slm-lab" element={<AppLayout />}>
+                <Route index element={<SLMLabPage />} />
+              </Route>
 
               {/* Protected app routes */}
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
