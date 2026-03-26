@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // ── FONTS ─────────────────────────────────────────────────────────────────────
@@ -503,11 +504,12 @@ function ProgressArc({ current, total, accent }: { current: number; total: numbe
 }
 
 // ── STATION PANEL ─────────────────────────────────────────────────────────────
-function StationPanel({ station, isActive, direction, isMobile }: {
+function StationPanel({ station, isActive, direction, isMobile, navigate }: {
   station: Station;
   isActive: boolean;
   direction: number;
   isMobile: boolean;
+  navigate: ReturnType<typeof useNavigate>;
 }) {
   const filteredActions = station.actions.filter(a => {
     if (isMobile) return !a.desktopOnly;
@@ -575,8 +577,11 @@ function StationPanel({ station, isActive, direction, isMobile }: {
               {/* Actions */}
               <div className="fr-action-list">
                 {filteredActions.map((action, i) => (
-                  <motion.a key={action.title} href={action.href}
+                  <motion.div key={action.title}
                     className="fr-action-item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(action.href)}
                     style={{ "--stripe": station.accent, textDecoration: "none", color: "inherit" } as React.CSSProperties}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -596,13 +601,14 @@ function StationPanel({ station, isActive, direction, isMobile }: {
                       <div className="fr-action-desc">{action.desc}</div>
                     </div>
                     <span className="fr-action-arrow" style={{ color: station.accent }}>→</span>
-                  </motion.a>
+                  </motion.div>
                 ))}
               </div>
 
               {/* CTA */}
-              <motion.a href={ctaHref}
-                style={{ textDecoration: "none" }}
+              <motion.div
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(ctaHref)}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}>
@@ -613,7 +619,7 @@ function StationPanel({ station, isActive, direction, isMobile }: {
                   {station.emoji} {cta}
                   <span style={{ fontFamily: "Space Mono, monospace", fontSize: 14 }}>→</span>
                 </button>
-              </motion.a>
+              </motion.div>
             </div>
           </div>
         </motion.div>
@@ -624,6 +630,7 @@ function StationPanel({ station, isActive, direction, isMobile }: {
 
 // ── FORGE RING MAIN ───────────────────────────────────────────────────────────
 export function ForgeRing() {
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
@@ -845,13 +852,13 @@ export function ForgeRing() {
         {isMobile ? (
           /* Mobile: single panel, no scroll sections — swipe gestures handle nav */
           <div className="fr-snap-section">
-            <StationPanel station={station} isActive={true} direction={direction} isMobile={isMobile} />
+            <StationPanel station={station} isActive={true} direction={direction} isMobile={isMobile} navigate={navigate} />
           </div>
         ) : (
           /* Desktop: scroll-snap sections */
           STATIONS.map((s, i) => (
             <div key={s.id} className="fr-snap-section">
-              <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} />
+              <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} navigate={navigate} />
             </div>
           ))
         )}
