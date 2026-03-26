@@ -92,6 +92,9 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/install" element={<InstallPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/slm-lab" element={<AppLayout />}>
+                <Route index element={<SLMLabPage />} />
+              </Route>
 
               {/* Protected app routes */}
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
@@ -117,7 +120,7 @@ const App = () => (
                 <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
                 <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
                 <Route path="/experimental" element={<ExperimentalPage />} />
-                <Route path="/slm-lab" element={<SLMLabPage />} />
+                
                 <Route path="/white-paper" element={<WhitePaperPage />} />
                 <Route path="/capture" element={<CapturePage />} />
                 <Route path="/review" element={<SwipeReviewPage />} />
