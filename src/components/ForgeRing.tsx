@@ -504,11 +504,12 @@ function ProgressArc({ current, total, accent }: { current: number; total: numbe
 }
 
 // ── STATION PANEL ─────────────────────────────────────────────────────────────
-function StationPanel({ station, isActive, direction, isMobile }: {
+function StationPanel({ station, isActive, direction, isMobile, navigate }: {
   station: Station;
   isActive: boolean;
   direction: number;
   isMobile: boolean;
+  navigate: ReturnType<typeof useNavigate>;
 }) {
   const filteredActions = station.actions.filter(a => {
     if (isMobile) return !a.desktopOnly;
