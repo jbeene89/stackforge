@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Play, Brain, Heart, Zap, Shield, Layers } from "lucide-react";
+import { Play, Brain, Heart, Zap, Shield, Layers, Flame, Activity } from "lucide-react";
 
 const videos = [
   {
@@ -63,6 +63,30 @@ const videos = [
     border: "border-forge-violet/30",
     bg: "bg-forge-violet/10",
     glow: "shadow-forge-violet/20",
+  },
+  {
+    id: "awakening",
+    title: "The Forge — Awakening",
+    subtitle: "Platform Overview",
+    desc: "Watch the Soupy Lab forge ignite — five cognitive lenses converging into a unified intelligence engine that builds different.",
+    src: "/videos/soupy-forge-awakening.mp4",
+    icon: Flame,
+    accent: "text-forge-gold",
+    border: "border-forge-gold/30",
+    bg: "bg-forge-gold/10",
+    glow: "shadow-forge-gold/20",
+  },
+  {
+    id: "cascade",
+    title: "Neural — Cascade",
+    subtitle: "Data Pipeline",
+    desc: "Raw data streams through ingestion, cognitive processing by all five minds, and emerges as amplified intelligence with 97%+ quality scores.",
+    src: "/videos/soupy-neural-cascade.mp4",
+    icon: Activity,
+    accent: "text-forge-cyan",
+    border: "border-forge-cyan/30",
+    bg: "bg-forge-cyan/10",
+    glow: "shadow-forge-cyan/20",
   },
 ];
 
