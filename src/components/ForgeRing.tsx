@@ -577,8 +577,11 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
               {/* Actions */}
               <div className="fr-action-list">
                 {filteredActions.map((action, i) => (
-                  <motion.a key={action.title} href={action.href}
+                  <motion.div key={action.title}
                     className="fr-action-item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(action.href)}
                     style={{ "--stripe": station.accent, textDecoration: "none", color: "inherit" } as React.CSSProperties}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -598,7 +601,7 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
                       <div className="fr-action-desc">{action.desc}</div>
                     </div>
                     <span className="fr-action-arrow" style={{ color: station.accent }}>→</span>
-                  </motion.a>
+                  </motion.div>
                 ))}
               </div>
 
