@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
-import { FONT, COLORS } from "../MainVideo";
+import { FONT, COLORS } from "../constants";
 
 export const Scene4Tagline: React.FC = () => {
   const frame = useCurrentFrame();

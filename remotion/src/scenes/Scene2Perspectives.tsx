@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
-import { FONT, COLORS } from "../MainVideo";
+import { FONT, COLORS } from "../constants";
 
 const perspectives = [
   { name: "AXIOM", role: "Builder", color: COLORS.cyan, symbol: "◆" },

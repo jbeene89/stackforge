@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
-import { FONT, COLORS } from "../MainVideo";
+import { FONT, COLORS } from "../constants";
 
 const features = [
   { label: "TRAIN", sub: "Edge-native fine-tuning", color: COLORS.cyan },

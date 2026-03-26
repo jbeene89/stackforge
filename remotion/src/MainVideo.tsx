@@ -2,30 +2,11 @@ import { AbsoluteFill, useCurrentFrame, interpolate, Sequence } from "remotion";
 import { TransitionSeries, springTiming } from "@remotion/transitions";
 import { wipe } from "@remotion/transitions/wipe";
 import { fade } from "@remotion/transitions/fade";
-import { loadFont } from "@remotion/google-fonts/SpaceGrotesk";
 import { Scene1Awakening } from "./scenes/Scene1Awakening";
 import { Scene2Perspectives } from "./scenes/Scene2Perspectives";
 import { Scene3Forge } from "./scenes/Scene3Forge";
 import { Scene4Tagline } from "./scenes/Scene4Tagline";
-
-const { fontFamily } = loadFont("normal", {
-  weights: ["400", "700"],
-  subsets: ["latin"],
-});
-
-export const FONT = fontFamily;
-
-export const COLORS = {
-  void: "#0a0e1a",
-  voidLight: "#111827",
-  gold: "#f5a623",
-  cyan: "#00d4ff",
-  rose: "#e94560",
-  violet: "#7c3aed",
-  emerald: "#10b981",
-  white: "#f0ece4",
-  dimWhite: "#9ca3af",
-};
+import { FONT, COLORS } from "./constants";
 
 const PersistentBackground: React.FC = () => {
   const frame = useCurrentFrame();
