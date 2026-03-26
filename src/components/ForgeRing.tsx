@@ -630,6 +630,7 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
 
 // ── FORGE RING MAIN ───────────────────────────────────────────────────────────
 export function ForgeRing() {
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
@@ -851,13 +852,13 @@ export function ForgeRing() {
         {isMobile ? (
           /* Mobile: single panel, no scroll sections — swipe gestures handle nav */
           <div className="fr-snap-section">
-            <StationPanel station={station} isActive={true} direction={direction} isMobile={isMobile} />
+            <StationPanel station={station} isActive={true} direction={direction} isMobile={isMobile} navigate={navigate} />
           </div>
         ) : (
           /* Desktop: scroll-snap sections */
           STATIONS.map((s, i) => (
             <div key={s.id} className="fr-snap-section">
-              <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} />
+              <StationPanel station={s} isActive={i === activeIndex} direction={direction} isMobile={isMobile} navigate={navigate} />
             </div>
           ))
         )}
