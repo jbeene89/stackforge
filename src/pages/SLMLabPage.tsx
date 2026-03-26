@@ -1,4 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
 import { Badge } from "@/components/ui/badge";
@@ -3211,7 +3213,37 @@ function AdvancedSettings({ epochs, setEpochs, lr, setLr, batchSize, setBatchSiz
 }
 
 // ── Main Page ──
+function SignupBanner() {
+  const navigate = useNavigate();
+  return (
+    <motion.div
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="mx-4 mt-3 mb-1 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Sparkles className="h-4 w-4 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-foreground">You're viewing a demo</p>
+          <p className="text-xs text-muted-foreground">Sign up free to build your own AI — train, curate, and deploy models from your data.</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("/login")}>
+          Log in
+        </Button>
+        <Button size="sm" className="text-xs gap-1" onClick={() => navigate("/signup")}>
+          Sign up free <ArrowRight className="h-3 w-3" />
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function SLMLabPage() {
+  const { user } = useAuth();
   const { data: datasets, isLoading: dsLoading } = useDatasets();
 
   const readSavedLabState = () => {
