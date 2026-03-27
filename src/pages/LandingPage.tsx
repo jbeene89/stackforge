@@ -15,6 +15,7 @@ import { useTheme } from "@/providers/ThemeProvider";
 
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
+import { ForgeDoodle } from "@/components/landing/ForgeDoodle";
 
 // ------- ANIMATED COUNT-UP -------
 
@@ -493,6 +494,9 @@ export default function LandingPage() {
                 <span>Your data stays yours</span>
               </div>
             </div>
+
+            {/* AI Doodle — unique for every visitor */}
+            <ForgeDoodle />
 
             {/* Hero video */}
             <HeroVideo />
