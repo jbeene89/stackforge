@@ -471,7 +471,7 @@ export default function LandingPage() {
                   Start Building Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link to="/slm-lab" className="w-full sm:w-auto">
+              <Link to="/demo/module-builder" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
                   <Play className="h-4 w-4" /> Try Live Demo
                 </Button>
