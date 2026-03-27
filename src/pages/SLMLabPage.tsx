@@ -47,6 +47,8 @@ import {
 } from "@/hooks/useTrainingData";
 import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } from "@/lib/chatExportParsers";
 import { ForgeRing } from "@/components/ForgeRing";
+import { SLMModePicker, type SLMMode } from "@/components/SLMModePicker";
+import { EasyModeWizard } from "@/components/EasyModeWizard";
 
 // ── Perspective config ──
 const PERSPECTIVE_CONFIG = {
