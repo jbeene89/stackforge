@@ -93,6 +93,7 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/install" element={<InstallPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
               <Route path="/slm-lab" element={<AppLayout />}>
                 <Route index element={<SLMLabPage />} />
               </Route>
