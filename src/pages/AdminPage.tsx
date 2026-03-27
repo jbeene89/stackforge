@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -12,8 +13,13 @@ import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
+  Megaphone, Plus, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 // ------- FEATURE FLAGS (local state, no DB table for these) -------
 const featureFlags = [
