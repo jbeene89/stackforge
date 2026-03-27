@@ -144,6 +144,64 @@ const SOCIAL_POSTS = [
 
 export default function AdminPage() {
   const [flags, setFlags] = useState(featureFlags.map((f) => ({ ...f })));
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [newPriority, setNewPriority] = useState("info");
+  const queryClient = useQueryClient();
+
+  const { data: announcements } = useQuery({
+    queryKey: ["admin-announcements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const addAnnouncement = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("announcements").insert({
+        title: newTitle,
+        content: newContent,
+        priority: newPriority,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Message posted");
+      setNewTitle("");
+      setNewContent("");
+      queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+    },
+    onError: () => toast.error("Failed to post"),
+  });
+
+  const deleteAnnouncement = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("announcements").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Message deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+    },
+  });
+
+  const toggleAnnouncement = useMutation({
+    mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
+      const { error } = await supabase.from("announcements").update({ active }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+    },
+  });
 
   const { user } = useAuth();
   const { data: profile } = useProfile();
