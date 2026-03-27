@@ -16,6 +16,7 @@ import { useTheme } from "@/providers/ThemeProvider";
 import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 import { ForgeDoodle } from "@/components/landing/ForgeDoodle";
+import { PhotoTransform } from "@/components/landing/PhotoTransform";
 
 // ------- ANIMATED COUNT-UP -------
 
@@ -505,6 +506,9 @@ export default function LandingPage() {
 
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
+
+      {/* ════════════════════ TRANSFORM YOUR PHOTO ════════════════════ */}
+      <PhotoTransform />
 
       {/* ════════════════════ SOCIAL PROOF — RIGHT AFTER HERO ════════════════════ */}
       <InlineSocialProof />
