@@ -3277,6 +3277,81 @@ export default function SLMLabPage() {
     }
   };
 
+  const [searchParams] = useSearchParams();
+  const [step, setStep] = useState<number>(() => {
+    const urlStep = searchParams.get("step");
+    if (urlStep !== null) return parseInt(urlStep, 10);
+    return readSavedLabState().step;
+  });
+  const [activeDatasetId, setActiveDatasetId] = useState<string | null>(() => readSavedLabState().activeDatasetId);
+  const [showInterview, setShowInterview] = useState(false);
+
+  useEffect(() => {
+    const urlStep = searchParams.get("step");
+    if (urlStep !== null) {
+      const parsed = parseInt(urlStep, 10);
+      if (!isNaN(parsed) && parsed !== step) {
+        setStep(parsed);
+      }
+    }
+  }, [searchParams]);
+
+  const cachedDatasetRef = useRef<TrainingDataset | null>(null);
+  const liveDataset = datasets?.find(d => d.id === activeDatasetId);
+  if (liveDataset) cachedDatasetRef.current = liveDataset;
+  const activeDataset = liveDataset || cachedDatasetRef.current;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    sessionStorage.setItem("slm-lab-state", JSON.stringify({ step, activeDatasetId }));
+  }, [step, activeDatasetId]);
+
+  const handleDatasetCreated = (id: string) => {
+    setActiveDatasetId(id);
+    setShowInterview(true);
+    setStep(0);
+  };
+
+  const handleSelectExisting = (id: string) => {
+    setActiveDatasetId(id);
+    setStep(2);
+  };
+
+  // Easy mode wizard handlers
+  const handleEasyCreate = (name: string, domain: string, description: string) => {
+    createDataset.mutate({ name, domain, description }, {
+      onSuccess: (data) => {
+        setActiveDatasetId(data.id);
+        setShowInterview(true);
+        setStep(0);
+      }
+    });
+  };
+
+  const handleEasyPreset = (presetId: string) => {
+    const presetNames: Record<string, string> = {
+      "customer-support": "Customer Support Bot",
+      "creative-writing": "Creative Writing Assistant",
+      "code-assistant": "Code Assistant",
+      "qa-expert": "Q&A Expert",
+      "sales-coach": "Sales & Outreach Coach",
+    };
+    createDataset.mutate({ name: presetNames[presetId] || presetId, domain: "general", description: `Preset: ${presetId}` }, {
+      onSuccess: (data) => {
+        setActiveDatasetId(data.id);
+        setStep(2);
+        toast.success("Preset dataset created! Add your training data next.");
+      }
+    });
+  };
+
+  if (dsLoading) return <div className="p-8 space-y-4"><Skeleton className="h-16 w-64 mx-auto" /><Skeleton className="h-[400px] max-w-lg mx-auto" /></div>;
+
+  // Mode picker popup (first visit)
+  if (!slmMode) {
+    return <SLMModePicker onSelect={handleModeSelect} />;
+  }
+
   // Interview mode — full screen chat
   if (showInterview && activeDatasetId && step === 0) {
     return (
@@ -3291,7 +3366,21 @@ export default function SLMLabPage() {
     );
   }
 
-  // Landing: ForgeRing station navigator
+  // Easy mode: show wizard when no dataset selected
+  if (slmMode === "easy" && step === -1) {
+    return (
+      <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
+        <EasyModeWizard
+          onCreateDataset={handleEasyCreate}
+          onStartInterview={() => {}}
+          onUsePreset={handleEasyPreset}
+          onSwitchToExpert={() => handleModeSelect("expert")}
+        />
+      </div>
+    );
+  }
+
+  // Expert mode landing: ForgeRing
   if (step === -1) {
     return (
       <>
@@ -3308,11 +3397,20 @@ export default function SLMLabPage() {
           <Brain className="h-5 w-5 text-forge-amber" />
           <h1 className="text-lg font-bold">SLM Lab</h1>
           {activeDataset && <Badge variant="outline" className="text-[10px]">{activeDataset.name}</Badge>}
+          <Badge
+            variant="outline"
+            className="text-[10px] cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setShowModePicker(true)}
+          >
+            {slmMode === "easy" ? "🟢 Easy" : "⚡ Expert"}
+          </Badge>
         </div>
         <Button variant="ghost" size="sm" onClick={() => { setStep(-1); setActiveDatasetId(null); }}>
-          <ArrowLeft className="h-4 w-4 mr-1" /> All Datasets
+          <ArrowLeft className="h-4 w-4 mr-1" /> {slmMode === "easy" ? "Start Over" : "All Datasets"}
         </Button>
       </div>
+
+      {showModePicker && <SLMModePicker onSelect={(m) => { handleModeSelect(m); setShowModePicker(false); }} />}
 
       <StepIndicator currentStep={step} />
 
