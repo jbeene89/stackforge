@@ -65,6 +65,7 @@ import DeviceConsolePage from "./pages/DeviceConsolePage";
 import SelfHostPage from "./pages/SelfHostPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
 import ImageForgePage from "./pages/ImageForgePage";
+import DemoModuleBuilderPage from "./pages/DemoModuleBuilderPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
