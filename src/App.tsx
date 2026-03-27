@@ -10,12 +10,6 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TierProtectedRoute } from "@/components/TierProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
-import { usePageTracking } from "@/hooks/usePageTracking";
-
-function PageTracker() {
-  usePageTracking();
-  return null;
-}
 
 import LandingPage from "./pages/LandingPage";
 import PricingPage from "./pages/PricingPage";
@@ -79,7 +73,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <PageTracker />
+            
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<LandingPage />} />

@@ -7,13 +7,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useProjects, useModules, useStacks, useRuns, useProfile } from "@/hooks/useSupabaseData";
-import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
-  Users, Eye, TrendingDown, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -147,7 +145,6 @@ export default function AdminPage() {
   const { data: modules } = useModules();
   const { data: stacks } = useStacks();
   const { data: runs } = useRuns();
-  const { data: analytics, isLoading: analyticsLoading } = useAnalytics(7);
 
   const projectCount = projects?.length || 0;
   const moduleCount = modules?.length || 0;
@@ -232,99 +229,6 @@ export default function AdminPage() {
                 <Progress value={gauge.value} className="h-2" />
               </div>
             ))}
-          </div>
-          {/* Site Analytics Summary */}
-          <div className="mt-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Eye className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold">Site Analytics</h3>
-              <Badge variant="outline" className="text-[10px]">Last 7 days{analyticsLoading ? " · loading…" : ""}</Badge>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              {[
-                { label: "Visitors", value: String(analytics?.totalVisitors ?? 0), icon: Users, change: `${analytics?.totalPageViews ?? 0} total views` },
-                { label: "Page Views", value: String(analytics?.totalPageViews ?? 0), icon: Eye, change: analytics?.totalVisitors ? `${(analytics.totalPageViews / analytics.totalVisitors).toFixed(1)} per visit` : "—" },
-                { label: "Bounce Rate", value: `${analytics?.bounceRate ?? 0}%`, icon: TrendingDown, change: analytics?.totalVisitors ? `${analytics.totalVisitors - Math.round(analytics.totalVisitors * analytics.bounceRate / 100)} engaged` : "—" },
-                { label: "Avg Session", value: analytics?.avgSessionDuration ?? "—", icon: Clock, change: `${analytics?.totalVisitors ?? 0} sessions` },
-              ].map((stat, i) => {
-                const Icon = stat.icon;
-                return (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + i * 0.05 }}
-                    className="glass rounded-xl p-4"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</div>
-                    <div className="text-[9px] text-primary/70 mt-1">{stat.change}</div>
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Top Pages */}
-              <div className="glass rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold">Top Pages</span>
-                </div>
-                <div className="space-y-2">
-                  {(analytics?.topPages ?? []).length === 0 && (
-                    <p className="text-xs text-muted-foreground">No data yet</p>
-                  )}
-                  {(analytics?.topPages ?? []).map((p) => (
-                    <div key={p.page} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground font-mono text-xs truncate">{p.page}</span>
-                      <Badge variant="secondary" className="text-[10px]">{p.views}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Traffic Sources */}
-              <div className="glass rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold">Traffic Sources</span>
-                </div>
-                <div className="space-y-2">
-                  {(analytics?.topSources ?? []).length === 0 && (
-                    <p className="text-xs text-muted-foreground">No data yet</p>
-                  )}
-                  {(analytics?.topSources ?? []).map((s) => (
-                    <div key={s.source} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground text-xs">{s.source}</span>
-                      <Badge variant="secondary" className="text-[10px]">{s.visits}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Devices */}
-              <div className="glass rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold">Devices</span>
-                </div>
-                <div className="space-y-2">
-                  {(analytics?.devices ?? []).length === 0 && (
-                    <p className="text-xs text-muted-foreground">No data yet</p>
-                  )}
-                  {(analytics?.devices ?? []).map((d) => (
-                    <div key={d.label} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground text-xs capitalize">{d.label}</span>
-                      <Badge variant="secondary" className="text-[10px]">{d.value}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         </TabsContent>
 
