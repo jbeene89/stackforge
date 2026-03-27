@@ -492,7 +492,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
           toast.error("Could not parse file. Make sure it's a valid JSON export.");
           return;
         }
-        console.log("Parsed JSON type:", typeof raw, "isArray:", Array.isArray(raw), "keys:", raw && typeof raw === 'object' ? Object.keys(raw).slice(0, 10) : "N/A");
+        
         let convos: ParsedConversation[] = [];
         try {
           convos = parseExport(provider, raw);
@@ -1247,9 +1247,6 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         const captureFrame = () => {
           if (currentSample >= totalSamples || frames.length >= maxFrames) {
             URL.revokeObjectURL(url);
-            if (useSmartKeyframe && skippedCount > 0) {
-              console.log(`Smart keyframe: kept ${frames.length}, skipped ${skippedCount} similar frames`);
-            }
             resolve({ frames, captions: captionText });
             return;
           }

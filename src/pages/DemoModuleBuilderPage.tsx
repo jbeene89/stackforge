@@ -38,13 +38,13 @@ const DEMO_PRESETS = [
     testInput: "dock repair job, 40ft floating dock, about 12 pilings need replacing, some decking boards rotted through, customer wants LED lighting added, north side of marina, tide is an issue, need barge access",
   },
   {
-    name: "Red Team Critic",
-    role: "Finds flaws and risks in proposals",
-    type: "critic",
-    goal: "Identify weak points, missing info, and risks",
-    systemPrompt: "You are a skeptical critic. Given any proposal, plan, or document, identify: 1) Missing information, 2) Logical weaknesses, 3) Risk factors, 4) Questions the author should answer. Be direct and specific. Don't soften your critique.",
-    temperature: 0.5,
-    testInput: "We plan to launch our new SaaS product next month. We'll offer a free tier and a $29/mo pro plan. Marketing will be through social media and word of mouth. We expect 1000 users in the first quarter.",
+    name: "Tone Rewriter",
+    role: "Rewrites text to match a target tone",
+    type: "formatter",
+    goal: "Transform casual or rough text into polished, professional copy",
+    systemPrompt: "You are a professional tone rewriter. Given any text, rewrite it to sound polished, confident, and professional while keeping the original meaning. Output only the rewritten version, no explanations.",
+    temperature: 0.4,
+    testInput: "hey so basically our product is way better than the other guys, we got faster speeds and cheaper pricing and honestly if you dont switch you're kinda missing out lol",
   },
 ];
 
