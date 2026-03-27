@@ -3247,6 +3247,19 @@ function SignupBanner() {
 export default function SLMLabPage() {
   const { user } = useAuth();
   const { data: datasets, isLoading: dsLoading } = useDatasets();
+  const createDataset = useCreateDataset();
+
+  // ── Mode state (persisted in localStorage) ──
+  const [slmMode, setSlmMode] = useState<SLMMode | null>(() => {
+    try { return localStorage.getItem("slm-lab-mode") as SLMMode | null; } catch { return null; }
+  });
+  const [showModePicker, setShowModePicker] = useState(false);
+
+  const handleModeSelect = (mode: SLMMode) => {
+    setSlmMode(mode);
+    localStorage.setItem("slm-lab-mode", mode);
+    setShowModePicker(false);
+  };
 
   const readSavedLabState = () => {
     if (typeof window === "undefined") return { step: -1 as number, activeDatasetId: null as string | null };
@@ -3256,7 +3269,6 @@ export default function SLMLabPage() {
       const parsed = JSON.parse(raw) as { step?: number; activeDatasetId?: string | null };
       const safeStep = typeof parsed.step === "number" ? parsed.step : -1;
       return {
-        // Step 0 is interview-only and can't be resumed safely after remount
         step: safeStep === 0 ? 2 : safeStep,
         activeDatasetId: parsed.activeDatasetId ?? null,
       };
@@ -3264,55 +3276,6 @@ export default function SLMLabPage() {
       return { step: -1 as number, activeDatasetId: null as string | null };
     }
   };
-
-  const [searchParams] = useSearchParams();
-  const [step, setStep] = useState<number>(() => {
-    const urlStep = searchParams.get("step");
-    if (urlStep !== null) return parseInt(urlStep, 10);
-    return readSavedLabState().step;
-  }); // -1 = landing
-  const [activeDatasetId, setActiveDatasetId] = useState<string | null>(() => readSavedLabState().activeDatasetId);
-  const [showInterview, setShowInterview] = useState(false);
-
-  // Sync step from URL params (e.g. when ForgeRing navigates via query params)
-  useEffect(() => {
-    const urlStep = searchParams.get("step");
-    if (urlStep !== null) {
-      const parsed = parseInt(urlStep, 10);
-      if (!isNaN(parsed) && parsed !== step) {
-        setStep(parsed);
-      }
-    }
-  }, [searchParams]);
-
-  // Cache dataset so component doesn't unmount during query refetches
-  const cachedDatasetRef = useRef<TrainingDataset | null>(null);
-  const liveDataset = datasets?.find(d => d.id === activeDatasetId);
-  if (liveDataset) {
-    cachedDatasetRef.current = liveDataset;
-  }
-  const activeDataset = liveDataset || cachedDatasetRef.current;
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    sessionStorage.setItem(
-      "slm-lab-state",
-      JSON.stringify({ step, activeDatasetId })
-    );
-  }, [step, activeDatasetId]);
-
-  const handleDatasetCreated = (id: string) => {
-    setActiveDatasetId(id);
-    setShowInterview(true);
-    setStep(0);
-  };
-
-  const handleSelectExisting = (id: string) => {
-    setActiveDatasetId(id);
-    setStep(2);
-  };
-
-  if (dsLoading) return <div className="p-8 space-y-4"><Skeleton className="h-16 w-64 mx-auto" /><Skeleton className="h-[400px] max-w-lg mx-auto" /></div>;
 
   // Interview mode — full screen chat
   if (showInterview && activeDatasetId && step === 0) {
