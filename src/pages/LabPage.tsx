@@ -12,10 +12,9 @@ import { cn } from "@/lib/utils";
 import { useModules, useStacks, useRuns, useCreateRun } from "@/hooks/useSupabaseData";
 import { streamAI } from "@/hooks/useSupabaseData";
 import {
-  FlaskConical, Play, Loader2, Zap, Clock, Hash, Coins,
-  BarChart3, CheckCircle2, XCircle, AlertTriangle,
-  ChevronDown, ChevronRight,
-  Copy, RotateCcw, Sparkles, Target, Shield, Brain, Layers
+  FlaskConical, Play, Loader2, Clock, Hash, Coins,
+  BarChart3, CheckCircle2,
+  Copy, RotateCcw, Sparkles, Brain, Layers
 } from "lucide-react";
 
 // ------- PLAYGROUND TAB -------
