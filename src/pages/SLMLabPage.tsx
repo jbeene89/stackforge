@@ -1247,9 +1247,6 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         const captureFrame = () => {
           if (currentSample >= totalSamples || frames.length >= maxFrames) {
             URL.revokeObjectURL(url);
-            if (useSmartKeyframe && skippedCount > 0) {
-              console.log(`Smart keyframe: kept ${frames.length}, skipped ${skippedCount} similar frames`);
-            }
             resolve({ frames, captions: captionText });
             return;
           }
