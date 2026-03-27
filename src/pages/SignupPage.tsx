@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X, Gift } from "lucide-react";
+import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X, Gift, Zap, Shield, Cpu } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -131,15 +131,16 @@ export default function SignupPage() {
           transition={{ delay: 0.2 }}
           className="relative"
         >
-          <h1 className="text-4xl font-bold text-white mb-4">Start building today</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Build AI that thinks like you</h1>
           <p className="text-white/80 text-lg max-w-md">
-            Create AI-powered software in minutes. Web apps, Android apps, AI modules, and intelligent workflows.
+            Train custom small language models on your data. No PhD required — just plain English.
           </p>
           <div className="mt-8 space-y-4">
             {[
-              "Free tier with 100 generations/month",
+              "50 free credits on signup — start training instantly",
               "No credit card required",
-              "Full access to all templates",
+              "Five-perspective training pipeline included",
+              "Deploy to web, Android, or on-device",
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-2 text-white/90">
                 <Check className="h-4 w-4" />
@@ -168,8 +169,22 @@ export default function SignupPage() {
             </Link>
           </div>
           <div className="lg:text-left text-center">
-            <h1 className="text-2xl font-bold">Create your account</h1>
-            <p className="text-sm text-muted-foreground mt-1">Start building with Soupy</p>
+            <h1 className="text-2xl font-bold">Create your free account</h1>
+            <p className="text-sm text-muted-foreground mt-1">Get 50 free credits — no card needed</p>
+          </div>
+
+          {/* Value prop badges - visible on all screens */}
+          <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+            {[
+              { icon: Zap, label: "50 Free Credits" },
+              { icon: Shield, label: "Private & Secure" },
+              { icon: Cpu, label: "On-Device Ready" },
+            ].map(({ icon: Icon, label }) => (
+              <span key={label} className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                <Icon className="h-3 w-3" />
+                {label}
+              </span>
+            ))}
           </div>
 
           {referralCode && (
