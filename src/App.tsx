@@ -73,7 +73,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <PageTracker />
+            
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
