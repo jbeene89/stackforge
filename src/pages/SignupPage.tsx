@@ -131,15 +131,16 @@ export default function SignupPage() {
           transition={{ delay: 0.2 }}
           className="relative"
         >
-          <h1 className="text-4xl font-bold text-white mb-4">Start building today</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Build AI that thinks like you</h1>
           <p className="text-white/80 text-lg max-w-md">
-            Create AI-powered software in minutes. Web apps, Android apps, AI modules, and intelligent workflows.
+            Train custom small language models on your data. No PhD required — just plain English.
           </p>
           <div className="mt-8 space-y-4">
             {[
-              "Free tier with 100 generations/month",
+              "50 free credits on signup — start training instantly",
               "No credit card required",
-              "Full access to all templates",
+              "Five-perspective training pipeline included",
+              "Deploy to web, Android, or on-device",
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-2 text-white/90">
                 <Check className="h-4 w-4" />
