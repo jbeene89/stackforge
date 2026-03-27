@@ -492,7 +492,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
           toast.error("Could not parse file. Make sure it's a valid JSON export.");
           return;
         }
-        console.log("Parsed JSON type:", typeof raw, "isArray:", Array.isArray(raw), "keys:", raw && typeof raw === 'object' ? Object.keys(raw).slice(0, 10) : "N/A");
+        
         let convos: ParsedConversation[] = [];
         try {
           convos = parseExport(provider, raw);
