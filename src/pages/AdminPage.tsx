@@ -7,13 +7,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useProjects, useModules, useStacks, useRuns, useProfile } from "@/hooks/useSupabaseData";
-import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
-  Users, Eye, TrendingDown, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
