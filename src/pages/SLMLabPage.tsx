@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
@@ -3263,9 +3263,25 @@ export default function SLMLabPage() {
     }
   };
 
-  const [step, setStep] = useState<number>(() => readSavedLabState().step); // -1 = landing
+  const [searchParams] = useSearchParams();
+  const [step, setStep] = useState<number>(() => {
+    const urlStep = searchParams.get("step");
+    if (urlStep !== null) return parseInt(urlStep, 10);
+    return readSavedLabState().step;
+  }); // -1 = landing
   const [activeDatasetId, setActiveDatasetId] = useState<string | null>(() => readSavedLabState().activeDatasetId);
   const [showInterview, setShowInterview] = useState(false);
+
+  // Sync step from URL params (e.g. when ForgeRing navigates via query params)
+  useEffect(() => {
+    const urlStep = searchParams.get("step");
+    if (urlStep !== null) {
+      const parsed = parseInt(urlStep, 10);
+      if (!isNaN(parsed) && parsed !== step) {
+        setStep(parsed);
+      }
+    }
+  }, [searchParams]);
 
   // Cache dataset so component doesn't unmount during query refetches
   const cachedDatasetRef = useRef<TrainingDataset | null>(null);
