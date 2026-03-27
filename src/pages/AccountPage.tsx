@@ -56,6 +56,19 @@ export default function AccountPage() {
   const [savingKey, setSavingKey] = useState(false);
   const [cancelFlowOpen, setCancelFlowOpen] = useState(false);
 
+  const { data: announcements } = useQuery({
+    queryKey: ["announcements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   if (profile && !initialized) {
     setName(profile.display_name || "");
     setInitialized(true);
