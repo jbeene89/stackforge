@@ -257,6 +257,36 @@ export type Database = {
           },
         ]
       }
+      forge_doodles: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          image_url: string
+          perspectives: string[]
+          prompt_seed: string | null
+          theme: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url: string
+          perspectives?: string[]
+          prompt_seed?: string | null
+          theme?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url?: string
+          perspectives?: string[]
+          prompt_seed?: string | null
+          theme?: string
+        }
+        Relationships: []
+      }
       founder_interviews: {
         Row: {
           created_at: string
