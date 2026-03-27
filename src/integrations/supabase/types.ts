@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          active: boolean
+          content: string
+          created_at: string
+          id: string
+          priority: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          content: string
+          created_at?: string
+          id?: string
+          priority?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          priority?: string
+          title?: string
+        }
+        Relationships: []
+      }
       cognitive_fingerprints: {
         Row: {
           created_at: string

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -12,8 +13,13 @@ import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
+  Megaphone, Plus, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 // ------- FEATURE FLAGS (local state, no DB table for these) -------
 const featureFlags = [
@@ -138,6 +144,64 @@ const SOCIAL_POSTS = [
 
 export default function AdminPage() {
   const [flags, setFlags] = useState(featureFlags.map((f) => ({ ...f })));
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [newPriority, setNewPriority] = useState("info");
+  const queryClient = useQueryClient();
+
+  const { data: announcements } = useQuery({
+    queryKey: ["admin-announcements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const addAnnouncement = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("announcements").insert({
+        title: newTitle,
+        content: newContent,
+        priority: newPriority,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Message posted");
+      setNewTitle("");
+      setNewContent("");
+      queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+    },
+    onError: () => toast.error("Failed to post"),
+  });
+
+  const deleteAnnouncement = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("announcements").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Message deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+    },
+  });
+
+  const toggleAnnouncement = useMutation({
+    mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
+      const { error } = await supabase.from("announcements").update({ active }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+    },
+  });
 
   const { user } = useAuth();
   const { data: profile } = useProfile();
@@ -188,6 +252,7 @@ export default function AdminPage() {
           <TabsTrigger value="metrics" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Overview</TabsTrigger>
           <TabsTrigger value="social" className="text-xs gap-1.5"><Share2 className="h-3 w-3" /> Quick Posts</TabsTrigger>
           <TabsTrigger value="flags" className="text-xs gap-1.5"><Settings className="h-3 w-3" /> Feature Flags</TabsTrigger>
+          <TabsTrigger value="messages" className="text-xs gap-1.5"><Megaphone className="h-3 w-3" /> Messages</TabsTrigger>
           <TabsTrigger value="recent" className="text-xs gap-1.5"><Activity className="h-3 w-3" /> Recent Runs</TabsTrigger>
         </TabsList>
 
@@ -358,6 +423,83 @@ export default function AdminPage() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Messages */}
+        <TabsContent value="messages" className="flex-1 min-h-0 mt-0 overflow-auto">
+          <div className="space-y-4">
+            <div className="glass rounded-xl p-4 space-y-3">
+              <h3 className="text-sm font-semibold">Post New Message</h3>
+              <div className="space-y-2">
+                <Input
+                  placeholder="Title"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="h-8 text-sm"
+                />
+                <Textarea
+                  placeholder="Message content..."
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  className="text-sm min-h-[60px]"
+                />
+                <div className="flex items-center gap-3">
+                  <select
+                    value={newPriority}
+                    onChange={(e) => setNewPriority(e.target.value)}
+                    className="h-8 rounded-md border border-input bg-background px-3 text-xs"
+                  >
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                  <Button
+                    size="sm"
+                    onClick={() => addAnnouncement.mutate()}
+                    disabled={!newTitle.trim() || !newContent.trim() || addAnnouncement.isPending}
+                  >
+                    <Plus className="h-3 w-3 mr-1" /> Post
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {announcements?.map((a: any) => (
+              <div key={a.id} className={cn(
+                "glass rounded-xl p-4 flex items-start justify-between gap-3",
+                !a.active && "opacity-50"
+              )}>
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={cn("text-[10px]",
+                      a.priority === "critical" ? "border-destructive text-destructive" :
+                      a.priority === "warning" ? "border-forge-amber text-forge-amber" :
+                      "border-primary text-primary"
+                    )}>{a.priority}</Badge>
+                    <span className="text-sm font-medium">{a.title}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{a.content}</p>
+                  <span className="text-[10px] text-muted-foreground">{new Date(a.created_at).toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Switch
+                    checked={a.active}
+                    onCheckedChange={(active) => toggleAnnouncement.mutate({ id: a.id, active })}
+                  />
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => deleteAnnouncement.mutate(a.id)}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {(!announcements || announcements.length === 0) && (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                <Megaphone className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                No messages yet. Post one above.
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -11,13 +11,14 @@ import { useProfile, useUpdateProfile } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Key, Plus, Trash2, Shield, Sparkles, Wand2 } from "lucide-react";
+import { Key, Plus, Trash2, Shield, Sparkles, Wand2, Megaphone, AlertTriangle, Info } from "lucide-react";
 import ReferralSection from "@/components/ReferralSection";
 import { TierBadge } from "@/components/TierBadge";
 import { useCredits } from "@/hooks/useCredits";
 import { useSpriteSettings } from "@/providers/SpriteSettingsProvider";
 import { CancelFlowDialog } from "@/components/CancelFlowDialog";
 import { Pause, Settings2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface ApiKey {
   id: string;
@@ -54,6 +55,19 @@ export default function AccountPage() {
   // visibleKeys removed — keys are encrypted and only shown masked
   const [savingKey, setSavingKey] = useState(false);
   const [cancelFlowOpen, setCancelFlowOpen] = useState(false);
+
+  const { data: announcements } = useQuery({
+    queryKey: ["announcements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   if (profile && !initialized) {
     setName(profile.display_name || "");
@@ -117,6 +131,38 @@ export default function AccountPage() {
         <h1 className="text-2xl font-bold">Account Settings</h1>
         {credits && <TierBadge tier={credits.tier} size="md" />}
       </div>
+
+      {/* Important Messages */}
+      {announcements && announcements.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-primary" />
+            <h2 className="font-semibold text-sm">Important Messages</h2>
+          </div>
+          {announcements.map((a: any) => (
+            <div
+              key={a.id}
+              className={`rounded-lg border p-4 space-y-1 ${
+                a.priority === "warning"
+                  ? "border-forge-amber/40 bg-forge-amber/10"
+                  : a.priority === "critical"
+                  ? "border-destructive/40 bg-destructive/10"
+                  : "border-primary/20 bg-primary/5"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {a.priority === "warning" || a.priority === "critical" ? (
+                  <AlertTriangle className={`h-3.5 w-3.5 ${a.priority === "critical" ? "text-destructive" : "text-forge-amber"}`} />
+                ) : (
+                  <Info className="h-3.5 w-3.5 text-primary" />
+                )}
+                <span className="font-medium text-sm">{a.title}</span>
+              </div>
+              <p className="text-xs text-muted-foreground pl-5.5">{a.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="glass rounded-xl p-6 space-y-4">
         <h2 className="font-semibold">Profile</h2>
