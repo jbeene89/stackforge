@@ -184,6 +184,10 @@ export default function AccountPage() {
 
       <Separator />
 
+      <TwoFactorSetup />
+
+      <Separator />
+
       {/* BYOK Section */}
       <div className="glass rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
