@@ -139,8 +139,8 @@ export default function PricingPage() {
   }, []);
 
   const currentTier = subscriptionData.subscribed
-    ? Object.entries(TIERS).find(([, t]) => t.product_id === subscriptionData.product_id)?.[0] || "free"
-    : "free";
+    ? Object.entries(TIERS).find(([, t]) => t.product_id === subscriptionData.product_id)?.[0] || credits?.tier || "free"
+    : credits?.tier || "free";
 
   const handleCheckout = async (tier: string) => {
     const priceId = TIERS[tier as keyof typeof TIERS]?.price_id;
