@@ -132,7 +132,38 @@ export default function AccountPage() {
         {credits && <TierBadge tier={credits.tier} size="md" />}
       </div>
 
-      <div className="glass rounded-xl p-6 space-y-4">
+      {/* Important Messages */}
+      {announcements && announcements.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-primary" />
+            <h2 className="font-semibold text-sm">Important Messages</h2>
+          </div>
+          {announcements.map((a: any) => (
+            <div
+              key={a.id}
+              className={`rounded-lg border p-4 space-y-1 ${
+                a.priority === "warning"
+                  ? "border-forge-amber/40 bg-forge-amber/10"
+                  : a.priority === "critical"
+                  ? "border-destructive/40 bg-destructive/10"
+                  : "border-primary/20 bg-primary/5"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {a.priority === "warning" || a.priority === "critical" ? (
+                  <AlertTriangle className={`h-3.5 w-3.5 ${a.priority === "critical" ? "text-destructive" : "text-forge-amber"}`} />
+                ) : (
+                  <Info className="h-3.5 w-3.5 text-primary" />
+                )}
+                <span className="font-medium text-sm">{a.title}</span>
+              </div>
+              <p className="text-xs text-muted-foreground pl-5.5">{a.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
         <h2 className="font-semibold">Profile</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
