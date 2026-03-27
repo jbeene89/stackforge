@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X, Gift } from "lucide-react";
+import { Sparkles, Mail, ArrowRight, Eye, EyeOff, Check, X, Gift, Zap, Shield, Cpu } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
