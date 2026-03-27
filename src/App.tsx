@@ -65,6 +65,7 @@ import DeviceConsolePage from "./pages/DeviceConsolePage";
 import SelfHostPage from "./pages/SelfHostPage";
 import TrainingProgressPage from "./pages/TrainingProgressPage";
 import ImageForgePage from "./pages/ImageForgePage";
+import DemoModuleBuilderPage from "./pages/DemoModuleBuilderPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/install" element={<InstallPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
               <Route path="/slm-lab" element={<AppLayout />}>
                 <Route index element={<SLMLabPage />} />
               </Route>
