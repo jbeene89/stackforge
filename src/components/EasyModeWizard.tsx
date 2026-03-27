@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowRight, ArrowLeft, Database, MessageSquare, Upload,
-  Sparkles, CheckCircle2, Brain, Globe, Package, Zap
+  ArrowRight, ArrowLeft, Upload,
+  Sparkles, CheckCircle2, Brain, Package, Zap
 } from "lucide-react";
 
 const PRESET_DATASETS = [
