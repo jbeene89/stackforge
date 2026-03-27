@@ -38,16 +38,16 @@ const SOCIAL_POSTS = [
     emoji: "💼",
     posts: [
       {
-        title: "Launch announcement",
-        body: `I built an AI app — without writing backend code.\n\nSoupy lets you wire up GPT-5, Gemini, and open-source models into pipelines, test them, and ship to Android — all from one dashboard.\n\nNo infra headaches. No API-key juggling.\n\nTry it free 👇\n${SITE_URL}`,
+        title: "Guest demo launch",
+        body: `Just added something I've been wanting to build for a while — a guest demo for Soupy Lab.\n\nYou can now try the module builder without signing up. Pick a preset (email classifier, scope summarizer, red team critic), tweak the system prompt, and run it live.\n\n5 free test runs. No account needed.\n\nI know "no-code AI" sounds like marketing fluff, but this is genuinely different — you're designing the reasoning, not just typing into a chatbox.\n\nWould love honest feedback from anyone who tries it.\n\n${SITE_URL}/demo/module-builder`,
       },
       {
-        title: "Builder credibility",
-        body: `Most "AI tools" are just wrappers.\n\nSoupy is different — you design the reasoning chain:\n✦ Pick your models\n✦ Set guardrails & tone\n✦ Wire nodes into stacks\n✦ Deploy to phone or web\n\nIt's Lego for AI builders.\n\n${SITE_URL}`,
+        title: "Why modular matters",
+        body: `Something I keep running into when talking to people about AI:\n\nEveryone's building wrappers. Thin layers over GPT that do one thing okay.\n\nWhat if instead, you designed each AI as a specialist with defined boundaries? Then wired them together?\n\nThat's what I've been building with Soupy. A module for classification. Another for critique. A third for formatting. Chain them into a pipeline. Each one traceable, testable, swappable.\n\nNot sexy. But it works in production.\n\n${SITE_URL}`,
       },
       {
-        title: "Edge AI angle",
-        body: `Hot take: the future of AI isn't in the cloud — it's on the device.\n\nThat's why I'm building with Soupy. It supports SLM mode so your models can run locally on a phone.\n\nSmaller. Faster. Private.\n\n${SITE_URL}`,
+        title: "Solo builder update",
+        body: `Quick update on what I've shipped this month as a solo founder:\n\n→ Guest demo mode (try building a module without signing up)\n→ Redesigned landing page (was losing 90% of visitors at the door)\n→ SLM Lab publicly accessible for non-logged-in users\n→ Pricing page now properly reflects database tiers\n\nSmall things, but they matter. The biggest lesson: nobody cares about your features until they can try them.\n\n${SITE_URL}`,
       },
     ],
     shareUrl: (text: string) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}`,
@@ -62,8 +62,8 @@ const SOCIAL_POSTS = [
         body: `Been working on something cool — an app that lets you build AI-powered tools without being an ML engineer. Pick models, wire them up, deploy to your phone. Check it out: ${SITE_URL}`,
       },
       {
-        title: "Community post",
-        body: `If you've ever wanted to build your own AI app but didn't know where to start — Soupy is free to try. No coding required for basic setups. 50 free credits/month.\n\n${SITE_URL}`,
+        title: "Demo drop",
+        body: `I just added a free demo to my AI project — you can try building an AI module without even making an account. It takes like 30 seconds. Would love to know what you think.\n\n${SITE_URL}/demo/module-builder`,
       },
     ],
     shareUrl: (text: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(text)}`,
@@ -78,6 +78,10 @@ const SOCIAL_POSTS = [
         body: `yo just shipped something — **Soupy** lets you build AI pipelines visually and deploy them to Android 🤖\n\npick your models (GPT-5, Gemini, etc), set guardrails, chain them together, hit deploy\n\nfree tier has 50 credits/mo\n${SITE_URL}`,
       },
       {
+        title: "Demo channel",
+        body: `added a guest demo to soupy — you can try the module builder without making an account\n\nthree presets loaded: email classifier, scope summarizer, red team critic\n\njust hit run and it streams live output. 5 free tests.\n\n${SITE_URL}/demo/module-builder`,
+      },
+      {
         title: "Dev channel",
         body: `anyone messing with multi-model AI stacks? built a tool that lets you chain different LLMs together with routing logic, evaluators, critics etc\n\nlike n8n but for AI reasoning\n\n${SITE_URL}`,
       },
@@ -90,8 +94,12 @@ const SOCIAL_POSTS = [
     emoji: "𝕏",
     posts: [
       {
-        title: "Thread opener",
-        body: `I built an AI builder that lets you ship real AI apps — not toy demos.\n\nPick models. Wire logic. Deploy to Android.\n\nMeet Soupy 🧪\n\n${SITE_URL}`,
+        title: "Demo announcement",
+        body: `you can now try soupy's module builder without signing up\n\npick a preset, tweak the prompt, hit run, see live AI output\n\n5 free tests. 30 seconds to start.\n\n${SITE_URL}/demo/module-builder`,
+      },
+      {
+        title: "Builder philosophy",
+        body: `hot take: the best AI apps won't be built by prompting one model really hard\n\nthey'll be built by wiring specialists together — classifier → critic → formatter\n\nthat's what soupy does\n${SITE_URL}`,
       },
       {
         title: "Short banger",
@@ -106,28 +114,24 @@ const SOCIAL_POSTS = [
     emoji: "🔴",
     posts: [
       {
-        title: "r/microsaas launch",
-        body: `Title: I built a visual AI platform that lets you design agents, chain models, and deploy to Android — no ML experience needed\n\nHey r/microsaas 👋\n\nI've been building Soupy Lab — a no-code platform for designing AI agents and multi-model pipelines.\n\nThe idea: instead of wrapping one API, you wire together specialists (GPT-5, Gemini, open-source SLMs) into reasoning chains with guardrails, evaluators, and routing logic.\n\nWhat it does:\n• Visual module builder — define role, tone, boundaries, output format\n• Stack canvas — drag-and-drop pipeline editor (like n8n but for AI reasoning)\n• Dataset engineering — build training data from chat exports, web scrapes, founder interviews\n• Perspective training — reshape model behavior with multi-lens analysis\n• One-click deploy to web or Android\n• Marketplace — sell your trained modules to other builders\n\nMonetization: freemium credits model (50 free/mo), paid tiers unlock more credits + features. Creators earn when their templates sell on the marketplace.\n\nStack: React + Supabase + Edge Functions. No backend servers to manage.\n\nWould love feedback from other builders here. What would make this useful to you?\n\n${SITE_URL}`,
+        title: "r/microsaas — guest demo",
+        body: `Title: Added a guest demo to my AI platform — try building a module without signing up\n\nHey r/microsaas,\n\nI posted about Soupy Lab a while back and got some good feedback. One thing that kept coming up: "let me try it before I make an account."\n\nSo I built that. There's now a guest demo at ${SITE_URL}/demo/module-builder where you can:\n\n• Pick a preset (email classifier, scope summarizer, or red team critic)\n• Edit the system prompt, role, temperature\n• Hit "Run Test" and get live streaming AI output\n• 5 free runs, no account needed\n\nThe whole point is to show that this isn't another chatbot wrapper. Each module has a defined job, explicit boundaries, and traceable output. You're designing the reasoning, not just typing.\n\nIf you try it, I'd genuinely love to hear what breaks or what feels weird. Solo founder here, so every bit of feedback actually gets read.\n\n${SITE_URL}`,
       },
       {
-        title: "r/microsaas traction update",
-        body: `Title: Soupy Lab — building a modular AI platform, here's what I learned\n\nQuick update on Soupy Lab (${SITE_URL}).\n\nThe core insight: most AI tools are monolithic wrappers. We let users build *modular* AI systems — each piece has a defined role, explicit boundaries, and traceable output.\n\nKey differentiators:\n• Selective Unlearning — surgically remove behaviors from models\n• Popcorn Injection — knowledge densification technique\n• CDPT (Cognitive Diversity Perspective Training) — train from multiple reasoning angles\n• Full ownership — your trained model is yours forever, sell it on our marketplace\n\nWould love to hear what the r/microsaas community thinks about the positioning.\n\n${SITE_URL}`,
+        title: "r/microsaas — conversion lessons",
+        body: `Title: 83 visitors, 0 signups — what I changed and what I learned\n\nReal numbers from my first week with analytics on Soupy Lab (${SITE_URL}):\n\n• 83 unique visitors\n• 90% bounce rate\n• 8 people reached the login page\n• 0 signed up\n\nOuch.\n\nWhat I did about it:\n1. Rebuilt the landing page — moved social proof up, added video in the hero, killed the "Explore Demo" button that required login\n2. Made the SLM Lab publicly accessible so people can poke around\n3. Built a guest demo mode — try the module builder without an account (5 free AI test runs)\n4. Fixed the "Try Live Demo" CTA to actually go somewhere useful\n\nBiggest lesson: nobody cares about your feature list until they can touch the product. Reduce friction ruthlessly.\n\nWould love to hear from other microsaas founders — what's your best tactic for converting cold traffic?\n\n${SITE_URL}`,
       },
       {
-        title: "r/SideProject launch",
-        body: `Title: Soupy Lab — a visual platform to build, train, and deploy AI agents (no ML experience needed)\n\nHey r/SideProject! 👋\n\nI've been working on Soupy Lab — a platform that lets you build AI systems visually instead of writing ML code.\n\nThe pitch: instead of using one giant model for everything, you design modular agents — each with its own role, tone, and guardrails — then chain them together into multi-step pipelines.\n\nFeatures:\n• Drag-and-drop stack canvas for building AI pipelines\n• Module builder — configure agents with system prompts, output formats, task boundaries\n• Train on YOUR data — chat exports, web scrapes, interviews, documents\n• Deploy to web or Android with one click\n• Marketplace where creators can sell trained modules\n\nIt's free to start (50 credits/mo). Built with React, Supabase, and Edge Functions — fully serverless.\n\nI'd love any feedback. What's the first thing you'd build with something like this?\n\n${SITE_URL}`,
+        title: "r/SideProject — demo update",
+        body: `Title: Month 3 of Soupy Lab — added a guest demo and rebuilt the landing page\n\nHey r/SideProject,\n\nQuick progress update on my AI builder side project:\n\nWhat shipped this sprint:\n• Guest demo mode — try the full module builder without signing up. Three presets, live AI output, 5 free runs\n• Landing page redesign — hero video, social proof moved above the fold, clearer CTAs\n• Public SLM Lab — the flagship feature page is now accessible without auth\n• Fixed pricing to respect database tiers (was defaulting everyone to "free")\n\nWhat I learned:\n• Having 83 visitors and 0 conversions is a humbling experience\n• The fix isn't more features — it's less friction\n• A free demo is worth 100 feature bullets\n\nStack: React + Supabase + Edge Functions. Solo founder. Everything serverless.\n\nTry the demo: ${SITE_URL}/demo/module-builder\n\nFeedback welcome — what would you build with something like this?`,
       },
       {
-        title: "r/SideProject progress update",
-        body: `Title: Month 3 building Soupy Lab — an AI agent builder with marketplace\n\nProgress update on my side project Soupy Lab (${SITE_URL}).\n\nThe idea: a no-code platform for designing modular AI systems. Think Zapier meets Hugging Face — you build agents visually, train them on your own data, and deploy or sell them.\n\nWhat's shipped:\n✅ Visual pipeline editor (Stack Canvas)\n✅ Module builder with 12+ agent types\n✅ Dataset engineering from multiple sources\n✅ Credit-based freemium model\n✅ Creator marketplace\n✅ Android deployment pipeline\n\nBiggest lesson: builders don't want "another ChatGPT wrapper." They want control — explicit boundaries, traceable outputs, and the ability to own what they build.\n\nHappy to answer any questions about the stack or approach!\n\n${SITE_URL}`,
+        title: "r/LocalLLaMA — SLM training",
+        body: `Title: Building a visual interface for training and deploying small language models — looking for feedback\n\nHey r/LocalLLaMA,\n\nI've been building Soupy Lab (${SITE_URL}) — a visual platform for AI development. One of the features I'm most excited about is the SLM Lab, which is designed around the idea that most real-world tasks don't need a 70B model.\n\nThe approach:\n• Build training datasets from multiple sources (chat exports, web scrapes, interviews, HuggingFace imports)\n• Each data point gets enriched through 5 cognitive perspectives (we call it CDPT)\n• Selective Unlearning — remove specific behaviors without full retraining\n• Cognitive Fingerprinting — analyze your dataset to pick the right base model\n• Export for fine-tuning on whatever hardware you have (Ollama, LM Studio, etc.)\n\nThe SLM Lab is publicly accessible if you want to poke around: ${SITE_URL}/slm-lab\n\nI'm not claiming to replace your existing workflow — I'm trying to make the dataset engineering part less painful, especially for domain experts who aren't comfortable with CLI tools.\n\nWould love to hear from people actually training small models: what's the most annoying part of your current pipeline? What would save you the most time?\n\n${SITE_URL}`,
       },
       {
-        title: "r/artificial — modular AI",
-        body: `Title: Why I think modular AI agents will replace monolithic wrappers\n\nI've been building Soupy Lab (${SITE_URL}) — a platform for designing multi-agent AI systems visually.\n\nThe thesis: single-model wrappers hit a ceiling fast. Real-world tasks need specialized agents working together — a router to classify intent, a critic to evaluate outputs, a synthesizer to merge perspectives.\n\nSoupy Lab lets you:\n• Define agents with explicit roles, guardrails, and task boundaries\n• Chain them into reasoning pipelines with evaluators and routing logic\n• Train on custom data using techniques like CDPT (multi-perspective training) and Popcorn Injection (knowledge densification)\n• Deploy the whole system as a web app or Android app\n\nThe interesting part: users can build and sell trained modules on a marketplace, so specialized expertise becomes composable.\n\nCurious what r/artificial thinks — is modular agent architecture the right direction, or is scaling single models still the better bet?\n\n${SITE_URL}`,
-      },
-      {
-        title: "r/artificial — edge AI training",
-        body: `Title: Training small language models with cognitive diversity — our approach at Soupy Lab\n\nWe've been exploring alternative training approaches for SLMs at Soupy Lab (${SITE_URL}):\n\n• CDPT (Cognitive Diversity Perspective Training) — instead of training from one "correct" answer, we generate training pairs from 6 cognitive perspectives (builder, empath, systems thinker, red team, frame breaker, synthesis)\n• Selective Unlearning — surgically remove specific behaviors without retraining\n• Popcorn Injection — dense knowledge insertion technique for small models\n• Cognitive Fingerprinting — analyze a dataset's reasoning patterns to match the right base model\n\nAll of this runs through a visual interface — no command line, no Jupyter notebooks. The goal is making edge AI training accessible to domain experts who aren't ML engineers.\n\nEarly results are promising for task-specific SLMs. Would love to discuss with anyone working on similar approaches.\n\n${SITE_URL}`,
+        title: "r/artificial — modular reasoning",
+        body: `Title: Modular AI agents vs. single-model wrappers — where do you stand?\n\nGenuinely curious about this community's take.\n\nI've been building a platform (Soupy Lab — ${SITE_URL}) around the thesis that modular agent architectures will outperform monolithic wrappers for real-world tasks.\n\nThe idea: instead of one giant system prompt doing everything, you design specialists:\n• A classifier that routes input\n• A domain expert that processes it\n• A critic that evaluates the output\n• A formatter that structures the final result\n\nEach has explicit task boundaries, guardrails, and traceable I/O. Wire them together visually.\n\nThe counterargument: models keep getting better and context windows keep growing. Maybe a single well-prompted model will always beat a pipeline of smaller ones.\n\nI've built a free demo where you can try designing a module: ${SITE_URL}/demo/module-builder\n\nBut honestly, I'm more interested in the theoretical debate. Where do you think this is headed?`,
       },
     ],
     shareUrl: (text: string) => `https://www.reddit.com/submit?url=${encodeURIComponent(SITE_URL)}&title=${encodeURIComponent(text.split('\n')[0] || 'Soupy Lab')}`,
