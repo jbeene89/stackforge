@@ -115,14 +115,14 @@ function InlineSocialProof() {
   ];
 
   return (
-    <section className="py-12 sm:py-16 px-4 sm:px-6">
+    <section className="py-8 sm:py-16 px-3 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        {/* Stats row — compact */}
+        {/* Stats row — 2x2 on mobile, 4-col on desktop */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-8 sm:mb-10"
         >
           {[
             { value: "12", label: "Module Types", color: "text-primary" },
@@ -136,16 +136,16 @@ function InlineSocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="glass rounded-xl p-4 text-center"
+              className="glass rounded-xl p-3 sm:p-4 text-center"
             >
-              <div className={`text-xl sm:text-2xl font-display font-bold ${s.color}`}>{s.value}</div>
-              <div className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-1">{s.label}</div>
+              <div className={`text-lg sm:text-2xl font-display font-bold ${s.color}`}>{s.value}</div>
+              <div className="text-[9px] sm:text-xs text-muted-foreground font-medium mt-0.5 sm:mt-1">{s.label}</div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Testimonials row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Testimonials — horizontal scroll on mobile, grid on desktop */}
+        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-3 px-3 md:mx-0 md:px-0">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
@@ -153,9 +153,9 @@ function InlineSocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 + i * 0.1 }}
-              className={`glass rounded-xl p-5 border-l-4 ${t.color}`}
+              className={`glass rounded-xl p-4 sm:p-5 border-l-4 ${t.color} min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink`}
             >
-              <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium italic mb-3">
+              <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium italic mb-2 sm:mb-3">
                 "{t.quote}"
               </p>
               <div className="text-[11px] font-bold">{t.name}</div>
