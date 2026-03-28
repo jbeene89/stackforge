@@ -441,57 +441,59 @@ export default function LandingPage() {
       </nav>
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section className="relative pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 overflow-hidden">
+      <section className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full glass border border-forge-gold/20 text-xs font-semibold text-forge-gold"
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="inline-flex items-center gap-2 mb-4 sm:mb-5 px-3 sm:px-4 py-1.5 rounded-full glass border border-forge-gold/20 text-[10px] sm:text-xs font-semibold text-forge-gold"
             >
               <Sparkles className="h-3 w-3" />
               No-Code AI Development Kitchen
             </motion.div>
 
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-wide leading-[1.1] mb-5 text-balance">
+            {/* Mobile: tighter, punchier hero text */}
+            <h1 className="text-[1.7rem] leading-[1.15] sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-wide sm:leading-[1.1] mb-4 sm:mb-5 text-balance">
               Build <span className="gradient-text">specialist AI</span> that{" "}
               <span className="text-foreground/80">actually works</span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 leading-relaxed text-balance font-medium">
+            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-5 sm:mb-6 leading-relaxed text-balance font-medium px-1 sm:px-0">
               Design single-purpose AI modules. Wire them into pipelines.
               Deploy to web, Android, or your own hardware.
               <span className="text-foreground font-semibold"> No coding required.</span>
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            {/* Mobile: full-width stacked buttons with bigger touch targets */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 mb-4">
               <Link to="/signup" className="w-full sm:w-auto">
-                <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold group w-full sm:w-auto glow-primary">
-                  Start Building Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <Button size="lg" className="gradient-primary text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-bold group w-full sm:w-auto glow-primary min-h-[52px]">
+                  Start Building Free <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/demo/module-builder" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
+                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-5 sm:py-6 text-sm sm:text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all min-h-[52px]">
                   <Play className="h-4 w-4" /> Try Live Demo
                 </Button>
               </Link>
             </div>
 
-            {/* Trust signals inline */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[10px] sm:text-xs text-muted-foreground font-medium">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald/70" />
-                <span>50 free credits/month</span>
+            {/* Mobile: horizontal scroll trust badges */}
+            <div className="flex items-center justify-center gap-3 sm:gap-8 text-[10px] sm:text-xs text-muted-foreground font-medium overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald/70 shrink-0" />
+                <span>50 free credits</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-forge-emerald/70" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <Shield className="h-3.5 w-3.5 text-forge-emerald/70 shrink-0" />
                 <span>No credit card</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Lock className="h-3.5 w-3.5 text-forge-emerald/70" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <Lock className="h-3.5 w-3.5 text-forge-emerald/70 shrink-0" />
                 <span>Your data stays yours</span>
               </div>
             </div>
@@ -504,7 +506,7 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* ════════════════════ TRANSFORM YOUR PHOTO ════════════════════ */}
