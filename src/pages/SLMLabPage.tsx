@@ -1596,7 +1596,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   </p>
                 </div>
 
-                <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
                   {videoFrames.map((frame, i) => (
                     <img key={i} src={frame} alt={`Frame ${i + 1}`} className="rounded border border-border/50 w-full aspect-video object-cover" />
                   ))}
@@ -1725,7 +1725,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 </div>
                 <Progress value={(bulkProgress.current / bulkProgress.total) * 100} className="h-2" />
                 <p className="text-xs text-muted-foreground truncate">{bulkProgress.currentUrl}</p>
-                <div className="grid grid-cols-5 gap-1">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1">
                   {(["builder", "red_team", "systems", "frame_breaker", "empath"] as const).map(k => {
                     const cfg = PERSPECTIVE_CONFIG[k];
                     const Icon = cfg.icon;
