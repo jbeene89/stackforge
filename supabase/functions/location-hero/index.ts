@@ -201,7 +201,9 @@ Deno.serve(async (req) => {
     }
 
     const scene = getSceneForLocation(country, region);
-    const prompt = `Create a stunning wide-format cinematic banner image (16:9 aspect ratio) of: ${scene}. Make it vibrant, atmospheric, and suitable as a website hero banner. Photorealistic quality with dramatic lighting. Do NOT include any text or letters in the image. Generate an image.`;
+    const seed = Math.floor(Math.random() * 10000);
+    const timeOfDay = ["at sunrise", "at golden hour", "at dusk", "under dramatic clouds", "in soft morning light", "at blue hour"][Math.floor(Math.random() * 6)];
+    const prompt = `Create a stunning wide-format cinematic banner image (16:9 aspect ratio) of: ${scene} ${timeOfDay}. Variation seed: ${seed}. Make it vibrant, atmospheric, and suitable as a website hero banner. Photorealistic quality with dramatic lighting. Do NOT include any text or letters in the image. Generate an image.`;
 
     const resp = await fetch(GATEWAY, {
       method: "POST",
