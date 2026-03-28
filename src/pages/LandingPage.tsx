@@ -352,8 +352,21 @@ const realUseCases = [
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
   const { theme, resolvedTheme, setTheme } = useTheme();
   const isDark = theme === "system" ? resolvedTheme === "dark" : theme === "dark";
+
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setPastHero(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(isDark ? "light" : "dark");
