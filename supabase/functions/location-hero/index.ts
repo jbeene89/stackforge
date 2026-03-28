@@ -97,15 +97,15 @@ const COUNTRY_SCENES: Record<string, string> = {
 const DEFAULT_SCENE = "a breathtaking panoramic landscape with mountains, water, and golden light — cinematic and inspiring";
 
 function getSceneForLocation(country: string, region: string): string {
-  // US visitors get state-specific scenes
+  let sceneStr = DEFAULT_SCENE;
   if (country === "US" && region && STATE_SCENES[region]) {
-    return STATE_SCENES[region];
+    sceneStr = STATE_SCENES[region];
+  } else if (COUNTRY_SCENES[country]) {
+    sceneStr = COUNTRY_SCENES[country];
   }
-  // Other countries
-  if (COUNTRY_SCENES[country]) {
-    return COUNTRY_SCENES[country];
-  }
-  return DEFAULT_SCENE;
+  // If scene has pipe-separated variants, pick one randomly
+  const variants = sceneStr.split("|").map(s => s.trim()).filter(Boolean);
+  return variants[Math.floor(Math.random() * variants.length)];
 }
 
 Deno.serve(async (req) => {
@@ -157,18 +157,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // If we have one already, sometimes return it (50% chance) to save credits
-    if (existing && existing.length > 0 && Math.random() > 0.5) {
-      const pick = existing[0];
-      return new Response(JSON.stringify({
-        image_url: pick.image_url,
-        region: pick.region,
-        country: pick.country,
-        source: "cached",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // If we have one already but under limit, generate a NEW one (don't reuse — variety matters)
+    // Only reuse if generation fails later
 
     // Check if there's a recent image for the same region (reuse for other visitors)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
