@@ -76,67 +76,69 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/install" element={<InstallPage />} />
-              <Route path="/terms" element={<TermsOfServicePage />} />
-              <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
-              <Route path="/slm-lab" element={<AppLayout />}>
-                <Route index element={<SLMLabPage />} />
-              </Route>
+            <Suspense fallback={null}>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/install" element={<InstallPage />} />
+                <Route path="/terms" element={<TermsOfServicePage />} />
+                <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
+                <Route path="/slm-lab" element={<AppLayout />}>
+                  <Route index element={<SLMLabPage />} />
+                </Route>
 
-              {/* Protected app routes */}
-              <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/projects" element={<ProjectsPage />} />
-                <Route path="/projects/:id" element={<ProjectPage />} />
-                <Route path="/modules" element={<ModulesPage />} />
-                <Route path="/modules/:id" element={<ModuleBuilderPage />} />
-                <Route path="/stacks" element={<StacksPage />} />
-                <Route path="/stacks/:id" element={<StackCanvasPage />} />
-                <Route path="/templates" element={<TemplatesPage />} />
-                <Route path="/marketplace" element={<MarketplacePage />} />
-                <Route path="/lab" element={<LabPage />} />
-                <Route path="/lab/slicer" element={<SlicerLabPage />} />
-                <Route path="/build-ai" element={<AIBuilderPage />} />
-                <Route path="/solvers" element={<SolverLibraryPage />} />
-                <Route path="/engine" element={<GameEnginePage />} />
-                <Route path="/models" element={<ModelZooPage />} />
-                <Route path="/pipelines" element={<DataPipelinesPage />} />
-                <Route path="/signals" element={<SignalLabPage />} />
-                <Route path="/robotics" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Robotics Controllers"><RoboticsPage /></TierProtectedRoute>} />
-                <Route path="/forge-ai" element={<ForgeAIPage />} />
-                <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
-                <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
-                
-                
-                <Route path="/white-paper" element={<WhitePaperPage />} />
-                <Route path="/capture" element={<CapturePage />} />
-                <Route path="/review" element={<SwipeReviewPage />} />
-                <Route path="/on-device" element={<OnDeviceTemplatesPage />} />
-                <Route path="/deploy" element={<DeployPipelinePage />} />
-                <Route path="/deploy/phone" element={<PhoneDeployGuidePage />} />
-                <Route path="/inference" element={<InferencePlaygroundPage />} />
-                <Route path="/console" element={<DeviceConsolePage />} />
-                <Route path="/self-host" element={<SelfHostPage />} />
-                <Route path="/image-forge" element={<ImageForgePage />} />
-                <Route path="/training" element={<TrainingProgressPage />} />
-                <Route path="/runs" element={<RunsPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/account" element={<AccountPage />} />
-              </Route>
+                {/* Protected app routes */}
+                <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/projects" element={<ProjectsPage />} />
+                  <Route path="/projects/:id" element={<ProjectPage />} />
+                  <Route path="/modules" element={<ModulesPage />} />
+                  <Route path="/modules/:id" element={<ModuleBuilderPage />} />
+                  <Route path="/stacks" element={<StacksPage />} />
+                  <Route path="/stacks/:id" element={<StackCanvasPage />} />
+                  <Route path="/templates" element={<TemplatesPage />} />
+                  <Route path="/marketplace" element={<MarketplacePage />} />
+                  <Route path="/lab" element={<LabPage />} />
+                  <Route path="/lab/slicer" element={<SlicerLabPage />} />
+                  <Route path="/build-ai" element={<AIBuilderPage />} />
+                  <Route path="/solvers" element={<SolverLibraryPage />} />
+                  <Route path="/engine" element={<GameEnginePage />} />
+                  <Route path="/models" element={<ModelZooPage />} />
+                  <Route path="/pipelines" element={<DataPipelinesPage />} />
+                  <Route path="/signals" element={<SignalLabPage />} />
+                  <Route path="/robotics" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Robotics Controllers"><RoboticsPage /></TierProtectedRoute>} />
+                  <Route path="/forge-ai" element={<ForgeAIPage />} />
+                  <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
+                  <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
+                  
+                  
+                  <Route path="/white-paper" element={<WhitePaperPage />} />
+                  <Route path="/capture" element={<CapturePage />} />
+                  <Route path="/review" element={<SwipeReviewPage />} />
+                  <Route path="/on-device" element={<OnDeviceTemplatesPage />} />
+                  <Route path="/deploy" element={<DeployPipelinePage />} />
+                  <Route path="/deploy/phone" element={<PhoneDeployGuidePage />} />
+                  <Route path="/inference" element={<InferencePlaygroundPage />} />
+                  <Route path="/console" element={<DeviceConsolePage />} />
+                  <Route path="/self-host" element={<SelfHostPage />} />
+                  <Route path="/image-forge" element={<ImageForgePage />} />
+                  <Route path="/training" element={<TrainingProgressPage />} />
+                  <Route path="/runs" element={<RunsPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/account" element={<AccountPage />} />
+                </Route>
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </AuthProvider>
           <CookieConsentBanner />
         </BrowserRouter>
