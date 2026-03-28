@@ -894,6 +894,23 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ── Sticky mobile CTA ── */}
+      <motion.div
+        initial={{ y: 80 }}
+        animate={{ y: pastHero ? 0 : 80 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="fixed bottom-0 inset-x-0 z-50 md:hidden"
+      >
+        <div className="glass-strong border-t border-primary/15 px-4 py-3 flex items-center gap-3">
+          <p className="text-xs font-medium text-muted-foreground flex-1 leading-tight">
+            50 free credits — no card needed
+          </p>
+          <Button asChild size="sm" className="gradient-primary glow-primary min-h-[44px] px-5 text-sm font-bold shrink-0">
+            <Link to="/signup">Start Free</Link>
+          </Button>
+        </div>
+      </motion.div>
     </div>
   );
 }
