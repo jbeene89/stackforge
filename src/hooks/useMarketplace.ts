@@ -47,11 +47,11 @@ export function useMarketplaceTemplates(type?: string) {
       // Get creator names
       const creatorIds = [...new Set((data as any[]).map((d: any) => d.creator_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("user_id, display_name")
         .in("user_id", creatorIds);
 
-      const nameMap = new Map(profiles?.map((p) => [p.user_id, p.display_name]) || []);
+      const nameMap = new Map((profiles as any[])?.map((p: any) => [p.user_id, p.display_name]) || []);
 
       return (data as any[]).map((d: any) => ({
         ...d,
