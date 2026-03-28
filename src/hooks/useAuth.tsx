@@ -24,10 +24,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Send welcome email on first sign-in (after email verification)
+      if (event === "SIGNED_IN" && session?.user) {
+        const welcomeKey = `welcome_sent_${session.user.id}`;
+        if (!localStorage.getItem(welcomeKey)) {
+          localStorage.setItem(welcomeKey, "1");
+          supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "welcome",
+              recipientEmail: session.user.email,
+              idempotencyKey: `welcome-${session.user.id}`,
+              templateData: { name: session.user.user_metadata?.name || undefined },
+            },
+          }).catch((err) => console.error("Welcome email failed", err));
+        }
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
