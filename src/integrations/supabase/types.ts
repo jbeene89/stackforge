@@ -415,6 +415,33 @@ export type Database = {
           },
         ]
       }
+      location_hero_images: {
+        Row: {
+          country: string
+          created_at: string
+          id: string
+          image_url: string
+          ip_hash: string
+          region: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          id?: string
+          image_url: string
+          ip_hash: string
+          region?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          ip_hash?: string
+          region?: string
+        }
+        Relationships: []
+      }
       marketplace_templates: {
         Row: {
           created_at: string
