@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,56 +12,58 @@ import { TierProtectedRoute } from "@/components/TierProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
+// Eagerly load the landing page (critical path)
 import LandingPage from "./pages/LandingPage";
-import PricingPage from "./pages/PricingPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import OnboardingPage from "./pages/OnboardingPage";
-import DashboardPage from "./pages/DashboardPage";
-import ProjectsPage from "./pages/ProjectsPage";
-import ProjectPage from "./pages/ProjectPage";
-import ModulesPage from "./pages/ModulesPage";
-import ModuleBuilderPage from "./pages/ModuleBuilderPage";
-import StacksPage from "./pages/StacksPage";
-import StackCanvasPage from "./pages/StackCanvasPage";
-import TemplatesPage from "./pages/TemplatesPage";
-import LabPage from "./pages/LabPage";
-import SlicerLabPage from "./pages/SlicerLabPage";
-import AIBuilderPage from "./pages/AIBuilderPage";
-import RunsPage from "./pages/RunsPage";
-import AdminPage from "./pages/AdminPage";
-import AccountPage from "./pages/AccountPage";
-import SolverLibraryPage from "./pages/SolverLibraryPage";
-import GameEnginePage from "./pages/GameEnginePage";
-import ModelZooPage from "./pages/ModelZooPage";
-import DataPipelinesPage from "./pages/DataPipelinesPage";
-import SignalLabPage from "./pages/SignalLabPage";
-import RoboticsPage from "./pages/RoboticsPage";
-import ForgeAIPage from "./pages/ForgeAIPage";
-import EdgeTrainingPage from "./pages/EdgeTrainingPage";
-import ExportStudioPage from "./pages/ExportStudioPage";
 
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import TermsOfServicePage from "./pages/TermsOfServicePage";
-import MarketplacePage from "./pages/MarketplacePage";
-import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
-import InstallPage from "./pages/InstallPage";
-import SLMLabPage from "./pages/SLMLabPage";
-import WhitePaperPage from "./pages/WhitePaperPage";
-import CapturePage from "./pages/CapturePage";
-import SwipeReviewPage from "./pages/SwipeReviewPage";
-import OnDeviceTemplatesPage from "./pages/OnDeviceTemplatesPage";
-import DeployPipelinePage from "./pages/DeployPipelinePage";
-import PhoneDeployGuidePage from "./pages/PhoneDeployGuidePage";
-import InferencePlaygroundPage from "./pages/InferencePlaygroundPage";
-import DeviceConsolePage from "./pages/DeviceConsolePage";
-import SelfHostPage from "./pages/SelfHostPage";
-import TrainingProgressPage from "./pages/TrainingProgressPage";
-import ImageForgePage from "./pages/ImageForgePage";
-import DemoModuleBuilderPage from "./pages/DemoModuleBuilderPage";
-import NotFound from "./pages/NotFound";
+// Lazy-load all other pages for code splitting
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
+const ProjectPage = lazy(() => import("./pages/ProjectPage"));
+const ModulesPage = lazy(() => import("./pages/ModulesPage"));
+const ModuleBuilderPage = lazy(() => import("./pages/ModuleBuilderPage"));
+const StacksPage = lazy(() => import("./pages/StacksPage"));
+const StackCanvasPage = lazy(() => import("./pages/StackCanvasPage"));
+const TemplatesPage = lazy(() => import("./pages/TemplatesPage"));
+const LabPage = lazy(() => import("./pages/LabPage"));
+const SlicerLabPage = lazy(() => import("./pages/SlicerLabPage"));
+const AIBuilderPage = lazy(() => import("./pages/AIBuilderPage"));
+const RunsPage = lazy(() => import("./pages/RunsPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const AccountPage = lazy(() => import("./pages/AccountPage"));
+const SolverLibraryPage = lazy(() => import("./pages/SolverLibraryPage"));
+const GameEnginePage = lazy(() => import("./pages/GameEnginePage"));
+const ModelZooPage = lazy(() => import("./pages/ModelZooPage"));
+const DataPipelinesPage = lazy(() => import("./pages/DataPipelinesPage"));
+const SignalLabPage = lazy(() => import("./pages/SignalLabPage"));
+const RoboticsPage = lazy(() => import("./pages/RoboticsPage"));
+const ForgeAIPage = lazy(() => import("./pages/ForgeAIPage"));
+const EdgeTrainingPage = lazy(() => import("./pages/EdgeTrainingPage"));
+const ExportStudioPage = lazy(() => import("./pages/ExportStudioPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const SubscriptionSuccessPage = lazy(() => import("./pages/SubscriptionSuccessPage"));
+const InstallPage = lazy(() => import("./pages/InstallPage"));
+const SLMLabPage = lazy(() => import("./pages/SLMLabPage"));
+const WhitePaperPage = lazy(() => import("./pages/WhitePaperPage"));
+const CapturePage = lazy(() => import("./pages/CapturePage"));
+const SwipeReviewPage = lazy(() => import("./pages/SwipeReviewPage"));
+const OnDeviceTemplatesPage = lazy(() => import("./pages/OnDeviceTemplatesPage"));
+const DeployPipelinePage = lazy(() => import("./pages/DeployPipelinePage"));
+const PhoneDeployGuidePage = lazy(() => import("./pages/PhoneDeployGuidePage"));
+const InferencePlaygroundPage = lazy(() => import("./pages/InferencePlaygroundPage"));
+const DeviceConsolePage = lazy(() => import("./pages/DeviceConsolePage"));
+const SelfHostPage = lazy(() => import("./pages/SelfHostPage"));
+const TrainingProgressPage = lazy(() => import("./pages/TrainingProgressPage"));
+const ImageForgePage = lazy(() => import("./pages/ImageForgePage"));
+const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -73,67 +76,69 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/install" element={<InstallPage />} />
-              <Route path="/terms" element={<TermsOfServicePage />} />
-              <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
-              <Route path="/slm-lab" element={<AppLayout />}>
-                <Route index element={<SLMLabPage />} />
-              </Route>
+            <Suspense fallback={null}>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/install" element={<InstallPage />} />
+                <Route path="/terms" element={<TermsOfServicePage />} />
+                <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
+                <Route path="/slm-lab" element={<AppLayout />}>
+                  <Route index element={<SLMLabPage />} />
+                </Route>
 
-              {/* Protected app routes */}
-              <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/projects" element={<ProjectsPage />} />
-                <Route path="/projects/:id" element={<ProjectPage />} />
-                <Route path="/modules" element={<ModulesPage />} />
-                <Route path="/modules/:id" element={<ModuleBuilderPage />} />
-                <Route path="/stacks" element={<StacksPage />} />
-                <Route path="/stacks/:id" element={<StackCanvasPage />} />
-                <Route path="/templates" element={<TemplatesPage />} />
-                <Route path="/marketplace" element={<MarketplacePage />} />
-                <Route path="/lab" element={<LabPage />} />
-                <Route path="/lab/slicer" element={<SlicerLabPage />} />
-                <Route path="/build-ai" element={<AIBuilderPage />} />
-                <Route path="/solvers" element={<SolverLibraryPage />} />
-                <Route path="/engine" element={<GameEnginePage />} />
-                <Route path="/models" element={<ModelZooPage />} />
-                <Route path="/pipelines" element={<DataPipelinesPage />} />
-                <Route path="/signals" element={<SignalLabPage />} />
-                <Route path="/robotics" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Robotics Controllers"><RoboticsPage /></TierProtectedRoute>} />
-                <Route path="/forge-ai" element={<ForgeAIPage />} />
-                <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
-                <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
-                
-                
-                <Route path="/white-paper" element={<WhitePaperPage />} />
-                <Route path="/capture" element={<CapturePage />} />
-                <Route path="/review" element={<SwipeReviewPage />} />
-                <Route path="/on-device" element={<OnDeviceTemplatesPage />} />
-                <Route path="/deploy" element={<DeployPipelinePage />} />
-                <Route path="/deploy/phone" element={<PhoneDeployGuidePage />} />
-                <Route path="/inference" element={<InferencePlaygroundPage />} />
-                <Route path="/console" element={<DeviceConsolePage />} />
-                <Route path="/self-host" element={<SelfHostPage />} />
-                <Route path="/image-forge" element={<ImageForgePage />} />
-                <Route path="/training" element={<TrainingProgressPage />} />
-                <Route path="/runs" element={<RunsPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/account" element={<AccountPage />} />
-              </Route>
+                {/* Protected app routes */}
+                <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/projects" element={<ProjectsPage />} />
+                  <Route path="/projects/:id" element={<ProjectPage />} />
+                  <Route path="/modules" element={<ModulesPage />} />
+                  <Route path="/modules/:id" element={<ModuleBuilderPage />} />
+                  <Route path="/stacks" element={<StacksPage />} />
+                  <Route path="/stacks/:id" element={<StackCanvasPage />} />
+                  <Route path="/templates" element={<TemplatesPage />} />
+                  <Route path="/marketplace" element={<MarketplacePage />} />
+                  <Route path="/lab" element={<LabPage />} />
+                  <Route path="/lab/slicer" element={<SlicerLabPage />} />
+                  <Route path="/build-ai" element={<AIBuilderPage />} />
+                  <Route path="/solvers" element={<SolverLibraryPage />} />
+                  <Route path="/engine" element={<GameEnginePage />} />
+                  <Route path="/models" element={<ModelZooPage />} />
+                  <Route path="/pipelines" element={<DataPipelinesPage />} />
+                  <Route path="/signals" element={<SignalLabPage />} />
+                  <Route path="/robotics" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Robotics Controllers"><RoboticsPage /></TierProtectedRoute>} />
+                  <Route path="/forge-ai" element={<ForgeAIPage />} />
+                  <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
+                  <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
+                  
+                  
+                  <Route path="/white-paper" element={<WhitePaperPage />} />
+                  <Route path="/capture" element={<CapturePage />} />
+                  <Route path="/review" element={<SwipeReviewPage />} />
+                  <Route path="/on-device" element={<OnDeviceTemplatesPage />} />
+                  <Route path="/deploy" element={<DeployPipelinePage />} />
+                  <Route path="/deploy/phone" element={<PhoneDeployGuidePage />} />
+                  <Route path="/inference" element={<InferencePlaygroundPage />} />
+                  <Route path="/console" element={<DeviceConsolePage />} />
+                  <Route path="/self-host" element={<SelfHostPage />} />
+                  <Route path="/image-forge" element={<ImageForgePage />} />
+                  <Route path="/training" element={<TrainingProgressPage />} />
+                  <Route path="/runs" element={<RunsPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/account" element={<AccountPage />} />
+                </Route>
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </AuthProvider>
           <CookieConsentBanner />
         </BrowserRouter>
