@@ -29,7 +29,7 @@ const STATE_SCENES: Record<string, string> = {
   CO: "Colorado Rocky Mountains with snow-capped peaks and aspen trees",
   CT: "Connecticut autumn foliage along a charming New England village",
   DE: "Delaware coastal boardwalk with Atlantic sunrise",
-  FL: "Florida tropical beach with palm trees and turquoise water",
+  FL: "Florida scenery|tropical beach with palm trees and turquoise water|Everglades wetlands with herons at golden hour|Key West sunset over the ocean with fishing boats|Miami Art Deco skyline reflecting on Biscayne Bay|St. Augustine historic lighthouse with coastal dunes|Crystal River springs with manatees in clear water",
   GA: "Georgia Savannah oak trees draped in Spanish moss",
   HI: "Hawaii volcanic landscape with tropical flowers and ocean",
   ID: "Idaho Shoshone Falls with rugged mountain backdrop",
