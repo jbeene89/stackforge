@@ -794,37 +794,37 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ CTA ════════════════════ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-40" />
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center ffx-card glass-strong rounded-2xl p-10 sm:p-14 glow-primary relative z-10"
+          transition={{ duration: 0.5 }}
+          className="max-w-3xl mx-auto text-center ffx-card glass-strong rounded-2xl p-6 sm:p-14 glow-primary relative z-10"
         >
-          <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold mb-4 tracking-wide">
+          <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold mb-3 sm:mb-4 tracking-wide">
             Stop Prompting.{" "}
             <span className="gradient-text">Start Engineering.</span>
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-8 max-w-lg mx-auto font-medium leading-relaxed">
+          <p className="text-[11px] sm:text-sm text-muted-foreground mb-5 sm:mb-8 max-w-lg mx-auto font-medium leading-relaxed">
             Build modular AI systems with defined roles, traceable behavior, and real-world deployment.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
             <Link to="/signup" className="w-full sm:w-auto">
-              <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold w-full sm:w-auto glow-primary">
-                Start Building Free <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="gradient-primary text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-bold w-full sm:w-auto glow-primary min-h-[48px]">
+                Start Building Free <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
             <Link to="/pricing" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:glow-primary">View Pricing</Button>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto py-5 sm:py-6 text-sm sm:text-base font-semibold border-primary/20 hover:glow-primary min-h-[48px]">View Pricing</Button>
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 mt-8 text-xs sm:text-sm text-muted-foreground font-semibold">
-            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Free tier</div>
-            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> No credit card</div>
-            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Export anytime</div>
+          <div className="flex items-center justify-center gap-4 sm:gap-8 mt-5 sm:mt-8 text-[10px] sm:text-sm text-muted-foreground font-semibold">
+            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald" /> Free tier</div>
+            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald" /> No card</div>
+            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald" /> Export</div>
           </div>
         </motion.div>
       </section>
