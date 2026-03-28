@@ -354,37 +354,37 @@ export default function PricingPage() {
               })()}
 
               {/* Transaction List */}
-              <div className="glass rounded-xl p-6 space-y-4">
-                <h3 className="font-semibold flex items-center gap-2">
+              <div className="glass rounded-xl p-3 sm:p-6 space-y-3 sm:space-y-4">
+                <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
                   <BarChart3 className="h-4 w-4 text-primary" /> Credit History
                 </h3>
                 {transactions && transactions.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     {transactions.map((tx: any) => {
                       const TxIcon = TX_ICONS[tx.transaction_type] || Coins;
                       const isPositive = tx.amount > 0;
                       return (
-                        <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-background/50">
-                          <div className="flex items-center gap-3">
-                            <TxIcon className={cn("h-4 w-4", isPositive ? "text-forge-emerald" : "text-muted-foreground")} />
-                            <div>
-                              <p className="text-sm">{tx.description}</p>
-                              <p className="text-[11px] text-muted-foreground">{new Date(tx.created_at).toLocaleString()}</p>
+                        <div key={tx.id} className="flex items-center justify-between py-2 px-2 sm:px-3 rounded-lg bg-background/50">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <TxIcon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0", isPositive ? "text-forge-emerald" : "text-muted-foreground")} />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs sm:text-sm truncate">{tx.description}</p>
+                              <p className="text-[10px] sm:text-[11px] text-muted-foreground">{new Date(tx.created_at).toLocaleString()}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={cn("text-sm font-medium", isPositive ? "text-forge-emerald" : "text-muted-foreground")}>
+                          <div className="text-right shrink-0 ml-2">
+                            <p className={cn("text-xs sm:text-sm font-medium", isPositive ? "text-forge-emerald" : "text-muted-foreground")}>
                               {isPositive ? "+" : ""}{tx.amount}
                             </p>
-                            <p className="text-[11px] text-muted-foreground">bal: {tx.balance_after}</p>
+                            <p className="text-[10px] sm:text-[11px] text-muted-foreground">bal: {tx.balance_after}</p>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground text-sm">
-                    <Coins className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                  <div className="text-center py-6 sm:py-8 text-muted-foreground text-xs sm:text-sm">
+                    <Coins className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 sm:mb-3 opacity-50" />
                     <p>No credit activity yet. Run an AI module to see usage here.</p>
                   </div>
                 )}
