@@ -29,7 +29,7 @@ const STATE_SCENES: Record<string, string> = {
   CO: "Colorado Rocky Mountains with snow-capped peaks and aspen trees",
   CT: "Connecticut autumn foliage along a charming New England village",
   DE: "Delaware coastal boardwalk with Atlantic sunrise",
-  FL: "Florida tropical beach with palm trees and turquoise water",
+  FL: "Florida scenery|tropical beach with palm trees and turquoise water|Everglades wetlands with herons at golden hour|Key West sunset over the ocean with fishing boats|Miami Art Deco skyline reflecting on Biscayne Bay|St. Augustine historic lighthouse with coastal dunes|Crystal River springs with manatees in clear water",
   GA: "Georgia Savannah oak trees draped in Spanish moss",
   HI: "Hawaii volcanic landscape with tropical flowers and ocean",
   ID: "Idaho Shoshone Falls with rugged mountain backdrop",
@@ -97,15 +97,15 @@ const COUNTRY_SCENES: Record<string, string> = {
 const DEFAULT_SCENE = "a breathtaking panoramic landscape with mountains, water, and golden light — cinematic and inspiring";
 
 function getSceneForLocation(country: string, region: string): string {
-  // US visitors get state-specific scenes
+  let sceneStr = DEFAULT_SCENE;
   if (country === "US" && region && STATE_SCENES[region]) {
-    return STATE_SCENES[region];
+    sceneStr = STATE_SCENES[region];
+  } else if (COUNTRY_SCENES[country]) {
+    sceneStr = COUNTRY_SCENES[country];
   }
-  // Other countries
-  if (COUNTRY_SCENES[country]) {
-    return COUNTRY_SCENES[country];
-  }
-  return DEFAULT_SCENE;
+  // If scene has pipe-separated variants, pick one randomly
+  const variants = sceneStr.split("|").map(s => s.trim()).filter(Boolean);
+  return variants[Math.floor(Math.random() * variants.length)];
 }
 
 Deno.serve(async (req) => {
@@ -157,32 +157,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // If we have one already, sometimes return it (50% chance) to save credits
-    if (existing && existing.length > 0 && Math.random() > 0.5) {
-      const pick = existing[0];
-      return new Response(JSON.stringify({
-        image_url: pick.image_url,
-        region: pick.region,
-        country: pick.country,
-        source: "cached",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // If we have one already but under limit, generate a NEW one (don't reuse — variety matters)
+    // Only reuse if generation fails later
 
-    // Check if there's a recent image for the same region (reuse for other visitors)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // Check regional cache (15 min window, only reuse if 3+ exist for variety)
+    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
     if (region || country) {
       const { data: regionCached } = await supabase
         .from("location_hero_images")
         .select("image_url, region, country")
         .eq("region", region || "")
         .eq("country", country || "")
-        .gte("created_at", oneHourAgo)
+        .gte("created_at", fifteenMinAgo)
         .order("created_at", { ascending: false })
         .limit(5);
 
-      if (regionCached && regionCached.length > 0) {
+      if (regionCached && regionCached.length >= 3) {
         const pick = regionCached[Math.floor(Math.random() * regionCached.length)];
         // Store this as the visitor's image too
         await supabase.from("location_hero_images").insert({
@@ -211,7 +201,9 @@ Deno.serve(async (req) => {
     }
 
     const scene = getSceneForLocation(country, region);
-    const prompt = `Create a stunning wide-format cinematic banner image (16:9 aspect ratio) of: ${scene}. Make it vibrant, atmospheric, and suitable as a website hero banner. Photorealistic quality with dramatic lighting. Do NOT include any text or letters in the image. Generate an image.`;
+    const seed = Math.floor(Math.random() * 10000);
+    const timeOfDay = ["at sunrise", "at golden hour", "at dusk", "under dramatic clouds", "in soft morning light", "at blue hour"][Math.floor(Math.random() * 6)];
+    const prompt = `Create a stunning wide-format cinematic banner image (16:9 aspect ratio) of: ${scene} ${timeOfDay}. Variation seed: ${seed}. Make it vibrant, atmospheric, and suitable as a website hero banner. Photorealistic quality with dramatic lighting. Do NOT include any text or letters in the image. Generate an image.`;
 
     const resp = await fetch(GATEWAY, {
       method: "POST",
