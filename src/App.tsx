@@ -65,7 +65,6 @@ const ImageForgePage = lazy(() => import("./pages/ImageForgePage"));
 const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
