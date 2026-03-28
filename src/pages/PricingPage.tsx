@@ -225,18 +225,18 @@ export default function PricingPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6">
               {plans.map((plan, idx) => {
                 const isCurrent = plan.tier === currentTier;
                 const PlanIcon = plan.icon;
                 return (
                   <motion.div
                     key={plan.tier}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
+                    transition={{ delay: idx * 0.08 }}
                     className={cn(
-                      "rounded-2xl p-7 flex flex-col relative",
+                      "rounded-2xl p-4 sm:p-7 flex flex-col relative",
                       plan.highlight ? "glass glow-primary border-primary/30" : "glass",
                       isCurrent && "ring-2 ring-primary"
                     )}
@@ -247,49 +247,49 @@ export default function PricingPage() {
                       </Badge>
                     )}
                     {isCurrent && (
-                      <Badge className="absolute -top-2.5 right-4 bg-forge-emerald text-primary-foreground text-[10px]">
+                      <Badge className="absolute -top-2.5 right-3 sm:right-4 bg-forge-emerald text-primary-foreground text-[10px]">
                         Current
                       </Badge>
                     )}
 
                     <div className="flex items-center gap-2 mb-1">
                       <PlanIcon className="h-4 w-4 text-primary" />
-                      <h3 className="text-lg font-bold">{TIERS[plan.tier]?.name}</h3>
+                      <h3 className="text-base sm:text-lg font-bold">{TIERS[plan.tier]?.name}</h3>
                     </div>
                     <div className="flex items-baseline gap-1 mb-1">
                       {(plan as any).originalPrice && (
-                        <span className="text-lg text-muted-foreground/60 line-through mr-1">${(plan as any).originalPrice}</span>
+                        <span className="text-base sm:text-lg text-muted-foreground/60 line-through mr-1">${(plan as any).originalPrice}</span>
                       )}
-                      <span className="text-4xl font-extrabold">${plan.monthlyPrice}</span>
-                      {plan.monthlyPrice > 0 && <span className="text-muted-foreground text-sm">/mo</span>}
+                      <span className="text-3xl sm:text-4xl font-extrabold">${plan.monthlyPrice}</span>
+                      {plan.monthlyPrice > 0 && <span className="text-muted-foreground text-xs sm:text-sm">/mo</span>}
                       {(plan as any).originalPrice && (
-                        <Badge className="ml-2 bg-destructive text-destructive-foreground text-[10px] px-2">50% OFF</Badge>
+                        <Badge className="ml-1.5 sm:ml-2 bg-destructive text-destructive-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">50% OFF</Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 mb-4">
+                    <div className="flex items-center gap-1 mb-3 sm:mb-4">
                       <Coins className="h-3 w-3 text-primary" />
-                      <span className="text-sm font-medium text-primary">{plan.credits} credits/mo</span>
+                      <span className="text-xs sm:text-sm font-medium text-primary">{plan.credits} credits/mo</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-6">{plan.desc}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">{plan.desc}</p>
 
-                    <ul className="space-y-2.5 mb-8 flex-1">
+                    <ul className="space-y-1.5 sm:space-y-2.5 mb-5 sm:mb-8 flex-1">
                       {plan.features.map((f: any) => (
-                        <li key={f.text} className={cn("flex items-center gap-2 text-sm", !f.included && "text-muted-foreground/50")}>
+                        <li key={f.text} className={cn("flex items-center gap-2 text-xs sm:text-sm", !f.included && "text-muted-foreground/50")}>
                           {f.included ? (
-                            <Check className="h-4 w-4 text-forge-emerald shrink-0" />
+                            <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald shrink-0" />
                           ) : f.locked ? (
-                            <Lock className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                            <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/40 shrink-0" />
                           ) : (
-                            <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/30 shrink-0" />
                           )}
                           {f.text}
-                          {f.locked && !f.included && <Badge variant="outline" className="text-[9px] px-1.5 py-0 ml-auto opacity-60">Upgrade</Badge>}
+                          {f.locked && !f.included && <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0 ml-auto opacity-60">Upgrade</Badge>}
                         </li>
                       ))}
                     </ul>
 
                     <Button
-                      className={cn("w-full", plan.highlight && "gradient-primary text-primary-foreground")}
+                      className={cn("w-full min-h-[44px]", plan.highlight && "gradient-primary text-primary-foreground")}
                       variant={plan.highlight ? "default" : "outline"}
                       disabled={isCurrent || checkingOut === plan.tier || plan.tier === "free"}
                       onClick={() => handleCheckout(plan.tier)}
