@@ -83,7 +83,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   ];
 
   return (
-    <div className="flex items-center justify-center gap-0.5 px-4 py-3 bg-muted/30 border-b border-border overflow-x-auto">
+    <div className="flex items-center justify-start sm:justify-center gap-0.5 px-3 sm:px-4 py-2 sm:py-3 bg-muted/30 border-b border-border overflow-x-auto scrollbar-hide">
       {steps.map((step, i) => {
         const Icon = step.icon;
         const isActive = currentStep === step.num;
@@ -270,33 +270,33 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
   return (
     <div className="h-full flex flex-col">
       {/* Minimal top bar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-2 sm:py-3 gap-2 border-b border-border/50">
         <div className="flex items-center gap-2">
           <Brain className="h-4 w-4 text-forge-amber" />
           <span className="text-sm font-medium">Capture Your Mind</span>
           {pairsCreated > 0 && (
             <Badge variant="outline" className="text-[10px] text-forge-emerald border-forge-emerald/30">
-              {pairsCreated} pairs captured
+              {pairsCreated} pairs
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-xs"
+            className="text-xs h-7 sm:h-8 px-2"
             onClick={() => setShowTopics(!showTopics)}
           >
             <ArrowRight className="h-3 w-3 mr-1" />
-            {showTopics ? "Hide Topics" : "Change Topic"}
+            {showTopics ? "Hide" : "Topics"}
           </Button>
-          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={onSkip}>
-            Skip Interview
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7 sm:h-8 px-2" onClick={onSkip}>
+            Skip
           </Button>
           {exchangeCount >= 3 && (
-            <Button variant="outline" size="sm" onClick={handleFinish} disabled={finish.isPending}>
+            <Button variant="outline" size="sm" className="h-7 sm:h-8 text-xs px-2 sm:px-3" onClick={handleFinish} disabled={finish.isPending}>
               {finish.isPending ? <RotateCcw className="h-3 w-3 animate-spin mr-1" /> : null}
-              I'm done for now
+              Done
             </Button>
           )}
         </div>
@@ -339,7 +339,7 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
                 <Bot className="h-4 w-4 text-forge-amber" />
               </div>
             )}
-            <div className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+            <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 ${
               msg.role === "user" 
                 ? "bg-primary text-primary-foreground rounded-br-md" 
                 : "bg-muted/50 rounded-bl-md"
@@ -370,21 +370,21 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
       </div>
 
       {/* Input */}
-      <div className="border-t border-border/50 p-4">
+      <div className="border-t border-border/50 p-3 sm:p-4">
         <div className="flex gap-2 max-w-2xl mx-auto">
           <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Share your experience..."
-            className="flex-1 resize-none min-h-[48px] max-h-[120px] text-base"
+            className="flex-1 resize-none min-h-[44px] max-h-[120px] text-sm sm:text-base"
             rows={1}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
           />
-          <Button onClick={handleSend} disabled={!input.trim() || respond.isPending} size="icon" className="h-12 w-12 shrink-0">
+          <Button onClick={handleSend} disabled={!input.trim() || respond.isPending} size="icon" className="h-11 w-11 sm:h-12 sm:w-12 shrink-0">
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-[10px] text-muted-foreground text-center mt-2">
+        <p className="text-[10px] text-muted-foreground text-center mt-1.5 sm:mt-2 hidden sm:block">
           Each response silently generates a five-perspective training pair in the background
         </p>
       </div>
@@ -657,7 +657,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
               <RotateCcw className="h-3 w-3 animate-spin text-primary" />
               <p className="text-xs text-muted-foreground truncate">"{progress.currentTitle}" — running 5 perspectives…</p>
             </div>
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-1">
               {(["builder", "red_team", "systems", "frame_breaker", "empath"] as const).map(k => {
                 const cfg = PERSPECTIVE_CONFIG[k];
                 const Icon = cfg.icon;
@@ -1409,12 +1409,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const sampleCount = samples?.length || 0;
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 space-y-6 animate-fade-in">
+    <div className="max-w-2xl mx-auto py-4 sm:py-8 px-3 sm:px-4 space-y-4 sm:space-y-6 animate-fade-in">
       <div className="text-center space-y-2">
-        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-          <Globe className="h-8 w-8 text-primary" />
+        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+          <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
         </div>
-        <h2 className="text-xl font-bold">Add Training Data to "{dataset.name}"</h2>
+        <h2 className="text-lg sm:text-xl font-bold">Add Training Data to "{dataset.name}"</h2>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
           Import your AI chat history, scrape websites, or add examples manually — all processed through the <strong className="text-foreground">Five Perspective Pipeline</strong>.
         </p>
@@ -1437,24 +1437,24 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </Card>
 
       {/* Mode toggle */}
-      <div className="flex gap-2 flex-wrap">
-        <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="flex-1">
-          <Upload className="h-4 w-4 mr-2" /> Import AI Chats
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2">
+        <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <Upload className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Import</span>
         </Button>
-        <Button variant={mode === "huggingface" ? "default" : "outline"} onClick={() => setMode("huggingface")} className="flex-1">
-          <Database className="h-4 w-4 mr-2" /> Hugging Face
+        <Button variant={mode === "huggingface" ? "default" : "outline"} onClick={() => setMode("huggingface")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <Database className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">HF</span>
         </Button>
-        <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="flex-1">
-          <Globe className="h-4 w-4 mr-2" /> Scrape URL
+        <Button variant={mode === "scrape" ? "default" : "outline"} onClick={() => setMode("scrape")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <Globe className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Scrape</span>
         </Button>
-        <Button variant={mode === "file" ? "default" : "outline"} onClick={() => setMode("file")} className="flex-1">
-          <FileText className="h-4 w-4 mr-2" /> Upload File
+        <Button variant={mode === "file" ? "default" : "outline"} onClick={() => setMode("file")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <FileText className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">File</span>
         </Button>
-        <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")} className="flex-1">
-          <Plus className="h-4 w-4 mr-2" /> Manual
+        <Button variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <Plus className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Manual</span>
         </Button>
-        <Button variant={mode === "video" ? "default" : "outline"} onClick={() => setMode("video")} className="flex-1">
-          <Video className="h-4 w-4 mr-2" /> Video
+        <Button variant={mode === "video" ? "default" : "outline"} onClick={() => setMode("video")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <Video className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Video</span>
         </Button>
       </div>
 
@@ -1596,7 +1596,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   </p>
                 </div>
 
-                <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-lg bg-muted/30 p-2">
                   {videoFrames.map((frame, i) => (
                     <img key={i} src={frame} alt={`Frame ${i + 1}`} className="rounded border border-border/50 w-full aspect-video object-cover" />
                   ))}
@@ -1725,7 +1725,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 </div>
                 <Progress value={(bulkProgress.current / bulkProgress.total) * 100} className="h-2" />
                 <p className="text-xs text-muted-foreground truncate">{bulkProgress.currentUrl}</p>
-                <div className="grid grid-cols-5 gap-1">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1">
                   {(["builder", "red_team", "systems", "frame_breaker", "empath"] as const).map(k => {
                     const cfg = PERSPECTIVE_CONFIG[k];
                     const Icon = cfg.icon;
@@ -3389,11 +3389,11 @@ export default function SLMLabPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 gap-2 border-b border-border">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Brain className="h-5 w-5 text-forge-amber" />
-          <h1 className="text-lg font-bold">SLM Lab</h1>
-          {activeDataset && <Badge variant="outline" className="text-[10px]">{activeDataset.name}</Badge>}
+          <h1 className="text-base sm:text-lg font-bold">SLM Lab</h1>
+          {activeDataset && <Badge variant="outline" className="text-[10px] max-w-[120px] truncate">{activeDataset.name}</Badge>}
           <Badge
             variant="outline"
             className="text-[10px] cursor-pointer hover:bg-muted/50 transition-colors"
@@ -3402,7 +3402,7 @@ export default function SLMLabPage() {
             {slmMode === "easy" ? "🟢 Easy" : "⚡ Expert"}
           </Badge>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => { setStep(-1); setActiveDatasetId(null); }}>
+        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setStep(-1); setActiveDatasetId(null); }}>
           <ArrowLeft className="h-4 w-4 mr-1" /> {slmMode === "easy" ? "Start Over" : "All Datasets"}
         </Button>
       </div>
