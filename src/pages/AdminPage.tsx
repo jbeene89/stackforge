@@ -149,26 +149,23 @@ export default function AdminPage() {
   const [newPriority, setNewPriority] = useState("info");
   const queryClient = useQueryClient();
 
+  const invokeAnnouncements = async (body: Record<string, unknown>) => {
+    const { data, error } = await supabase.functions.invoke("manage-announcements", { body });
+    if (error) throw error;
+    return data;
+  };
+
   const { data: announcements } = useQuery({
     queryKey: ["admin-announcements"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("announcements")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      const result = await invokeAnnouncements({ action: "list" });
+      return result.data;
     },
   });
 
   const addAnnouncement = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("announcements").insert({
-        title: newTitle,
-        content: newContent,
-        priority: newPriority,
-      });
-      if (error) throw error;
+      await invokeAnnouncements({ action: "create", title: newTitle, content: newContent, priority: newPriority });
     },
     onSuccess: () => {
       toast.success("Message posted");
@@ -182,8 +179,7 @@ export default function AdminPage() {
 
   const deleteAnnouncement = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("announcements").delete().eq("id", id);
-      if (error) throw error;
+      await invokeAnnouncements({ action: "delete", id });
     },
     onSuccess: () => {
       toast.success("Message deleted");
@@ -194,8 +190,7 @@ export default function AdminPage() {
 
   const toggleAnnouncement = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      const { error } = await supabase.from("announcements").update({ active }).eq("id", id);
-      if (error) throw error;
+      await invokeAnnouncements({ action: "toggle", id, active });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
