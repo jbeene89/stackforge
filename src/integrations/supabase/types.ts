@@ -733,6 +733,7 @@ export type Database = {
           display_name: string | null
           id: string
           referral_code: string
+          saved_hero_url: string | null
           updated_at: string
           user_id: string
         }
@@ -743,6 +744,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           referral_code?: string
+          saved_hero_url?: string | null
           updated_at?: string
           user_id: string
         }
@@ -753,6 +755,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           referral_code?: string
+          saved_hero_url?: string | null
           updated_at?: string
           user_id?: string
         }
