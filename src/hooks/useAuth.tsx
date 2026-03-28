@@ -34,13 +34,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const welcomeKey = `welcome_sent_${session.user.id}`;
         if (!localStorage.getItem(welcomeKey)) {
           localStorage.setItem(welcomeKey, "1");
-          supabase.functions.invoke("send-transactional-email", {
-            body: {
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-transactional-email`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({
               templateName: "welcome",
               recipientEmail: session.user.email,
               idempotencyKey: `welcome-${session.user.id}`,
               templateData: { name: session.user.user_metadata?.name || undefined },
-            },
+            }),
           }).catch((err) => console.error("Welcome email failed", err));
         }
       }
