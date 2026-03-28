@@ -160,19 +160,19 @@ Deno.serve(async (req) => {
     // If we have one already but under limit, generate a NEW one (don't reuse — variety matters)
     // Only reuse if generation fails later
 
-    // Check if there's a recent image for the same region (reuse for other visitors)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // Check regional cache (15 min window, only reuse if 3+ exist for variety)
+    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
     if (region || country) {
       const { data: regionCached } = await supabase
         .from("location_hero_images")
         .select("image_url, region, country")
         .eq("region", region || "")
         .eq("country", country || "")
-        .gte("created_at", oneHourAgo)
+        .gte("created_at", fifteenMinAgo)
         .order("created_at", { ascending: false })
         .limit(5);
 
-      if (regionCached && regionCached.length > 0) {
+      if (regionCached && regionCached.length >= 3) {
         const pick = regionCached[Math.floor(Math.random() * regionCached.length)];
         // Store this as the visitor's image too
         await supabase.from("location_hero_images").insert({
