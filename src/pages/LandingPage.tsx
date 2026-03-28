@@ -689,30 +689,30 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ YOUR BRAIN YOUR MODEL ════════════════════ */}
-      <section className="relative py-20 sm:py-28 px-4 sm:px-6 overflow-hidden">
+      <section className="relative py-14 sm:py-28 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-60" />
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-14"
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 sm:mb-14"
           >
-            <Badge variant="outline" className="text-[10px] mb-5 border-primary/30 text-primary font-semibold tracking-wider">
+            <Badge variant="outline" className="text-[10px] mb-4 sm:mb-5 border-primary/30 text-primary font-semibold tracking-wider">
               THE REAL POWER
             </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-wide leading-[1.15] mb-6">
+            <h2 className="text-xl sm:text-3xl md:text-5xl font-display font-bold tracking-wide leading-[1.15] mb-4 sm:mb-6">
               Put <span className="gradient-text">your brain</span> inside a model.
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed px-1 sm:px-0">
               Your knowledge. Your domain expertise. Your reasoning style.
               Inject it all into a small language model — then train on <span className="text-foreground font-bold">0 to 100,000+ data points</span>,
               on whatever hardware you have.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-14">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-8 mb-8 sm:mb-14">
             {[
               { icon: Upload, stat: "Any Knowledge", desc: "Conversations, PDFs, voice memos, URLs, photos, HuggingFace datasets.", color: "text-forge-gold", bgColor: "bg-forge-gold/10 border-forge-gold/20" },
               { icon: Fingerprint, stat: "Your Reasoning", desc: "Cognitive Fingerprinting extracts how you think and bakes it into training.", color: "text-primary", bgColor: "bg-primary/10 border-primary/20" },
@@ -720,17 +720,17 @@ export default function LandingPage() {
             ].map((item, i) => (
               <motion.div
                 key={item.stat}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className={`ffx-card glass-strong rounded-2xl p-7 text-center border ${item.bgColor} hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] transition-all duration-500`}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
+                className={`ffx-card glass-strong rounded-2xl p-5 sm:p-7 text-center border ${item.bgColor} hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] transition-all duration-500`}
               >
-                <div className={`w-14 h-14 rounded-xl ${item.bgColor} border flex items-center justify-center mx-auto mb-5`}>
-                  <item.icon className={`h-7 w-7 ${item.color}`} />
+                <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl ${item.bgColor} border flex items-center justify-center mx-auto mb-3 sm:mb-5`}>
+                  <item.icon className={`h-5 w-5 sm:h-7 sm:w-7 ${item.color}`} />
                 </div>
-                <h3 className={`text-lg font-display font-bold mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                <h3 className={`text-base sm:text-lg font-display font-bold mb-2 sm:mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
+                <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -739,11 +739,11 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
             className="text-center"
           >
             <Link to="/slm-lab">
-              <Button size="lg" className="gradient-primary text-primary-foreground font-bold glow-primary px-8">
+              <Button size="lg" className="gradient-primary text-primary-foreground font-bold glow-primary px-6 sm:px-8 min-h-[48px]">
                 <Brain className="h-4 w-4 mr-2" /> Open SLM Lab <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -755,37 +755,37 @@ export default function LandingPage() {
       <HowItWorksVideos />
 
       {/* ════════════════════ REAL USE CASES ════════════════════ */}
-      <section id="use-cases" className="py-16 sm:py-24 px-4 sm:px-6">
+      <section id="use-cases" className="py-10 sm:py-24 px-3 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold mb-3 tracking-wide">Built for Real Industries</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground text-balance font-medium">Not toy demos. These are production patterns used by contractors, legal teams, and field operators.</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6 sm:mb-14">
+            <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold mb-2 sm:mb-3 tracking-wide">Built for Real Industries</h2>
+            <p className="text-[11px] sm:text-sm text-muted-foreground text-balance font-medium">Not toy demos. Production patterns used by contractors, legal teams, and field operators.</p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             {realUseCases.map((uc, i) => (
               <motion.div
                 key={uc.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`ffx-card glass rounded-xl p-5 sm:p-7 border-l-4 ${uc.color} hover:glow-primary transition-all duration-500 cursor-pointer group`}
+                transition={{ delay: i * 0.08 }}
+                className={`ffx-card glass rounded-xl p-4 sm:p-7 border-l-4 ${uc.color} hover:glow-primary transition-all duration-500 cursor-pointer group`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] font-display">{uc.industry}</span>
-                  <Badge variant="outline" className="text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] font-display">{uc.industry}</span>
+                  <Badge variant="outline" className="text-[9px] sm:text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
                 </div>
-                <h3 className="font-display font-bold text-base sm:text-lg mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
+                <h3 className="font-display font-bold text-sm sm:text-lg mb-1.5 sm:mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
+                <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
                 {uc.modules > 0 && (
-                  <div className="mt-3 text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
+                  <div className="mt-2 sm:mt-3 text-[9px] sm:text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
                 )}
               </motion.div>
             ))}
           </div>
-          <div className="text-center mt-10">
+          <div className="text-center mt-6 sm:mt-10">
             <Link to="/templates">
-              <Button variant="outline" className="font-bold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
+              <Button variant="outline" className="font-bold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all text-sm min-h-[44px]">
                 Browse All Templates <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
