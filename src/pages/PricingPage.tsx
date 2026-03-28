@@ -395,45 +395,44 @@ export default function PricingPage() {
           {/* ── Top Up Tab ── */}
           <TabsContent value="topup">
             <div className="space-y-4">
-              <div className="glass rounded-xl p-4">
-                <h3 className="font-semibold flex items-center gap-2 mb-1">
+              <div className="glass rounded-xl p-3 sm:p-4">
+                <h3 className="font-semibold flex items-center gap-2 mb-1 text-sm sm:text-base">
                   <ShoppingCart className="h-4 w-4 text-primary" /> Buy Credit Packs
                 </h3>
-                <p className="text-sm text-muted-foreground mb-6">Need more credits? Top up instantly — credits never expire.</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">Need more credits? Top up instantly — credits never expire.</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   {TOPUP_PACKS.map((pack, idx) => (
                     <motion.div
                       key={pack.priceId}
-                      initial={{ opacity: 0, y: 16 }}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.08 }}
+                      transition={{ delay: idx * 0.06 }}
                       className={cn(
-                        "rounded-xl p-5 flex flex-col items-center text-center relative",
+                        "rounded-xl p-4 sm:p-5 flex flex-row sm:flex-col items-center sm:text-center relative gap-3 sm:gap-0",
                         pack.highlight ? "glass glow-primary border-primary/30" : "glass"
                       )}
                     >
                       {pack.highlight && (
-                        <Badge className="absolute -top-2.5 gradient-primary text-primary-foreground text-[10px] px-3">
+                        <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 gradient-primary text-primary-foreground text-[10px] px-3 hidden sm:inline-flex">
                           {pack.label}
                         </Badge>
                       )}
                       {!pack.highlight && pack.label === "Best Value" && (
-                        <Badge variant="outline" className="absolute -top-2.5 text-[10px] px-3">
+                        <Badge variant="outline" className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] px-3 hidden sm:inline-flex">
                           {pack.label}
                         </Badge>
                       )}
-                      <div className="flex items-center gap-1.5 mb-2 mt-1">
-                        <Coins className="h-5 w-5 text-primary" />
-                        <span className="text-3xl font-extrabold">{pack.credits.toLocaleString()}</span>
+                      <div className="flex items-center gap-1.5 sm:mb-2 sm:mt-1 shrink-0">
+                        <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                        <span className="text-2xl sm:text-3xl font-extrabold">{pack.credits.toLocaleString()}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-1">credits</p>
-                      <p className="text-lg font-bold mb-1">${pack.price}</p>
-                      <p className="text-[11px] text-muted-foreground mb-4">
-                        ${(pack.price / pack.credits * 100).toFixed(1)}¢ per credit
-                      </p>
+                      <div className="flex-1 sm:flex-initial">
+                        <p className="text-xs text-muted-foreground sm:mb-1">{pack.label} · credits</p>
+                        <p className="text-base sm:text-lg font-bold">${pack.price} <span className="text-[10px] sm:text-[11px] text-muted-foreground font-normal">(${(pack.price / pack.credits * 100).toFixed(1)}¢/cr)</span></p>
+                      </div>
                       <Button
-                        className={cn("w-full", pack.highlight && "gradient-primary text-primary-foreground")}
+                        className={cn("min-h-[40px] shrink-0 sm:w-full sm:mt-3", pack.highlight && "gradient-primary text-primary-foreground")}
                         variant={pack.highlight ? "default" : "outline"}
                         size="sm"
                         disabled={topUpLoading === pack.priceId}
@@ -442,7 +441,7 @@ export default function PricingPage() {
                         {topUpLoading === pack.priceId ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <>Buy Now <ArrowRight className="ml-1 h-3 w-3" /></>
+                          <>Buy <ArrowRight className="ml-1 h-3 w-3" /></>
                         )}
                       </Button>
                     </motion.div>
