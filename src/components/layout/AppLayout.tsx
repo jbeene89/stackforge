@@ -2,7 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
-import { CompanionSprites } from "@/components/CompanionSprites";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -193,7 +193,7 @@ export function AppLayout() {
           </main>
         </div>
       </div>
-      <CompanionSprites />
+      
       <CommandPalette open={open} onOpenChange={setOpen} />
     </SidebarProvider>
   );
