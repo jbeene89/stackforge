@@ -157,6 +157,7 @@ export function HowItWorksVideos() {
                 loop
                 muted
                 playsInline
+                preload="none"
                 className="w-full h-full object-cover"
               />
               {/* Subtle overlay gradient */}
