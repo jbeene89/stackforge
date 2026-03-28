@@ -63,6 +63,8 @@ const SelfHostPage = lazy(() => import("./pages/SelfHostPage"));
 const TrainingProgressPage = lazy(() => import("./pages/TrainingProgressPage"));
 const ImageForgePage = lazy(() => import("./pages/ImageForgePage"));
 const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage"));
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -91,6 +93,7 @@ const App = () => (
                 <Route path="/install" element={<InstallPage />} />
                 <Route path="/terms" element={<TermsOfServicePage />} />
                 <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
+                <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/slm-lab" element={<AppLayout />}>
                   <Route index element={<SLMLabPage />} />
                 </Route>
