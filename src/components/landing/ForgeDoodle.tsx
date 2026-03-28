@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, MapPin } from "lucide-react";
+import { Sparkles, MapPin, Heart, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 /* ── Floating ember particles ── */
 function ForgeEmbers({ count = 18 }: { count?: number }) {
@@ -89,10 +90,7 @@ async function fetchLocationInfo(): Promise<{ country: string; region: string } 
     const resp = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(3000) });
     if (!resp.ok) return null;
     const data = await resp.json();
-    return {
-      country: data.country_code || "",
-      region: data.region_code || "",
-    };
+    return { country: data.country_code || "", region: data.region_code || "" };
   } catch {
     return null;
   }
@@ -104,15 +102,48 @@ export function ForgeDoodle() {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
   const [isLocationBased, setIsLocationBased] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [hasSavedHero, setHasSavedHero] = useState(false);
+  const [usingSaved, setUsingSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
+  // Check auth state
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id || null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load image
   useEffect(() => {
     let cancelled = false;
 
     const loadImage = async () => {
       try {
-        // Try location-based image first
-        const location = await fetchLocationInfo();
+        // If signed in, check for saved hero first
+        if (userId) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("saved_hero_url")
+            .eq("user_id", userId)
+            .single();
 
+          if (profile?.saved_hero_url && !cancelled) {
+            setImageUrl(profile.saved_hero_url);
+            setHasSavedHero(true);
+            setUsingSaved(true);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Try location-based image
+        const location = await fetchLocationInfo();
         if (location && !cancelled) {
           const { data, error } = await supabase.functions.invoke("location-hero", {
             body: { country: location.country, region: location.region },
@@ -121,8 +152,6 @@ export function ForgeDoodle() {
           if (!error && data?.image_url && !cancelled) {
             setImageUrl(data.image_url);
             setIsLocationBased(true);
-
-            // Build location label
             if (data.country === "US" && data.region && US_STATE_NAMES[data.region]) {
               setLocationLabel(US_STATE_NAMES[data.region]);
             } else if (data.country && COUNTRY_NAMES[data.country]) {
@@ -133,7 +162,7 @@ export function ForgeDoodle() {
           }
         }
 
-        // Fallback to existing forge doodles
+        // Fallback to forge doodles
         if (!cancelled) {
           const { data: doodles, error } = await (supabase as any)
             .from("forge_doodles")
@@ -148,7 +177,7 @@ export function ForgeDoodle() {
           }
         }
       } catch {
-        // Silently fail — hero image is non-critical
+        // Silently fail
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -156,7 +185,85 @@ export function ForgeDoodle() {
 
     loadImage();
     return () => { cancelled = true; };
-  }, []);
+  }, [userId]);
+
+  const handleSave = async () => {
+    if (!userId || !imageUrl || saving) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ saved_hero_url: imageUrl } as any)
+        .eq("user_id", userId);
+      if (error) throw error;
+      setHasSavedHero(true);
+      setUsingSaved(true);
+      toast.success("Hero image saved to your profile!");
+    } catch {
+      toast.error("Couldn't save — try again");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setImgLoaded(false);
+    try {
+      // Force a new location-based image (skip saved)
+      const location = await fetchLocationInfo();
+      if (location) {
+        const { data, error } = await supabase.functions.invoke("location-hero", {
+          body: { country: location.country, region: location.region },
+        });
+        if (!error && data?.image_url) {
+          setImageUrl(data.image_url);
+          setIsLocationBased(true);
+          setUsingSaved(false);
+          if (data.country === "US" && data.region && US_STATE_NAMES[data.region]) {
+            setLocationLabel(US_STATE_NAMES[data.region]);
+          } else if (data.country && COUNTRY_NAMES[data.country]) {
+            setLocationLabel(COUNTRY_NAMES[data.country]);
+          }
+          return;
+        }
+      }
+      // Fallback: pick a random doodle
+      const { data: doodles } = await (supabase as any)
+        .from("forge_doodles")
+        .select("image_url")
+        .eq("active", true)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (doodles?.length) {
+        setImageUrl(doodles[Math.floor(Math.random() * doodles.length)].image_url);
+        setIsLocationBased(false);
+        setUsingSaved(false);
+        setLocationLabel(null);
+      }
+    } catch {
+      toast.error("Couldn't refresh — try again");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleUseSaved = async () => {
+    if (!userId) return;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("saved_hero_url")
+      .eq("user_id", userId)
+      .single();
+    if (profile?.saved_hero_url) {
+      setImgLoaded(false);
+      setImageUrl(profile.saved_hero_url);
+      setUsingSaved(true);
+      setIsLocationBased(false);
+      setLocationLabel(null);
+    }
+  };
 
   if (loading || !imageUrl) return null;
 
@@ -168,70 +275,111 @@ export function ForgeDoodle() {
         transition={{ duration: 1.2, ease: "easeOut" }}
         className="relative max-w-4xl mx-auto mt-6 sm:mt-10 mb-4"
       >
-        {/* Animated glow behind the image */}
+        {/* Animated glow */}
         <motion.div
           className="absolute -inset-2 sm:-inset-3 rounded-2xl blur-xl sm:blur-2xl opacity-50"
           style={{
             background:
               "linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--forge-gold) / 0.25), hsl(var(--forge-cyan) / 0.3))",
           }}
-          animate={{
-            opacity: [0.4, 0.65, 0.4],
-            scale: [1, 1.02, 1],
-          }}
+          animate={{ opacity: [0.4, 0.65, 0.4], scale: [1, 1.02, 1] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         />
 
         <div className="relative rounded-2xl overflow-hidden border border-primary/20 shadow-2xl">
-          {/* Ember particles */}
           <ForgeEmbers count={14} />
-
-          {/* Shimmer sweep */}
           <ShimmerSweep />
 
           <img
             src={imageUrl}
             alt={
-              isLocationBased && locationLabel
-                ? `AI-generated scenic view of ${locationLabel} — crafted uniquely for you`
-                : "AI-generated art — unique for every visitor, crafted by three AI perspectives"
+              usingSaved
+                ? "Your saved hero image"
+                : isLocationBased && locationLabel
+                  ? `AI-generated scenic view of ${locationLabel}`
+                  : "AI-generated art — unique for every visitor"
             }
             className={`w-full h-auto object-cover transition-opacity duration-700 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
             loading="eager"
             onLoad={() => setImgLoaded(true)}
           />
 
-          {/* Badge */}
+          {/* Bottom bar with badge + actions */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.5, duration: 0.6 }}
-            className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-background/70 backdrop-blur-sm border border-primary/20 text-[9px] sm:text-[10px] text-muted-foreground"
+            className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 flex items-center justify-between gap-2"
           >
-            {isLocationBased ? (
-              <>
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            {/* Label badge */}
+            <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-background/70 backdrop-blur-sm border border-primary/20 text-[9px] sm:text-[10px] text-muted-foreground">
+              {usingSaved ? (
+                <>
+                  <Heart className="h-3 w-3 text-forge-gold fill-forge-gold" />
+                  <span>Your saved hero</span>
+                </>
+              ) : isLocationBased ? (
+                <>
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <MapPin className="h-3 w-3 text-forge-gold" />
+                  </motion.div>
+                  <span>{locationLabel ? `Forged for ${locationLabel}` : "Forged for your location"}</span>
+                </>
+              ) : (
+                <>
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Sparkles className="h-3 w-3 text-forge-gold" />
+                  </motion.div>
+                  <span>Forge Doodle — unique for you</span>
+                </>
+              )}
+            </div>
+
+            {/* Action buttons for signed-in users */}
+            {userId && (
+              <div className="flex items-center gap-1.5">
+                {/* Save button — show if not currently viewing saved */}
+                {!usingSaved && (
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex items-center gap-1 px-2 py-1 rounded-full bg-background/70 backdrop-blur-sm border border-primary/20 text-[9px] sm:text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+                    title="Save as my hero image"
+                  >
+                    <Heart className={`h-3 w-3 ${saving ? "animate-pulse" : ""}`} />
+                    <span className="hidden sm:inline">Save</span>
+                  </button>
+                )}
+
+                {/* Show saved button — if has saved and not viewing it */}
+                {hasSavedHero && !usingSaved && (
+                  <button
+                    onClick={handleUseSaved}
+                    className="flex items-center gap-1 px-2 py-1 rounded-full bg-background/70 backdrop-blur-sm border border-primary/20 text-[9px] sm:text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                    title="Show my saved hero"
+                  >
+                    <Heart className="h-3 w-3 fill-current" />
+                    <span className="hidden sm:inline">My hero</span>
+                  </button>
+                )}
+
+                {/* Refresh button */}
+                <button
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-background/70 backdrop-blur-sm border border-primary/20 text-[9px] sm:text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+                  title="Generate a new image"
                 >
-                  <MapPin className="h-3 w-3 text-forge-gold" />
-                </motion.div>
-                <span>
-                  {locationLabel
-                    ? `Forged for ${locationLabel}`
-                    : "Forged for your location"}
-                </span>
-              </>
-            ) : (
-              <>
-                <motion.div
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <Sparkles className="h-3 w-3 text-forge-gold" />
-                </motion.div>
-                <span>Forge Doodle — unique for you</span>
-              </>
+                  <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
+                  <span className="hidden sm:inline">New</span>
+                </button>
+              </div>
             )}
           </motion.div>
         </div>
