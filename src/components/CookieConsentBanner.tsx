@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 const CONSENT_KEY = "cookie-consent";
 
-export function CookieConsentBanner() {
+export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieConsentBanner(_props, ref) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -61,4 +61,4 @@ export function CookieConsentBanner() {
       )}
     </AnimatePresence>
   );
-}
+});
