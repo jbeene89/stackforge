@@ -115,14 +115,14 @@ function InlineSocialProof() {
   ];
 
   return (
-    <section className="py-12 sm:py-16 px-4 sm:px-6">
+    <section className="py-8 sm:py-16 px-3 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        {/* Stats row — compact */}
+        {/* Stats row — 2x2 on mobile, 4-col on desktop */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-10"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-8 sm:mb-10"
         >
           {[
             { value: "12", label: "Module Types", color: "text-primary" },
@@ -136,16 +136,16 @@ function InlineSocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="glass rounded-xl p-4 text-center"
+              className="glass rounded-xl p-3 sm:p-4 text-center"
             >
-              <div className={`text-xl sm:text-2xl font-display font-bold ${s.color}`}>{s.value}</div>
-              <div className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-1">{s.label}</div>
+              <div className={`text-lg sm:text-2xl font-display font-bold ${s.color}`}>{s.value}</div>
+              <div className="text-[9px] sm:text-xs text-muted-foreground font-medium mt-0.5 sm:mt-1">{s.label}</div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Testimonials row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Testimonials — horizontal scroll on mobile, grid on desktop */}
+        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-3 px-3 md:mx-0 md:px-0">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
@@ -153,9 +153,9 @@ function InlineSocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 + i * 0.1 }}
-              className={`glass rounded-xl p-5 border-l-4 ${t.color}`}
+              className={`glass rounded-xl p-4 sm:p-5 border-l-4 ${t.color} min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink`}
             >
-              <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium italic mb-3">
+              <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium italic mb-2 sm:mb-3">
                 "{t.quote}"
               </p>
               <div className="text-[11px] font-bold">{t.name}</div>
@@ -441,57 +441,59 @@ export default function LandingPage() {
       </nav>
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section className="relative pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 overflow-hidden">
+      <section className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full glass border border-forge-gold/20 text-xs font-semibold text-forge-gold"
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="inline-flex items-center gap-2 mb-4 sm:mb-5 px-3 sm:px-4 py-1.5 rounded-full glass border border-forge-gold/20 text-[10px] sm:text-xs font-semibold text-forge-gold"
             >
               <Sparkles className="h-3 w-3" />
               No-Code AI Development Kitchen
             </motion.div>
 
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-wide leading-[1.1] mb-5 text-balance">
+            {/* Mobile: tighter, punchier hero text */}
+            <h1 className="text-[1.7rem] leading-[1.15] sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-wide sm:leading-[1.1] mb-4 sm:mb-5 text-balance">
               Build <span className="gradient-text">specialist AI</span> that{" "}
               <span className="text-foreground/80">actually works</span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 leading-relaxed text-balance font-medium">
+            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-5 sm:mb-6 leading-relaxed text-balance font-medium px-1 sm:px-0">
               Design single-purpose AI modules. Wire them into pipelines.
               Deploy to web, Android, or your own hardware.
               <span className="text-foreground font-semibold"> No coding required.</span>
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            {/* Mobile: full-width stacked buttons with bigger touch targets */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 mb-4">
               <Link to="/signup" className="w-full sm:w-auto">
-                <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold group w-full sm:w-auto glow-primary">
-                  Start Building Free <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <Button size="lg" className="gradient-primary text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-bold group w-full sm:w-auto glow-primary min-h-[52px]">
+                  Start Building Free <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/demo/module-builder" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
+                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-5 sm:py-6 text-sm sm:text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all min-h-[52px]">
                   <Play className="h-4 w-4" /> Try Live Demo
                 </Button>
               </Link>
             </div>
 
-            {/* Trust signals inline */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[10px] sm:text-xs text-muted-foreground font-medium">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald/70" />
-                <span>50 free credits/month</span>
+            {/* Mobile: horizontal scroll trust badges */}
+            <div className="flex items-center justify-center gap-3 sm:gap-8 text-[10px] sm:text-xs text-muted-foreground font-medium overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <CheckCircle2 className="h-3.5 w-3.5 text-forge-emerald/70 shrink-0" />
+                <span>50 free credits</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-forge-emerald/70" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <Shield className="h-3.5 w-3.5 text-forge-emerald/70 shrink-0" />
                 <span>No credit card</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Lock className="h-3.5 w-3.5 text-forge-emerald/70" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <Lock className="h-3.5 w-3.5 text-forge-emerald/70 shrink-0" />
                 <span>Your data stays yours</span>
               </div>
             </div>
@@ -504,7 +506,7 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* ════════════════════ TRANSFORM YOUR PHOTO ════════════════════ */}
@@ -529,77 +531,80 @@ export default function LandingPage() {
       <InteractiveDemo />
 
       {/* ════════════════════ THREE DIFFERENTIATORS ════════════════════ */}
-      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 relative">
+      <section id="how-it-works" className="py-12 sm:py-24 px-3 sm:px-6 relative">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-20">
-            <Badge variant="outline" className="text-[10px] mb-4 border-forge-gold/30 text-forge-gold font-semibold">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-20">
+            <Badge variant="outline" className="text-[10px] mb-3 sm:mb-4 border-forge-gold/30 text-forge-gold font-semibold">
               What makes Soupy different
             </Badge>
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
+            <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
               Three things we do that nobody else does
             </h2>
           </motion.div>
 
-          <div className="space-y-16 sm:space-y-28">
+          <div className="space-y-10 sm:space-y-28">
             {differentiators.map((d, i) => (
               <motion.div
                 key={d.title}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.1, duration: 0.6 }}
-                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} gap-8 sm:gap-12 items-center`}
+                transition={{ delay: 0.1, duration: 0.5 }}
+                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} gap-5 sm:gap-12 items-center`}
               >
-                <div className="flex-1 space-y-5">
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${d.color} flex items-center justify-center glow-primary`}>
-                    <d.icon className="h-7 w-7 text-primary-foreground" />
+                {/* Text content — more compact on mobile */}
+                <div className="flex-1 space-y-3 sm:space-y-5">
+                  <div className="flex items-center gap-3 sm:block">
+                    <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${d.color} flex items-center justify-center glow-primary shrink-0`}>
+                      <d.icon className="h-5 w-5 sm:h-7 sm:w-7 text-primary-foreground" />
+                    </div>
+                    <div className="sm:mt-3">
+                      <h3 className="text-base sm:text-2xl font-display font-bold tracking-wide">{d.title}</h3>
+                      <p className="text-xs sm:text-sm font-semibold text-primary">{d.subtitle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg sm:text-2xl font-display font-bold mb-1 tracking-wide">{d.title}</h3>
-                    <p className="text-sm font-semibold text-primary">{d.subtitle}</p>
-                  </div>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{d.desc}</p>
-                  <ul className="space-y-3">
+                  <p className="text-xs sm:text-base text-muted-foreground leading-relaxed">{d.desc}</p>
+                  <ul className="grid grid-cols-1 sm:block gap-1.5 sm:space-y-3">
                     {d.details.map((detail) => (
-                      <li key={detail} className="flex items-center gap-2.5 text-xs sm:text-sm font-medium">
-                        <CheckCircle2 className="h-4 w-4 text-forge-emerald shrink-0" />
+                      <li key={detail} className="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-sm font-medium">
+                        <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald shrink-0" />
                         {detail}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="flex-1 ffx-card glass rounded-xl p-5 sm:p-7 min-h-[200px] sm:min-h-[220px] flex items-center justify-center w-full">
+                <div className="flex-1 ffx-card glass rounded-xl p-4 sm:p-7 min-h-[160px] sm:min-h-[220px] flex items-center justify-center w-full">
                   {i === 0 && (
-                    <div className="space-y-3 w-full">
+                    <div className="space-y-2 sm:space-y-3 w-full">
                       {[
                         { icon: Brain, name: "Marine Scope Summarizer", sub: "specialist • temp 0.3 • deterministic", ver: "v6", iconColor: "text-forge-gold" },
                         { icon: Shield, name: "Red Team Critic", sub: "critic • temp 0.5 • skeptical tone", ver: "v3", iconColor: "text-forge-rose" },
                         { icon: Cpu, name: "Cost Estimator", sub: "specialist • SLM mode • JSON output", ver: "v9", iconColor: "text-forge-cyan" },
                       ].map((m) => (
-                        <div key={m.name} className="flex items-center gap-3 glass rounded-lg px-3 sm:px-4 py-3 hover:glow-primary transition-all">
+                        <div key={m.name} className="flex items-center gap-2.5 sm:gap-3 glass rounded-lg px-3 py-2.5 sm:py-3 hover:glow-primary transition-all">
                           <m.icon className={`h-4 w-4 ${m.iconColor} shrink-0`} />
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-bold truncate">{m.name}</div>
-                            <div className="text-[10px] text-muted-foreground">{m.sub}</div>
+                            <div className="text-[11px] sm:text-xs font-bold truncate">{m.name}</div>
+                            <div className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{m.sub}</div>
                           </div>
-                          <Badge className="bg-forge-emerald/15 text-forge-emerald text-[9px] shrink-0 border-forge-emerald/20">{m.ver}</Badge>
+                          <Badge className="bg-forge-emerald/15 text-forge-emerald text-[8px] sm:text-[9px] shrink-0 border-forge-emerald/20">{m.ver}</Badge>
                         </div>
                       ))}
                     </div>
                   )}
                   {i === 1 && <ArchitectureDiagram />}
                   {i === 2 && (
-                    <div className="w-[200px] mx-auto">
-                      <div className="ffx-card rounded-2xl border border-primary/20 bg-background/80 p-3 glow-primary">
-                        <div className="rounded-xl bg-primary/10 h-9 flex items-center justify-center text-[11px] font-bold mb-2 text-primary font-display tracking-wide">
+                    <div className="w-[180px] sm:w-[200px] mx-auto">
+                      <div className="ffx-card rounded-2xl border border-primary/20 bg-background/80 p-2.5 sm:p-3 glow-primary">
+                        <div className="rounded-xl bg-primary/10 h-8 sm:h-9 flex items-center justify-center text-[10px] sm:text-[11px] font-bold mb-1.5 sm:mb-2 text-primary font-display tracking-wide">
                           Field Inspector
                         </div>
-                        <div className="space-y-1.5">
-                          <div className="rounded-lg bg-forge-cyan/10 h-16 flex items-center justify-center text-[10px] text-forge-cyan font-semibold border border-forge-cyan/10">📷 Photo Capture</div>
-                          <div className="rounded-lg bg-forge-emerald/10 h-7 flex items-center justify-center text-[10px] text-forge-emerald font-semibold border border-forge-emerald/10">📍 GPS Tagged</div>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            <div className="rounded-lg bg-forge-gold/10 h-8 flex items-center justify-center text-[9px] text-forge-gold font-semibold border border-forge-gold/10">Checklist</div>
-                            <div className="rounded-lg bg-primary/10 h-8 flex items-center justify-center text-[9px] text-primary font-semibold border border-primary/10">Sync ↑</div>
+                        <div className="space-y-1 sm:space-y-1.5">
+                          <div className="rounded-lg bg-forge-cyan/10 h-12 sm:h-16 flex items-center justify-center text-[9px] sm:text-[10px] text-forge-cyan font-semibold border border-forge-cyan/10">📷 Photo Capture</div>
+                          <div className="rounded-lg bg-forge-emerald/10 h-6 sm:h-7 flex items-center justify-center text-[9px] sm:text-[10px] text-forge-emerald font-semibold border border-forge-emerald/10">📍 GPS Tagged</div>
+                          <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
+                            <div className="rounded-lg bg-forge-gold/10 h-7 sm:h-8 flex items-center justify-center text-[8px] sm:text-[9px] text-forge-gold font-semibold border border-forge-gold/10">Checklist</div>
+                            <div className="rounded-lg bg-primary/10 h-7 sm:h-8 flex items-center justify-center text-[8px] sm:text-[9px] text-primary font-semibold border border-primary/10">Sync ↑</div>
                           </div>
                         </div>
                       </div>
@@ -613,29 +618,29 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ ARCHITECTURE PHILOSOPHY ════════════════════ */}
-      <section className="relative py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
+      <section className="relative py-10 sm:py-20 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
-            <h2 className="text-lg sm:text-xl md:text-3xl font-display font-bold tracking-wide">Architecture Principles</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-3 font-medium">How Soupy thinks about AI systems.</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6 sm:mb-14">
+            <h2 className="text-base sm:text-xl md:text-3xl font-display font-bold tracking-wide">Architecture Principles</h2>
+            <p className="text-[11px] sm:text-sm text-muted-foreground mt-2 sm:mt-3 font-medium">How Soupy thinks about AI systems.</p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-5">
             {architecturePoints.map((p, i) => (
               <motion.div
                 key={p.label}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="ffx-card glass rounded-xl px-5 py-4 flex items-start gap-3 hover:glow-primary transition-all duration-500"
+                transition={{ delay: i * 0.06 }}
+                className="ffx-card glass rounded-xl px-3 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row items-start gap-2 sm:gap-3 hover:glow-primary transition-all duration-500"
               >
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <p.icon className="h-4 w-4 text-primary" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <p.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold font-display tracking-wide">{p.label}</div>
-                  <div className="text-sm text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
+                  <div className="text-[11px] sm:text-sm font-bold font-display tracking-wide">{p.label}</div>
+                  <div className="text-[10px] sm:text-sm text-muted-foreground mt-0.5 font-medium leading-snug">{p.desc}</div>
                 </div>
               </motion.div>
             ))}
@@ -644,37 +649,37 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ DEEP CUSTOMIZATION ════════════════════ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 relative">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="text-center mb-12 sm:mb-16">
-            <Badge variant="outline" className="text-[10px] mb-4 border-forge-rose/30 text-forge-rose font-semibold">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="text-center mb-8 sm:mb-16">
+            <Badge variant="outline" className="text-[10px] mb-3 sm:mb-4 border-forge-rose/30 text-forge-rose font-semibold">
               This is not normal AI building
             </Badge>
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
+            <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
               Control what your model <span className="gradient-text">learns — and unlearns</span>
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             {deepCustomization.map((item, i) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="ffx-card glass rounded-xl p-6 hover:glow-primary transition-all duration-500 group"
+                transition={{ delay: i * 0.08, duration: 0.4 }}
+                className="ffx-card glass rounded-xl p-4 sm:p-6 hover:glow-primary transition-all duration-500 group"
               >
-                <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${item.bgColor}`}>
-                    <item.icon className={`h-5 w-5 ${item.color}`} />
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg border flex items-center justify-center shrink-0 ${item.bgColor}`}>
+                    <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${item.color}`} />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                      <h3 className="text-sm sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                      <h3 className="text-xs sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
+                      <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                    <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -684,30 +689,30 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ YOUR BRAIN YOUR MODEL ════════════════════ */}
-      <section className="relative py-20 sm:py-28 px-4 sm:px-6 overflow-hidden">
+      <section className="relative py-14 sm:py-28 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-60" />
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-14"
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 sm:mb-14"
           >
-            <Badge variant="outline" className="text-[10px] mb-5 border-primary/30 text-primary font-semibold tracking-wider">
+            <Badge variant="outline" className="text-[10px] mb-4 sm:mb-5 border-primary/30 text-primary font-semibold tracking-wider">
               THE REAL POWER
             </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-wide leading-[1.15] mb-6">
+            <h2 className="text-xl sm:text-3xl md:text-5xl font-display font-bold tracking-wide leading-[1.15] mb-4 sm:mb-6">
               Put <span className="gradient-text">your brain</span> inside a model.
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed px-1 sm:px-0">
               Your knowledge. Your domain expertise. Your reasoning style.
               Inject it all into a small language model — then train on <span className="text-foreground font-bold">0 to 100,000+ data points</span>,
               on whatever hardware you have.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-14">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-8 mb-8 sm:mb-14">
             {[
               { icon: Upload, stat: "Any Knowledge", desc: "Conversations, PDFs, voice memos, URLs, photos, HuggingFace datasets.", color: "text-forge-gold", bgColor: "bg-forge-gold/10 border-forge-gold/20" },
               { icon: Fingerprint, stat: "Your Reasoning", desc: "Cognitive Fingerprinting extracts how you think and bakes it into training.", color: "text-primary", bgColor: "bg-primary/10 border-primary/20" },
@@ -715,17 +720,17 @@ export default function LandingPage() {
             ].map((item, i) => (
               <motion.div
                 key={item.stat}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className={`ffx-card glass-strong rounded-2xl p-7 text-center border ${item.bgColor} hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] transition-all duration-500`}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
+                className={`ffx-card glass-strong rounded-2xl p-5 sm:p-7 text-center border ${item.bgColor} hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] transition-all duration-500`}
               >
-                <div className={`w-14 h-14 rounded-xl ${item.bgColor} border flex items-center justify-center mx-auto mb-5`}>
-                  <item.icon className={`h-7 w-7 ${item.color}`} />
+                <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl ${item.bgColor} border flex items-center justify-center mx-auto mb-3 sm:mb-5`}>
+                  <item.icon className={`h-5 w-5 sm:h-7 sm:w-7 ${item.color}`} />
                 </div>
-                <h3 className={`text-lg font-display font-bold mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                <h3 className={`text-base sm:text-lg font-display font-bold mb-2 sm:mb-3 ${item.color} tracking-wide`}>{item.stat}</h3>
+                <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -734,11 +739,11 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
             className="text-center"
           >
             <Link to="/slm-lab">
-              <Button size="lg" className="gradient-primary text-primary-foreground font-bold glow-primary px-8">
+              <Button size="lg" className="gradient-primary text-primary-foreground font-bold glow-primary px-6 sm:px-8 min-h-[48px]">
                 <Brain className="h-4 w-4 mr-2" /> Open SLM Lab <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -750,37 +755,37 @@ export default function LandingPage() {
       <HowItWorksVideos />
 
       {/* ════════════════════ REAL USE CASES ════════════════════ */}
-      <section id="use-cases" className="py-16 sm:py-24 px-4 sm:px-6">
+      <section id="use-cases" className="py-10 sm:py-24 px-3 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold mb-3 tracking-wide">Built for Real Industries</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground text-balance font-medium">Not toy demos. These are production patterns used by contractors, legal teams, and field operators.</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6 sm:mb-14">
+            <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold mb-2 sm:mb-3 tracking-wide">Built for Real Industries</h2>
+            <p className="text-[11px] sm:text-sm text-muted-foreground text-balance font-medium">Not toy demos. Production patterns used by contractors, legal teams, and field operators.</p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             {realUseCases.map((uc, i) => (
               <motion.div
                 key={uc.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`ffx-card glass rounded-xl p-5 sm:p-7 border-l-4 ${uc.color} hover:glow-primary transition-all duration-500 cursor-pointer group`}
+                transition={{ delay: i * 0.08 }}
+                className={`ffx-card glass rounded-xl p-4 sm:p-7 border-l-4 ${uc.color} hover:glow-primary transition-all duration-500 cursor-pointer group`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] font-display">{uc.industry}</span>
-                  <Badge variant="outline" className="text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] font-display">{uc.industry}</span>
+                  <Badge variant="outline" className="text-[9px] sm:text-[10px] border-primary/20 font-semibold">{uc.type}</Badge>
                 </div>
-                <h3 className="font-display font-bold text-base sm:text-lg mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
+                <h3 className="font-display font-bold text-sm sm:text-lg mb-1.5 sm:mb-2 group-hover:text-primary transition-colors tracking-wide">{uc.title}</h3>
+                <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium">{uc.desc}</p>
                 {uc.modules > 0 && (
-                  <div className="mt-3 text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
+                  <div className="mt-2 sm:mt-3 text-[9px] sm:text-[10px] text-primary/70 font-semibold">{uc.modules} specialist modules</div>
                 )}
               </motion.div>
             ))}
           </div>
-          <div className="text-center mt-10">
+          <div className="text-center mt-6 sm:mt-10">
             <Link to="/templates">
-              <Button variant="outline" className="font-bold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all">
+              <Button variant="outline" className="font-bold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all text-sm min-h-[44px]">
                 Browse All Templates <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -789,86 +794,86 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ CTA ════════════════════ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-40" />
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center ffx-card glass-strong rounded-2xl p-10 sm:p-14 glow-primary relative z-10"
+          transition={{ duration: 0.5 }}
+          className="max-w-3xl mx-auto text-center ffx-card glass-strong rounded-2xl p-6 sm:p-14 glow-primary relative z-10"
         >
-          <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold mb-4 tracking-wide">
+          <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold mb-3 sm:mb-4 tracking-wide">
             Stop Prompting.{" "}
             <span className="gradient-text">Start Engineering.</span>
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-8 max-w-lg mx-auto font-medium leading-relaxed">
+          <p className="text-[11px] sm:text-sm text-muted-foreground mb-5 sm:mb-8 max-w-lg mx-auto font-medium leading-relaxed">
             Build modular AI systems with defined roles, traceable behavior, and real-world deployment.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
             <Link to="/signup" className="w-full sm:w-auto">
-              <Button size="lg" className="gradient-primary text-primary-foreground px-10 py-6 text-base font-bold w-full sm:w-auto glow-primary">
-                Start Building Free <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="gradient-primary text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-bold w-full sm:w-auto glow-primary min-h-[48px]">
+                Start Building Free <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
             <Link to="/pricing" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto py-6 text-base font-semibold border-primary/20 hover:glow-primary">View Pricing</Button>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto py-5 sm:py-6 text-sm sm:text-base font-semibold border-primary/20 hover:glow-primary min-h-[48px]">View Pricing</Button>
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 mt-8 text-xs sm:text-sm text-muted-foreground font-semibold">
-            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Free tier</div>
-            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> No credit card</div>
-            <div className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-forge-emerald" /> Export anytime</div>
+          <div className="flex items-center justify-center gap-4 sm:gap-8 mt-5 sm:mt-8 text-[10px] sm:text-sm text-muted-foreground font-semibold">
+            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald" /> Free tier</div>
+            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald" /> No card</div>
+            <div className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-forge-emerald" /> Export</div>
           </div>
         </motion.div>
       </section>
 
       {/* ════════════════════ FOOTER ════════════════════ */}
-      <footer className="relative py-10 sm:py-14 px-4 sm:px-6">
-        <FFXDivider className="mb-10" />
+      <footer className="relative py-8 sm:py-14 px-3 sm:px-6">
+        <FFXDivider className="mb-6 sm:mb-10" />
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-6 sm:gap-8 mb-6 sm:mb-10">
             <div>
-              <Link to="/" className="flex items-center gap-2.5 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
-                  <Sparkles className="h-4 w-4 text-primary-foreground" />
+              <Link to="/" className="flex items-center gap-2.5 mb-2 sm:mb-3">
+                <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
+                  <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Lab</span></span>
+                <span className="text-sm sm:text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Lab</span></span>
               </Link>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs font-medium">The modular AI development kitchen for specialist systems.</p>
+              <p className="text-[11px] sm:text-sm text-muted-foreground max-w-xs font-medium">The modular AI development kitchen for specialist systems.</p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8 text-xs sm:text-sm w-full md:w-auto">
               <div>
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Product</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                <div className="font-bold font-display tracking-wide mb-2 sm:mb-3 text-primary/80 text-[11px] sm:text-sm">Product</div>
+                <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
                   <div><Link to="/templates" className="hover:text-primary transition-colors duration-300">Templates</Link></div>
                   <div><Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link></div>
                   <div><Link to="/marketplace" className="hover:text-primary transition-colors duration-300">Marketplace</Link></div>
                 </div>
               </div>
               <div>
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Resources</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                <div className="font-bold font-display tracking-wide mb-2 sm:mb-3 text-primary/80 text-[11px] sm:text-sm">Resources</div>
+                <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
                   <div><Link to="/white-paper" className="hover:text-primary transition-colors duration-300">White Paper</Link></div>
-                  <div><Link to="/self-host" className="hover:text-primary transition-colors duration-300">Self-Host Guide</Link></div>
+                  <div><Link to="/self-host" className="hover:text-primary transition-colors duration-300">Self-Host</Link></div>
                   <div><Link to="/deploy/phone" className="hover:text-primary transition-colors duration-300">Phone Deploy</Link></div>
                 </div>
               </div>
-              <div className="col-span-2 sm:col-span-1">
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Legal</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
-                  <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy Policy</Link></div>
-                  <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms of Service</Link></div>
+              <div>
+                <div className="font-bold font-display tracking-wide mb-2 sm:mb-3 text-primary/80 text-[11px] sm:text-sm">Legal</div>
+                <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
+                  <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link></div>
+                  <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link></div>
                   <div><a href="mailto:support@soupy.com" className="hover:text-primary transition-colors duration-300">Contact</a></div>
                 </div>
               </div>
             </div>
           </div>
-          <FFXDivider className="mb-6" />
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-muted-foreground font-medium">
+          <FFXDivider className="mb-4 sm:mb-6" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[10px] sm:text-sm text-muted-foreground font-medium">
             <span>© 2026 Soupy. All rights reserved.</span>
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6">
               <Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link>
               <Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link>
               <span className="text-muted-foreground/50 cursor-default">Status</span>
