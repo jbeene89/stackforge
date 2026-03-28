@@ -191,19 +191,19 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead title="Pricing — Free, Builder & Pro Plans" description="Compare Soupy pricing plans. Start free with 50 credits, upgrade to Builder or Pro for more AI modules, pipeline runs, and advanced features. No credit card required." />
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-3 mb-2">
-          <CreditCard className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold">Pricing & Credits</h1>
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
+        <div className="flex items-center gap-2.5 sm:gap-3 mb-1.5 sm:mb-2">
+          <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+          <h1 className="text-xl sm:text-2xl font-bold">Pricing & Credits</h1>
         </div>
-        <p className="text-sm text-muted-foreground mb-8">Every AI run costs credits. Pick a plan, or earn free credits by exploring.</p>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-5 sm:mb-8">Every AI run costs credits. Pick a plan, or earn free credits by exploring.</p>
 
-        <Tabs defaultValue="plans" className="space-y-6">
-          <TabsList className="glass w-fit">
-            <TabsTrigger value="plans" className="text-xs gap-1.5"><Crown className="h-3 w-3" /> Plans</TabsTrigger>
-            <TabsTrigger value="usage" className="text-xs gap-1.5"><BarChart3 className="h-3 w-3" /> Usage & History</TabsTrigger>
-            <TabsTrigger value="topup" className="text-xs gap-1.5"><Plus className="h-3 w-3" /> Top Up</TabsTrigger>
-            <TabsTrigger value="costs" className="text-xs gap-1.5"><Coins className="h-3 w-3" /> Credit Costs</TabsTrigger>
+        <Tabs defaultValue="plans" className="space-y-4 sm:space-y-6">
+          <TabsList className="glass w-full sm:w-fit overflow-x-auto no-scrollbar flex">
+            <TabsTrigger value="plans" className="text-[11px] sm:text-xs gap-1 sm:gap-1.5 min-h-[36px] flex-1 sm:flex-initial"><Crown className="h-3 w-3" /> Plans</TabsTrigger>
+            <TabsTrigger value="usage" className="text-[11px] sm:text-xs gap-1 sm:gap-1.5 min-h-[36px] flex-1 sm:flex-initial"><BarChart3 className="h-3 w-3" /> Usage</TabsTrigger>
+            <TabsTrigger value="topup" className="text-[11px] sm:text-xs gap-1 sm:gap-1.5 min-h-[36px] flex-1 sm:flex-initial"><Plus className="h-3 w-3" /> Top Up</TabsTrigger>
+            <TabsTrigger value="costs" className="text-[11px] sm:text-xs gap-1 sm:gap-1.5 min-h-[36px] flex-1 sm:flex-initial"><Coins className="h-3 w-3" /> Costs</TabsTrigger>
           </TabsList>
 
           {/* ── Plans Tab ── */}
