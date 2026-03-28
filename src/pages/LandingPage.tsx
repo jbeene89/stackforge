@@ -352,8 +352,21 @@ const realUseCases = [
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
   const { theme, resolvedTheme, setTheme } = useTheme();
   const isDark = theme === "system" ? resolvedTheme === "dark" : theme === "dark";
+
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setPastHero(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(isDark ? "light" : "dark");
@@ -441,7 +454,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
+      <section ref={heroRef} className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
@@ -881,6 +894,23 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ── Sticky mobile CTA ── */}
+      <motion.div
+        initial={{ y: 80 }}
+        animate={{ y: pastHero ? 0 : 80 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="fixed bottom-0 inset-x-0 z-50 md:hidden"
+      >
+        <div className="glass-strong border-t border-primary/15 px-4 py-3 flex items-center gap-3">
+          <p className="text-xs font-medium text-muted-foreground flex-1 leading-tight">
+            50 free credits — no card needed
+          </p>
+          <Button asChild size="sm" className="gradient-primary glow-primary min-h-[44px] px-5 text-sm font-bold shrink-0">
+            <Link to="/signup">Start Free</Link>
+          </Button>
+        </div>
+      </motion.div>
     </div>
   );
 }
