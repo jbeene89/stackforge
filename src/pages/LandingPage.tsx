@@ -618,29 +618,29 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ ARCHITECTURE PHILOSOPHY ════════════════════ */}
-      <section className="relative py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
+      <section className="relative py-10 sm:py-20 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh opacity-50" />
         <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
-            <h2 className="text-lg sm:text-xl md:text-3xl font-display font-bold tracking-wide">Architecture Principles</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-3 font-medium">How Soupy thinks about AI systems.</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6 sm:mb-14">
+            <h2 className="text-base sm:text-xl md:text-3xl font-display font-bold tracking-wide">Architecture Principles</h2>
+            <p className="text-[11px] sm:text-sm text-muted-foreground mt-2 sm:mt-3 font-medium">How Soupy thinks about AI systems.</p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-5">
             {architecturePoints.map((p, i) => (
               <motion.div
                 key={p.label}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="ffx-card glass rounded-xl px-5 py-4 flex items-start gap-3 hover:glow-primary transition-all duration-500"
+                transition={{ delay: i * 0.06 }}
+                className="ffx-card glass rounded-xl px-3 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row items-start gap-2 sm:gap-3 hover:glow-primary transition-all duration-500"
               >
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <p.icon className="h-4 w-4 text-primary" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <p.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold font-display tracking-wide">{p.label}</div>
-                  <div className="text-sm text-muted-foreground mt-0.5 font-medium">{p.desc}</div>
+                  <div className="text-[11px] sm:text-sm font-bold font-display tracking-wide">{p.label}</div>
+                  <div className="text-[10px] sm:text-sm text-muted-foreground mt-0.5 font-medium leading-snug">{p.desc}</div>
                 </div>
               </motion.div>
             ))}
