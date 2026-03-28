@@ -454,7 +454,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
+      <section ref={heroRef} className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-mesh" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
