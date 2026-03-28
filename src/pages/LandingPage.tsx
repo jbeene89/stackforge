@@ -649,37 +649,37 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ DEEP CUSTOMIZATION ════════════════════ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 relative">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="text-center mb-12 sm:mb-16">
-            <Badge variant="outline" className="text-[10px] mb-4 border-forge-rose/30 text-forge-rose font-semibold">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} className="text-center mb-8 sm:mb-16">
+            <Badge variant="outline" className="text-[10px] mb-3 sm:mb-4 border-forge-rose/30 text-forge-rose font-semibold">
               This is not normal AI building
             </Badge>
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
+            <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold text-balance tracking-wide">
               Control what your model <span className="gradient-text">learns — and unlearns</span>
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             {deepCustomization.map((item, i) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="ffx-card glass rounded-xl p-6 hover:glow-primary transition-all duration-500 group"
+                transition={{ delay: i * 0.08, duration: 0.4 }}
+                className="ffx-card glass rounded-xl p-4 sm:p-6 hover:glow-primary transition-all duration-500 group"
               >
-                <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${item.bgColor}`}>
-                    <item.icon className={`h-5 w-5 ${item.color}`} />
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg border flex items-center justify-center shrink-0 ${item.bgColor}`}>
+                    <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${item.color}`} />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                      <h3 className="text-sm sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                      <h3 className="text-xs sm:text-base font-display font-bold tracking-wide">{item.title}</h3>
+                      <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 opacity-70 font-mono shrink-0">{item.tag}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
+                    <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium">{item.desc}</p>
                   </div>
                 </div>
               </motion.div>
