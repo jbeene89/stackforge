@@ -57,47 +57,55 @@ export default function VisualChatroom() {
     const char = CHARACTERS[charIndex];
     const previousImages = allMessages.filter(m => m.image).map(m => m.image!);
     const isFirst = allMessages.length === 0;
+    const MAX_RETRIES = 2;
 
-    try {
-      const { data, error } = await supabase.functions.invoke("visual-chatroom", {
-        body: {
-          characterId: char.id,
-          seedPrompt: isFirst ? (seedPrompt || null) : null,
-          seedImage: isFirst ? seedImage : null,
-          previousImages,
-          imageModel: "google/gemini-3.1-flash-image-preview",
-        },
-      });
-      if (error) {
-        // Check for 402 insufficient credits
-        if (error.message?.includes("402") || error.message?.includes("Insufficient")) {
-          toast.error("Out of credits! Upgrade your plan to continue.", {
-            action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
-          });
-          abortRef.current = true;
-          queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const { data, error } = await supabase.functions.invoke("visual-chatroom", {
+          body: {
+            characterId: char.id,
+            seedPrompt: isFirst ? (seedPrompt || null) : null,
+            seedImage: isFirst ? seedImage : null,
+            previousImages,
+            imageModel: "google/gemini-3.1-flash-image-preview",
+          },
+        });
+        if (error) {
+          if (error.message?.includes("402") || error.message?.includes("Insufficient")) {
+            toast.error("Out of credits! Upgrade your plan to continue.", {
+              action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+            });
+            abortRef.current = true;
+            queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+            return null;
+          }
+          throw error;
+        }
+        if (data?.error) {
+          if (data.error.includes("Insufficient")) {
+            toast.error("Out of credits!", {
+              action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+            });
+            abortRef.current = true;
+            queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+            return null;
+          }
+          throw new Error(data.error);
+        }
+        queryClient.invalidateQueries({ queryKey: ["user-credits"] });
+        return { characterId: char.id, image: data.image, text: data.text, round: currentRound };
+      } catch (e: any) {
+        if (attempt < MAX_RETRIES) {
+          const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s
+          console.log(`${char.name} attempt ${attempt + 1} failed, retrying in ${delay / 1000}s...`);
+          await new Promise(res => setTimeout(res, delay));
+        } else {
+          toast.error(`${char.name} failed after ${MAX_RETRIES + 1} attempts`);
           return null;
         }
-        throw error;
       }
-      if (data?.error) {
-        if (data.error.includes("Insufficient")) {
-          toast.error("Out of credits!", {
-            action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
-          });
-          abortRef.current = true;
-          queryClient.invalidateQueries({ queryKey: ["user-credits"] });
-          return null;
-        }
-        throw new Error(data.error);
-      }
-      // Refresh credit balance after successful generation
-      queryClient.invalidateQueries({ queryKey: ["user-credits"] });
-      return { characterId: char.id, image: data.image, text: data.text, round: currentRound };
-    } catch (e: any) {
-      toast.error(`${char.name} failed: ${e.message}`);
-      return null;
     }
+    return null;
   };
 
   const waitWhilePaused = async () => {
