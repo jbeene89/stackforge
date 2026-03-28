@@ -830,50 +830,50 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ FOOTER ════════════════════ */}
-      <footer className="relative py-10 sm:py-14 px-4 sm:px-6">
-        <FFXDivider className="mb-10" />
+      <footer className="relative py-8 sm:py-14 px-3 sm:px-6">
+        <FFXDivider className="mb-6 sm:mb-10" />
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-6 sm:gap-8 mb-6 sm:mb-10">
             <div>
-              <Link to="/" className="flex items-center gap-2.5 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
-                  <Sparkles className="h-4 w-4 text-primary-foreground" />
+              <Link to="/" className="flex items-center gap-2.5 mb-2 sm:mb-3">
+                <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg gradient-primary glow-primary">
+                  <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Lab</span></span>
+                <span className="text-sm sm:text-base font-bold font-display tracking-wider">Soupy<span className="gradient-text">Lab</span></span>
               </Link>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xs font-medium">The modular AI development kitchen for specialist systems.</p>
+              <p className="text-[11px] sm:text-sm text-muted-foreground max-w-xs font-medium">The modular AI development kitchen for specialist systems.</p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8 text-xs sm:text-sm w-full md:w-auto">
               <div>
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Product</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                <div className="font-bold font-display tracking-wide mb-2 sm:mb-3 text-primary/80 text-[11px] sm:text-sm">Product</div>
+                <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
                   <div><Link to="/templates" className="hover:text-primary transition-colors duration-300">Templates</Link></div>
                   <div><Link to="/pricing" className="hover:text-primary transition-colors duration-300">Pricing</Link></div>
                   <div><Link to="/marketplace" className="hover:text-primary transition-colors duration-300">Marketplace</Link></div>
                 </div>
               </div>
               <div>
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Resources</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
+                <div className="font-bold font-display tracking-wide mb-2 sm:mb-3 text-primary/80 text-[11px] sm:text-sm">Resources</div>
+                <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
                   <div><Link to="/white-paper" className="hover:text-primary transition-colors duration-300">White Paper</Link></div>
-                  <div><Link to="/self-host" className="hover:text-primary transition-colors duration-300">Self-Host Guide</Link></div>
+                  <div><Link to="/self-host" className="hover:text-primary transition-colors duration-300">Self-Host</Link></div>
                   <div><Link to="/deploy/phone" className="hover:text-primary transition-colors duration-300">Phone Deploy</Link></div>
                 </div>
               </div>
-              <div className="col-span-2 sm:col-span-1">
-                <div className="font-bold font-display tracking-wide mb-3 text-primary/80">Legal</div>
-                <div className="space-y-2 text-muted-foreground text-xs sm:text-sm font-medium">
-                  <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy Policy</Link></div>
-                  <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms of Service</Link></div>
+              <div>
+                <div className="font-bold font-display tracking-wide mb-2 sm:mb-3 text-primary/80 text-[11px] sm:text-sm">Legal</div>
+                <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
+                  <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link></div>
+                  <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link></div>
                   <div><a href="mailto:support@soupy.com" className="hover:text-primary transition-colors duration-300">Contact</a></div>
                 </div>
               </div>
             </div>
           </div>
-          <FFXDivider className="mb-6" />
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-muted-foreground font-medium">
+          <FFXDivider className="mb-4 sm:mb-6" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[10px] sm:text-sm text-muted-foreground font-medium">
             <span>© 2026 Soupy. All rights reserved.</span>
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6">
               <Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link>
               <Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link>
               <span className="text-muted-foreground/50 cursor-default">Status</span>
