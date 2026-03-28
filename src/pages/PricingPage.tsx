@@ -453,25 +453,25 @@ export default function PricingPage() {
 
           {/* ── Costs Tab ── */}
           <TabsContent value="costs">
-            <div className="glass rounded-xl p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <div className="glass rounded-xl p-3 sm:p-6">
+              <h3 className="font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
                 <Coins className="h-4 w-4 text-primary" /> Credits Per AI Run
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">Each AI model costs a different number of credits per run. Cheaper models = more runs.</p>
-              <div className="space-y-2">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">Each AI model costs a different number of credits per run.</p>
+              <div className="space-y-1.5 sm:space-y-2">
                 {MODEL_COSTS.map((m) => (
-                  <div key={m.model} className="flex items-center justify-between py-2 px-3 rounded-lg bg-background/50">
-                    <span className="text-sm">{m.model}</span>
+                  <div key={m.model} className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg bg-background/50">
+                    <span className="text-xs sm:text-sm">{m.model}</span>
                     <div className="flex items-center gap-1">
                       <Coins className="h-3 w-3 text-primary" />
-                      <span className="text-sm font-bold">{m.credits}</span>
-                      <span className="text-xs text-muted-foreground">credits</span>
+                      <span className="text-xs sm:text-sm font-bold">{m.credits}</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">cr</span>
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground mt-4">
-                💡 Tip: Use Gemini Flash Lite for simple tasks to stretch your credits 10× further than GPT-5.2.
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-3 sm:mt-4">
+                💡 Use Gemini Flash Lite for simple tasks to stretch your credits 10× further.
               </p>
             </div>
           </TabsContent>
