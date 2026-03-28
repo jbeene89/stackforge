@@ -129,7 +129,7 @@ const exploreItems = [
   { title: "Solvers", url: "/solvers", icon: Atom, tip: "Library of reusable problem-solving patterns" },
   { title: "Capture", url: "/capture", icon: Smartphone, tip: "Capture training data from your phone" },
   { title: "Testing Lab", url: "/lab", icon: FlaskConical, tip: "Benchmark and test modules in isolation" },
-  { title: "Experimental", url: "/experimental", icon: Flame, tip: "Bleeding-edge features and prototypes" },
+  
   { title: "Model Zoo", url: "/models", icon: Box, tip: "Browse and download pre-trained model checkpoints" },
   { title: "Signal Lab", url: "/signals", icon: Radio, soon: true, tip: "Real-time signal processing and analysis" },
   { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train models directly on edge hardware" },

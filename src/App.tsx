@@ -41,7 +41,7 @@ import RoboticsPage from "./pages/RoboticsPage";
 import ForgeAIPage from "./pages/ForgeAIPage";
 import EdgeTrainingPage from "./pages/EdgeTrainingPage";
 import ExportStudioPage from "./pages/ExportStudioPage";
-import ExperimentalPage from "./pages/ExperimentalPage";
+
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import MarketplacePage from "./pages/MarketplacePage";
@@ -114,7 +114,7 @@ const App = () => (
                 <Route path="/forge-ai" element={<ForgeAIPage />} />
                 <Route path="/edge-training" element={<TierProtectedRoute allowedTiers={["pro"]} requiredTier="Pro" featureName="Edge Training"><EdgeTrainingPage /></TierProtectedRoute>} />
                 <Route path="/export" element={<TierProtectedRoute allowedTiers={["builder", "pro"]} requiredTier="Builder" featureName="Export Studio"><ExportStudioPage /></TierProtectedRoute>} />
-                <Route path="/experimental" element={<ExperimentalPage />} />
+                
                 
                 <Route path="/white-paper" element={<WhitePaperPage />} />
                 <Route path="/capture" element={<CapturePage />} />
