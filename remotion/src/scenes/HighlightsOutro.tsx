@@ -72,7 +72,7 @@ export const HighlightsOutro: React.FC = () => {
           opacity: interpolate(frame, [40, 60], [0, 1], { extrapolateRight: "clamp" }),
           letterSpacing: 4,
         }}>
-          stackforge.lovable.app
+          soupylab.lovable.app
         </div>
       </div>
     </AbsoluteFill>

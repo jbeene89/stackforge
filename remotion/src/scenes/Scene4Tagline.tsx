@@ -88,7 +88,7 @@ export const Scene4Tagline: React.FC = () => {
           letterSpacing: "4px",
         }}
       >
-        stackforge.lovable.app
+        soupylab.lovable.app
       </div>
 
       {/* Bottom accent line */}

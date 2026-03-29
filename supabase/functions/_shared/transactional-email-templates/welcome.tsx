@@ -6,7 +6,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'SoupyLab'
-const SITE_URL = 'https://stackforge.lovable.app'
+const SITE_URL = 'https://soupylab.lovable.app'
 
 interface WelcomeProps {
   name?: string
