@@ -189,7 +189,7 @@ const simpleSections: NavSection[] = [
         desc: "Features we're building next",
         accent: "#8899BB",
         items: [
-          { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train on edge hardware", desc: "Train directly on devices" },
+          { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train on edge hardware", desc: "Train directly on devices", soon: true },
           { title: "Signal Lab", url: "/signals", icon: Radio, tip: "Real-time signal processing", desc: "Process live data streams", soon: true },
           { title: "Robotics", url: "/robotics", icon: Joystick, tip: "AI for robotic systems", desc: "Control robots with AI", soon: true },
           { title: "Game Engine", url: "/engine", icon: Gamepad2, tip: "AI-powered game logic", desc: "Smart NPCs and game AI", soon: true },
@@ -270,7 +270,7 @@ const advancedSections: NavSection[] = [
         { title: "Testing Lab", url: "/lab", icon: FlaskConical, tip: "Benchmark and test modules in isolation" },
         { title: "Model Zoo", url: "/models", icon: Box, tip: "Browse and download pre-trained model checkpoints" },
         { title: "Signal Lab", url: "/signals", icon: Radio, soon: true, tip: "Real-time signal processing and analysis" },
-        { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train models directly on edge hardware" },
+        { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, soon: true, tip: "Train models directly on edge hardware" },
         { title: "Robotics", url: "/robotics", icon: Joystick, soon: true, tip: "AI controllers for robotic systems" },
         { title: "Game Engine", url: "/engine", icon: Gamepad2, soon: true, tip: "AI-powered game logic and NPC behavior" },
         { title: "Device Console", url: "/console", icon: Smartphone, tip: "Monitor and debug on-device model performance" },
