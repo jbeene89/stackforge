@@ -77,7 +77,7 @@ export const HighlightsIntro: React.FC = () => {
           transform: `translateY(${subtitleY}px)`,
           letterSpacing: 2,
         }}>
-          Soupy Lab — StackForge
+          SoupyLab
         </div>
       </div>
     </AbsoluteFill>

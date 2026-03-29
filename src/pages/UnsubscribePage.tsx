@@ -78,7 +78,7 @@ const UnsubscribePage = () => {
               <MailX className="h-10 w-10 text-primary mx-auto" />
               <h1 className="text-xl font-bold text-foreground">Unsubscribe</h1>
               <p className="text-muted-foreground text-sm">
-                Click below to stop receiving app emails from StackForge.
+                Click below to stop receiving app emails from SoupyLab.
               </p>
               <Button onClick={handleUnsubscribe} disabled={submitting} className="mt-2">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}

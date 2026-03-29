@@ -276,7 +276,7 @@ const SceneOutput: React.FC = () => {
         color: COLORS.dimWhite, letterSpacing: "3px",
         opacity: interpolate(frame, [80, 100], [0, 0.7], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
       }}>
-        stackforge.lovable.app
+        soupylab.lovable.app
       </div>
     </AbsoluteFill>
   );
