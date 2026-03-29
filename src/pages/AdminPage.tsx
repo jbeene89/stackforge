@@ -546,6 +546,99 @@ export default function AdminPage() {
             )}
           </div>
         </TabsContent>
+
+        {/* Gift Credits */}
+        <TabsContent value="gift" className="flex-1 min-h-0 mt-0 overflow-auto">
+          <div className="max-w-lg space-y-5">
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Search User</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Type a display name..."
+                  value={giftSearch}
+                  onChange={(e) => { setGiftSearch(e.target.value); setSelectedUserId(null); }}
+                  className="pl-9 text-sm"
+                />
+              </div>
+              {searchingUsers && <p className="text-xs text-muted-foreground mt-1">Searching...</p>}
+              {searchedUsers && searchedUsers.length > 0 && !selectedUserId && (
+                <div className="mt-2 border border-border rounded-lg overflow-hidden">
+                  {searchedUsers.map((u: any) => (
+                    <button
+                      key={u.user_id}
+                      onClick={() => { setSelectedUserId(u.user_id); setGiftSearch(u.display_name || u.user_id); }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent/50 transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                    >
+                      <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                        {(u.display_name || "?")[0].toUpperCase()}
+                      </div>
+                      <span className="truncate">{u.display_name || u.user_id}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {selectedUserId && (
+                <Badge variant="secondary" className="mt-2 text-xs">
+                  ✓ Selected: {giftSearch}
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1.5 block">Credits Amount</Label>
+                <Select value={giftAmount} onValueChange={setGiftAmount}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="25">25 credits</SelectItem>
+                    <SelectItem value="50">50 credits</SelectItem>
+                    <SelectItem value="100">100 credits</SelectItem>
+                    <SelectItem value="250">250 credits</SelectItem>
+                    <SelectItem value="500">500 credits</SelectItem>
+                    <SelectItem value="1000">1,000 credits</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end pb-1">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="sendEmail"
+                    checked={giftSendEmail}
+                    onCheckedChange={(v) => setGiftSendEmail(v === true)}
+                  />
+                  <Label htmlFor="sendEmail" className="text-xs cursor-pointer">Send notification email</Label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Reason / Message</Label>
+              <Textarea
+                placeholder="e.g. Early adopter bonus — thanks for testing!"
+                value={giftReason}
+                onChange={(e) => setGiftReason(e.target.value)}
+                className="text-sm resize-none"
+                rows={3}
+              />
+            </div>
+
+            <Button
+              onClick={() => giftCreditsMutation.mutate()}
+              disabled={!selectedUserId || !giftAmount || giftCreditsMutation.isPending}
+              className="w-full gap-2"
+            >
+              {giftCreditsMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Gift className="h-4 w-4" />
+              )}
+              Gift {giftAmount} Credits
+            </Button>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
