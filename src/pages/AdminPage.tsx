@@ -13,13 +13,15 @@ import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
-  Megaphone, Plus, Trash2,
+  Megaphone, Plus, Trash2, Gift, Search, Send, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // ------- FEATURE FLAGS (local state, no DB table for these) -------
 const featureFlags = [
@@ -147,6 +149,11 @@ export default function AdminPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newPriority, setNewPriority] = useState("info");
+  const [giftSearch, setGiftSearch] = useState("");
+  const [giftAmount, setGiftAmount] = useState("100");
+  const [giftReason, setGiftReason] = useState("");
+  const [giftSendEmail, setGiftSendEmail] = useState(true);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const invokeAnnouncements = async (body: Record<string, unknown>) => {
@@ -196,6 +203,48 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-announcements"] });
       queryClient.invalidateQueries({ queryKey: ["announcements"] });
     },
+  });
+
+  // Gift credits: user search
+  const { data: searchedUsers, isLoading: searchingUsers } = useQuery({
+    queryKey: ["admin-user-search", giftSearch],
+    queryFn: async () => {
+      if (giftSearch.length < 2) return [];
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .or(`display_name.ilike.%${giftSearch}%`)
+        .limit(10);
+      return data || [];
+    },
+    enabled: giftSearch.length >= 2,
+  });
+
+  const giftCreditsMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedUserId) throw new Error("No user selected");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const { data, error } = await supabase.functions.invoke("gift-credits", {
+        body: {
+          targetUserId: selectedUserId,
+          amount: parseInt(giftAmount),
+          reason: giftReason || "Admin gift",
+          sendEmail: giftSendEmail,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Gifted ${giftAmount} credits to ${data.targetUser}!`);
+      setSelectedUserId(null);
+      setGiftSearch("");
+      setGiftAmount("100");
+      setGiftReason("");
+    },
+    onError: (e) => toast.error(e.message),
   });
 
   const { user } = useAuth();
@@ -248,6 +297,7 @@ export default function AdminPage() {
           <TabsTrigger value="social" className="text-xs gap-1.5"><Share2 className="h-3 w-3" /> Quick Posts</TabsTrigger>
           <TabsTrigger value="flags" className="text-xs gap-1.5"><Settings className="h-3 w-3" /> Feature Flags</TabsTrigger>
           <TabsTrigger value="messages" className="text-xs gap-1.5"><Megaphone className="h-3 w-3" /> Messages</TabsTrigger>
+          <TabsTrigger value="gift" className="text-xs gap-1.5"><Gift className="h-3 w-3" /> Gift Credits</TabsTrigger>
           <TabsTrigger value="recent" className="text-xs gap-1.5"><Activity className="h-3 w-3" /> Recent Runs</TabsTrigger>
         </TabsList>
 
@@ -494,6 +544,99 @@ export default function AdminPage() {
                 No messages yet. Post one above.
               </div>
             )}
+          </div>
+        </TabsContent>
+
+        {/* Gift Credits */}
+        <TabsContent value="gift" className="flex-1 min-h-0 mt-0 overflow-auto">
+          <div className="max-w-lg space-y-5">
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Search User</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Type a display name..."
+                  value={giftSearch}
+                  onChange={(e) => { setGiftSearch(e.target.value); setSelectedUserId(null); }}
+                  className="pl-9 text-sm"
+                />
+              </div>
+              {searchingUsers && <p className="text-xs text-muted-foreground mt-1">Searching...</p>}
+              {searchedUsers && searchedUsers.length > 0 && !selectedUserId && (
+                <div className="mt-2 border border-border rounded-lg overflow-hidden">
+                  {searchedUsers.map((u: any) => (
+                    <button
+                      key={u.user_id}
+                      onClick={() => { setSelectedUserId(u.user_id); setGiftSearch(u.display_name || u.user_id); }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent/50 transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                    >
+                      <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                        {(u.display_name || "?")[0].toUpperCase()}
+                      </div>
+                      <span className="truncate">{u.display_name || u.user_id}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {selectedUserId && (
+                <Badge variant="secondary" className="mt-2 text-xs">
+                  ✓ Selected: {giftSearch}
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1.5 block">Credits Amount</Label>
+                <Select value={giftAmount} onValueChange={setGiftAmount}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="25">25 credits</SelectItem>
+                    <SelectItem value="50">50 credits</SelectItem>
+                    <SelectItem value="100">100 credits</SelectItem>
+                    <SelectItem value="250">250 credits</SelectItem>
+                    <SelectItem value="500">500 credits</SelectItem>
+                    <SelectItem value="1000">1,000 credits</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end pb-1">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="sendEmail"
+                    checked={giftSendEmail}
+                    onCheckedChange={(v) => setGiftSendEmail(v === true)}
+                  />
+                  <Label htmlFor="sendEmail" className="text-xs cursor-pointer">Send notification email</Label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Reason / Message</Label>
+              <Textarea
+                placeholder="e.g. Early adopter bonus — thanks for testing!"
+                value={giftReason}
+                onChange={(e) => setGiftReason(e.target.value)}
+                className="text-sm resize-none"
+                rows={3}
+              />
+            </div>
+
+            <Button
+              onClick={() => giftCreditsMutation.mutate()}
+              disabled={!selectedUserId || !giftAmount || giftCreditsMutation.isPending}
+              className="w-full gap-2"
+            >
+              {giftCreditsMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Gift className="h-4 w-4" />
+              )}
+              Gift {giftAmount} Credits
+            </Button>
           </div>
         </TabsContent>
       </Tabs>
