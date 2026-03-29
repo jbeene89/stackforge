@@ -768,6 +768,7 @@ export default function DeployPipelinePage() {
   const [downloading, setDownloading] = useState(false);
   const [selectedGPU, setSelectedGPU] = useState<GPUProfile>(GPU_PROFILES[0]);
   const [selectedOllamaModel, setSelectedOllamaModel] = useState<OllamaModel | null>(null);
+  const [deployPlatform, setDeployPlatform] = useState<"ios" | "android">("ios");
 
   const isPopcornOnly = selectedDatasetId === POPCORN_ONLY_ID;
   const selectedDataset = isPopcornOnly ? null : datasets?.find((d) => d.id === selectedDatasetId);
