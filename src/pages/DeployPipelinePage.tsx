@@ -768,6 +768,7 @@ export default function DeployPipelinePage() {
   const [downloading, setDownloading] = useState(false);
   const [selectedGPU, setSelectedGPU] = useState<GPUProfile>(GPU_PROFILES[0]);
   const [selectedOllamaModel, setSelectedOllamaModel] = useState<OllamaModel | null>(null);
+  const [deployPlatform, setDeployPlatform] = useState<"ios" | "android">("ios");
 
   const isPopcornOnly = selectedDatasetId === POPCORN_ONLY_ID;
   const selectedDataset = isPopcornOnly ? null : datasets?.find((d) => d.id === selectedDatasetId);
@@ -1282,7 +1283,7 @@ export default function DeployPipelinePage() {
           onToggleComplete={() => handleToggleStep("deploy")}
         >
           <div className="space-y-4 pt-2">
-            <Tabs defaultValue="ios">
+            <Tabs defaultValue="ios" onValueChange={(v) => setDeployPlatform(v as "ios" | "android")}>
               <TabsList className="h-8">
                 <TabsTrigger value="ios" className="text-xs h-6">
                   iOS
@@ -1312,11 +1313,9 @@ export default function DeployPipelinePage() {
                     </Badge>
                     <div>
                       <p className="text-xs font-semibold">MLC Chat</p>
-                      <ol className="text-[11px] text-muted-foreground space-y-1 mt-1 list-decimal list-inside">
-                        <li>Install <strong>MLC Chat</strong> from the App Store</li>
-                        <li>Transfer .gguf via Files app</li>
-                        <li>Add as custom model in MLC settings</li>
-                      </ol>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        MLC Chat for iOS must be built from source via Xcode.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1385,12 +1384,25 @@ export default function DeployPipelinePage() {
                 <div>
                   <strong>Storage:</strong> 1-2GB free per model
                 </div>
-                <div>
-                  <strong>iOS:</strong> iPhone 12+ (A14 chip)
-                </div>
-                <div>
-                  <strong>Android:</strong> Snapdragon 8 Gen 1+
-                </div>
+                {deployPlatform === "ios" ? (
+                  <>
+                    <div>
+                      <strong>Device:</strong> iPhone 12+ (A14 chip)
+                    </div>
+                    <div>
+                      <strong>OS:</strong> iOS 16+
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <strong>Chip:</strong> Snapdragon 8 Gen 1+
+                    </div>
+                    <div>
+                      <strong>OS:</strong> Android 12+
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

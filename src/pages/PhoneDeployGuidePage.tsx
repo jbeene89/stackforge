@@ -342,18 +342,25 @@ export default function PhoneDeployGuidePage() {
           <AppCard
             name="MLC Chat"
             icon="💬"
-            description="Open-source on-device chat app by the MLC team. Lightweight with broad model support."
+            description="Open-source on-device chat app by the MLC team. Build from source via GitHub for iOS."
             platform="ios"
-            storeUrl="https://apps.apple.com/app/mlc-chat/id6448482004"
           >
             <div className="space-y-3">
               <div className="flex items-start gap-2.5">
                 <StepNumber n={1} />
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold">Install MLC Chat</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Download from the App Store. Open-source and free.
-                  </p>
+                   <p className="text-xs font-semibold">Get MLC Chat</p>
+                   <p className="text-[11px] text-muted-foreground">
+                     MLC Chat for iOS must be built from source. Clone the repo and build with Xcode.
+                   </p>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     className="h-7 text-[10px] gap-1"
+                     onClick={() => window.open("https://github.com/nicklimmm/mlc-llm-ios", "_blank")}
+                   >
+                     <ExternalLink className="h-3 w-3" /> GitHub
+                   </Button>
                 </div>
               </div>
 
