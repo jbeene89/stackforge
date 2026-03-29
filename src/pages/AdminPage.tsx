@@ -149,6 +149,11 @@ export default function AdminPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newPriority, setNewPriority] = useState("info");
+  const [giftSearch, setGiftSearch] = useState("");
+  const [giftAmount, setGiftAmount] = useState("100");
+  const [giftReason, setGiftReason] = useState("");
+  const [giftSendEmail, setGiftSendEmail] = useState(true);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const invokeAnnouncements = async (body: Record<string, unknown>) => {
