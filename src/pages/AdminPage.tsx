@@ -13,13 +13,15 @@ import {
   Shield, Settings, BarChart3, Activity,
   Zap, Clock, Globe, Cpu, AlertTriangle,
   Brain, Layers, Share2, Copy, ExternalLink,
-  Megaphone, Plus, Trash2,
+  Megaphone, Plus, Trash2, Gift, Search, Send, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // ------- FEATURE FLAGS (local state, no DB table for these) -------
 const featureFlags = [
