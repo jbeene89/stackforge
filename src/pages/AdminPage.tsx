@@ -205,6 +205,48 @@ export default function AdminPage() {
     },
   });
 
+  // Gift credits: user search
+  const { data: searchedUsers, isLoading: searchingUsers } = useQuery({
+    queryKey: ["admin-user-search", giftSearch],
+    queryFn: async () => {
+      if (giftSearch.length < 2) return [];
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .or(`display_name.ilike.%${giftSearch}%`)
+        .limit(10);
+      return data || [];
+    },
+    enabled: giftSearch.length >= 2,
+  });
+
+  const giftCreditsMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedUserId) throw new Error("No user selected");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const { data, error } = await supabase.functions.invoke("gift-credits", {
+        body: {
+          targetUserId: selectedUserId,
+          amount: parseInt(giftAmount),
+          reason: giftReason || "Admin gift",
+          sendEmail: giftSendEmail,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Gifted ${giftAmount} credits to ${data.targetUser}!`);
+      setSelectedUserId(null);
+      setGiftSearch("");
+      setGiftAmount("100");
+      setGiftReason("");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const { data: projects } = useProjects();
