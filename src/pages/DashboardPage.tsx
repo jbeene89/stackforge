@@ -68,11 +68,11 @@ const TYPE_ACCENTS: Record<ProjectType, string> = {
 };
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  draft: { bg: "rgba(136,153,187,0.1)", color: "#B0C4DE", label: "DRAFT" },
+  draft: { bg: "rgba(176,196,222,0.1)", color: "#B0C4DE", label: "DRAFT" },
   building: { bg: "rgba(255,107,53,0.1)", color: "#FF6B35", label: "BUILDING" },
   testing: { bg: "rgba(0,229,255,0.1)", color: "#00E5FF", label: "TESTING" },
   deployed: { bg: "rgba(127,255,0,0.1)", color: "#7FFF00", label: "DEPLOYED" },
-  archived: { bg: "rgba(136,153,187,0.08)", color: "#B0C4DE", label: "ARCHIVED" },
+  archived: { bg: "rgba(176,196,222,0.08)", color: "#B0C4DE", label: "ARCHIVED" },
 };
 
 const FILTERS = ["ALL", "STACK", "MODULE", "WEB", "ANDROID"];
