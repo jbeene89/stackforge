@@ -493,6 +493,58 @@ export default function SelfHostPage() {
         );
       }
 
+      // ── Bundle dataset JSONL if a dataset is selected ──────────
+      if (selectedSource.startsWith("dataset:")) {
+        const datasetId = selectedSource.split(":")[1];
+        const dataset = datasets?.find((d) => d.id === datasetId);
+        const { data: samples } = await supabase
+          .from("dataset_samples")
+          .select("*")
+          .eq("dataset_id", datasetId)
+          .eq("status", "approved");
+
+        if (samples && samples.length > 0) {
+          const lines = samples.map((s) => {
+            let assistantContent = "";
+            if (s.builder || s.red_team || s.systems || s.frame_breaker || s.empath || s.synthesis) {
+              assistantContent = [
+                s.builder ? `<BUILDER>${s.builder}</BUILDER>` : "",
+                s.red_team ? `<RED_TEAM>${s.red_team}</RED_TEAM>` : "",
+                s.systems ? `<SYSTEMS>${s.systems}</SYSTEMS>` : "",
+                s.frame_breaker ? `<FRAME_BREAKER>${s.frame_breaker}</FRAME_BREAKER>` : "",
+                s.empath ? `<EMPATH>${s.empath}</EMPATH>` : "",
+                s.synthesis ? `<SYNTHESIS>${s.synthesis}</SYNTHESIS>` : "",
+              ].filter(Boolean).join("\n\n");
+            } else {
+              assistantContent = s.output;
+            }
+            return JSON.stringify({
+              messages: [
+                { role: "user", content: s.input },
+                { role: "assistant", content: assistantContent },
+              ],
+            });
+          });
+
+          const datasetSlug = (dataset?.name || "dataset").toLowerCase().replace(/\s+/g, "-");
+          folder.file(`data/${datasetSlug}.jsonl`, lines.join("\n"));
+          folder.file(`data/README.md`,
+            `# Bundled Dataset: ${dataset?.name || "Unknown"}\n\n` +
+            `- **Samples**: ${samples.length} approved pairs\n` +
+            `- **Domain**: ${dataset?.domain || "general"}\n` +
+            `- **Format**: JSONL (messages format)\n\n` +
+            `## Usage\n\n` +
+            `Use this file directly with your training script:\n\n` +
+            `\`\`\`bash\n` +
+            `python3 train.py --data data/${datasetSlug}.jsonl --model ${config.ollamaModel}\n` +
+            `\`\`\`\n`
+          );
+          toast.info(`Bundled ${samples.length} approved samples from "${dataset?.name}"`);
+        } else {
+          toast.warning("No approved samples found in this dataset — package generated without data.");
+        }
+      }
+
       const blob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
