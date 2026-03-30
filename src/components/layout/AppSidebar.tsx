@@ -133,6 +133,7 @@ const simpleSections: NavSection[] = [
           { title: "Swipe Review", url: "/review", icon: SwatchBook, tip: "Approve or reject training data", desc: "Swipe right on good data" },
           { title: "Training Jobs", url: "/training", icon: Activity, tip: "Monitor training progress", desc: "Watch your model learn" },
           { title: "Capture Data", url: "/capture", icon: Smartphone, tip: "Capture training data from your phone", desc: "Use your phone to gather data" },
+          { title: "Harvest Inbox", url: "/harvest", icon: Zap, tip: "Import images from the Harvester Chrome extension", desc: "Clip images from the web" },
         ],
       },
       {
