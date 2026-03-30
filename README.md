@@ -100,6 +100,16 @@ Export to multiple platforms with auto-generated, domain-specific code:
 - **Device Console** — Real-time device monitoring, logs, and diagnostics
 - **Self-Host Package Generator** — Bundle entire AI infrastructure locally with Docker Compose, Ollama, and zero cloud dependencies
 
+### 🌾 SoupyLab Harvester (Chrome Extension)
+Privacy-first browser extension for collecting training data while browsing the web:
+- **Right-click capture** — Save any image with alt text and page context via context menu
+- **Harvest Mode** — Toggle overlay to click-capture multiple images in sequence
+- **100% local** — All data stored in `chrome.storage.local`. Zero network permissions, zero tracking
+- **JSON export** — One-click export of all captures as a portable JSON file
+- **Harvest Inbox** (`/harvest`) — Upload the JSON export into SoupyLab, review captures, and import into datasets
+- **Optional Thinktank** — Toggle 5-perspective analysis (Builder, Empath, Systems, Red Team, Frame Breaker) during import
+- **Downloadable** — Extension ZIP available at `/soupylab-harvester.zip`
+
 ### 📄 White Paper Engine
 Live-streaming academic documentation engine for "Curiosity-Driven Perspective Training" — the methodology behind SoupyLab's multi-perspective AI approach.
 
@@ -182,6 +192,7 @@ Live-streaming academic documentation engine for "Curiosity-Driven Perspective T
 | `/inference` | Inference Playground | Free |
 | `/console` | Device Console | Free |
 | `/self-host` | Self-Host Generator | Free |
+| `/harvest` | Harvest Inbox | Free |
 | `/image-forge` | Image Forge | Free |
 | `/training` | Training Progress | Free |
 | `/runs` | Runs | Free |
