@@ -320,10 +320,10 @@ export default function DashboardPage() {
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.background = "#00E5FF";
-            (e.currentTarget as HTMLElement).style.color = "#1a1f2e";
+            (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "#1a1f2e";
+            (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary-foreground))";
             (e.currentTarget as HTMLElement).style.color = "hsl(var(--foreground))";
           }}
         >
@@ -370,7 +370,7 @@ export default function DashboardPage() {
           disabled={!prompt.trim()}
           style={{
             background: prompt.trim() ? "#00E5FF" : "transparent",
-            color: prompt.trim() ? "#1a1f2e" : "#B0C4DE",
+            color: prompt.trim() ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
             border: "none",
             padding: "14px 20px",
             cursor: prompt.trim() ? "pointer" : "default",
@@ -422,7 +422,7 @@ export default function DashboardPage() {
                 letterSpacing: "0.2em",
                 padding: "7px 14px",
                 background: filter === f ? "hsl(var(--foreground))" : "transparent",
-                color: filter === f ? "hsl(var(--background))" : "#B0C4DE",
+                color: filter === f ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
                 border: "none",
                 cursor: "pointer",
                 transition: "all 0.15s",
