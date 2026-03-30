@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import {
   Send, FolderTree, Eye, Database, Settings, Activity,
-  Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2
+  Smartphone, Trash2, Save, CheckCircle2, MessageSquare, Loader2,
+  Brain, Server, Rocket
 } from "lucide-react";
 import DiscussionThread from "@/components/DiscussionThread";
 import ChatHistory from "@/components/ChatHistory";
@@ -166,8 +167,24 @@ export default function ProjectPage() {
           <Badge variant="secondary" className="text-[10px]">{project.type}</Badge>
           <Badge variant="outline" className="text-[10px]">{project.status}</Badge>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-muted-foreground">v{project.version_count}</span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1 text-xs border-[hsl(var(--forge-cyan))]/40 text-[hsl(var(--forge-cyan))] hover:bg-[hsl(var(--forge-cyan))]/10"
+            onClick={() => navigate(`/slm-lab?step=1&project=${project.id}&name=${encodeURIComponent(project.name)}`)}
+          >
+            <Brain className="h-3.5 w-3.5" /> Train in SLM Lab
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1 text-xs border-[hsl(var(--forge-emerald))]/40 text-[hsl(var(--forge-emerald))] hover:bg-[hsl(var(--forge-emerald))]/10"
+            onClick={() => navigate(`/self-host?project=${project.id}&name=${encodeURIComponent(project.name)}`)}
+          >
+            <Server className="h-3.5 w-3.5" /> Self-Host
+          </Button>
           <PublishToMarketplace
             type="project"
             sourceId={project.id}
