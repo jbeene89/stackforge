@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Upload, Trash2, Image, ExternalLink, Download, Zap, Brain } from "lucide-react";
-import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useDatasets } from "@/hooks/useTrainingData";
 import { SEOHead } from "@/components/SEOHead";
 
 interface HarvestCapture {
@@ -52,7 +52,7 @@ const HarvestInboxPage = () => {
   const [targetDataset, setTargetDataset] = useState<string>("");
   const [fileLoaded, setFileLoaded] = useState(false);
 
-  const { data: datasets } = useSupabaseData("training_datasets");
+  const { data: datasets } = useDatasets();
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
