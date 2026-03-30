@@ -6,6 +6,7 @@ import {
   ScrollText, Flame, Rocket, Image, TabletSmartphone, LogOut, Store,
   Smartphone, SwatchBook, Terminal, Server, ChevronRight, ChevronDown,
   Zap, Hammer, Send, Compass, Cog, ToggleLeft, ToggleRight,
+  Database, Sparkles,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -130,6 +131,8 @@ const simpleSections: NavSection[] = [
         accent: "#00E5FF",
         items: [
           { title: "SLM Lab", url: "/slm-lab", icon: Brain, tip: "Train small language models", desc: "The main training workshop", hero: true, accent: "#00E5FF" },
+          { title: "⚡ Create Dataset", url: "/slm-lab?step=1", icon: Database, tip: "Jump straight to dataset creation", desc: "Start building training data now", accent: "#7FFF00" },
+          { title: "🍿 Popcorn Injection", url: "/slm-lab?tab=popcorn", icon: Sparkles, tip: "Generate training data from free-association bursts", desc: "Expand your model's mind", accent: "#FF6B35" },
           { title: "Swipe Review", url: "/review", icon: SwatchBook, tip: "Approve or reject training data", desc: "Swipe right on good data" },
           { title: "Training Jobs", url: "/training", icon: Activity, tip: "Monitor training progress", desc: "Watch your model learn" },
           { title: "Capture Data", url: "/capture", icon: Smartphone, tip: "Capture training data from your phone", desc: "Use your phone to gather data" },
