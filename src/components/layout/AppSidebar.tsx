@@ -182,13 +182,13 @@ const simpleSections: NavSection[] = [
   },
   {
     label: "COMING SOON",
-    accent: "#B0C4DE",
+    accent: "hsl(var(--muted-foreground))",
     submenus: [
       {
         title: "On the Roadmap",
         icon: Compass,
         desc: "Features we're building next",
-        accent: "#B0C4DE",
+        accent: "hsl(var(--muted-foreground))",
         items: [
           { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train on edge hardware", desc: "Train directly on devices", soon: true },
           { title: "Signal Lab", url: "/signals", icon: Radio, tip: "Real-time signal processing", desc: "Process live data streams", soon: true },
@@ -394,8 +394,8 @@ export function AppSidebar() {
       <Collapsible key={submenu.title} defaultOpen={active} className="group/submenu">
         <CollapsibleTrigger className={cn(
           "flex items-center gap-2.5 w-full px-3 py-2 rounded transition-colors",
-          "hover:bg-white/5",
-          active && "bg-white/5"
+          "hover:bg-muted/50",
+          active && "bg-muted/50"
         )}>
           <submenu.icon style={{ width: 14, height: 14, flexShrink: 0, color: submenu.accent || accent }} />
           {!collapsed && (
@@ -411,7 +411,7 @@ export function AppSidebar() {
           )}
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <SidebarMenu className="ml-3 border-l border-white/5 pl-2 mt-1">
+          <SidebarMenu className="ml-3 border-l border-border pl-2 mt-1">
             {submenu.items.map((item) => renderNavItem(item, accent))}
           </SidebarMenu>
         </CollapsibleContent>
@@ -457,7 +457,7 @@ export function AppSidebar() {
         {!collapsed && (
           <button
             onClick={() => setSimpleMode(!simpleMode)}
-            className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded transition-colors hover:bg-white/5"
+            className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded transition-colors hover:bg-muted/50"
             style={{ fontSize: 9, letterSpacing: "0.15em", color: "hsl(var(--muted-foreground))" }}
           >
             {simpleMode ? (
