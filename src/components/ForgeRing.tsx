@@ -536,7 +536,7 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
             style={{
               "--glow": station.glow,
               "--glow-fade": station.glowFade,
-              background: "#080A12",
+              background: "hsl(var(--card))",
               borderColor: `${station.accent}20`,
             } as React.CSSProperties}>
 

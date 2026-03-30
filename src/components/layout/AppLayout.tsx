@@ -122,7 +122,7 @@ export function AppLayout() {
               <DropdownMenuContent
                 align="end"
                 className="w-52"
-                style={{ background: "#0A0C14", border: "1px solid rgba(0,229,255,0.12)", borderRadius: 0 }}
+                style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 0 }}
               >
                 <div style={{ padding: "12px 14px", borderBottom: "1px solid rgba(0,229,255,0.08)" }}>
                   <p
