@@ -614,6 +614,66 @@ export default function SelfHostPage() {
                   />
                 </div>
               </div>
+
+              {/* Project / Dataset Picker */}
+              <Separator />
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Bundle Your AI (Project or Dataset)
+                </label>
+                <p className="text-[10px] text-muted-foreground">
+                  Include one of your projects or trained datasets in the self-host package instead of a generic setup.
+                </p>
+                <Select
+                  value={selectedSource}
+                  onValueChange={(v) => {
+                    setSelectedSource(v);
+                    // Auto-set project name from selection
+                    if (v !== "none") {
+                      const [type, id] = v.split(":");
+                      if (type === "project") {
+                        const proj = projects?.find((p) => p.id === id);
+                        if (proj) setConfig((c) => ({ ...c, projectName: proj.name.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") }));
+                      } else if (type === "dataset") {
+                        const ds = datasets?.find((d) => d.id === id);
+                        if (ds) setConfig((c) => ({ ...c, projectName: ds.name.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") }));
+                      }
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="None — generic package" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none" className="text-xs">None — generic package</SelectItem>
+                    {(projects?.length ?? 0) > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Projects</div>
+                        {projects?.map((p) => (
+                          <SelectItem key={`project:${p.id}`} value={`project:${p.id}`} className="text-xs">
+                            📁 {p.name} <span className="text-muted-foreground ml-1">({p.type})</span>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {(datasets?.length ?? 0) > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Datasets</div>
+                        {datasets?.map((d) => (
+                          <SelectItem key={`dataset:${d.id}`} value={`dataset:${d.id}`} className="text-xs">
+                            🧠 {d.name} <span className="text-muted-foreground ml-1">({d.sample_count} samples)</span>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+                {selectedSource !== "none" && (
+                  <p className="text-[10px] text-[hsl(var(--forge-emerald))]">
+                    ✓ Your {selectedSource.startsWith("project") ? "project" : "dataset"} config will be bundled into the package
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
 
