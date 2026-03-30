@@ -12,7 +12,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
 
     .fr-root {
       font-family: 'Chakra Petch', sans-serif;
-      background: #050810;
+      background: #1a1f2e;
       color: #FAFCFF;
       position: fixed;
       inset: 0;
@@ -216,7 +216,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
       clip-path: polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
       display: flex; align-items: center; gap: 10px;
       transition: all 0.2s; width: 100%; justify-content: center;
-      text-decoration: none; color: #050810;
+      text-decoration: none; color: #1a1f2e;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -613,7 +613,7 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}>
                 <button className="fr-cta"
-                  style={{ background: station.accent, color: "#050810" }}
+                  style={{ background: station.accent, color: "#1a1f2e" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1.1)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1)"; }}>
                   {station.emoji} {cta}
@@ -879,7 +879,7 @@ export function ForgeRing() {
       }}>
         {/* Hex logo */}
         <svg width={isMobile ? 20 : 24} height={isMobile ? 20 : 24} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-          <polygon points="12,1 23,6.5 23,17.5 12,23 1,17.5 1,6.5" fill="#050810" stroke={station.accent} strokeWidth={1.5} />
+          <polygon points="12,1 23,6.5 23,17.5 12,23 1,17.5 1,6.5" fill="#1a1f2e" stroke={station.accent} strokeWidth={1.5} />
           <polygon points="12,7 17,9.5 17,14.5 12,17 7,14.5 7,9.5" fill={station.accent} opacity={0.8} />
         </svg>
         <span style={{

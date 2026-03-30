@@ -38,7 +38,7 @@ const SidebarFonts = () => (
 function HexMark({ size = 28, accent = "#00E5FF" }: { size?: number; accent?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none" style={{ flexShrink: 0 }}>
-      <polygon points="14,1 27,7.5 27,20.5 14,27 1,20.5 1,7.5" fill="#050810" />
+      <polygon points="14,1 27,7.5 27,20.5 14,27 1,20.5 1,7.5" fill="#1a1f2e" />
       <polygon points="14,8 20,11.5 20,16.5 14,20 8,16.5 8,11.5" fill={accent} />
     </svg>
   );
