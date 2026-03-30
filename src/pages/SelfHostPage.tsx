@@ -1,5 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
+import { useDatasets } from "@/hooks/useTrainingData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useProjects } from "@/hooks/useSupabaseData";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
@@ -338,6 +341,11 @@ function generateEnvFile(config: PackageConfig): string {
 
 // ─── Main Page ──────────────────────────────────────────────
 export default function SelfHostPage() {
+  const [searchParams] = useSearchParams();
+  const { data: projects } = useProjects();
+  const { data: datasets } = useDatasets();
+  const [selectedSource, setSelectedSource] = useState<string>("none");
+
   const [config, setConfig] = useState<PackageConfig>({
     projectName: "my-ai-factory",
     hostPort: 3000,
@@ -349,6 +357,16 @@ export default function SelfHostPage() {
   });
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+
+  // Auto-select project from URL params
+  useEffect(() => {
+    const projectId = searchParams.get("project");
+    const projectName = searchParams.get("name");
+    if (projectId && projectName) {
+      setSelectedSource(`project:${projectId}`);
+      setConfig((c) => ({ ...c, projectName: projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") }));
+    }
+  }, [searchParams]);
 
   const toggleComponent = (id: string) => {
     const comp = COMPONENTS.find((c) => c.id === id);
@@ -595,6 +613,66 @@ export default function SelfHostPage() {
                     onCheckedChange={(v) => setConfig((c) => ({ ...c, gpuEnabled: v }))}
                   />
                 </div>
+              </div>
+
+              {/* Project / Dataset Picker */}
+              <Separator />
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Bundle Your AI (Project or Dataset)
+                </label>
+                <p className="text-[10px] text-muted-foreground">
+                  Include one of your projects or trained datasets in the self-host package instead of a generic setup.
+                </p>
+                <Select
+                  value={selectedSource}
+                  onValueChange={(v) => {
+                    setSelectedSource(v);
+                    // Auto-set project name from selection
+                    if (v !== "none") {
+                      const [type, id] = v.split(":");
+                      if (type === "project") {
+                        const proj = projects?.find((p) => p.id === id);
+                        if (proj) setConfig((c) => ({ ...c, projectName: proj.name.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") }));
+                      } else if (type === "dataset") {
+                        const ds = datasets?.find((d) => d.id === id);
+                        if (ds) setConfig((c) => ({ ...c, projectName: ds.name.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") }));
+                      }
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="None — generic package" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none" className="text-xs">None — generic package</SelectItem>
+                    {(projects?.length ?? 0) > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Projects</div>
+                        {projects?.map((p) => (
+                          <SelectItem key={`project:${p.id}`} value={`project:${p.id}`} className="text-xs">
+                            📁 {p.name} <span className="text-muted-foreground ml-1">({p.type})</span>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {(datasets?.length ?? 0) > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Datasets</div>
+                        {datasets?.map((d) => (
+                          <SelectItem key={`dataset:${d.id}`} value={`dataset:${d.id}`} className="text-xs">
+                            🧠 {d.name} <span className="text-muted-foreground ml-1">({d.sample_count} samples)</span>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+                {selectedSource !== "none" && (
+                  <p className="text-[10px] text-[hsl(var(--forge-emerald))]">
+                    ✓ Your {selectedSource.startsWith("project") ? "project" : "dataset"} config will be bundled into the package
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
