@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
 import { useDatasets } from "@/hooks/useTrainingData";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { IndependenceScorecard } from "@/components/IndependenceScorecard";
 import { Button } from "@/components/ui/button";
