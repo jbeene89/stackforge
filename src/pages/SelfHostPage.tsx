@@ -358,6 +358,34 @@ export default function SelfHostPage() {
   });
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [datasetPreview, setDatasetPreview] = useState<{ count: number; rows: Array<{ input: string; output: string }> } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+
+  // Fetch dataset preview when a dataset is selected
+  useEffect(() => {
+    if (!selectedSource.startsWith("dataset:")) {
+      setDatasetPreview(null);
+      return;
+    }
+    const datasetId = selectedSource.split(":")[1];
+    setLoadingPreview(true);
+    (async () => {
+      const { count } = await supabase
+        .from("dataset_samples")
+        .select("*", { count: "exact", head: true })
+        .eq("dataset_id", datasetId)
+        .eq("status", "approved");
+      const { data: rows } = await supabase
+        .from("dataset_samples")
+        .select("input, output")
+        .eq("dataset_id", datasetId)
+        .eq("status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      setDatasetPreview({ count: count ?? 0, rows: rows ?? [] });
+      setLoadingPreview(false);
+    })();
+  }, [selectedSource]);
 
   // Auto-select project from URL params
   useEffect(() => {
@@ -915,6 +943,44 @@ export default function SelfHostPage() {
                   )}
                 </div>
               </div>
+
+              {/* Dataset preview */}
+              {selectedSource.startsWith("dataset:") && (
+                <>
+                  <Separator />
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Database className="h-3 w-3" /> Bundled Dataset
+                    </p>
+                    {loadingPreview ? (
+                      <p className="text-[10px] text-muted-foreground animate-pulse">Loading preview…</p>
+                    ) : datasetPreview ? (
+                      <>
+                        <p className="text-xs font-mono text-foreground">
+                          {datasetPreview.count} <span className="text-muted-foreground font-sans">approved samples</span>
+                        </p>
+                        {datasetPreview.rows.length > 0 && (
+                          <div className="space-y-1.5 mt-1">
+                            {datasetPreview.rows.map((row, i) => (
+                              <div key={i} className="rounded-md bg-secondary/40 p-1.5 text-[9px] space-y-0.5 overflow-hidden">
+                                <p className="text-muted-foreground truncate">
+                                  <span className="font-semibold text-foreground/70">Q:</span> {row.input.slice(0, 80)}{row.input.length > 80 ? "…" : ""}
+                                </p>
+                                <p className="text-muted-foreground truncate">
+                                  <span className="font-semibold text-foreground/70">A:</span> {row.output.slice(0, 80)}{row.output.length > 80 ? "…" : ""}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {datasetPreview.count === 0 && (
+                          <p className="text-[9px] text-[hsl(var(--forge-amber))]">No approved samples — approve some first to include them.</p>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                </>
+              )}
 
               <Separator />
 
