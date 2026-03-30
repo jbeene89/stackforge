@@ -64,6 +64,7 @@ const TrainingProgressPage = lazy(() => import("./pages/TrainingProgressPage"));
 const ImageForgePage = lazy(() => import("./pages/ImageForgePage"));
 const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
+const HarvestInboxPage = lazy(() => import("./pages/HarvestInboxPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -132,6 +133,7 @@ const App = () => (
                   <Route path="/console" element={<DeviceConsolePage />} />
                   <Route path="/self-host" element={<SelfHostPage />} />
                   <Route path="/image-forge" element={<ImageForgePage />} />
+                  <Route path="/harvest" element={<HarvestInboxPage />} />
                   <Route path="/training" element={<TrainingProgressPage />} />
                   <Route path="/runs" element={<RunsPage />} />
                   <Route path="/admin" element={<AdminPage />} />
