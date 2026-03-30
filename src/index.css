@@ -51,17 +51,17 @@
   .dark {
     /* ── Bold Editorial: Dark (deep space) ── */
     --background: 220 30% 7%;
-    --foreground: 210 20% 85%;
+    --foreground: 210 20% 92%;
     --card: 220 28% 10%;
-    --card-foreground: 210 20% 85%;
+    --card-foreground: 210 20% 92%;
     --popover: 220 28% 10%;
-    --popover-foreground: 210 20% 85%;
+    --popover-foreground: 210 20% 92%;
     --primary: 185 100% 50%;
     --primary-foreground: 220 30% 6%;
     --secondary: 220 22% 14%;
     --secondary-foreground: 210 20% 85%;
     --muted: 220 22% 14%;
-    --muted-foreground: 210 10% 48%;
+    --muted-foreground: 210 12% 62%;
     --accent: 25 90% 55%;
     --accent-foreground: 220 30% 6%;
     --destructive: 0 62% 45%;
