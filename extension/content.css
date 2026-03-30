@@ -1,0 +1,50 @@
+/* SoupyLab Harvester — Content Script Styles */
+
+.soupylab-harvest-active img {
+  cursor: crosshair !important;
+}
+
+.soupylab-harvest-overlay {
+  position: absolute;
+  border: 3px solid #00D4BE;
+  border-radius: 8px;
+  background: rgba(0, 212, 190, 0.1);
+  pointer-events: none;
+  z-index: 999999;
+  transition: all 0.15s ease;
+}
+
+.soupylab-harvest-label {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00D4BE;
+  color: #111;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: system-ui, -apple-system, sans-serif;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.soupylab-captured-feedback {
+  position: absolute;
+  z-index: 999999;
+  background: #00D4BE;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: system-ui, -apple-system, sans-serif;
+  padding: 6px 16px;
+  border-radius: 6px;
+  pointer-events: none;
+  animation: soupylab-fade-up 1.2s ease-out forwards;
+}
+
+@keyframes soupylab-fade-up {
+  0% { opacity: 1; transform: translateY(0); }
+  70% { opacity: 1; transform: translateY(-20px); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}

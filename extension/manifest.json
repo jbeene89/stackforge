@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "SoupyLab Harvester",
+  "version": "1.0.0",
+  "description": "Capture images from any webpage for AI training datasets. Privacy-first: all data stays local until you export.",
+  "permissions": ["contextMenus", "storage", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
