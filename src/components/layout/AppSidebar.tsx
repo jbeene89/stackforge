@@ -6,6 +6,7 @@ import {
   ScrollText, Flame, Rocket, Image, TabletSmartphone, LogOut, Store,
   Smartphone, SwatchBook, Terminal, Server, ChevronRight, ChevronDown,
   Zap, Hammer, Send, Compass, Cog, ToggleLeft, ToggleRight,
+  Database, Sparkles,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
