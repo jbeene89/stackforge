@@ -148,6 +148,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
 
     .fr-station-body {
       padding: ${isMobile ? '14px 16px 24px' : '32px 40px'};
+      background: rgba(0,0,0,0.25);
     }
 
     .fr-action-list {
