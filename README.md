@@ -126,6 +126,7 @@ Live-streaming academic documentation engine for "Curiosity-Driven Perspective T
 | **Runs** | `/runs` | Free | Full execution audit trail with step-by-step replay |
 | **SLM Lab** | `/slm-lab` | Public | Small Language Model experimentation (no auth required) |
 | **Capture** | `/capture` | Free | Mobile data capture for training |
+| **Harvest Inbox** | `/harvest` | Free | Import Chrome extension captures with optional perspective analysis |
 | **Swipe Review** | `/review` | Free | Tinder-style data review interface |
 | **Training Progress** | `/training` | Free | Monitor training job status and metrics |
 

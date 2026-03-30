@@ -290,8 +290,8 @@ const deepCustomization = [
   {
     icon: Database,
     title: "Dataset Engineering",
-    desc: "Build training datasets from scratch — scrape, interview, capture from mobile, import from HuggingFace.",
-    tag: "5-Perspective Council",
+    desc: "Build training datasets from scratch — scrape, interview, capture from mobile, harvest with Chrome extension, import from HuggingFace.",
+    tag: "Chrome Extension + 5 Perspectives",
     color: "text-forge-cyan",
     bgColor: "bg-forge-cyan/10 border-forge-cyan/20",
   },
