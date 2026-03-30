@@ -68,11 +68,11 @@ const TYPE_ACCENTS: Record<ProjectType, string> = {
 };
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  draft: { bg: "rgba(136,153,187,0.1)", color: "#8899BB", label: "DRAFT" },
+  draft: { bg: "rgba(136,153,187,0.1)", color: "#B0C4DE", label: "DRAFT" },
   building: { bg: "rgba(255,107,53,0.1)", color: "#FF6B35", label: "BUILDING" },
   testing: { bg: "rgba(0,229,255,0.1)", color: "#00E5FF", label: "TESTING" },
   deployed: { bg: "rgba(127,255,0,0.1)", color: "#7FFF00", label: "DEPLOYED" },
-  archived: { bg: "rgba(136,153,187,0.08)", color: "#8899BB", label: "ARCHIVED" },
+  archived: { bg: "rgba(136,153,187,0.08)", color: "#B0C4DE", label: "ARCHIVED" },
 };
 
 const FILTERS = ["ALL", "STACK", "MODULE", "WEB", "ANDROID"];
@@ -105,7 +105,7 @@ function StatCard({
     >
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: accent }} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <span className="sl-mono" style={{ fontSize: 9, letterSpacing: "0.3em", color: "#8899BB" }}>
+        <span className="sl-mono" style={{ fontSize: 9, letterSpacing: "0.3em", color: "#B0C4DE" }}>
           {label}
         </span>
         <div
@@ -199,7 +199,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
           className="sl-chakra"
           style={{
             fontSize: 11,
-            color: "#8899BB",
+            color: "#B0C4DE",
             lineHeight: 1.6,
             marginBottom: 16,
             display: "-webkit-box",
@@ -215,7 +215,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span
             className="sl-mono"
-            style={{ fontSize: 9, color: "#8899BB", letterSpacing: "0.1em", textTransform: "uppercase" }}
+            style={{ fontSize: 9, color: "#B0C4DE", letterSpacing: "0.1em", textTransform: "uppercase" }}
           >
             {project.type}
           </span>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
           >
             DASHBOARD
           </h1>
-          <p className="sl-mono" style={{ fontSize: 10, color: "#8899BB", letterSpacing: "0.15em" }}>
+          <p className="sl-mono" style={{ fontSize: 10, color: "#B0C4DE", letterSpacing: "0.15em" }}>
             YOUR PROJECTS · MODULES · STACKS
           </p>
         </div>
@@ -308,7 +308,7 @@ export default function DashboardPage() {
           className="sl-btn-slash"
           onClick={() => navigate("/onboarding")}
           style={{
-            background: "#050810",
+            background: "#1a1f2e",
             color: "#FAFCFF",
             padding: "14px 28px",
             fontSize: 11,
@@ -320,10 +320,10 @@ export default function DashboardPage() {
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.background = "#00E5FF";
-            (e.currentTarget as HTMLElement).style.color = "#050810";
+            (e.currentTarget as HTMLElement).style.color = "#1a1f2e";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "#050810";
+            (e.currentTarget as HTMLElement).style.background = "#1a1f2e";
             (e.currentTarget as HTMLElement).style.color = "#FAFCFF";
           }}
         >
@@ -370,7 +370,7 @@ export default function DashboardPage() {
           disabled={!prompt.trim()}
           style={{
             background: prompt.trim() ? "#00E5FF" : "transparent",
-            color: prompt.trim() ? "#050810" : "#8899BB",
+            color: prompt.trim() ? "#1a1f2e" : "#B0C4DE",
             border: "none",
             padding: "14px 20px",
             cursor: prompt.trim() ? "pointer" : "default",
@@ -422,7 +422,7 @@ export default function DashboardPage() {
                 letterSpacing: "0.2em",
                 padding: "7px 14px",
                 background: filter === f ? "#FAFCFF" : "transparent",
-                color: filter === f ? "#050810" : "#8899BB",
+                color: filter === f ? "#1a1f2e" : "#B0C4DE",
                 border: "none",
                 cursor: "pointer",
                 transition: "all 0.15s",
@@ -433,7 +433,7 @@ export default function DashboardPage() {
           ))}
         </div>
         <div style={{ flex: 1, maxWidth: 300, position: "relative", display: "flex", alignItems: "center" }}>
-          <Search style={{ position: "absolute", left: 12, width: 12, height: 12, color: "#8899BB" }} />
+          <Search style={{ position: "absolute", left: 12, width: 12, height: 12, color: "#B0C4DE" }} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -459,7 +459,7 @@ export default function DashboardPage() {
       {isLoading ? (
         <div
           className="sl-mono"
-          style={{ textAlign: "center", padding: "80px 0", color: "#8899BB", fontSize: 10, letterSpacing: "0.3em" }}
+          style={{ textAlign: "center", padding: "80px 0", color: "#B0C4DE", fontSize: 10, letterSpacing: "0.3em" }}
         >
           LOADING…
         </div>
@@ -486,7 +486,7 @@ export default function DashboardPage() {
           <p className="sl-heading" style={{ fontSize: 14, color: "#FAFCFF", marginBottom: 8 }}>
             NO PROJECTS YET
           </p>
-          <p className="sl-mono" style={{ fontSize: 9, color: "#8899BB", letterSpacing: "0.2em", marginBottom: 24 }}>
+          <p className="sl-mono" style={{ fontSize: 9, color: "#B0C4DE", letterSpacing: "0.2em", marginBottom: 24 }}>
             CREATE YOUR FIRST PROJECT TO GET STARTED
           </p>
           <button
@@ -494,7 +494,7 @@ export default function DashboardPage() {
             onClick={() => navigate("/onboarding")}
             style={{
               background: "#00E5FF",
-              color: "#050810",
+              color: "#1a1f2e",
               border: "none",
               padding: "12px 28px",
               fontSize: 9,
@@ -569,7 +569,7 @@ export default function DashboardPage() {
                 >
                   {label}
                 </div>
-                <div className="sl-mono" style={{ fontSize: 9, color: "#8899BB", letterSpacing: "0.1em" }}>
+                <div className="sl-mono" style={{ fontSize: 9, color: "#B0C4DE", letterSpacing: "0.1em" }}>
                   {desc}
                 </div>
               </div>
