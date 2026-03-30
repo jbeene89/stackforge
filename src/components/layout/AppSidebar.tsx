@@ -182,13 +182,13 @@ const simpleSections: NavSection[] = [
   },
   {
     label: "COMING SOON",
-    accent: "#8899BB",
+    accent: "#B0C4DE",
     submenus: [
       {
         title: "On the Roadmap",
         icon: Compass,
         desc: "Features we're building next",
-        accent: "#8899BB",
+        accent: "#B0C4DE",
         items: [
           { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train on edge hardware", desc: "Train directly on devices", soon: true },
           { title: "Signal Lab", url: "/signals", icon: Radio, tip: "Real-time signal processing", desc: "Process live data streams", soon: true },
@@ -350,7 +350,7 @@ export function AppSidebar() {
                       {item.soon && (
                         <span className="sl-soon-badge" style={{
                           fontSize: 7, letterSpacing: "0.2em", padding: "2px 6px",
-                          border: "1px solid rgba(136,153,187,0.3)", color: "#8899BB",
+                          border: "1px solid rgba(176,196,222,0.3)", color: "#B0C4DE",
                           clipPath: "polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)",
                         }}>
                           SOON
@@ -358,7 +358,7 @@ export function AppSidebar() {
                       )}
                     </span>
                     {simpleMode && item.desc && !collapsed && (
-                      <span style={{ fontSize: 10, color: "#8899BB", lineHeight: 1.3, marginTop: 1 }}>
+                      <span style={{ fontSize: 10, color: "#B0C4DE", lineHeight: 1.3, marginTop: 1 }}>
                         {item.desc}
                       </span>
                     )}
@@ -402,7 +402,7 @@ export function AppSidebar() {
             <>
               <span className="sl-nav-item flex-1 text-left min-w-0" style={{ fontSize: 12, fontWeight: 600 }}>
                 <span style={{ color: active ? "#FAFCFF" : "inherit" }}>{submenu.title}</span>
-                <span className="block" style={{ fontSize: 10, color: "#8899BB", lineHeight: 1.3, marginTop: 1 }}>
+                <span className="block" style={{ fontSize: 10, color: "#B0C4DE", lineHeight: 1.3, marginTop: 1 }}>
                   {submenu.desc}
                 </span>
               </span>
@@ -458,7 +458,7 @@ export function AppSidebar() {
           <button
             onClick={() => setSimpleMode(!simpleMode)}
             className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded transition-colors hover:bg-white/5"
-            style={{ fontSize: 9, letterSpacing: "0.15em", color: "#8899BB" }}
+            style={{ fontSize: 9, letterSpacing: "0.15em", color: "#B0C4DE" }}
           >
             {simpleMode ? (
               <ToggleLeft style={{ width: 14, height: 14, color: "#00E5FF" }} />
@@ -483,21 +483,21 @@ export function AppSidebar() {
           </div>
         ))}
 
-        <SidebarSeparator style={{ background: "rgba(136,153,187,0.06)", margin: "4px 0" }} />
+        <SidebarSeparator style={{ background: "rgba(176,196,222,0.06)", margin: "4px 0" }} />
 
         {/* Admin — always flat */}
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel
               className="sl-group-label px-3 mb-1"
-              style={{ fontSize: 9, letterSpacing: "0.35em", color: "#8899BB", opacity: 0.7, fontWeight: 700 }}
+              style={{ fontSize: 9, letterSpacing: "0.35em", color: "#B0C4DE", opacity: 0.7, fontWeight: 700 }}
             >
               SYSTEM
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminItems.map((item) => renderNavItem(item, "#8899BB"))}
+              {adminItems.map((item) => renderNavItem(item, "#B0C4DE"))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -516,9 +516,9 @@ export function AppSidebar() {
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="flex items-center gap-2.5 w-full px-3 py-2 transition-colors rounded"
-          style={{ color: "#8899BB" }}
+          style={{ color: "#B0C4DE" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#FAFCFF")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#8899BB")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#B0C4DE")}
         >
           {theme === "dark" ? (
             <Sun style={{ width: 14, height: 14, flexShrink: 0 }} />
