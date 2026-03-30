@@ -74,7 +74,7 @@ export function AppLayout() {
               flexShrink: 0,
             }}
           >
-            <SidebarTrigger style={{ color: "#8899BB" }} />
+            <SidebarTrigger style={{ color: "#B0C4DE" }} />
 
             {/* Search bar */}
             <button className="sl-search" onClick={() => setOpen(true)}>
@@ -142,7 +142,7 @@ export function AppLayout() {
                   <p
                     style={{
                       fontSize: 10,
-                      color: "#8899BB",
+                      color: "#B0C4DE",
                       fontFamily: "Space Mono, monospace",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -160,11 +160,11 @@ export function AppLayout() {
                     fontFamily: "Space Mono, monospace",
                     fontSize: 10,
                     letterSpacing: "0.15em",
-                    color: "#8899BB",
+                    color: "#B0C4DE",
                     cursor: "pointer",
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#FAFCFF")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#8899BB")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#B0C4DE")}
                 >
                   <Settings style={{ width: 12, height: 12, marginRight: 8 }} /> SETTINGS
                 </DropdownMenuItem>
