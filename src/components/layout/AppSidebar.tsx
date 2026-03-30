@@ -350,7 +350,7 @@ export function AppSidebar() {
                       {item.soon && (
                         <span className="sl-soon-badge" style={{
                           fontSize: 7, letterSpacing: "0.2em", padding: "2px 6px",
-                          border: "1px solid rgba(136,153,187,0.3)", color: "#B0C4DE",
+                          border: "1px solid rgba(176,196,222,0.3)", color: "#B0C4DE",
                           clipPath: "polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)",
                         }}>
                           SOON
@@ -483,7 +483,7 @@ export function AppSidebar() {
           </div>
         ))}
 
-        <SidebarSeparator style={{ background: "rgba(136,153,187,0.06)", margin: "4px 0" }} />
+        <SidebarSeparator style={{ background: "rgba(176,196,222,0.06)", margin: "4px 0" }} />
 
         {/* Admin — always flat */}
         <SidebarGroup>
