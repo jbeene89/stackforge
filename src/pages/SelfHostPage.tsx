@@ -341,6 +341,11 @@ function generateEnvFile(config: PackageConfig): string {
 
 // ─── Main Page ──────────────────────────────────────────────
 export default function SelfHostPage() {
+  const [searchParams] = useSearchParams();
+  const { data: projects } = useProjects();
+  const { data: datasets } = useDatasets();
+  const [selectedSource, setSelectedSource] = useState<string>("none");
+
   const [config, setConfig] = useState<PackageConfig>({
     projectName: "my-ai-factory",
     hostPort: 3000,
@@ -352,6 +357,16 @@ export default function SelfHostPage() {
   });
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+
+  // Auto-select project from URL params
+  useEffect(() => {
+    const projectId = searchParams.get("project");
+    const projectName = searchParams.get("name");
+    if (projectId && projectName) {
+      setSelectedSource(`project:${projectId}`);
+      setConfig((c) => ({ ...c, projectName: projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-") }));
+    }
+  }, [searchParams]);
 
   const toggleComponent = (id: string) => {
     const comp = COMPONENTS.find((c) => c.id === id);
