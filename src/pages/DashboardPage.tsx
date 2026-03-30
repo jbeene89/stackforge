@@ -447,7 +447,7 @@ export default function DashboardPage() {
               fontFamily: "Space Mono, monospace",
               fontSize: 9,
               letterSpacing: "0.2em",
-              color: "#FAFCFF",
+              color: "hsl(var(--foreground))",
             }}
             onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(0,229,255,0.25)")}
             onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}

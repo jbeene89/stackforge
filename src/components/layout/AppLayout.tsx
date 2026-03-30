@@ -124,12 +124,12 @@ export function AppLayout() {
                 className="w-52"
                 style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 0 }}
               >
-                <div style={{ padding: "12px 14px", borderBottom: "1px solid rgba(0,229,255,0.08)" }}>
+                <div style={{ padding: "12px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
                   <p
                     style={{
                       fontSize: 11,
                       fontWeight: 700,
-                      color: "#FAFCFF",
+                      color: "hsl(var(--foreground))",
                       fontFamily: "Orbitron, monospace",
                       letterSpacing: "0.05em",
                       overflow: "hidden",
@@ -142,7 +142,7 @@ export function AppLayout() {
                   <p
                     style={{
                       fontSize: 10,
-                      color: "#B0C4DE",
+                      color: "hsl(var(--muted-foreground))",
                       fontFamily: "Space Mono, monospace",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
