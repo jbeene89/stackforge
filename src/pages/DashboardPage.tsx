@@ -31,7 +31,7 @@ import { TourMenu } from "@/components/TourMenu";
 const DashFonts = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@300;400;600;700&display=swap');
-    .sl-dash { font-family: 'Chakra Petch', sans-serif; color: #FAFCFF; }
+    .sl-dash { font-family: 'Chakra Petch', sans-serif; color: hsl(var(--foreground)); }
     .sl-dash h1, .sl-dash .sl-heading { font-family: 'Orbitron', monospace; }
     .sl-dash .sl-mono { font-family: 'Space Mono', monospace; }
     .sl-dash .sl-btn-slash {
@@ -96,8 +96,8 @@ function StatCard({
       id={id}
       className="sl-card-hover"
       style={{
-        background: "#0D0F1A",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border))",
         padding: "20px 20px 16px",
         position: "relative",
         overflow: "hidden",
@@ -122,7 +122,7 @@ function StatCard({
           <Icon style={{ width: 12, height: 12, color: accent }} />
         </div>
       </div>
-      <div className="sl-heading" style={{ fontSize: 28, fontWeight: 900, color: "#FAFCFF", lineHeight: 1 }}>
+      <div className="sl-heading" style={{ fontSize: 28, fontWeight: 900, color: "hsl(var(--foreground))", lineHeight: 1 }}>
         {value}
       </div>
     </div>
@@ -141,8 +141,8 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
         to={`/projects/${project.id}`}
         className="sl-card-hover group block"
         style={{
-          background: "#0D0F1A",
-          border: "1px solid rgba(255,255,255,0.06)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           padding: "24px",
           position: "relative",
           overflow: "hidden",
@@ -152,7 +152,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
           (e.currentTarget as HTMLElement).style.borderColor = `${accent}30`;
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
+          (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
         }}
       >
         {/* Top accent line */}
@@ -191,7 +191,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
 
         <div
           className="sl-heading"
-          style={{ fontSize: 13, fontWeight: 700, color: "#FAFCFF", marginBottom: 6, letterSpacing: "0.03em" }}
+          style={{ fontSize: 13, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 6, letterSpacing: "0.03em" }}
         >
           {project.name}
         </div>
@@ -309,7 +309,7 @@ export default function DashboardPage() {
           onClick={() => navigate("/onboarding")}
           style={{
             background: "#1a1f2e",
-            color: "#FAFCFF",
+            color: "hsl(var(--foreground))",
             padding: "14px 28px",
             fontSize: 11,
             border: "none",
@@ -324,7 +324,7 @@ export default function DashboardPage() {
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = "#1a1f2e";
-            (e.currentTarget as HTMLElement).style.color = "#FAFCFF";
+            (e.currentTarget as HTMLElement).style.color = "hsl(var(--foreground))";
           }}
         >
           <Plus style={{ width: 14, height: 14 }} /> NEW PROJECT
@@ -337,8 +337,8 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         onSubmit={handlePrompt}
         style={{
-          background: "#0A0C14",
-          border: "1px solid rgba(0,229,255,0.15)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderTop: "3px solid #00E5FF",
           padding: "0",
           marginBottom: 32,
@@ -361,7 +361,7 @@ export default function DashboardPage() {
             fontFamily: "Space Mono, monospace",
             fontSize: 11,
             letterSpacing: "0.1em",
-            color: "#FAFCFF",
+            color: "hsl(var(--foreground))",
             padding: "14px 18px",
           }}
         />
@@ -407,9 +407,9 @@ export default function DashboardPage() {
           style={{
             display: "flex",
             gap: 2,
-            background: "#0D0F1A",
+            background: "hsl(var(--card))",
             padding: 3,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid hsl(var(--border))",
           }}
         >
           {FILTERS.map((f) => (
@@ -440,14 +440,14 @@ export default function DashboardPage() {
             placeholder="SEARCH PROJECTS…"
             style={{
               width: "100%",
-              background: "#0D0F1A",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               outline: "none",
               padding: "8px 12px 8px 32px",
               fontFamily: "Space Mono, monospace",
               fontSize: 9,
               letterSpacing: "0.2em",
-              color: "#FAFCFF",
+              color: "hsl(var(--foreground))",
             }}
             onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(0,229,255,0.25)")}
             onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}
@@ -483,7 +483,7 @@ export default function DashboardPage() {
           >
             <Plus style={{ width: 20, height: 20, color: "rgba(0,229,255,0.4)" }} />
           </div>
-          <p className="sl-heading" style={{ fontSize: 14, color: "#FAFCFF", marginBottom: 8 }}>
+          <p className="sl-heading" style={{ fontSize: 14, color: "hsl(var(--foreground))", marginBottom: 8 }}>
             NO PROJECTS YET
           </p>
           <p className="sl-mono" style={{ fontSize: 9, color: "#B0C4DE", letterSpacing: "0.2em", marginBottom: 24 }}>
@@ -530,8 +530,8 @@ export default function DashboardPage() {
             <div
               className="sl-card-hover"
               style={{
-                background: "#0D0F1A",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
                 padding: "20px",
                 display: "flex",
                 alignItems: "center",
@@ -544,7 +544,7 @@ export default function DashboardPage() {
                 (e.currentTarget as HTMLElement).style.borderTopColor = accent;
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
                 (e.currentTarget as HTMLElement).style.borderTopColor = accent;
               }}
             >
@@ -565,7 +565,7 @@ export default function DashboardPage() {
               <div>
                 <div
                   className="sl-heading"
-                  style={{ fontSize: 11, letterSpacing: "0.1em", color: "#FAFCFF", marginBottom: 3 }}
+                  style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--foreground))", marginBottom: 3 }}
                 >
                   {label}
                 </div>
