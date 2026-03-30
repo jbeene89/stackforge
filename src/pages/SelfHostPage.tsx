@@ -41,6 +41,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useProjects } from "@/hooks/useSupabaseData";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
