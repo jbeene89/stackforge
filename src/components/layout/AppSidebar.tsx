@@ -38,7 +38,7 @@ const SidebarFonts = () => (
 function HexMark({ size = 28, accent = "#00E5FF" }: { size?: number; accent?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none" style={{ flexShrink: 0 }}>
-      <polygon points="14,1 27,7.5 27,20.5 14,27 1,20.5 1,7.5" fill="#1a1f2e" />
+      <polygon points="14,1 27,7.5 27,20.5 14,27 1,20.5 1,7.5" fill="hsl(var(--card))" />
       <polygon points="14,8 20,11.5 20,16.5 14,20 8,16.5 8,11.5" fill={accent} />
     </svg>
   );
@@ -343,14 +343,14 @@ export function AppSidebar() {
                   <span className="sl-nav-item flex flex-col flex-1 min-w-0">
                     <span className="flex items-center gap-2" style={{
                       fontSize: 12, fontWeight: active ? 700 : 500,
-                      color: active ? (item.accent || accent) : item.hero ? "#FAFCFF" : "inherit",
+                      color: active ? (item.accent || accent) : item.hero ? "hsl(var(--foreground))" : "inherit",
                       letterSpacing: item.hero ? "0.05em" : "normal",
                     }}>
                       {item.title}
                       {item.soon && (
                         <span className="sl-soon-badge" style={{
                           fontSize: 7, letterSpacing: "0.2em", padding: "2px 6px",
-                          border: "1px solid rgba(176,196,222,0.3)", color: "#B0C4DE",
+                          border: "1px solid hsl(var(--muted-foreground) / 0.3)", color: "hsl(var(--muted-foreground))",
                           clipPath: "polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)",
                         }}>
                           SOON
@@ -358,7 +358,7 @@ export function AppSidebar() {
                       )}
                     </span>
                     {simpleMode && item.desc && !collapsed && (
-                      <span style={{ fontSize: 10, color: "#B0C4DE", lineHeight: 1.3, marginTop: 1 }}>
+                      <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", lineHeight: 1.3, marginTop: 1 }}>
                         {item.desc}
                       </span>
                     )}
@@ -401,8 +401,8 @@ export function AppSidebar() {
           {!collapsed && (
             <>
               <span className="sl-nav-item flex-1 text-left min-w-0" style={{ fontSize: 12, fontWeight: 600 }}>
-                <span style={{ color: active ? "#FAFCFF" : "inherit" }}>{submenu.title}</span>
-                <span className="block" style={{ fontSize: 10, color: "#B0C4DE", lineHeight: 1.3, marginTop: 1 }}>
+                <span style={{ color: active ? "hsl(var(--foreground))" : "inherit" }}>{submenu.title}</span>
+                <span className="block" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", lineHeight: 1.3, marginTop: 1 }}>
                   {submenu.desc}
                 </span>
               </span>
@@ -439,15 +439,15 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon" className="sl-sidebar" style={{ borderRight: "1px solid rgba(0,229,255,0.08)" }}>
+    <Sidebar collapsible="icon" className="sl-sidebar" style={{ borderRight: "1px solid hsl(var(--border))" }}>
       <SidebarFonts />
 
       {/* HEADER */}
-      <SidebarHeader style={{ padding: "16px 12px 12px", borderBottom: "1px solid rgba(0,229,255,0.08)" }}>
+      <SidebarHeader style={{ padding: "16px 12px 12px", borderBottom: "1px solid hsl(var(--border))" }}>
         <NavLink to="/" className="flex items-center gap-2.5">
           <HexMark size={collapsed ? 24 : 28} />
           {!collapsed && (
-            <span className="sl-logo font-black tracking-widest" style={{ fontSize: 13, color: "#FAFCFF" }}>
+            <span className="sl-logo font-black tracking-widest" style={{ fontSize: 13, color: "hsl(var(--foreground))" }}>
               SOUPY<span style={{ color: "#00E5FF" }}>LAB</span>
             </span>
           )}
@@ -458,7 +458,7 @@ export function AppSidebar() {
           <button
             onClick={() => setSimpleMode(!simpleMode)}
             className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded transition-colors hover:bg-white/5"
-            style={{ fontSize: 9, letterSpacing: "0.15em", color: "#B0C4DE" }}
+            style={{ fontSize: 9, letterSpacing: "0.15em", color: "hsl(var(--muted-foreground))" }}
           >
             {simpleMode ? (
               <ToggleLeft style={{ width: 14, height: 14, color: "#00E5FF" }} />
@@ -483,21 +483,21 @@ export function AppSidebar() {
           </div>
         ))}
 
-        <SidebarSeparator style={{ background: "rgba(176,196,222,0.06)", margin: "4px 0" }} />
+        <SidebarSeparator style={{ background: "hsl(var(--border))", margin: "4px 0" }} />
 
         {/* Admin — always flat */}
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel
               className="sl-group-label px-3 mb-1"
-              style={{ fontSize: 9, letterSpacing: "0.35em", color: "#B0C4DE", opacity: 0.7, fontWeight: 700 }}
+              style={{ fontSize: 9, letterSpacing: "0.35em", color: "hsl(var(--muted-foreground))", opacity: 0.7, fontWeight: 700 }}
             >
               SYSTEM
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminItems.map((item) => renderNavItem(item, "#B0C4DE"))}
+              {adminItems.map((item) => renderNavItem(item, "hsl(var(--muted-foreground))"))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -506,7 +506,7 @@ export function AppSidebar() {
       {/* FOOTER */}
       <SidebarFooter
         style={{
-          padding: "12px 8px", borderTop: "1px solid rgba(0,229,255,0.08)",
+          padding: "12px 8px", borderTop: "1px solid hsl(var(--border))",
           gap: 6, display: "flex", flexDirection: "column",
         }}
       >
@@ -516,9 +516,9 @@ export function AppSidebar() {
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="flex items-center gap-2.5 w-full px-3 py-2 transition-colors rounded"
-          style={{ color: "#B0C4DE" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#FAFCFF")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#B0C4DE")}
+          style={{ color: "hsl(var(--muted-foreground))" }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--foreground))")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
         >
           {theme === "dark" ? (
             <Sun style={{ width: 14, height: 14, flexShrink: 0 }} />
