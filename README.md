@@ -340,6 +340,14 @@ remotion/                    # Cinematic video generation
 ├── package.json
 └── tsconfig.json
 
+extension/                   # SoupyLab Harvester Chrome Extension
+├── manifest.json            # Manifest V3 configuration
+├── background.js            # Context menu + badge management
+├── content.js               # Harvest Mode overlay + capture logic
+├── content.css              # Harvest Mode UI styles
+├── popup.html               # Extension popup (capture list + export)
+└── popup.js                 # Popup logic + JSON export
+
 supabase/
 ├── config.toml              # Supabase project configuration
 └── functions/               # 30+ Edge Functions (Deno)
