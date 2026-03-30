@@ -560,7 +560,7 @@ export default function SelfHostPage() {
     } finally {
       setGenerating(false);
     }
-  }, [config]);
+  }, [config, selectedSource, datasets]);
 
   const copyDockerCompose = () => {
     navigator.clipboard.writeText(generateDockerCompose(config, COMPONENTS));
