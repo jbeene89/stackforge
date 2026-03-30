@@ -213,8 +213,8 @@ export default function ProjectPage() {
         </TabsList>
 
         <TabsContent value="preview" className="flex-1 m-0 mt-2 px-6 pb-4">
-          <div className="glass rounded-xl h-full flex items-center justify-center overflow-auto">
-            <div className="text-center space-y-2 w-full max-w-2xl p-4">
+          <div className="glass rounded-xl h-full overflow-auto">
+            <div className="space-y-2 w-full max-w-2xl mx-auto p-4">
               <div className="glass-strong rounded-xl p-8 mx-auto">
                 <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
                   <div className="w-2.5 h-2.5 rounded-full bg-forge-rose" />
