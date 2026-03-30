@@ -61,20 +61,20 @@ export function AppLayout() {
   return (
     <SidebarProvider>
       <LayoutFonts />
-      <div className="sl-layout min-h-screen flex w-full" style={{ background: "#07090F" }}>
+      <div className="sl-layout min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           {/* ── HEADER ── */}
           <header
             className="sl-header flex items-center h-12 px-4 gap-3"
             style={{
-              background: "rgba(7,9,15,0.95)",
-              borderBottom: "1px solid rgba(0,229,255,0.08)",
+              background: "hsl(var(--background) / 0.95)",
+              borderBottom: "1px solid hsl(var(--border))",
               backdropFilter: "blur(8px)",
               flexShrink: 0,
             }}
           >
-            <SidebarTrigger style={{ color: "#B0C4DE" }} />
+            <SidebarTrigger className="text-muted-foreground" />
 
             {/* Search bar */}
             <button className="sl-search" onClick={() => setOpen(true)}>
@@ -153,22 +153,22 @@ export function AppLayout() {
                     {user?.email}
                   </p>
                 </div>
-                <DropdownMenuSeparator style={{ background: "rgba(0,229,255,0.08)" }} />
+                <DropdownMenuSeparator style={{ background: "hsl(var(--border))" }} />
                 <DropdownMenuItem
                   onClick={() => navigate("/account")}
                   style={{
                     fontFamily: "Space Mono, monospace",
                     fontSize: 10,
                     letterSpacing: "0.15em",
-                    color: "#B0C4DE",
+                    color: "hsl(var(--muted-foreground))",
                     cursor: "pointer",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FAFCFF")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#B0C4DE")}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--foreground))")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
                 >
                   <Settings style={{ width: 12, height: 12, marginRight: 8 }} /> SETTINGS
                 </DropdownMenuItem>
-                <DropdownMenuSeparator style={{ background: "rgba(0,229,255,0.08)" }} />
+                <DropdownMenuSeparator style={{ background: "hsl(var(--border))" }} />
                 <DropdownMenuItem
                   onClick={handleSignOut}
                   style={{
@@ -188,7 +188,7 @@ export function AppLayout() {
           </header>
 
           {/* ── MAIN CONTENT ── */}
-          <main className="flex-1 overflow-auto" style={{ background: "#07090F" }}>
+          <main className="flex-1 overflow-auto bg-background">
             <Outlet />
           </main>
         </div>
