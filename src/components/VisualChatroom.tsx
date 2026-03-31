@@ -94,7 +94,20 @@ export default function VisualChatroom() {
           throw new Error(data.error);
         }
         queryClient.invalidateQueries({ queryKey: ["user-credits"] });
-        return { characterId: char.id, image: data.image, text: data.text, round: currentRound };
+        const msg: ChatMessage = { characterId: char.id, image: data.image, text: data.text, round: currentRound };
+
+        // Auto-save image to gallery
+        if (data.image) {
+          saveToGallery({
+            image: data.image,
+            prompt: seedPrompt || "(visual chatroom)",
+            mode: "chatroom",
+            characterId: char.id,
+            characterName: char.name,
+          }).catch(() => {});
+        }
+
+        return msg;
       } catch (e: any) {
         if (attempt < MAX_RETRIES) {
           const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s
