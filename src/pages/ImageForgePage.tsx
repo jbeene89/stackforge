@@ -185,6 +185,16 @@ export default function ImageForgePage() {
       });
       setStage("done");
       toast.success("The council has forged your image!");
+
+      // Auto-save to gallery
+      if (finalImage) {
+        saveToGallery({
+          image: finalImage,
+          prompt: prompt.trim(),
+          mode: "council",
+          perspectives: perspectives.map(p => `${p.name}: ${p.enhancement}`),
+        }).catch(() => {});
+      }
     } catch (e: any) {
       toast.error(e.message || "Generation failed");
       setStage("idle");
