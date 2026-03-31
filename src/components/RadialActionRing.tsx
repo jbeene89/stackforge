@@ -18,6 +18,7 @@ interface RadialActionRingProps {
 }
 
 export function RadialActionRing({ actions, isOpen, onClose, radius = 180 }: RadialActionRingProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const count = actions.length;
   const angleStep = (2 * Math.PI) / count;
   const startAngle = -Math.PI / 2;
