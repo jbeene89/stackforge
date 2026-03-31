@@ -13,10 +13,11 @@ import { formatDistanceToNow } from "date-fns";
 
 interface ForgeGalleryProps {
   onSelect?: (item: ForgeGalleryItem) => void;
+  onReforge?: (item: ForgeGalleryItem) => void;
   onClose: () => void;
 }
 
-export default function ForgeGallery({ onSelect, onClose }: ForgeGalleryProps) {
+export default function ForgeGallery({ onSelect, onReforge, onClose }: ForgeGalleryProps) {
   const [items, setItems] = useState<ForgeGalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ForgeGalleryItem | null>(null);
@@ -119,6 +120,16 @@ export default function ForgeGallery({ onSelect, onClose }: ForgeGalleryProps) {
                   >
                     <Download className="h-3 w-3 mr-1" /> Save
                   </Button>
+                   {onReforge && selected.prompt && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => { onReforge(selected); onClose(); }}
+                      className="h-7 text-xs backdrop-blur bg-background/80 gap-1"
+                    >
+                      <Users className="h-3 w-3" /> Re-forge
+                    </Button>
+                  )}
                   {onSelect && (
                     <Button
                       size="sm"
