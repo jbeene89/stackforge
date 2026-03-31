@@ -50,9 +50,9 @@ export default function AIHubPage() {
   const navigate = useNavigate();
   const { data: datasets } = useDatasets();
   const { data: trainingJobs } = useTrainingJobs();
-  const { data: projects } = useSupabaseData("projects");
-  const { data: modules } = useSupabaseData("modules");
-  const { data: stacks } = useSupabaseData("stacks");
+  const { data: projects } = useProjects();
+  const { data: modules } = useModules();
+  const { data: stacks } = useStacks();
 
   const [search, setSearch] = useState("");
   const [selectedEntity, setSelectedEntity] = useState<AIEntity | null>(null);
