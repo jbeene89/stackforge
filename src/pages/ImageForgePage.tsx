@@ -12,9 +12,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Hammer, Heart, Zap, ShieldAlert, Settings2,
   Loader2, Download, Copy, Image as ImageIcon, Database, Mic, MicOff,
-  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare,
+  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare, Wand2,
 } from "lucide-react";
 import VisualChatroom from "@/components/VisualChatroom";
+import ImageAnimator from "@/components/ImageAnimator";
 
 // ─── The 5 Perspective Characters ───
 const CHARACTERS = [
@@ -113,6 +114,7 @@ export default function ImageForgePage() {
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [savingToDataset, setSavingToDataset] = useState(false);
+  const [showAnimator, setShowAnimator] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll the conversation
@@ -578,6 +580,14 @@ export default function ImageForgePage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => setShowAnimator(true)}
+                  className="text-xs gap-1"
+                >
+                  <Wand2 className="h-3 w-3" /> Animate
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={saveToDataset}
                   disabled={savingToDataset}
                   className="text-xs"
@@ -627,6 +637,16 @@ export default function ImageForgePage() {
               </AnimatePresence>
             </Card>
           </motion.div>
+        )}
+       </AnimatePresence>
+
+      {/* ─── Image Animator ─── */}
+      <AnimatePresence>
+        {showAnimator && result?.image && (
+          <ImageAnimator
+            imageSrc={result.image}
+            onClose={() => setShowAnimator(false)}
+          />
         )}
       </AnimatePresence>
 
