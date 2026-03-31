@@ -2,7 +2,8 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
-import bgLandscape from "@/assets/bg-landscape.jpg";
+import bgNight from "@/assets/bg-landscape.jpg";
+import bgDay from "@/assets/bg-landscape-day.jpg";
 
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/providers/ThemeProvider";
 import { LogOut, Settings, Search, Command } from "lucide-react";
 
 const LayoutFonts = () => (
@@ -44,6 +46,9 @@ export function AppLayout() {
   const { open, setOpen } = useCommandPalette();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, resolvedTheme } = useTheme();
+  const isDark = theme === "system" ? resolvedTheme === "dark" : theme === "dark";
+  const bgImage = isDark ? bgNight : bgDay;
 
   const displayName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email || "User";
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
@@ -65,7 +70,7 @@ export function AppLayout() {
       <div
         className="sl-layout min-h-screen flex w-full relative"
         style={{
-          backgroundImage: `url(${bgLandscape})`,
+          backgroundImage: `url(${bgImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed",
