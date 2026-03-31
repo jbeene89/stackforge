@@ -17,6 +17,9 @@ const CDPT_CALLS_PER_SAMPLE = 14; // 5 perspectives + cross-challenge + synthesi
 const POPCORN_CALLS_PER_SAMPLE = 6;
 const ADVANCED_MODE_CALLS = 4; // per sample, average across modes
 
+const SALE_END = new Date("2026-04-06T23:59:59").getTime();
+const isSaleActive = () => Date.now() < SALE_END;
+
 const CREDIT_PACKS = [
   { credits: 100, price: 4.99 },
   { credits: 500, price: 19.99 },
@@ -64,23 +67,24 @@ export function CreditCostEstimator() {
     }
 
     // Recalculate with a cleaner greedy approach
+    const saleMultiplier = isSaleActive() ? 0.5 : 1;
     dollarsNeeded = 0;
     remaining = totalCredits;
     while (remaining > 0) {
       if (remaining >= 1500) {
         const packs = Math.floor(remaining / 1500);
-        dollarsNeeded += packs * 59.99;
+        dollarsNeeded += packs * 59.99 * saleMultiplier;
         remaining -= packs * 1500;
       } else if (remaining >= 500) {
-        dollarsNeeded += 19.99;
+        dollarsNeeded += 19.99 * saleMultiplier;
         remaining -= 500;
       } else {
-        dollarsNeeded += 4.99;
+        dollarsNeeded += 4.99 * saleMultiplier;
         remaining -= 100;
       }
     }
 
-    const bestPack = totalCredits >= 1000 ? "$59.99 / 1500cr" : totalCredits >= 200 ? "$19.99 / 500cr" : "$4.99 / 100cr";
+    const bestPack = totalCredits >= 1000 ? `$${(59.99 * saleMultiplier).toFixed(2)} / 1500cr` : totalCredits >= 200 ? `$${(19.99 * saleMultiplier).toFixed(2)} / 500cr` : `$${(4.99 * saleMultiplier).toFixed(2)} / 100cr`;
 
     const monthsOnTier: Record<string, number> = {};
     for (const tier of TIERS) {
