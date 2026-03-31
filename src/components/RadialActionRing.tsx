@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 
 export interface RadialAction {
   label: string;
+  description?: string;
   icon: LucideIcon;
   onClick: () => void;
   color?: string;
