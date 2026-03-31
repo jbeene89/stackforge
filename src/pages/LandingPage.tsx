@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import bgLandscape from "@/assets/bg-landscape.jpg";
+import bgNight from "@/assets/bg-landscape.jpg";
+import bgDay from "@/assets/bg-landscape-day.jpg";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

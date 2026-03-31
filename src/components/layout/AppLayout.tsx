@@ -2,7 +2,8 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
-import bgLandscape from "@/assets/bg-landscape.jpg";
+import bgNight from "@/assets/bg-landscape.jpg";
+import bgDay from "@/assets/bg-landscape-day.jpg";
 
 import {
   DropdownMenu,
