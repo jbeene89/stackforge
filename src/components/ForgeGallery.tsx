@@ -17,7 +17,7 @@ interface ForgeGalleryProps {
   onClose: () => void;
 }
 
-export default function ForgeGallery({ onSelect, onClose }: ForgeGalleryProps) {
+export default function ForgeGallery({ onSelect, onReforge, onClose }: ForgeGalleryProps) {
   const [items, setItems] = useState<ForgeGalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ForgeGalleryItem | null>(null);
