@@ -31,6 +31,13 @@ const tierConfig: Record<TierName, {
     glow: "shadow-[0_0_12px_hsl(var(--primary)/0.4)]",
     flair: "⚡",
   },
+  admin: {
+    label: "Admin",
+    icon: ShieldCheck,
+    colors: "bg-[hsl(var(--forge-emerald))]/15 text-[hsl(var(--forge-emerald))] border-[hsl(var(--forge-emerald))]/30",
+    glow: "shadow-[0_0_14px_hsl(var(--forge-emerald)/0.5)]",
+    flair: "🛡️",
+  },
 };
 
 interface TierBadgeProps {
