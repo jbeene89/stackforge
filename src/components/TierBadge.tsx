@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Crown, Flame, Zap, Star } from "lucide-react";
+import { Crown, Flame, Zap, Star, ShieldCheck } from "lucide-react";
 
-export type TierName = "free" | "builder" | "pro";
+export type TierName = "free" | "builder" | "pro" | "admin";
 
 const tierConfig: Record<TierName, {
   label: string;
@@ -30,6 +30,13 @@ const tierConfig: Record<TierName, {
     colors: "bg-primary/15 text-primary border-primary/30",
     glow: "shadow-[0_0_12px_hsl(var(--primary)/0.4)]",
     flair: "⚡",
+  },
+  admin: {
+    label: "Admin",
+    icon: ShieldCheck,
+    colors: "bg-[hsl(var(--forge-emerald))]/15 text-[hsl(var(--forge-emerald))] border-[hsl(var(--forge-emerald))]/30",
+    glow: "shadow-[0_0_14px_hsl(var(--forge-emerald)/0.5)]",
+    flair: "🛡️",
   },
 };
 
