@@ -20,6 +20,9 @@ const TIERS = {
   pro: { name: "Pro", product_id: "prod_UD4fLliAe5KKKE", price_id: "price_1TEeVhEgO8H7yovMxXABYtzr", credits: 2000 },
 };
 
+const SALE_END = new Date("2026-04-06T23:59:59").getTime();
+const isSaleActive = () => Date.now() < SALE_END;
+
 const TOPUP_PACKS = [
   { credits: 100, price: 4.99, priceId: "price_1TD61PEgO8H7yovM947iyWTY", label: "Starter" },
   { credits: 500, price: 19.99, priceId: "price_1TD62JEgO8H7yovM5HSx5vl2", label: "Popular", highlight: true },
