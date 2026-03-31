@@ -123,7 +123,7 @@ export function WhatsNewPanel() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-background/30 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none lg:pointer-events-none"
+              className="fixed inset-0 z-40 bg-background/30 backdrop-blur-sm"
               onClick={() => setOpen(false)}
             />
             {/* Side panel */}
@@ -132,7 +132,8 @@ export function WhatsNewPanel() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-80 sm:w-96 border-l border-primary/15 bg-background/95 backdrop-blur-xl shadow-2xl flex flex-col"
+              className="fixed right-0 top-0 bottom-0 z-[60] w-80 sm:w-96 border-l border-primary/15 bg-background/95 backdrop-blur-xl shadow-2xl flex flex-col"
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
