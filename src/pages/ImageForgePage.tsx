@@ -607,7 +607,6 @@ export default function ImageForgePage() {
                   {showDetails ? "Hide" : "Show"} Details
                   {showDetails ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />}
                 </Button>
-                </Button>
               </div>
 
               {/* Expandable details */}
