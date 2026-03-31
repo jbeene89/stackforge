@@ -117,6 +117,7 @@ export default function ImageForgePage() {
   const [showDetails, setShowDetails] = useState(false);
   const [savingToDataset, setSavingToDataset] = useState(false);
   const [showAnimator, setShowAnimator] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll the conversation
