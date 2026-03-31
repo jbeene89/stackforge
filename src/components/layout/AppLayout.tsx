@@ -62,7 +62,17 @@ export function AppLayout() {
   return (
     <SidebarProvider>
       <LayoutFonts />
-      <div className="sl-layout min-h-screen flex w-full bg-background">
+      <div
+        className="sl-layout min-h-screen flex w-full"
+        style={{
+          backgroundImage: `url(${bgLandscape})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-background/80 dark:bg-background/75 pointer-events-none" style={{ zIndex: 0 }} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           {/* ── HEADER ── */}
