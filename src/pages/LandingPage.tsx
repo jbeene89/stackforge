@@ -20,6 +20,58 @@ import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 import { ForgeDoodle } from "@/components/landing/ForgeDoodle";
 import { PhotoTransform } from "@/components/landing/PhotoTransform";
 
+// ------- SALE COUNTDOWN BANNER -------
+
+function SaleBanner() {
+  const saleEnd = new Date("2026-04-06T23:59:59").getTime();
+  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, saleEnd - Date.now()));
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const id = setInterval(() => {
+      const remaining = Math.max(0, saleEnd - Date.now());
+      setTimeLeft(remaining);
+      if (remaining <= 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [saleEnd, timeLeft <= 0]);
+
+  if (timeLeft <= 0) return null;
+
+  const days = Math.floor(timeLeft / 86400000);
+  const hours = Math.floor((timeLeft % 86400000) / 3600000);
+  const minutes = Math.floor((timeLeft % 3600000) / 60000);
+  const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed top-14 inset-x-0 z-40"
+    >
+      <div className="bg-gradient-to-r from-forge-amber/90 via-forge-gold/90 to-forge-amber/90 dark:from-forge-amber/80 dark:via-forge-gold/80 dark:to-forge-amber/80 backdrop-blur-sm border-b border-forge-gold/30 py-2 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
+          <div className="flex items-center gap-2 text-background dark:text-background font-bold text-sm sm:text-base">
+            <Zap className="h-4 w-4 animate-pulse" />
+            <span>🔥 Easter Sale — 50% off all credit packs!</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-background/90 dark:text-background/90 font-mono text-xs sm:text-sm font-semibold">
+            <Timer className="h-3.5 w-3.5" />
+            <span>Ends in</span>
+            <span className="bg-background/20 rounded px-1.5 py-0.5">{days}d</span>
+            <span className="bg-background/20 rounded px-1.5 py-0.5">{String(hours).padStart(2, "0")}h</span>
+            <span className="bg-background/20 rounded px-1.5 py-0.5">{String(minutes).padStart(2, "0")}m</span>
+            <span className="bg-background/20 rounded px-1.5 py-0.5">{String(seconds).padStart(2, "0")}s</span>
+          </div>
+          <Link to="/pricing" className="text-background dark:text-background text-xs sm:text-sm font-bold underline underline-offset-2 hover:no-underline">
+            Grab the deal →
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ------- ANIMATED COUNT-UP -------
 
 function CountUp({ value, prefix = "", suffix = "", duration = 2000 }: { value: number; prefix?: string; suffix?: string; duration?: number }) {
