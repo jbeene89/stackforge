@@ -26,7 +26,7 @@ export function TierProtectedRoute({
 
   const userTier = credits?.tier || "free";
 
-  if (!allowedTiers.includes(userTier)) {
+  if (userTier !== "admin" && !allowedTiers.includes(userTier)) {
     return (
       <UpgradePrompt
         featureName={featureName}
