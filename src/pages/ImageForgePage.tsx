@@ -12,9 +12,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Hammer, Heart, Zap, ShieldAlert, Settings2,
   Loader2, Download, Copy, Image as ImageIcon, Database, Mic, MicOff,
-  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare,
+  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare, Wand2,
 } from "lucide-react";
 import VisualChatroom from "@/components/VisualChatroom";
+import ImageAnimator from "@/components/ImageAnimator";
 
 // ─── The 5 Perspective Characters ───
 const CHARACTERS = [
