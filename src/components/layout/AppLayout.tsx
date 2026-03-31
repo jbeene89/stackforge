@@ -71,7 +71,7 @@ export function AppLayout() {
       <div
         className="sl-layout min-h-screen flex w-full relative"
         style={{
-          backgroundImage: `url(${bgLandscape})`,
+          backgroundImage: `url(${bgImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed",

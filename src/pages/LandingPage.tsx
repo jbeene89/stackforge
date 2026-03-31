@@ -378,7 +378,7 @@ export default function LandingPage() {
     <div
       className="min-h-screen overflow-hidden relative"
       style={{
-        backgroundImage: `url(${bgLandscape})`,
+        backgroundImage: `url(${isDark ? bgNight : bgDay})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",
