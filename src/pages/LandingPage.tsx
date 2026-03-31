@@ -517,6 +517,8 @@ export default function LandingPage() {
         )}
       </nav>
 
+      <SaleBanner />
+
       {/* ════════════════════ HERO ════════════════════ */}
       <section ref={heroRef} className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         {/* gradient-mesh removed to prevent flicker with bg image */}
