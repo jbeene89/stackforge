@@ -916,7 +916,33 @@ def build_sft_trainer(SFTTrainer, model, tokenizer, dataset, training_args):
 
 def check_hardware():
     import torch
-    if torch.cuda.is_available():
+    # Check for AMD ROCm (HIP) first — torch.cuda works on ROCm too
+    if hasattr(torch.version, "hip") and torch.version.hip is not None:
+        if torch.cuda.is_available():
+            gpu_name = torch.cuda.get_device_name(0)
+            vram = torch.cuda.get_device_properties(0).total_mem / 1e9
+            print(f"  AMD ROCm GPU: {gpu_name} ({vram:.1f} GB VRAM)")
+            print(f"  ROCm version: {torch.version.hip}")
+            # Set HSA override for common AMD GPUs (RX 580, RX 570, etc.)
+            import subprocess
+            try:
+                gfx_arch = subprocess.check_output(
+                    ["rocminfo"], stderr=subprocess.DEVNULL
+                ).decode()
+                if "gfx803" in gfx_arch:
+                    import os
+                    os.environ["HSA_OVERRIDE_GFX_VERSION"] = "8.0.3"
+                    print("  [Auto] Set HSA_OVERRIDE_GFX_VERSION=8.0.3 for Polaris GPU")
+            except Exception:
+                pass
+            return "rocm"
+        else:
+            print("  ROCm detected but no GPU available — falling back to CPU")
+            import psutil
+            ram = psutil.virtual_memory().total / 1e9
+            print(f"  CPU mode - {ram:.0f} GB RAM available")
+            return "cpu"
+    elif torch.cuda.is_available():
         gpu_name = torch.cuda.get_device_name(0)
         vram = torch.cuda.get_device_properties(0).total_mem / 1e9
         print(f"  NVIDIA CUDA GPU: {gpu_name} ({vram:.1f} GB VRAM)")
@@ -1113,6 +1139,113 @@ def train_cpu_fallback():
     print(f"   To merge: use peft merge_and_unload() then export to GGUF manually")
 
 
+def train_with_rocm():
+    """AMD ROCm path - uses transformers + PEFT with ROCm-compatible settings."""
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+    from peft import LoraConfig, get_peft_model, TaskType
+    from trl import SFTTrainer
+    from datasets import Dataset
+    import os
+
+    print("\\n[ROCm] AMD GPU detected — using ROCm-compatible training path")
+    print("   Make sure you have pytorch-rocm installed (pip install torch --index-url https://download.pytorch.org/whl/rocm6.0)")
+
+    # Ensure HSA override is set for older AMD GPUs
+    if not os.environ.get("HSA_OVERRIDE_GFX_VERSION"):
+        gpu_name = torch.cuda.get_device_name(0).lower()
+        if any(x in gpu_name for x in ["rx 580", "rx 570", "rx 560", "rx 480", "rx 470"]):
+            os.environ["HSA_OVERRIDE_GFX_VERSION"] = "8.0.3"
+            print("   [Auto] Set HSA_OVERRIDE_GFX_VERSION=8.0.3 for Polaris GPU")
+
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True, token=HF_TOKEN)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model = AutoModelForCausalLM.from_pretrained(
+        BASE_MODEL,
+        torch_dtype=torch.float16,
+        device_map="auto",
+        trust_remote_code=True,
+        token=HF_TOKEN,
+    )
+
+    tokenizer.add_special_tokens({"additional_special_tokens": SPECIAL_TOKENS})
+    model.resize_token_embeddings(len(tokenizer))
+
+    if not getattr(tokenizer, "chat_template", None):
+        tokenizer.chat_template = "{% for message in messages %}{% if message['role'] == 'system' %}<|system|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'user' %}<|user|>\\n{{ message['content'] }}\\n{% elif message['role'] == 'assistant' %}<|assistant|>\\n{{ message['content'] }}\\n{% endif %}{% endfor %}"
+
+    # Apply selective layer control
+    base_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    layer_indices, _ = get_target_layers(model, LAYER_STRATEGY)
+
+    lora_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        r=HYPERPARAMS["lora_rank"],
+        lora_alpha=HYPERPARAMS["lora_alpha"],
+        target_modules=base_modules if LAYER_STRATEGY != "reasoning" else ["q_proj", "k_proj", "v_proj", "o_proj"],
+        layers_to_transform=layer_indices if LAYER_STRATEGY != "all" else None,
+        lora_dropout=0.05,
+    )
+    model = get_peft_model(model, lora_config)
+    model.print_trainable_parameters()
+
+    raw = load_dataset(DATASET_FILE)
+    formatted = []
+    for sample in raw:
+        msgs = sample["messages"]
+        text = tokenizer.apply_chat_template(msgs, tokenize=False, add_generation_prompt=False)
+        formatted.append({"text": text})
+
+    dataset = Dataset.from_list(formatted)
+
+    training_args = TrainingArguments(
+        output_dir=OUTPUT_DIR,
+        num_train_epochs=HYPERPARAMS["epochs"],
+        per_device_train_batch_size=HYPERPARAMS["batch_size"],
+        learning_rate=HYPERPARAMS["learning_rate"],
+        warmup_steps=HYPERPARAMS["warmup_steps"],
+        logging_steps=1,
+        save_strategy="epoch",
+        fp16=True,
+        gradient_accumulation_steps=${cpuOffload ? 4 : 2},
+        gradient_checkpointing=${gradientCheckpointing ? "True" : "False"},
+    )
+
+    trainer = build_sft_trainer(
+        SFTTrainer=SFTTrainer,
+        model=model,
+        tokenizer=tokenizer,
+        dataset=dataset,
+        training_args=training_args,
+    )
+
+    print("\\n>> Starting ROCm training with Five Perspective Pipeline tokens...")
+    print(f"   GPU: {torch.cuda.get_device_name(0)}")
+    print(f"   VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+    trainer.train()
+
+    model.save_pretrained(f"{OUTPUT_DIR}/lora")
+    tokenizer.save_pretrained(f"{OUTPUT_DIR}/lora")
+    print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
+
+    # Try GGUF export
+    try:
+        from transformers import AutoModelForCausalLM as AMCLM
+        from peft import PeftModel
+        base = AMCLM.from_pretrained(BASE_MODEL, torch_dtype=torch.float16, token=HF_TOKEN)
+        merged = PeftModel.from_pretrained(base, f"{OUTPUT_DIR}/lora")
+        merged = merged.merge_and_unload()
+        merged.save_pretrained(f"{OUTPUT_DIR}/merged")
+        tokenizer.save_pretrained(f"{OUTPUT_DIR}/merged")
+        print(f"[OK] Merged model saved to {OUTPUT_DIR}/merged")
+        print(f"   Convert to GGUF with: python llama.cpp/convert_hf_to_gguf.py {OUTPUT_DIR}/merged --outtype q4_k_m")
+    except Exception as e:
+        print(f"[!] Auto-merge skipped: {e}")
+        print(f"   Manual merge: load LoRA with PeftModel, call merge_and_unload(), then convert to GGUF")
+
+
 if __name__ == "__main__":
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
     print(f"Soupy Local Trainer - Five Perspective Pipeline")
@@ -1132,8 +1265,10 @@ if __name__ == "__main__":
         train_cpu_fallback()
     elif hw == "cuda":
         train_with_unsloth()
+    elif hw == "rocm":
+        train_with_rocm()
     else:
-        print("Non-NVIDIA environment detected - using CPU fallback path.")
+        print("Non-NVIDIA/AMD environment detected - using CPU fallback path.")
         train_cpu_fallback()
 `;
 }
