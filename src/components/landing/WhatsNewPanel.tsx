@@ -132,7 +132,7 @@ export function WhatsNewPanel() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-80 sm:w-96 border-l border-primary/15 bg-background/95 backdrop-blur-xl shadow-2xl flex flex-col"
+              className="fixed right-0 top-0 bottom-0 z-[60] w-80 sm:w-96 border-l border-primary/15 bg-background/95 backdrop-blur-xl shadow-2xl flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
