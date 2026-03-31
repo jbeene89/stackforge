@@ -12,10 +12,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Hammer, Heart, Zap, ShieldAlert, Settings2,
   Loader2, Download, Copy, Image as ImageIcon, Database, Mic, MicOff,
-  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare, Wand2,
+  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare, Wand2, GalleryHorizontalEnd,
 } from "lucide-react";
 import VisualChatroom from "@/components/VisualChatroom";
 import ImageAnimator from "@/components/ImageAnimator";
+import ForgeGallery from "@/components/ForgeGallery";
+import { saveToGallery } from "@/lib/forgeGallery";
 
 // ─── The 5 Perspective Characters ───
 const CHARACTERS = [
@@ -115,6 +117,7 @@ export default function ImageForgePage() {
   const [showDetails, setShowDetails] = useState(false);
   const [savingToDataset, setSavingToDataset] = useState(false);
   const [showAnimator, setShowAnimator] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll the conversation
@@ -182,6 +185,16 @@ export default function ImageForgePage() {
       });
       setStage("done");
       toast.success("The council has forged your image!");
+
+      // Auto-save to gallery
+      if (finalImage) {
+        saveToGallery({
+          image: finalImage,
+          prompt: prompt.trim(),
+          mode: "council",
+          perspectives: perspectives.map(p => `${p.name}: ${p.enhancement}`),
+        }).catch(() => {});
+      }
     } catch (e: any) {
       toast.error(e.message || "Generation failed");
       setStage("idle");
@@ -285,17 +298,41 @@ export default function ImageForgePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-display font-bold tracking-tight flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl gradient-primary glow-primary flex items-center justify-center">
-            <ImageIcon className="h-5 w-5 text-primary-foreground" />
-          </div>
-          Image Forge
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Five minds, one vision — council mode or unrestricted visual chatroom.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-display font-bold tracking-tight flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl gradient-primary glow-primary flex items-center justify-center">
+              <ImageIcon className="h-5 w-5 text-primary-foreground" />
+            </div>
+            Image Forge
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Five minds, one vision — council mode or unrestricted visual chatroom.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowGallery(g => !g)}
+          className="gap-1.5 mt-1"
+        >
+          <GalleryHorizontalEnd className="h-4 w-4" />
+          Gallery
+        </Button>
       </div>
+
+      {/* Gallery */}
+      <AnimatePresence>
+        {showGallery && (
+          <ForgeGallery
+            onClose={() => setShowGallery(false)}
+            onSelect={(item) => {
+              setResult({ image: item.image, synthesizedPrompt: item.prompt, perspectives: [] });
+              setStage("done");
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Mode Tabs */}
       <Tabs defaultValue="council" className="space-y-4">
