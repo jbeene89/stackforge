@@ -13,6 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface ForgeGalleryProps {
   onSelect?: (item: ForgeGalleryItem) => void;
+  onReforge?: (item: ForgeGalleryItem) => void;
   onClose: () => void;
 }
 
