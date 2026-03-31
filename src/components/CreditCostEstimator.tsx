@@ -67,23 +67,24 @@ export function CreditCostEstimator() {
     }
 
     // Recalculate with a cleaner greedy approach
+    const saleMultiplier = isSaleActive() ? 0.5 : 1;
     dollarsNeeded = 0;
     remaining = totalCredits;
     while (remaining > 0) {
       if (remaining >= 1500) {
         const packs = Math.floor(remaining / 1500);
-        dollarsNeeded += packs * 59.99;
+        dollarsNeeded += packs * 59.99 * saleMultiplier;
         remaining -= packs * 1500;
       } else if (remaining >= 500) {
-        dollarsNeeded += 19.99;
+        dollarsNeeded += 19.99 * saleMultiplier;
         remaining -= 500;
       } else {
-        dollarsNeeded += 4.99;
+        dollarsNeeded += 4.99 * saleMultiplier;
         remaining -= 100;
       }
     }
 
-    const bestPack = totalCredits >= 1000 ? "$59.99 / 1500cr" : totalCredits >= 200 ? "$19.99 / 500cr" : "$4.99 / 100cr";
+    const bestPack = totalCredits >= 1000 ? `$${(59.99 * saleMultiplier).toFixed(2)} / 1500cr` : totalCredits >= 200 ? `$${(19.99 * saleMultiplier).toFixed(2)} / 500cr` : `$${(4.99 * saleMultiplier).toFixed(2)} / 100cr`;
 
     const monthsOnTier: Record<string, number> = {};
     for (const tier of TIERS) {
