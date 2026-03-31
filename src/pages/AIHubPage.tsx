@@ -12,7 +12,7 @@ import {
   Wrench, FlaskConical, Send, Eye, Activity, Plus,
 } from "lucide-react";
 import { useDatasets, useTrainingJobs, type TrainingDataset, type TrainingJob } from "@/hooks/useTrainingData";
-import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useProjects, useModules, useStacks } from "@/hooks/useSupabaseData";
 
 // ── Unified AI Entity ────────────────────────────────────────────────────────
 interface AIEntity {
