@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 
 export interface RadialAction {
   label: string;
+  description?: string;
   icon: LucideIcon;
   onClick: () => void;
   color?: string;
@@ -16,6 +18,7 @@ interface RadialActionRingProps {
 }
 
 export function RadialActionRing({ actions, isOpen, onClose, radius = 180 }: RadialActionRingProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const count = actions.length;
   const angleStep = (2 * Math.PI) / count;
   const startAngle = -Math.PI / 2;
@@ -161,9 +164,41 @@ export function RadialActionRing({ actions, isOpen, onClose, radius = 180 }: Rad
                     action.onClick();
                     onClose();
                   }}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
                 >
+                  {/* Tooltip */}
+                  <AnimatePresence>
+                    {hoveredIndex === i && action.description && (
+                      <motion.div
+                        className="absolute z-20 pointer-events-none"
+                        style={{
+                          bottom: "calc(100% + 12px)",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                        }}
+                        initial={{ opacity: 0, y: 6, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.9 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <div
+                          className="bg-card/95 backdrop-blur-md border border-border/80 rounded-lg px-3 py-2 shadow-xl max-w-[180px] text-center"
+                          style={{
+                            boxShadow: "0 4px 24px hsl(var(--background) / 0.6), 0 0 12px hsl(var(--primary) / 0.1)",
+                          }}
+                        >
+                          <p className="text-[11px] text-foreground/90 leading-snug whitespace-normal">
+                            {action.description}
+                          </p>
+                        </div>
+                        {/* Arrow */}
+                        <div className="w-2 h-2 bg-card/95 border-b border-r border-border/80 rotate-45 mx-auto -mt-1" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   {/* Button glow on hover */}
                   <motion.div
                     className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -m-1"

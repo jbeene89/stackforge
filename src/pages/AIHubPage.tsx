@@ -131,26 +131,26 @@ export default function AIHubPage() {
 
     if (selectedEntity.datasetId) {
       actions.push(
-        { label: "Train", icon: Cpu, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}`) },
-        { label: "Review Data", icon: Eye, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=3`) },
-        { label: "Export Kit", icon: Download, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=4`) },
-        { label: "Deploy", icon: Rocket, color: "text-primary", onClick: () => navigate(`/deploy?dataset=${selectedEntity.datasetId}`) },
-        { label: "Track Progress", icon: Activity, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate("/training") },
+        { label: "Train", description: "Fine-tune a model on this dataset using SLM Lab", icon: Cpu, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}`) },
+        { label: "Review Data", description: "Inspect and curate dataset samples for quality", icon: Eye, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=3`) },
+        { label: "Export Kit", description: "Package model weights and config for deployment", icon: Download, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=4`) },
+        { label: "Deploy", description: "Push your trained model to a device or cloud endpoint", icon: Rocket, color: "text-primary", onClick: () => navigate(`/deploy?dataset=${selectedEntity.datasetId}`) },
+        { label: "Track Progress", description: "Monitor active training runs and metrics", icon: Activity, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate("/training") },
       );
     }
 
     if (selectedEntity.projectId) {
       actions.push(
-        { label: "Open Project", icon: Layers, color: "text-primary", onClick: () => navigate(`/projects/${selectedEntity.projectId}`) },
-        { label: "Run", icon: Play, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate("/runs") },
+        { label: "Open Project", description: "View project details, settings, and history", icon: Layers, color: "text-primary", onClick: () => navigate(`/projects/${selectedEntity.projectId}`) },
+        { label: "Run", description: "Execute the project pipeline and view results", icon: Play, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate("/runs") },
       );
     }
 
     // Universal actions
     actions.push(
-      { label: "Image Forge", icon: Image, color: "text-purple-400", onClick: () => navigate("/image-forge") },
-      { label: "Inference", icon: Terminal, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate("/inference") },
-      { label: "Marketplace", icon: Sparkles, color: "text-pink-400", onClick: () => navigate("/marketplace") },
+      { label: "Image Forge", description: "Generate and transform images with AI models", icon: Image, color: "text-purple-400", onClick: () => navigate("/image-forge") },
+      { label: "Inference", description: "Test prompts against your models in real time", icon: Terminal, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate("/inference") },
+      { label: "Marketplace", description: "Browse and share community templates and models", icon: Sparkles, color: "text-pink-400", onClick: () => navigate("/marketplace") },
     );
 
     return actions;
