@@ -234,6 +234,7 @@ const advancedSections: NavSection[] = [
       desc: "Create and manage AI components",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Overview of your projects, modules, and activity" },
+        { title: "AI Hub", url: "/ai-hub", icon: Compass, tip: "All your AIs in one place — click to see actions", hero: true, accent: "#00E5FF" },
         { title: "Projects", url: "/projects", icon: FolderOpen, tip: "Manage web, Android, and hybrid app projects" },
         { title: "AI Modules", url: "/modules", icon: Cpu, tip: "Build single-purpose AI specialists with guardrails" },
         { title: "Stacks", url: "/stacks", icon: Layers, tip: "Wire modules into multi-step intelligent pipelines" },
