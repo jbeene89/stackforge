@@ -916,7 +916,33 @@ def build_sft_trainer(SFTTrainer, model, tokenizer, dataset, training_args):
 
 def check_hardware():
     import torch
-    if torch.cuda.is_available():
+    # Check for AMD ROCm (HIP) first — torch.cuda works on ROCm too
+    if hasattr(torch.version, "hip") and torch.version.hip is not None:
+        if torch.cuda.is_available():
+            gpu_name = torch.cuda.get_device_name(0)
+            vram = torch.cuda.get_device_properties(0).total_mem / 1e9
+            print(f"  AMD ROCm GPU: {gpu_name} ({vram:.1f} GB VRAM)")
+            print(f"  ROCm version: {torch.version.hip}")
+            # Set HSA override for common AMD GPUs (RX 580, RX 570, etc.)
+            import subprocess
+            try:
+                gfx_arch = subprocess.check_output(
+                    ["rocminfo"], stderr=subprocess.DEVNULL
+                ).decode()
+                if "gfx803" in gfx_arch:
+                    import os
+                    os.environ["HSA_OVERRIDE_GFX_VERSION"] = "8.0.3"
+                    print("  [Auto] Set HSA_OVERRIDE_GFX_VERSION=8.0.3 for Polaris GPU")
+            except Exception:
+                pass
+            return "rocm"
+        else:
+            print("  ROCm detected but no GPU available — falling back to CPU")
+            import psutil
+            ram = psutil.virtual_memory().total / 1e9
+            print(f"  CPU mode - {ram:.0f} GB RAM available")
+            return "cpu"
+    elif torch.cuda.is_available():
         gpu_name = torch.cuda.get_device_name(0)
         vram = torch.cuda.get_device_properties(0).total_mem / 1e9
         print(f"  NVIDIA CUDA GPU: {gpu_name} ({vram:.1f} GB VRAM)")
