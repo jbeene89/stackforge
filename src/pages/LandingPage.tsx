@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import bgLandscape from "@/assets/bg-landscape.jpg";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -373,7 +374,17 @@ export default function LandingPage() {
   }, [isDark, setTheme]);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden relative">
+    <div
+      className="min-h-screen overflow-hidden relative"
+      style={{
+        backgroundImage: `url(${bgLandscape})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-background/70 dark:bg-background/65 pointer-events-none" />
       <SEOHead
         title="No-Code AI Agent & Pipeline Builder"
         description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."

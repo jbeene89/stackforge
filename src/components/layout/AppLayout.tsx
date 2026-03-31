@@ -2,6 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
+import bgLandscape from "@/assets/bg-landscape.jpg";
 
 import {
   DropdownMenu,
@@ -61,7 +62,18 @@ export function AppLayout() {
   return (
     <SidebarProvider>
       <LayoutFonts />
-      <div className="sl-layout min-h-screen flex w-full bg-background">
+      <div
+        className="sl-layout min-h-screen flex w-full relative"
+        style={{
+          backgroundImage: `url(${bgLandscape})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-background/80 dark:bg-background/75 pointer-events-none" />
+        <div className="relative z-10 flex w-full min-h-screen">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           {/* ── HEADER ── */}
@@ -188,9 +200,10 @@ export function AppLayout() {
           </header>
 
           {/* ── MAIN CONTENT ── */}
-          <main className="flex-1 overflow-auto bg-background">
+          <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
+        </div>
         </div>
       </div>
       
