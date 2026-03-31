@@ -2435,11 +2435,11 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
   };
 
   const models = [
-    { value: "llama-3.2-1b", label: "Llama 3.2 (1B)", desc: "Best for limited hardware", vram: "~3 GB", rec: ["cpu_only", "low_vram"] },
-    { value: "qwen2.5-1.5b", label: "Qwen 2.5 (1.5B)", desc: "Excellent for code", vram: "~3 GB", rec: ["low_vram", "mid_vram"] },
-    { value: "gemma-2-2b", label: "Gemma 2 (2B)", desc: "Strong reasoning", vram: "~4 GB", rec: ["mid_vram"] },
-    { value: "phi-3-mini", label: "Phi-3 Mini (3.8B)", desc: "Great all-rounder", vram: "~6 GB", rec: ["mid_vram", "good_gpu"] },
-    { value: "llama-3.2-3b", label: "Llama 3.2 (3B)", desc: "Good balance", vram: "~5 GB", rec: ["mid_vram", "good_gpu"] },
+    { value: "llama-3.2-1b", label: "Llama 3.2 (1B)", desc: "Best for limited hardware", vram: "~3 GB", rec: ["cpu_only", "low_vram", "amd_rocm"] },
+    { value: "qwen2.5-1.5b", label: "Qwen 2.5 (1.5B)", desc: "Excellent for code", vram: "~3 GB", rec: ["low_vram", "mid_vram", "amd_rocm"] },
+    { value: "gemma-2-2b", label: "Gemma 2 (2B)", desc: "Strong reasoning", vram: "~4 GB", rec: ["mid_vram", "amd_rocm"] },
+    { value: "phi-3-mini", label: "Phi-3 Mini (3.8B)", desc: "Great all-rounder", vram: "~6 GB", rec: ["mid_vram", "good_gpu", "amd_rocm"] },
+    { value: "llama-3.2-3b", label: "Llama 3.2 (3B)", desc: "Good balance", vram: "~5 GB", rec: ["mid_vram", "good_gpu", "amd_rocm"] },
     { value: "mistral-7b", label: "Mistral (7B)", desc: "Most capable", vram: "~10 GB", rec: ["good_gpu"] },
   ];
 
