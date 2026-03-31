@@ -2429,7 +2429,7 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
     // Auto-select best model for the profile
     if (profile === "cpu_only" || profile === "low_vram") {
       setBaseModel("qwen2.5-1.5b");
-    } else if (profile === "mid_vram") {
+    } else if (profile === "mid_vram" || profile === "amd_rocm") {
       setBaseModel("qwen2.5-1.5b");
     }
   };
