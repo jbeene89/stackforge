@@ -495,19 +495,29 @@ export function AppSidebar() {
 
         <SidebarSeparator style={{ background: "hsl(var(--border))", margin: "4px 0" }} />
 
-        {/* Admin — always flat */}
+        {/* Admin section — only visible to admin tier */}
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel
               className="sl-group-label px-3 mb-1"
-              style={{ fontSize: 9, letterSpacing: "0.35em", color: "hsl(var(--muted-foreground))", opacity: 0.7, fontWeight: 700 }}
+              style={{
+                fontSize: 9, letterSpacing: "0.35em",
+                color: isAdmin ? "hsl(var(--forge-emerald))" : "hsl(var(--muted-foreground))",
+                opacity: 0.7, fontWeight: 700,
+              }}
             >
-              SYSTEM
+              {isAdmin ? "⚙ ADMIN" : "SYSTEM"}
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminItems.map((item) => renderNavItem(item, "hsl(var(--muted-foreground))"))}
+              {adminItems
+                .filter((item) => {
+                  // Non-admin users only see Settings
+                  if (!isAdmin && item.url.startsWith("/admin")) return false;
+                  return true;
+                })
+                .map((item) => renderNavItem(item, isAdmin ? "hsl(var(--forge-emerald))" : "hsl(var(--muted-foreground))"))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
