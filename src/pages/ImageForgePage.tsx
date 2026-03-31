@@ -640,6 +640,14 @@ export default function ImageForgePage() {
                   {savingToDataset ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Database className="h-3 w-3 mr-1" />}
                   Save to Training Data
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setStage("idle"); setSpokenResults([]); setActiveSpeaker(-1); }}
+                  className="text-xs gap-1"
+                >
+                  <Users className="h-3 w-3" /> Re-forge
+                </Button>
                 <Button size="sm" variant="outline" onClick={reset} className="text-xs">
                   <RotateCcw className="h-3 w-3 mr-1" /> New Vision
                 </Button>

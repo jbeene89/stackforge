@@ -120,6 +120,16 @@ export default function ForgeGallery({ onSelect, onReforge, onClose }: ForgeGall
                   >
                     <Download className="h-3 w-3 mr-1" /> Save
                   </Button>
+                   {onReforge && selected.prompt && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => { onReforge(selected); onClose(); }}
+                      className="h-7 text-xs backdrop-blur bg-background/80 gap-1"
+                    >
+                      <Users className="h-3 w-3" /> Re-forge
+                    </Button>
+                  )}
                   {onSelect && (
                     <Button
                       size="sm"
