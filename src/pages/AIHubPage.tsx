@@ -148,9 +148,9 @@ export default function AIHubPage() {
 
     // Universal actions
     actions.push(
-      { label: "Image Forge", icon: Image, color: "text-purple-400", onClick: () => navigate("/image-forge") },
-      { label: "Inference", icon: Terminal, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate("/inference") },
-      { label: "Marketplace", icon: Sparkles, color: "text-pink-400", onClick: () => navigate("/marketplace") },
+      { label: "Image Forge", description: "Generate and transform images with AI models", icon: Image, color: "text-purple-400", onClick: () => navigate("/image-forge") },
+      { label: "Inference", description: "Test prompts against your models in real time", icon: Terminal, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate("/inference") },
+      { label: "Marketplace", description: "Browse and share community templates and models", icon: Sparkles, color: "text-pink-400", onClick: () => navigate("/marketplace") },
     );
 
     return actions;
