@@ -131,11 +131,11 @@ export default function AIHubPage() {
 
     if (selectedEntity.datasetId) {
       actions.push(
-        { label: "Train", icon: Cpu, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}`) },
-        { label: "Review Data", icon: Eye, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=3`) },
-        { label: "Export Kit", icon: Download, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=4`) },
-        { label: "Deploy", icon: Rocket, color: "text-primary", onClick: () => navigate(`/deploy?dataset=${selectedEntity.datasetId}`) },
-        { label: "Track Progress", icon: Activity, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate("/training") },
+        { label: "Train", description: "Fine-tune a model on this dataset using SLM Lab", icon: Cpu, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}`) },
+        { label: "Review Data", description: "Inspect and curate dataset samples for quality", icon: Eye, color: "text-[hsl(var(--forge-amber))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=3`) },
+        { label: "Export Kit", description: "Package model weights and config for deployment", icon: Download, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate(`/slm-lab?dataset=${selectedEntity.datasetId}&step=4`) },
+        { label: "Deploy", description: "Push your trained model to a device or cloud endpoint", icon: Rocket, color: "text-primary", onClick: () => navigate(`/deploy?dataset=${selectedEntity.datasetId}`) },
+        { label: "Track Progress", description: "Monitor active training runs and metrics", icon: Activity, color: "text-[hsl(var(--forge-cyan))]", onClick: () => navigate("/training") },
       );
     }
 
