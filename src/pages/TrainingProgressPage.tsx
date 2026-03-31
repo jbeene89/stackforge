@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useTrainingJobs,
@@ -108,6 +108,39 @@ function JobCard({
   const currentEpoch = (metrics.current_epoch as number) || 0;
   const totalEpochs = (hp.epochs as number) || 3;
   const progressPct = job.status === "completed" ? 100 : Math.round((currentEpoch / totalEpochs) * 100);
+
+  // Auto-simulate epoch progress when job is running
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (job.status === "running") {
+      const epoch = (metrics.current_epoch as number) || 0;
+      const total = (hp.epochs as number) || 3;
+      if (epoch < total) {
+        intervalRef.current = setInterval(() => {
+          const curMetrics = job.metrics || {};
+          const curEpoch = (curMetrics.current_epoch as number) || 0;
+          const nextEpoch = curEpoch + 1;
+          const fakeLoss = Math.max(0.01, 2.5 * Math.exp(-0.6 * nextEpoch) + (Math.random() * 0.1 - 0.05));
+          const lossHistory = ((curMetrics.loss_history as any[]) || []).concat({ epoch: nextEpoch, loss: parseFloat(fakeLoss.toFixed(4)) });
+
+          if (nextEpoch >= total) {
+            onUpdate(job.id, {
+              status: "completed",
+              metrics: { ...curMetrics, current_epoch: total, current_loss: fakeLoss, loss_history: lossHistory, completed_at: new Date().toISOString() },
+            });
+          } else {
+            onUpdate(job.id, {
+              metrics: { ...curMetrics, current_epoch: nextEpoch, current_loss: fakeLoss, loss_history: lossHistory, eta_minutes: Math.round((total - nextEpoch) * 8) },
+            });
+          }
+        }, 3000); // 3 seconds per epoch
+      }
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [job.status, job.id]);
 
   return (
     <Card className="hover:border-[hsl(var(--forge-cyan))]/30 transition-colors">
