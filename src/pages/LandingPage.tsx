@@ -8,7 +8,7 @@ import {
   Sparkles, Globe, Smartphone, Brain, Layers, ArrowRight, Zap, Shield, Eye,
   Play, CheckCircle2, ChevronRight, Command, GitBranch, Target, Cpu,
   FileCode, Workflow, Lock, BarChart3, Wrench, Scissors, Database, FlaskConical, Eraser,
-  Menu, X, Moon, Sun, HardDrive, Upload, Fingerprint, Server, Store, Coins, Crown, Repeat
+  Menu, X, Moon, Sun, HardDrive, Upload, Fingerprint, Server, Store, Coins, Crown, Repeat, Timer
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
