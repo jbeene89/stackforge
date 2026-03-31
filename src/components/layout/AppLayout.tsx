@@ -63,7 +63,7 @@ export function AppLayout() {
     <SidebarProvider>
       <LayoutFonts />
       <div
-        className="sl-layout min-h-screen flex w-full"
+        className="sl-layout min-h-screen flex w-full relative"
         style={{
           backgroundImage: `url(${bgLandscape})`,
           backgroundSize: "cover",
@@ -72,8 +72,9 @@ export function AppLayout() {
         }}
       >
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-background/80 dark:bg-background/75 pointer-events-none" style={{ zIndex: 0 }} />
-        <AppSidebar style={{ position: "relative", zIndex: 1 }} />
+        <div className="absolute inset-0 bg-background/80 dark:bg-background/75 pointer-events-none" />
+        <div className="relative z-10 flex w-full min-h-screen">
+        <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           {/* ── HEADER ── */}
           <header
