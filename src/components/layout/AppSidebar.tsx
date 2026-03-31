@@ -301,6 +301,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { signOut } = useAuth();
+  const { data: credits } = useCredits();
+  const isAdmin = credits?.tier === "admin";
 
   const [simpleMode, setSimpleMode] = useState(() => {
     const saved = localStorage.getItem("soupy-sidebar-mode");
