@@ -49,7 +49,6 @@ export function AppLayout() {
   const { theme, resolvedTheme } = useTheme();
   const isDark = theme === "system" ? resolvedTheme === "dark" : theme === "dark";
   const bgImage = isDark ? bgNight : bgDay;
-  const navigate = useNavigate();
 
   const displayName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email || "User";
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
