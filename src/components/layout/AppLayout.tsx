@@ -73,7 +73,7 @@ export function AppLayout() {
       >
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-background/80 dark:bg-background/75 pointer-events-none" style={{ zIndex: 0 }} />
-        <AppSidebar />
+        <AppSidebar style={{ position: "relative", zIndex: 1 }} />
         <div className="flex-1 flex flex-col min-w-0">
           {/* ── HEADER ── */}
           <header
