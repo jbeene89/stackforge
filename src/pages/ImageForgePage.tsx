@@ -321,6 +321,19 @@ export default function ImageForgePage() {
         </Button>
       </div>
 
+      {/* Gallery */}
+      <AnimatePresence>
+        {showGallery && (
+          <ForgeGallery
+            onClose={() => setShowGallery(false)}
+            onSelect={(item) => {
+              setResult({ image: item.image, synthesizedPrompt: item.prompt, perspectives: [] });
+              setStage("done");
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Mode Tabs */}
       <Tabs defaultValue="council" className="space-y-4">
         <TabsList className="bg-muted/50">
