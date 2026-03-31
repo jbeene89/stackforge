@@ -520,7 +520,7 @@ export default function LandingPage() {
       <SaleBanner />
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section ref={heroRef} className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
+      <section ref={heroRef} className="relative pt-28 sm:pt-40 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         {/* gradient-mesh removed to prevent flicker with bg image */}
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
