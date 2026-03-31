@@ -12,10 +12,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Hammer, Heart, Zap, ShieldAlert, Settings2,
   Loader2, Download, Copy, Image as ImageIcon, Database, Mic, MicOff,
-  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare, Wand2,
+  ChevronDown, ChevronUp, RotateCcw, Save, Users, MessageSquare, Wand2, GalleryHorizontalEnd,
 } from "lucide-react";
 import VisualChatroom from "@/components/VisualChatroom";
 import ImageAnimator from "@/components/ImageAnimator";
+import ForgeGallery from "@/components/ForgeGallery";
+import { saveToGallery } from "@/lib/forgeGallery";
 
 // ─── The 5 Perspective Characters ───
 const CHARACTERS = [
