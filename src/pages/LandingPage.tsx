@@ -385,7 +385,7 @@ export default function LandingPage() {
       }}
     >
       {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-background/70 dark:bg-background/65 pointer-events-none" />
+      <div className="absolute inset-0 bg-background/50 dark:bg-background/45 pointer-events-none" />
       <SEOHead
         title="No-Code AI Agent & Pipeline Builder"
         description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
