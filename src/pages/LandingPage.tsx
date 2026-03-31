@@ -467,7 +467,7 @@ export default function LandingPage() {
 
       {/* ════════════════════ HERO ════════════════════ */}
       <section ref={heroRef} className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
-        <div className="absolute inset-0 gradient-mesh" />
+        {/* gradient-mesh removed to prevent flicker with bg image */}
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
