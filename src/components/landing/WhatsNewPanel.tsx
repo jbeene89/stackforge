@@ -123,7 +123,7 @@ export function WhatsNewPanel() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-background/30 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none lg:pointer-events-none"
+              className="fixed inset-0 z-40 bg-background/30 backdrop-blur-sm"
               onClick={() => setOpen(false)}
             />
             {/* Side panel */}
