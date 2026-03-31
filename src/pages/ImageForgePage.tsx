@@ -580,6 +580,14 @@ export default function ImageForgePage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => setShowAnimator(true)}
+                  className="text-xs gap-1"
+                >
+                  <Wand2 className="h-3 w-3" /> Animate
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={saveToDataset}
                   disabled={savingToDataset}
                   className="text-xs"
@@ -598,6 +606,7 @@ export default function ImageForgePage() {
                 >
                   {showDetails ? "Hide" : "Show"} Details
                   {showDetails ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />}
+                </Button>
                 </Button>
               </div>
 
