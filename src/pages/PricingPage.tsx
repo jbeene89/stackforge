@@ -398,6 +398,14 @@ export default function PricingPage() {
           {/* ── Top Up Tab ── */}
           <TabsContent value="topup">
             <div className="space-y-4">
+              {isSaleActive() && (
+                <div className="rounded-xl bg-gradient-to-r from-forge-amber/20 via-forge-gold/20 to-forge-amber/20 border border-forge-gold/30 p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                  <Zap className="h-4 w-4 text-forge-amber animate-pulse shrink-0" />
+                  <p className="text-xs sm:text-sm font-semibold text-foreground">
+                    🔥 Easter Sale — <span className="text-forge-amber">50% off</span> all credit packs! Prices shown reflect the discount.
+                  </p>
+                </div>
+              )}
               <div className="glass rounded-xl p-3 sm:p-4">
                 <h3 className="font-semibold flex items-center gap-2 mb-1 text-sm sm:text-base">
                   <ShoppingCart className="h-4 w-4 text-primary" /> Buy Credit Packs
@@ -405,50 +413,64 @@ export default function PricingPage() {
                 <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">Need more credits? Top up instantly — credits never expire.</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                  {TOPUP_PACKS.map((pack, idx) => (
-                    <motion.div
-                      key={pack.priceId}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.06 }}
-                      className={cn(
-                        "rounded-xl p-4 sm:p-5 flex flex-row sm:flex-col items-center sm:text-center relative gap-3 sm:gap-0",
-                        pack.highlight ? "glass glow-primary border-primary/30" : "glass"
-                      )}
-                    >
-                      {pack.highlight && (
-                        <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 gradient-primary text-primary-foreground text-[10px] px-3 hidden sm:inline-flex">
-                          {pack.label}
-                        </Badge>
-                      )}
-                      {!pack.highlight && pack.label === "Best Value" && (
-                        <Badge variant="outline" className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] px-3 hidden sm:inline-flex">
-                          {pack.label}
-                        </Badge>
-                      )}
-                      <div className="flex items-center gap-1.5 sm:mb-2 sm:mt-1 shrink-0">
-                        <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                        <span className="text-2xl sm:text-3xl font-extrabold">{pack.credits.toLocaleString()}</span>
-                      </div>
-                      <div className="flex-1 sm:flex-initial">
-                        <p className="text-xs text-muted-foreground sm:mb-1">{pack.label} · credits</p>
-                        <p className="text-base sm:text-lg font-bold">${pack.price} <span className="text-[10px] sm:text-[11px] text-muted-foreground font-normal">(${(pack.price / pack.credits * 100).toFixed(1)}¢/cr)</span></p>
-                      </div>
-                      <Button
-                        className={cn("min-h-[40px] shrink-0 sm:w-full sm:mt-3", pack.highlight && "gradient-primary text-primary-foreground")}
-                        variant={pack.highlight ? "default" : "outline"}
-                        size="sm"
-                        disabled={topUpLoading === pack.priceId}
-                        onClick={() => handleTopUp(pack.priceId)}
-                      >
-                        {topUpLoading === pack.priceId ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>Buy <ArrowRight className="ml-1 h-3 w-3" /></>
+                  {TOPUP_PACKS.map((pack, idx) => {
+                    const saleActive = isSaleActive();
+                    const salePrice = Math.round(pack.price * 50) / 100; // 50% off
+                    const displayPrice = saleActive ? salePrice : pack.price;
+                    const perCredit = (displayPrice / pack.credits * 100).toFixed(1);
+                    return (
+                      <motion.div
+                        key={pack.priceId}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.06 }}
+                        className={cn(
+                          "rounded-xl p-4 sm:p-5 flex flex-row sm:flex-col items-center sm:text-center relative gap-3 sm:gap-0",
+                          pack.highlight ? "glass glow-primary border-primary/30" : "glass"
                         )}
-                      </Button>
-                    </motion.div>
-                  ))}
+                      >
+                        {pack.highlight && (
+                          <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 gradient-primary text-primary-foreground text-[10px] px-3 hidden sm:inline-flex">
+                            {pack.label}
+                          </Badge>
+                        )}
+                        {!pack.highlight && pack.label === "Best Value" && (
+                          <Badge variant="outline" className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] px-3 hidden sm:inline-flex">
+                            {pack.label}
+                          </Badge>
+                        )}
+                        {saleActive && (
+                          <Badge className="absolute -top-2.5 right-3 bg-destructive text-destructive-foreground text-[9px] px-2">50% OFF</Badge>
+                        )}
+                        <div className="flex items-center gap-1.5 sm:mb-2 sm:mt-1 shrink-0">
+                          <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          <span className="text-2xl sm:text-3xl font-extrabold">{pack.credits.toLocaleString()}</span>
+                        </div>
+                        <div className="flex-1 sm:flex-initial">
+                          <p className="text-xs text-muted-foreground sm:mb-1">{pack.label} · credits</p>
+                          <div className="flex items-baseline gap-1.5">
+                            {saleActive && (
+                              <span className="text-sm text-muted-foreground/60 line-through">${pack.price}</span>
+                            )}
+                            <p className="text-base sm:text-lg font-bold">${displayPrice.toFixed(2)} <span className="text-[10px] sm:text-[11px] text-muted-foreground font-normal">({perCredit}¢/cr)</span></p>
+                          </div>
+                        </div>
+                        <Button
+                          className={cn("min-h-[40px] shrink-0 sm:w-full sm:mt-3", pack.highlight && "gradient-primary text-primary-foreground")}
+                          variant={pack.highlight ? "default" : "outline"}
+                          size="sm"
+                          disabled={topUpLoading === pack.priceId}
+                          onClick={() => handleTopUp(pack.priceId)}
+                        >
+                          {topUpLoading === pack.priceId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>Buy <ArrowRight className="ml-1 h-3 w-3" /></>
+                          )}
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
