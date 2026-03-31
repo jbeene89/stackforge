@@ -17,6 +17,9 @@ const CDPT_CALLS_PER_SAMPLE = 14; // 5 perspectives + cross-challenge + synthesi
 const POPCORN_CALLS_PER_SAMPLE = 6;
 const ADVANCED_MODE_CALLS = 4; // per sample, average across modes
 
+const SALE_END = new Date("2026-04-06T23:59:59").getTime();
+const isSaleActive = () => Date.now() < SALE_END;
+
 const CREDIT_PACKS = [
   { credits: 100, price: 4.99 },
   { credits: 500, price: 19.99 },
