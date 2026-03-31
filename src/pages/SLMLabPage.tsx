@@ -2384,6 +2384,7 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
 const HARDWARE_PROFILES = {
   low_vram: { label: "🪶 Low VRAM (2-4 GB)", desc: "Integrated GPU or old card", defaults: { batchSize: 1, loraRank: 8, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: true } },
   mid_vram: { label: "⚡ Mid VRAM (4-8 GB)", desc: "GTX 1060/1070, RTX 2060", defaults: { batchSize: 2, loraRank: 16, maxSeqLen: 2048, gradientCheckpoint: true, cpuOffload: false } },
+  amd_rocm: { label: "🔴 AMD ROCm (RX 580, etc.)", desc: "AMD GPU with ROCm support", defaults: { batchSize: 2, loraRank: 16, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: false } },
   cpu_only: { label: "🖥️ CPU Only (16GB+ RAM)", desc: "No GPU — uses RAM instead", defaults: { batchSize: 1, loraRank: 8, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: true } },
   good_gpu: { label: "🔥 Good GPU (8+ GB)", desc: "RTX 3060+, A100, etc.", defaults: { batchSize: 4, loraRank: 32, maxSeqLen: 2048, gradientCheckpoint: false, cpuOffload: false } },
 } as const;
