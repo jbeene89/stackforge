@@ -66,6 +66,9 @@ const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage")
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const HarvestInboxPage = lazy(() => import("./pages/HarvestInboxPage"));
 const AIHubPage = lazy(() => import("./pages/AIHubPage"));
+const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
+const SystemHealthPage = lazy(() => import("./pages/admin/SystemHealthPage"));
+const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -139,6 +142,9 @@ const App = () => (
                   <Route path="/training" element={<TrainingProgressPage />} />
                   <Route path="/runs" element={<RunsPage />} />
                   <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/admin/users" element={<UserManagementPage />} />
+                  <Route path="/admin/health" element={<SystemHealthPage />} />
+                  <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
                   <Route path="/account" element={<AccountPage />} />
                 </Route>
 

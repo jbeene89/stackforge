@@ -6,13 +6,14 @@ import {
   ScrollText, Flame, Rocket, Image, TabletSmartphone, LogOut, Store,
   Smartphone, SwatchBook, Terminal, Server, ChevronRight, ChevronDown,
   Zap, Hammer, Send, Compass, Cog, ToggleLeft, ToggleRight,
-  Database, Sparkles,
+  Database, Sparkles, Users, HeartPulse, BarChart3, Megaphone, ShieldCheck,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
+import { useCredits } from "@/hooks/useCredits";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel,
@@ -286,6 +287,9 @@ const advancedSections: NavSection[] = [
 
 const adminItems: NavItem[] = [
   { title: "Admin", url: "/admin", icon: Shield, tip: "Platform administration and user management" },
+  { title: "User Management", url: "/admin/users", icon: Users, tip: "Search, view, and manage platform users" },
+  { title: "System Health", url: "/admin/health", icon: HeartPulse, tip: "Real-time system metrics and health checks" },
+  { title: "Analytics", url: "/admin/analytics", icon: BarChart3, tip: "Platform-wide usage analytics" },
   { title: "Settings", url: "/account", icon: Settings, tip: "Account settings, API keys, and preferences" },
 ];
 
@@ -297,6 +301,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { signOut } = useAuth();
+  const { data: credits } = useCredits();
+  const isAdmin = credits?.tier === "admin";
 
   const [simpleMode, setSimpleMode] = useState(() => {
     const saved = localStorage.getItem("soupy-sidebar-mode");
@@ -489,19 +495,29 @@ export function AppSidebar() {
 
         <SidebarSeparator style={{ background: "hsl(var(--border))", margin: "4px 0" }} />
 
-        {/* Admin — always flat */}
+        {/* Admin section — only visible to admin tier */}
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel
               className="sl-group-label px-3 mb-1"
-              style={{ fontSize: 9, letterSpacing: "0.35em", color: "hsl(var(--muted-foreground))", opacity: 0.7, fontWeight: 700 }}
+              style={{
+                fontSize: 9, letterSpacing: "0.35em",
+                color: isAdmin ? "hsl(var(--forge-emerald))" : "hsl(var(--muted-foreground))",
+                opacity: 0.7, fontWeight: 700,
+              }}
             >
-              SYSTEM
+              {isAdmin ? "⚙ ADMIN" : "SYSTEM"}
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminItems.map((item) => renderNavItem(item, "hsl(var(--muted-foreground))"))}
+              {adminItems
+                .filter((item) => {
+                  // Non-admin users only see Settings
+                  if (!isAdmin && item.url.startsWith("/admin")) return false;
+                  return true;
+                })
+                .map((item) => renderNavItem(item, isAdmin ? "hsl(var(--forge-emerald))" : "hsl(var(--muted-foreground))"))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
