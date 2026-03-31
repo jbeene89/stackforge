@@ -639,6 +639,16 @@ export default function ImageForgePage() {
             </Card>
           </motion.div>
         )}
+       </AnimatePresence>
+
+      {/* ─── Image Animator ─── */}
+      <AnimatePresence>
+        {showAnimator && result?.image && (
+          <ImageAnimator
+            imageSrc={result.image}
+            onClose={() => setShowAnimator(false)}
+          />
+        )}
       </AnimatePresence>
 
       {/* ─── Prompt Input (bottom, like a chat input) ─── */}
