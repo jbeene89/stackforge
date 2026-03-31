@@ -385,7 +385,7 @@ export default function LandingPage() {
       }}
     >
       {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-background/70 dark:bg-background/65 pointer-events-none" />
+      <div className="absolute inset-0 bg-background/50 dark:bg-background/45 pointer-events-none" />
       <SEOHead
         title="No-Code AI Agent & Pipeline Builder"
         description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
@@ -467,7 +467,7 @@ export default function LandingPage() {
 
       {/* ════════════════════ HERO ════════════════════ */}
       <section ref={heroRef} className="relative pt-20 sm:pt-32 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
-        <div className="absolute inset-0 gradient-mesh" />
+        {/* gradient-mesh removed to prevent flicker with bg image */}
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>

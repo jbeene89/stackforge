@@ -77,7 +77,7 @@ export function AppLayout() {
         }}
       >
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-background/80 dark:bg-background/75 pointer-events-none" />
+        <div className="absolute inset-0 bg-background/55 dark:bg-background/50 pointer-events-none" />
         <div className="relative z-10 flex w-full min-h-screen">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
