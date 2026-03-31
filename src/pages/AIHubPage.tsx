@@ -141,8 +141,8 @@ export default function AIHubPage() {
 
     if (selectedEntity.projectId) {
       actions.push(
-        { label: "Open Project", icon: Layers, color: "text-primary", onClick: () => navigate(`/projects/${selectedEntity.projectId}`) },
-        { label: "Run", icon: Play, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate("/runs") },
+        { label: "Open Project", description: "View project details, settings, and history", icon: Layers, color: "text-primary", onClick: () => navigate(`/projects/${selectedEntity.projectId}`) },
+        { label: "Run", description: "Execute the project pipeline and view results", icon: Play, color: "text-[hsl(var(--forge-emerald))]", onClick: () => navigate("/runs") },
       );
     }
 
