@@ -330,6 +330,14 @@ export default function ImageForgePage() {
               setResult({ image: item.image, synthesizedPrompt: item.prompt, perspectives: [] });
               setStage("done");
             }}
+            onReforge={(item) => {
+              setPrompt(item.prompt);
+              setResult({ image: item.image, synthesizedPrompt: item.prompt, perspectives: [] });
+              setSpokenResults([]);
+              setActiveSpeaker(-1);
+              setStage("done");
+              setShowGallery(false);
+            }}
           />
         )}
       </AnimatePresence>
