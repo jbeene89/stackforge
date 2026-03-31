@@ -19,6 +19,7 @@ import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 import { ForgeDoodle } from "@/components/landing/ForgeDoodle";
 import { PhotoTransform } from "@/components/landing/PhotoTransform";
+import { WhatsNewPanel } from "@/components/landing/WhatsNewPanel";
 
 // ------- SALE COUNTDOWN BANNER -------
 
