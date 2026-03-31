@@ -2057,9 +2057,9 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
       )}
 
       {/* Cognitive Fingerprint */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-primary/20 bg-primary/5 relative z-10">
         <CardContent className="py-4 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Brain className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold">Cognitive Fingerprint</span>
@@ -2067,10 +2067,13 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
             </div>
             {!fingerprint ? (
               <Button
-                onClick={() => generateFingerprint.mutate({ dataset_id: dataset.id })}
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  generateFingerprint.mutate({ dataset_id: dataset.id });
+                }}
                 disabled={generateFingerprint.isPending || (samples?.length || 0) < 5}
-                variant="outline"
-                className="text-xs border-primary/30 text-primary hover:bg-primary/10"
+                className="text-xs gradient-primary text-primary-foreground hover:opacity-90 shrink-0"
               >
                 {generateFingerprint.isPending ? <RotateCcw className="h-3 w-3 mr-1 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1" />}
                 {generateFingerprint.isPending ? "Analyzing..." : "Extract Fingerprint"}
@@ -2079,17 +2082,18 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
               <Button
                 onClick={() => setShowFingerprint(!showFingerprint)}
                 variant="ghost"
-                className="text-xs"
+                size="sm"
+                className="text-xs shrink-0"
               >
                 {showFingerprint ? "Hide" : "View"} <ChevronDown className={`h-3 w-3 ml-1 transition-transform ${showFingerprint ? "rotate-180" : ""}`} />
               </Button>
             )}
           </div>
           {!fingerprint && (samples?.length || 0) < 5 && (
-            <p className="text-[11px] text-muted-foreground">Need at least 5 samples to generate a fingerprint.</p>
+            <p className="text-[11px] text-muted-foreground">Need at least 5 approved or pending samples to generate a fingerprint. You have {samples?.length || 0} so far.</p>
           )}
           {!fingerprint && (samples?.length || 0) >= 5 && (
-            <p className="text-[11px] text-muted-foreground">Extract your cognitive fingerprint to supercharge future data generation. The pipeline will analyze through YOUR thinking lens.</p>
+            <p className="text-[11px] text-muted-foreground">Click <strong>Extract Fingerprint</strong> above to analyze your thinking patterns and supercharge future data generation.</p>
           )}
           {fingerprint && showFingerprint && (
             <div className="space-y-2 text-xs">
