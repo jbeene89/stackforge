@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Crown, Flame, Zap, Star } from "lucide-react";
+import { Crown, Flame, Zap, Star, ShieldCheck } from "lucide-react";
 
-export type TierName = "free" | "builder" | "pro";
+export type TierName = "free" | "builder" | "pro" | "admin";
 
 const tierConfig: Record<TierName, {
   label: string;
