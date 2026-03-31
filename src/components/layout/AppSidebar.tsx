@@ -85,6 +85,7 @@ const simpleSections: NavSection[] = [
         desc: "Your overview & quick actions",
         items: [
           { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Overview of your projects and activity", desc: "See everything at a glance" },
+          { title: "AI Hub", url: "/ai-hub", icon: Compass, tip: "All your AIs in one place — click to see actions", desc: "Your AIs, one click away", hero: true, accent: "#00E5FF" },
           { title: "Projects", url: "/projects", icon: FolderOpen, tip: "Manage your projects", desc: "All your apps and tools" },
         ],
       },
