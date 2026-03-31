@@ -298,16 +298,27 @@ export default function ImageForgePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-display font-bold tracking-tight flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl gradient-primary glow-primary flex items-center justify-center">
-            <ImageIcon className="h-5 w-5 text-primary-foreground" />
-          </div>
-          Image Forge
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Five minds, one vision — council mode or unrestricted visual chatroom.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-display font-bold tracking-tight flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl gradient-primary glow-primary flex items-center justify-center">
+              <ImageIcon className="h-5 w-5 text-primary-foreground" />
+            </div>
+            Image Forge
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Five minds, one vision — council mode or unrestricted visual chatroom.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowGallery(g => !g)}
+          className="gap-1.5 mt-1"
+        >
+          <GalleryHorizontalEnd className="h-4 w-4" />
+          Gallery
+        </Button>
       </div>
 
       {/* Mode Tabs */}
