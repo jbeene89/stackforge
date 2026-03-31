@@ -287,6 +287,9 @@ const advancedSections: NavSection[] = [
 
 const adminItems: NavItem[] = [
   { title: "Admin", url: "/admin", icon: Shield, tip: "Platform administration and user management" },
+  { title: "User Management", url: "/admin/users", icon: Users, tip: "Search, view, and manage platform users" },
+  { title: "System Health", url: "/admin/health", icon: HeartPulse, tip: "Real-time system metrics and health checks" },
+  { title: "Analytics", url: "/admin/analytics", icon: BarChart3, tip: "Platform-wide usage analytics" },
   { title: "Settings", url: "/account", icon: Settings, tip: "Account settings, API keys, and preferences" },
 ];
 
