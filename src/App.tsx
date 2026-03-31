@@ -65,6 +65,7 @@ const ImageForgePage = lazy(() => import("./pages/ImageForgePage"));
 const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const HarvestInboxPage = lazy(() => import("./pages/HarvestInboxPage"));
+const AIHubPage = lazy(() => import("./pages/AIHubPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -101,6 +102,7 @@ const App = () => (
                 {/* Protected app routes */}
                 <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                   <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/ai-hub" element={<AIHubPage />} />
                   <Route path="/projects" element={<ProjectsPage />} />
                   <Route path="/projects/:id" element={<ProjectPage />} />
                   <Route path="/modules" element={<ModulesPage />} />
