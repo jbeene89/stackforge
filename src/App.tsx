@@ -102,6 +102,7 @@ const App = () => (
                 {/* Protected app routes */}
                 <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                   <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/ai-hub" element={<AIHubPage />} />
                   <Route path="/projects" element={<ProjectsPage />} />
                   <Route path="/projects/:id" element={<ProjectPage />} />
                   <Route path="/modules" element={<ModulesPage />} />
