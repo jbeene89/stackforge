@@ -78,6 +78,58 @@ export function RadialActionRing({ actions, isOpen, onClose, radius = 180 }: Rad
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             />
 
+            {/* Particle field */}
+            {Array.from({ length: 18 }).map((_, i) => {
+              const angle = (i / 18) * Math.PI * 2;
+              const orbitRadius = 30 + (i % 3) * 25;
+              const size = 2 + (i % 3);
+              const duration = 4 + (i % 5) * 1.5;
+              const delay = i * 0.12;
+              return (
+                <motion.div
+                  key={`particle-${i}`}
+                  className="absolute rounded-full"
+                  style={{
+                    width: size,
+                    height: size,
+                    background: i % 2 === 0
+                      ? "hsl(var(--primary) / 0.7)"
+                      : "hsl(var(--forge-cyan) / 0.6)",
+                    boxShadow: i % 2 === 0
+                      ? "0 0 6px hsl(var(--primary) / 0.5)"
+                      : "0 0 6px hsl(var(--forge-cyan) / 0.4)",
+                    left: "50%",
+                    top: "50%",
+                  }}
+                  initial={{ opacity: 0, x: 0, y: 0 }}
+                  animate={{
+                    opacity: [0, 0.8, 0.4, 0.8, 0],
+                    x: [
+                      Math.cos(angle) * orbitRadius * 0.3,
+                      Math.cos(angle + Math.PI * 0.5) * orbitRadius,
+                      Math.cos(angle + Math.PI) * orbitRadius * 1.1,
+                      Math.cos(angle + Math.PI * 1.5) * orbitRadius,
+                      Math.cos(angle + Math.PI * 2) * orbitRadius * 0.3,
+                    ],
+                    y: [
+                      Math.sin(angle) * orbitRadius * 0.3,
+                      Math.sin(angle + Math.PI * 0.5) * orbitRadius,
+                      Math.sin(angle + Math.PI) * orbitRadius * 1.1,
+                      Math.sin(angle + Math.PI * 1.5) * orbitRadius,
+                      Math.sin(angle + Math.PI * 2) * orbitRadius * 0.3,
+                    ],
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration,
+                    delay,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
+              );
+            })}
+
             {/* Center core */}
             <motion.div
               className="absolute flex items-center justify-center"
