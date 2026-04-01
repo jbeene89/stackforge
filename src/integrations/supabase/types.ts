@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      changelog_entries: {
+        Row: {
+          active: boolean
+          created_at: string
+          date: string
+          description: string
+          icon: string
+          id: string
+          sort_order: number
+          tag: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          date: string
+          description: string
+          icon?: string
+          id?: string
+          sort_order?: number
+          tag?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          date?: string
+          description?: string
+          icon?: string
+          id?: string
+          sort_order?: number
+          tag?: string
+          title?: string
+        }
+        Relationships: []
+      }
       cognitive_fingerprints: {
         Row: {
           created_at: string
