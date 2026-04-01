@@ -83,6 +83,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             
+            <ChunkErrorBoundary>
             <Suspense fallback={null}>
               <Routes>
                 {/* Public routes */}
