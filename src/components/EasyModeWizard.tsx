@@ -45,6 +45,16 @@ export function EasyModeWizard({ onCreateDataset, onStartInterview, onUsePreset,
   const [modelName, setModelName] = useState("");
   const [modelDescription, setModelDescription] = useState("");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [dsSearch, setDsSearch] = useState("");
+
+  const filteredExisting = useMemo(() => {
+    if (!existingDatasets) return [];
+    if (!dsSearch.trim()) return existingDatasets;
+    const q = dsSearch.toLowerCase();
+    return existingDatasets.filter(ds =>
+      ds.name.toLowerCase().includes(q) || ds.domain.toLowerCase().includes(q)
+    );
+  }, [existingDatasets, dsSearch]);
 
   const steps: WizardStep[] = ["welcome", "data-choice", dataChoice === "preset" ? "preset-pick" : "name-model", "ready"];
   const currentIndex = steps.indexOf(wizStep);
