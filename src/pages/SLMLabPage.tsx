@@ -1572,10 +1572,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </div>
 
             <div className="flex items-center gap-3">
-              <Button onClick={() => videoUploadRef.current?.click()} variant="outline" className="flex-1" disabled={videoExtracting}>
-                <Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}
-              </Button>
-              <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="hidden" onChange={handleVideoUpload} />
+              <label className="flex-1 cursor-pointer">
+                <Button variant="outline" className="w-full" asChild disabled={videoExtracting}>
+                  <span><Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}</span>
+                </Button>
+                <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="sr-only" onChange={handleVideoUpload} />
+              </label>
             </div>
 
             {videoExtracting && (
