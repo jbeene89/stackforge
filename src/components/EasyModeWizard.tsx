@@ -125,8 +125,18 @@ export function EasyModeWizard({ onCreateDataset, onStartInterview, onUsePreset,
                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
                       <div className="relative flex justify-center"><span className="bg-background px-3 text-xs text-muted-foreground">or continue where you left off</span></div>
                     </div>
-                    <div className="grid gap-2 max-w-sm mx-auto text-left">
-                      {existingDatasets.slice(0, 3).map(ds => (
+                    {existingDatasets.length > 3 && (
+                      <div className="max-w-sm mx-auto">
+                        <Input
+                          value={dsSearch}
+                          onChange={e => setDsSearch(e.target.value)}
+                          placeholder="Search datasets..."
+                          className="text-sm h-8"
+                        />
+                      </div>
+                    )}
+                    <div className="grid gap-2 max-w-sm mx-auto text-left max-h-[180px] overflow-y-auto">
+                      {filteredExisting.slice(0, 10).map(ds => (
                         <button
                           key={ds.id}
                           onClick={() => onSelectExisting(ds.id)}
