@@ -443,12 +443,24 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
             <p className="text-sm text-muted-foreground">Pick up where you left off</p>
           </div>
           {existingDatasets.length > 3 && (
-            <Input
-              value={datasetSearch}
-              onChange={e => setDatasetSearch(e.target.value)}
-              placeholder="Search datasets..."
-              className="text-sm"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={datasetSearch}
+                onChange={e => setDatasetSearch(e.target.value)}
+                placeholder="Search datasets..."
+                className="text-sm flex-1"
+              />
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                <SelectTrigger className="w-[130px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="name">Name A–Z</SelectItem>
+                  <SelectItem value="samples">Most Samples</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           )}
           <div className="grid gap-2 max-h-[240px] overflow-y-auto">
             {filteredDatasets.map(ds => (
