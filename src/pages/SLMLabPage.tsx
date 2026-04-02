@@ -3473,7 +3473,7 @@ export default function SLMLabPage() {
       <StepIndicator currentStep={step} />
 
       <div className="flex-1 overflow-auto">
-        {step === 1 && <Step1CreateDataset onCreated={handleDatasetCreated} />}
+        {step === 1 && <Step1CreateDataset onCreated={handleDatasetCreated} onSelectExisting={handleSelectExisting} existingDatasets={datasets || []} />}
         {step === 2 && activeDataset && <Step2AddData dataset={activeDataset} onNext={() => setStep(3)} />}
         {step === 3 && activeDataset && <Step3Review dataset={activeDataset} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
         {step === 4 && activeDataset && <Step4Export dataset={activeDataset} onBack={() => setStep(3)} />}
