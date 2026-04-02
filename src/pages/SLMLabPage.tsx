@@ -1476,10 +1476,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <Button onClick={() => fileUploadRef.current?.click()} variant="outline" className="flex-1">
-                <Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}
-              </Button>
-              <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
+              <label className="flex-1 cursor-pointer">
+                <Button variant="outline" className="w-full" asChild>
+                  <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}</span>
+                </Button>
+                <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="sr-only" onChange={handleRawFileUpload} />
+              </label>
             </div>
             {fileName && (
               <div className="space-y-3">
