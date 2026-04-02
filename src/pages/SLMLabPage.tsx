@@ -397,7 +397,17 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("general");
   const [description, setDescription] = useState("");
+  const [datasetSearch, setDatasetSearch] = useState("");
   const create = useCreateDataset();
+
+  const filteredDatasets = useMemo(() => {
+    if (!existingDatasets) return [];
+    if (!datasetSearch.trim()) return existingDatasets;
+    const q = datasetSearch.toLowerCase();
+    return existingDatasets.filter(ds =>
+      ds.name.toLowerCase().includes(q) || ds.domain.toLowerCase().includes(q)
+    );
+  }, [existingDatasets, datasetSearch]);
 
   const domains = [
     { value: "general", label: "🌐 General Purpose", desc: "Good for chatbots and assistants" },
