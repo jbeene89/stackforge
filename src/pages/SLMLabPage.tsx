@@ -3433,6 +3433,8 @@ export default function SLMLabPage() {
           onStartInterview={() => {}}
           onUsePreset={handleEasyPreset}
           onSwitchToExpert={() => handleModeSelect("expert")}
+          onSelectExisting={handleSelectExisting}
+          existingDatasets={datasets || []}
         />
       </div>
     );
