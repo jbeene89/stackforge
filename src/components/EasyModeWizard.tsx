@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -45,6 +45,16 @@ export function EasyModeWizard({ onCreateDataset, onStartInterview, onUsePreset,
   const [modelName, setModelName] = useState("");
   const [modelDescription, setModelDescription] = useState("");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [dsSearch, setDsSearch] = useState("");
+
+  const filteredExisting = useMemo(() => {
+    if (!existingDatasets) return [];
+    if (!dsSearch.trim()) return existingDatasets;
+    const q = dsSearch.toLowerCase();
+    return existingDatasets.filter(ds =>
+      ds.name.toLowerCase().includes(q) || ds.domain.toLowerCase().includes(q)
+    );
+  }, [existingDatasets, dsSearch]);
 
   const steps: WizardStep[] = ["welcome", "data-choice", dataChoice === "preset" ? "preset-pick" : "name-model", "ready"];
   const currentIndex = steps.indexOf(wizStep);
@@ -115,8 +125,18 @@ export function EasyModeWizard({ onCreateDataset, onStartInterview, onUsePreset,
                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
                       <div className="relative flex justify-center"><span className="bg-background px-3 text-xs text-muted-foreground">or continue where you left off</span></div>
                     </div>
-                    <div className="grid gap-2 max-w-sm mx-auto text-left">
-                      {existingDatasets.slice(0, 3).map(ds => (
+                    {existingDatasets.length > 3 && (
+                      <div className="max-w-sm mx-auto">
+                        <Input
+                          value={dsSearch}
+                          onChange={e => setDsSearch(e.target.value)}
+                          placeholder="Search datasets..."
+                          className="text-sm h-8"
+                        />
+                      </div>
+                    )}
+                    <div className="grid gap-2 max-w-sm mx-auto text-left max-h-[180px] overflow-y-auto">
+                      {filteredExisting.slice(0, 10).map(ds => (
                         <button
                           key={ds.id}
                           onClick={() => onSelectExisting(ds.id)}

@@ -397,7 +397,17 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("general");
   const [description, setDescription] = useState("");
+  const [datasetSearch, setDatasetSearch] = useState("");
   const create = useCreateDataset();
+
+  const filteredDatasets = useMemo(() => {
+    if (!existingDatasets) return [];
+    if (!datasetSearch.trim()) return existingDatasets;
+    const q = datasetSearch.toLowerCase();
+    return existingDatasets.filter(ds =>
+      ds.name.toLowerCase().includes(q) || ds.domain.toLowerCase().includes(q)
+    );
+  }, [existingDatasets, datasetSearch]);
 
   const domains = [
     { value: "general", label: "🌐 General Purpose", desc: "Good for chatbots and assistants" },
@@ -425,8 +435,16 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
             <h2 className="text-lg font-bold">Continue a Dataset</h2>
             <p className="text-sm text-muted-foreground">Pick up where you left off</p>
           </div>
-          <div className="grid gap-2">
-            {existingDatasets.map(ds => (
+          {existingDatasets.length > 3 && (
+            <Input
+              value={datasetSearch}
+              onChange={e => setDatasetSearch(e.target.value)}
+              placeholder="Search datasets..."
+              className="text-sm"
+            />
+          )}
+          <div className="grid gap-2 max-h-[240px] overflow-y-auto">
+            {filteredDatasets.map(ds => (
               <button
                 key={ds.id}
                 onClick={() => onSelectExisting(ds.id)}
