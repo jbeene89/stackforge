@@ -600,10 +600,12 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
               <p className="text-sm font-medium">Upload your {PROVIDER_INFO[provider].label} export</p>
               <p className="text-[10px] text-muted-foreground">Expected: {PROVIDER_INFO[provider].acceptedFiles}</p>
             </div>
-            <Button onClick={() => fileInputRef.current?.click()} variant="outline" size="sm">
-              <Upload className="h-3.5 w-3.5 mr-1.5" /> Choose File
-            </Button>
-            <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileUpload} />
+            <label className="cursor-pointer">
+              <Button variant="outline" size="sm" asChild>
+                <span><Upload className="h-3.5 w-3.5 mr-1.5" /> Choose File</span>
+              </Button>
+              <input ref={fileInputRef} type="file" accept=".json" className="sr-only" onChange={handleFileUpload} />
+            </label>
           </div>
         </CardContent>
       </Card>
@@ -1474,10 +1476,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <Button onClick={() => fileUploadRef.current?.click()} variant="outline" className="flex-1">
-                <Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}
-              </Button>
-              <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="hidden" onChange={handleRawFileUpload} />
+              <label className="flex-1 cursor-pointer">
+                <Button variant="outline" className="w-full" asChild>
+                  <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}</span>
+                </Button>
+                <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="sr-only" onChange={handleRawFileUpload} />
+              </label>
             </div>
             {fileName && (
               <div className="space-y-3">
@@ -1568,10 +1572,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </div>
 
             <div className="flex items-center gap-3">
-              <Button onClick={() => videoUploadRef.current?.click()} variant="outline" className="flex-1" disabled={videoExtracting}>
-                <Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}
-              </Button>
-              <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="hidden" onChange={handleVideoUpload} />
+              <label className="flex-1 cursor-pointer">
+                <Button variant="outline" className="w-full" asChild disabled={videoExtracting}>
+                  <span><Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}</span>
+                </Button>
+                <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="sr-only" onChange={handleVideoUpload} />
+              </label>
             </div>
 
             {videoExtracting && (
