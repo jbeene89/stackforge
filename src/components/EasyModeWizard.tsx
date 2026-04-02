@@ -20,11 +20,21 @@ const PRESET_DATASETS = [
   { id: "sales-coach", name: "Sales & Outreach Coach", description: "Build an AI that helps craft outreach messages, follow-ups, and sales strategies.", icon: "📈", samples: 30 },
 ];
 
+interface ExistingDataset {
+  id: string;
+  name: string;
+  sample_count: number;
+  domain: string;
+  status: string;
+}
+
 interface EasyModeWizardProps {
   onCreateDataset: (name: string, domain: string, description: string) => void;
   onStartInterview: () => void;
   onUsePreset: (presetId: string) => void;
   onSwitchToExpert: () => void;
+  onSelectExisting?: (id: string) => void;
+  existingDatasets?: ExistingDataset[];
 }
 
 type WizardStep = "welcome" | "data-choice" | "name-model" | "preset-pick" | "ready";
