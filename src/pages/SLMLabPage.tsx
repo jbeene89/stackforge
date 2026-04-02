@@ -393,7 +393,7 @@ function Step0Interview({ datasetId, domain, onDone, onSkip }: { datasetId: stri
 }
 
 // ── Step 1: Create Dataset ──
-function Step1CreateDataset({ onCreated }: { onCreated: (id: string) => void }) {
+function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: { onCreated: (id: string) => void; onSelectExisting?: (id: string) => void; existingDatasets?: TrainingDataset[] }) {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("general");
   const [description, setDescription] = useState("");
@@ -418,6 +418,40 @@ function Step1CreateDataset({ onCreated }: { onCreated: (id: string) => void }) 
 
   return (
     <div className="max-w-lg mx-auto py-8 px-4 space-y-6 animate-fade-in">
+      {/* Existing datasets */}
+      {existingDatasets && existingDatasets.length > 0 && onSelectExisting && (
+        <div className="space-y-3">
+          <div className="text-center space-y-1">
+            <h2 className="text-lg font-bold">Continue a Dataset</h2>
+            <p className="text-sm text-muted-foreground">Pick up where you left off</p>
+          </div>
+          <div className="grid gap-2">
+            {existingDatasets.map(ds => (
+              <button
+                key={ds.id}
+                onClick={() => onSelectExisting(ds.id)}
+                className="text-left rounded-lg px-4 py-3 border border-border hover:border-primary/40 hover:bg-primary/5 transition-all flex items-center gap-3 group"
+              >
+                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Database className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{ds.name}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {ds.sample_count} samples · {ds.domain} · {ds.status}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+              </button>
+            ))}
+          </div>
+          <div className="relative py-2">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+            <div className="relative flex justify-center"><span className="bg-background px-3 text-xs text-muted-foreground">or create new</span></div>
+          </div>
+        </div>
+      )}
+
       <div className="text-center space-y-2">
         <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
           <Database className="h-8 w-8 text-primary" />
@@ -3399,6 +3433,8 @@ export default function SLMLabPage() {
           onStartInterview={() => {}}
           onUsePreset={handleEasyPreset}
           onSwitchToExpert={() => handleModeSelect("expert")}
+          onSelectExisting={handleSelectExisting}
+          existingDatasets={datasets || []}
         />
       </div>
     );
@@ -3439,7 +3475,7 @@ export default function SLMLabPage() {
       <StepIndicator currentStep={step} />
 
       <div className="flex-1 overflow-auto">
-        {step === 1 && <Step1CreateDataset onCreated={handleDatasetCreated} />}
+        {step === 1 && <Step1CreateDataset onCreated={handleDatasetCreated} onSelectExisting={handleSelectExisting} existingDatasets={datasets || []} />}
         {step === 2 && activeDataset && <Step2AddData dataset={activeDataset} onNext={() => setStep(3)} />}
         {step === 3 && activeDataset && <Step3Review dataset={activeDataset} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
         {step === 4 && activeDataset && <Step4Export dataset={activeDataset} onBack={() => setStep(3)} />}
