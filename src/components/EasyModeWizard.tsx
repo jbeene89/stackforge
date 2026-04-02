@@ -39,7 +39,7 @@ interface EasyModeWizardProps {
 
 type WizardStep = "welcome" | "data-choice" | "name-model" | "preset-pick" | "ready";
 
-export function EasyModeWizard({ onCreateDataset, onStartInterview, onUsePreset, onSwitchToExpert }: EasyModeWizardProps) {
+export function EasyModeWizard({ onCreateDataset, onStartInterview, onUsePreset, onSwitchToExpert, onSelectExisting, existingDatasets }: EasyModeWizardProps) {
   const [wizStep, setWizStep] = useState<WizardStep>("welcome");
   const [dataChoice, setDataChoice] = useState<"own" | "preset" | null>(null);
   const [modelName, setModelName] = useState("");
