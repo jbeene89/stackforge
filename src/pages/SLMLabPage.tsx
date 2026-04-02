@@ -398,16 +398,23 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
   const [domain, setDomain] = useState("general");
   const [description, setDescription] = useState("");
   const [datasetSearch, setDatasetSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "name" | "samples">("recent");
   const create = useCreateDataset();
 
   const filteredDatasets = useMemo(() => {
     if (!existingDatasets) return [];
-    if (!datasetSearch.trim()) return existingDatasets;
-    const q = datasetSearch.toLowerCase();
-    return existingDatasets.filter(ds =>
-      ds.name.toLowerCase().includes(q) || ds.domain.toLowerCase().includes(q)
-    );
-  }, [existingDatasets, datasetSearch]);
+    let list = [...existingDatasets];
+    if (datasetSearch.trim()) {
+      const q = datasetSearch.toLowerCase();
+      list = list.filter(ds =>
+        ds.name.toLowerCase().includes(q) || ds.domain.toLowerCase().includes(q)
+      );
+    }
+    if (sortBy === "name") list.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sortBy === "samples") list.sort((a, b) => b.sample_count - a.sample_count);
+    else list.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    return list;
+  }, [existingDatasets, datasetSearch, sortBy]);
 
   const domains = [
     { value: "general", label: "🌐 General Purpose", desc: "Good for chatbots and assistants" },
