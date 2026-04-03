@@ -11,6 +11,7 @@ const CREDIT_PACKS: Record<string, { credits: number; priceId: string }> = {
   "price_1TD61PEgO8H7yovM947iyWTY": { credits: 100, priceId: "price_1TD61PEgO8H7yovM947iyWTY" },
   "price_1TD62JEgO8H7yovM5HSx5vl2": { credits: 500, priceId: "price_1TD62JEgO8H7yovM5HSx5vl2" },
   "price_1TD62fEgO8H7yovMu0AHTCpt": { credits: 1500, priceId: "price_1TD62fEgO8H7yovMu0AHTCpt" },
+  "price_1TIGZ7EgO8H7yovMg2v4QyAq": { credits: 3000, priceId: "price_1TIGZ7EgO8H7yovMg2v4QyAq" },
 };
 
 serve(async (req) => {
