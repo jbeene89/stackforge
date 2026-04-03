@@ -25,16 +25,21 @@ export function TierProtectedRoute({
   }
 
   const userTier = credits?.tier || "free";
+  const isLocked = userTier !== "admin" && !allowedTiers.includes(userTier);
 
-  if (userTier !== "admin" && !allowedTiers.includes(userTier)) {
-    return (
-      <UpgradePrompt
-        featureName={featureName}
-        requiredTier={requiredTier}
-        currentTier={userTier}
-      />
-    );
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      {/* Always render the page — locked users see it blurred behind the overlay */}
+      <div className={isLocked ? "pointer-events-none select-none" : ""}>
+        {children}
+      </div>
+      {isLocked && (
+        <UpgradePrompt
+          featureName={featureName}
+          requiredTier={requiredTier}
+          currentTier={userTier}
+        />
+      )}
+    </>
+  );
 }
