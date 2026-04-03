@@ -41,7 +41,28 @@ const PIPELINE_STEPS = [
   { step: "—", label: "Buffer credits", detail: "Extra runs, tweaks, iterations", credits: 100, color: "hsl(var(--muted-foreground))" },
 ];
 
-interface CreditTopUpPacksProps {
+const WHY_OWN_AI = [
+  {
+    icon: Fingerprint,
+    title: "It thinks like you",
+    desc: "CDPT training encodes your reasoning style, domain knowledge, and decision patterns — not generic internet averages.",
+  },
+  {
+    icon: WifiOff,
+    title: "Runs offline forever",
+    desc: "Once trained, your SLM runs on your hardware with zero API calls, zero internet, zero monthly bills.",
+  },
+  {
+    icon: Lock,
+    title: "Your data stays yours",
+    desc: "Nothing leaves your machine. No training OpenAI's next model with your proprietary knowledge.",
+  },
+  {
+    icon: Brain,
+    title: "Surgical precision",
+    desc: "Selective Unlearning, Popcorn Injection, Perspective Training — reshape behavior in ways prompting never can.",
+  },
+];
   compact?: boolean;
   className?: string;
 }
