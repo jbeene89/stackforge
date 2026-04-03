@@ -27,6 +27,7 @@ import { motion } from "framer-motion";
 import { OnboardingTour, type OnboardingTourHandle } from "@/components/OnboardingTour";
 import { TourMenu } from "@/components/TourMenu";
 import { FirstWinAccelerator } from "@/components/FirstWinAccelerator";
+import { LowCreditsNudge } from "@/components/LowCreditsNudge";
 
 // ── FONTS ────────────────────────────────────────────────────────────────────
 const DashFonts = () => (
@@ -385,6 +386,9 @@ export default function DashboardPage() {
 
       {/* ── FIRST WIN ACCELERATOR ── */}
       <FirstWinAccelerator />
+
+      {/* ── LOW CREDITS NUDGE ── */}
+      <LowCreditsNudge />
 
       {/* ── INDEPENDENCE SCORECARD ── */}
       <div style={{ marginBottom: 32 }}>
