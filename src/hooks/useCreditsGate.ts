@@ -14,8 +14,8 @@ export function useCreditsGate(minCredits = 1) {
     (onSuccess: () => void) => {
       if (!credits || credits.credits_balance < minCredits) {
         toast.error("You're out of credits!", {
-          description: "Upgrade your plan or wait for your monthly reset.",
-          action: { label: "Upgrade", onClick: () => navigate("/pricing") },
+          description: "Grab a credit pack to keep building.",
+          action: { label: "Buy Credits", onClick: () => navigate("/pricing?tab=credits") },
         });
         return;
       }
