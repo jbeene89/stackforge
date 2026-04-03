@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Coins, Loader2, Sparkles, Zap, Image, MessageSquare, Bot, Layers, Rocket, Package } from "lucide-react";
+import { Coins, Loader2, Sparkles, Zap, Image, MessageSquare, Bot, Layers, Rocket, Package, ShieldCheck, Wifi, WifiOff, Brain, Fingerprint, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,29 @@ const PIPELINE_STEPS = [
   { step: "2", label: "Test & evaluate", detail: "~10 Council runs + inference", credits: 150, color: "hsl(var(--accent))" },
   { step: "3", label: "Deploy to device", detail: "Export, convert & ship", credits: 50, color: "hsl(var(--primary))" },
   { step: "—", label: "Buffer credits", detail: "Extra runs, tweaks, iterations", credits: 100, color: "hsl(var(--muted-foreground))" },
+];
+
+const WHY_OWN_AI = [
+  {
+    icon: Fingerprint,
+    title: "It thinks like you",
+    desc: "CDPT training encodes your reasoning style, domain knowledge, and decision patterns — not generic internet averages.",
+  },
+  {
+    icon: WifiOff,
+    title: "Runs offline forever",
+    desc: "Once trained, your SLM runs on your hardware with zero API calls, zero internet, zero monthly bills.",
+  },
+  {
+    icon: Lock,
+    title: "Your data stays yours",
+    desc: "Nothing leaves your machine. No training OpenAI's next model with your proprietary knowledge.",
+  },
+  {
+    icon: Brain,
+    title: "Surgical precision",
+    desc: "Selective Unlearning, Popcorn Injection, Perspective Training — reshape behavior in ways prompting never can.",
+  },
 ];
 
 interface CreditTopUpPacksProps {
@@ -275,6 +298,49 @@ export function CreditTopUpPacks({ compact = false, className = "" }: CreditTopU
             </div>
             <p className="text-[10px] text-muted-foreground/70 italic pt-1">
               * Based on ~100 CDPT training samples (~27 credits each), which produce ~500 cognitive function questions for your SLM.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Why this vs ChatGPT */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="rounded-xl border border-border/50 bg-card/50 p-5 space-y-4"
+      >
+        <p className="text-xs font-semibold text-foreground text-center">
+          Why build your own AI instead of using ChatGPT?
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {WHY_OWN_AI.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + i * 0.06 }}
+              className="flex gap-3 items-start"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <item.icon className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground leading-tight">{item.title}</p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+          <div className="flex-1 space-y-0.5">
+            <p className="text-[10px] text-muted-foreground">
+              <span className="font-semibold text-foreground">ChatGPT</span> — $20/mo forever, they own the model, your data trains their AI, goes offline = you're stuck
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              <span className="font-semibold text-primary">StackForge</span> — one-time credit purchase, you own the model, runs offline on your hardware, no recurring fees
             </p>
           </div>
         </div>
