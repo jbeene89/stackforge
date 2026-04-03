@@ -101,6 +101,19 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      // Refund credits on AI failure
+      await supabase.from("user_credits").update({
+        credits_balance: credits.credits_balance,
+        credits_used: credits.credits_used,
+      }).eq("user_id", userId);
+      await supabase.from("credit_transactions").insert({
+        user_id: userId,
+        amount: cost,
+        balance_after: credits.credits_balance,
+        description: `Refund: AI error ${response.status}`,
+        transaction_type: "refund",
+      });
+
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), {
           status: 429,
