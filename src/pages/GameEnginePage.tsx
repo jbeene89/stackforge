@@ -208,6 +208,9 @@ export default function GameEnginePage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [transformMode, setTransformMode] = useState<TransformMode>("translate");
   const [expandedHierarchy, setExpandedHierarchy] = useState(true);
+  const [generatingAI, setGeneratingAI] = useState(false);
+  const [aiContext, setAiContext] = useState("");
+  const [generatedBehavior, setGeneratedBehavior] = useState<any>(null);
 
   const selected = objects.find((o) => o.id === selectedId) || null;
 
