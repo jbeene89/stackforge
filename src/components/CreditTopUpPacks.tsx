@@ -63,6 +63,8 @@ const WHY_OWN_AI = [
     desc: "Selective Unlearning, Popcorn Injection, Perspective Training — reshape behavior in ways prompting never can.",
   },
 ];
+
+interface CreditTopUpPacksProps {
   compact?: boolean;
   className?: string;
 }
