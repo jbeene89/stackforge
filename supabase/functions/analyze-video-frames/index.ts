@@ -130,6 +130,19 @@ Do NOT describe the frames themselves (e.g., "this frame shows..."). Instead, di
     });
 
     if (!response.ok) {
+      // Refund credits on AI failure
+      await adminClient.from("user_credits").update({
+        credits_balance: credits.credits_balance,
+        credits_used: credits.credits_used,
+      }).eq("user_id", user.id);
+      await adminClient.from("credit_transactions").insert({
+        user_id: user.id,
+        amount: cost,
+        balance_after: credits.credits_balance,
+        description: `Refund: Video analysis error ${response.status}`,
+        transaction_type: "refund",
+      });
+
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), {
           status: 429,

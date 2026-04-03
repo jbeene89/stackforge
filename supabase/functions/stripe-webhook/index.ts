@@ -21,6 +21,7 @@ const TOPUP_PRODUCT_MAP: Record<string, number> = {
   prod_UBSxWZJuoZCE7F: 100,
   prod_UBSygVKYUgUs90: 500,
   prod_UBSyqxTOHs9qct: 1500,
+  prod_UGoBgbVF4G5Wde: 3000,
 };
 
 const FREE_TIER = { tier: "free", allowance: 50 };
