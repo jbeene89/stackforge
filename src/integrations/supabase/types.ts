@@ -1215,6 +1215,30 @@ export type Database = {
       }
     }
     Views: {
+      location_hero_images_public: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          id: string | null
+          image_url: string | null
+          region: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          region?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          region?: string | null
+        }
+        Relationships: []
+      }
       marketplace_templates_public: {
         Row: {
           created_at: string | null
