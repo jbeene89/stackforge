@@ -10,11 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Gamepad2, Play, Pause, RotateCcw, Plus, Trash2, Eye, EyeOff,
   Move, RotateCw, Maximize2, Box, Layers, Brain, ChevronRight,
-  ChevronDown, Settings, Zap, Shield, Crosshair, Sun
+  ChevronDown, Settings, Zap, Shield, Crosshair, Sun, Sparkles, Loader2
 } from "lucide-react";
 
 // ── Scene Objects ───────────────────────────────────────────
@@ -205,6 +208,9 @@ export default function GameEnginePage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [transformMode, setTransformMode] = useState<TransformMode>("translate");
   const [expandedHierarchy, setExpandedHierarchy] = useState(true);
+  const [generatingAI, setGeneratingAI] = useState(false);
+  const [aiContext, setAiContext] = useState("");
+  const [generatedBehavior, setGeneratedBehavior] = useState<any>(null);
 
   const selected = objects.find((o) => o.id === selectedId) || null;
 
@@ -227,6 +233,33 @@ export default function GameEnginePage() {
   const deleteObject = (id: string) => {
     setObjects((prev) => prev.filter((o) => o.id !== id));
     if (selectedId === id) setSelectedId(null);
+  };
+
+  const generateAIBehavior = async () => {
+    if (!selected) return;
+    setGeneratingAI(true);
+    setGeneratedBehavior(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-npc-behavior", {
+        body: {
+          objectName: selected.name,
+          objectType: selected.type,
+          behaviorType: selected.aiModule || "Patrol AI",
+          context: aiContext || undefined,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+      setGeneratedBehavior(data.behavior);
+      toast.success(`Generated "${data.behavior.name}" behavior!`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to generate behavior");
+    } finally {
+      setGeneratingAI(false);
+    }
   };
 
   return (
@@ -464,9 +497,60 @@ export default function GameEnginePage() {
                     </SelectContent>
                   </Select>
                   {selected.aiModule && (
-                    <div className="glass rounded-lg p-2 text-[10px] text-muted-foreground">
-                      <Brain className="h-3 w-3 text-primary inline mr-1" />
-                      <span className="font-medium text-foreground">{selected.aiModule}</span> is attached. It will execute during Play mode.
+                    <div className="space-y-2">
+                      <div className="glass rounded-lg p-2 text-[10px] text-muted-foreground">
+                        <Brain className="h-3 w-3 text-primary inline mr-1" />
+                        <span className="font-medium text-foreground">{selected.aiModule}</span> is attached. It will execute during Play mode.
+                      </div>
+                      <Textarea
+                        placeholder="Optional context: 'guards a treasure chest', 'friendly shopkeeper'…"
+                        value={aiContext}
+                        onChange={(e) => setAiContext(e.target.value)}
+                        className="text-[10px] min-h-[40px] resize-none"
+                        rows={2}
+                      />
+                      <Button
+                        size="sm"
+                        className="w-full h-7 text-[10px] gradient-primary text-primary-foreground"
+                        onClick={generateAIBehavior}
+                        disabled={generatingAI}
+                      >
+                        {generatingAI ? (
+                          <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Generating…</>
+                        ) : (
+                          <><Sparkles className="h-3 w-3 mr-1" />Generate AI Behavior</>
+                        )}
+                      </Button>
+                      {generatedBehavior && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-lg border bg-muted/30 p-3 space-y-2"
+                        >
+                          <div className="text-[10px] font-semibold text-primary">{generatedBehavior.name}</div>
+                          <p className="text-[9px] text-muted-foreground">{generatedBehavior.description}</p>
+                          {generatedBehavior.states?.map((s: any, i: number) => (
+                            <div key={i} className="rounded-md bg-background/50 p-2">
+                              <div className="text-[10px] font-medium">{s.name}</div>
+                              <div className="text-[9px] text-muted-foreground italic">{s.condition}</div>
+                              <ul className="mt-1 space-y-0.5">
+                                {s.actions?.map((a: string, j: number) => (
+                                  <li key={j} className="text-[9px] text-foreground/70 flex items-start gap-1">
+                                    <span className="text-primary">→</span> {a}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                          {generatedBehavior.parameters && Object.keys(generatedBehavior.parameters).length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {Object.entries(generatedBehavior.parameters).map(([k, v]) => (
+                                <Badge key={k} variant="secondary" className="text-[8px]">{k}: {String(v)}</Badge>
+                              ))}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
                     </div>
                   )}
                 </div>
