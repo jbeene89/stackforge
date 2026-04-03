@@ -235,6 +235,33 @@ export default function GameEnginePage() {
     if (selectedId === id) setSelectedId(null);
   };
 
+  const generateAIBehavior = async () => {
+    if (!selected) return;
+    setGeneratingAI(true);
+    setGeneratedBehavior(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-npc-behavior", {
+        body: {
+          objectName: selected.name,
+          objectType: selected.type,
+          behaviorType: selected.aiModule || "Patrol AI",
+          context: aiContext || undefined,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+      setGeneratedBehavior(data.behavior);
+      toast.success(`Generated "${data.behavior.name}" behavior!`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to generate behavior");
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
+
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
       {/* Header */}
