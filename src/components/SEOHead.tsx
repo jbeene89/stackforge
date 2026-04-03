@@ -13,7 +13,7 @@ export function SEOHead({ title, description }: SEOHeadProps) {
   useEffect(() => {
     const fullTitle = title
       ? `${title} | Soupy`
-      : "Soupy — Build AI Modules & Stacks from Plain English";
+      : "Soupy — Design AI modules from plain English";
     document.title = fullTitle;
 
     let meta = document.querySelector('meta[name="description"]');
