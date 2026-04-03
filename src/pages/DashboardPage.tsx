@@ -26,6 +26,7 @@ import type { ProjectType } from "@/types";
 import { motion } from "framer-motion";
 import { OnboardingTour, type OnboardingTourHandle } from "@/components/OnboardingTour";
 import { TourMenu } from "@/components/TourMenu";
+import { FirstWinAccelerator } from "@/components/FirstWinAccelerator";
 
 // ── FONTS ────────────────────────────────────────────────────────────────────
 const DashFonts = () => (
@@ -381,6 +382,9 @@ export default function DashboardPage() {
           <Send style={{ width: 14, height: 14 }} />
         </button>
       </motion.form>
+
+      {/* ── FIRST WIN ACCELERATOR ── */}
+      <FirstWinAccelerator />
 
       {/* ── INDEPENDENCE SCORECARD ── */}
       <div style={{ marginBottom: 32 }}>
