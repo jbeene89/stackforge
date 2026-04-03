@@ -383,6 +383,9 @@ export default function DashboardPage() {
         </button>
       </motion.form>
 
+      {/* ── FIRST WIN ACCELERATOR ── */}
+      <FirstWinAccelerator />
+
       {/* ── INDEPENDENCE SCORECARD ── */}
       <div style={{ marginBottom: 32 }}>
         <IndependenceScorecard compact />
