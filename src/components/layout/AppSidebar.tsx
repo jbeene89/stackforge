@@ -168,6 +168,7 @@ const simpleSections: NavSection[] = [
           { title: "To Your Phone", url: "/deploy/phone", icon: Smartphone, tip: "Deploy to Android/iOS", desc: "Run AI on your mobile device" },
           { title: "Self-Host", url: "/self-host", icon: Server, tip: "Run locally, zero cloud", desc: "Keep everything on your machine" },
           { title: "On-Device SLMs", url: "/on-device", icon: TabletSmartphone, tip: "Deploy to phones and edge devices", desc: "Tiny models for tiny devices" },
+          { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train on edge hardware", desc: "Train directly on devices" },
         ],
       },
       {
@@ -186,6 +187,22 @@ const simpleSections: NavSection[] = [
     ],
   },
   {
+    label: "PLAY & EXPLORE",
+    accent: "#B44FFF",
+    submenus: [
+      {
+        title: "Creative Tools",
+        icon: Gamepad2,
+        desc: "AI-powered creative and experimental tools",
+        accent: "#B44FFF",
+        items: [
+          { title: "Game Engine", url: "/engine", icon: Gamepad2, tip: "AI-powered game logic", desc: "Smart NPCs and game AI" },
+          { title: "Solvers", url: "/solvers", icon: Atom, tip: "Reusable problem-solving patterns", desc: "Math, physics, and logic solvers" },
+        ],
+      },
+    ],
+  },
+  {
     label: "COMING SOON",
     accent: "hsl(var(--muted-foreground))",
     submenus: [
@@ -195,10 +212,8 @@ const simpleSections: NavSection[] = [
         desc: "Features we're building next",
         accent: "hsl(var(--muted-foreground))",
         items: [
-          { title: "Edge AI", url: "/edge-training", icon: CircuitBoard, tip: "Train on edge hardware", desc: "Train directly on devices", soon: true },
           { title: "Signal Lab", url: "/signals", icon: Radio, tip: "Real-time signal processing", desc: "Process live data streams", soon: true },
           { title: "Robotics", url: "/robotics", icon: Joystick, tip: "AI for robotic systems", desc: "Control robots with AI", soon: true },
-          { title: "Game Engine", url: "/engine", icon: Gamepad2, tip: "AI-powered game logic", desc: "Smart NPCs and game AI", soon: true },
         ],
       },
     ],
