@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Coins, Loader2, Sparkles, Zap, Image, MessageSquare, Bot, Layers, Rocket, Package } from "lucide-react";
+import { Coins, Loader2, Sparkles, Zap, Image, MessageSquare, Bot, Layers, Rocket, Package, ShieldCheck, Wifi, WifiOff, Brain, Fingerprint, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
