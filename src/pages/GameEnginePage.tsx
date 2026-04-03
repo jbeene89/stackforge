@@ -10,11 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Gamepad2, Play, Pause, RotateCcw, Plus, Trash2, Eye, EyeOff,
   Move, RotateCw, Maximize2, Box, Layers, Brain, ChevronRight,
-  ChevronDown, Settings, Zap, Shield, Crosshair, Sun
+  ChevronDown, Settings, Zap, Shield, Crosshair, Sun, Sparkles, Loader2
 } from "lucide-react";
 
 // ── Scene Objects ───────────────────────────────────────────
