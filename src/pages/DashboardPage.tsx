@@ -387,6 +387,9 @@ export default function DashboardPage() {
       {/* ── FIRST WIN ACCELERATOR ── */}
       <FirstWinAccelerator />
 
+      {/* ── LOW CREDITS NUDGE ── */}
+      <LowCreditsNudge />
+
       {/* ── INDEPENDENCE SCORECARD ── */}
       <div style={{ marginBottom: 32 }}>
         <IndependenceScorecard compact />
