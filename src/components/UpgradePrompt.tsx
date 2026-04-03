@@ -3,6 +3,7 @@ import { Lock, Crown, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { CreditTopUpPacks } from "@/components/CreditTopUpPacks";
 
 interface UpgradePromptProps {
   featureName: string;
@@ -18,7 +19,7 @@ export function UpgradePrompt({ featureName, requiredTier, currentTier }: Upgrad
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass rounded-2xl p-10 max-w-md text-center space-y-6"
+        className="glass rounded-2xl p-10 max-w-lg text-center space-y-6"
       >
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mx-auto">
           <Lock className="h-8 w-8 text-primary" />
@@ -39,16 +40,26 @@ export function UpgradePrompt({ featureName, requiredTier, currentTier }: Upgrad
           </p>
         </div>
 
-        <Button
-          className="w-full gradient-primary text-primary-foreground"
-          onClick={() => navigate("/pricing")}
-        >
-          Upgrade to {requiredTier} <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
+        <div className="space-y-3 text-left">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">
+            Or grab credits instantly — no subscription needed
+          </p>
+          <CreditTopUpPacks />
+        </div>
 
-        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-          Back to Dashboard
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/pricing")}
+          >
+            Compare all plans <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+            Back to Dashboard
+          </Button>
+        </div>
       </motion.div>
     </div>
   );
