@@ -27,6 +27,7 @@ const TOPUP_PACKS = [
   { credits: 100, price: 4.99, priceId: "price_1TD61PEgO8H7yovM947iyWTY", label: "Starter" },
   { credits: 500, price: 19.99, priceId: "price_1TD62JEgO8H7yovM5HSx5vl2", label: "Popular", highlight: true },
   { credits: 1500, price: 59.99, priceId: "price_1TD62fEgO8H7yovMu0AHTCpt", label: "Best Value" },
+  { credits: 3000, price: 99.99, priceId: "price_1TIGZ7EgO8H7yovMg2v4QyAq", label: "Full Pipeline" },
 ];
 
 const MODEL_COSTS = [
