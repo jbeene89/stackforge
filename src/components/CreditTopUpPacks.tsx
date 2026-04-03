@@ -279,6 +279,49 @@ export function CreditTopUpPacks({ compact = false, className = "" }: CreditTopU
           </div>
         </div>
       </motion.div>
+
+      {/* Why this vs ChatGPT */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="rounded-xl border border-border/50 bg-card/50 p-5 space-y-4"
+      >
+        <p className="text-xs font-semibold text-foreground text-center">
+          Why build your own AI instead of using ChatGPT?
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {WHY_OWN_AI.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + i * 0.06 }}
+              className="flex gap-3 items-start"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <item.icon className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground leading-tight">{item.title}</p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+          <div className="flex-1 space-y-0.5">
+            <p className="text-[10px] text-muted-foreground">
+              <span className="font-semibold text-foreground">ChatGPT</span> — $20/mo forever, they own the model, your data trains their AI, goes offline = you're stuck
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              <span className="font-semibold text-primary">StackForge</span> — one-time credit purchase, you own the model, runs offline on your hardware, no recurring fees
+            </p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
