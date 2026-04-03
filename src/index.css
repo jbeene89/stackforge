@@ -325,4 +325,14 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Pulsing glow for highlighted credit pack cards */
+  @keyframes packGlow {
+    0%, 100% {
+      box-shadow: 0 0 16px -4px hsl(var(--primary) / 0.2);
+    }
+    50% {
+      box-shadow: 0 0 24px -2px hsl(var(--primary) / 0.35);
+    }
+  }
 }
