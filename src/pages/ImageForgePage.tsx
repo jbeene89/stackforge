@@ -137,7 +137,7 @@ export default function ImageForgePage() {
         body: {
           prompt: prompt.trim(),
           selectedPerspectives: CHARACTERS.map(c => c.id),
-          imageModel: isStability ? "__skip_image__" : imageModel,
+          imageModel,
         },
       });
 
@@ -156,23 +156,8 @@ export default function ImageForgePage() {
       setStage("sketching");
       await new Promise(r => setTimeout(r, 1200));
 
-      let finalImage = perspData.image;
-      let synthesizedPrompt = perspData.synthesizedPrompt;
-
-      // Step 2: If Stability model selected, generate image via Stability API
-      if (isStability) {
-        const { data: sdData, error: sdError } = await supabase.functions.invoke("stability-generate", {
-          body: {
-            prompt: synthesizedPrompt,
-            model: imageModel,
-            negative_prompt: "blurry, low quality, distorted, deformed",
-          },
-        });
-
-        if (sdError) throw sdError;
-        if (sdData?.error) throw new Error(sdData.error);
-        finalImage = sdData.image;
-      }
+      const finalImage = perspData.image;
+      const synthesizedPrompt = perspData.synthesizedPrompt;
 
       setResult({
         image: finalImage,
