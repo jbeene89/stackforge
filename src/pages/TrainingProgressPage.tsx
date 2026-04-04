@@ -407,6 +407,18 @@ export default function TrainingProgressPage() {
                     <SelectItem value="llama-3.2-3b">Llama 3.2 3B</SelectItem>
                     <SelectItem value="qwen2.5-1.5b">Qwen 2.5 1.5B</SelectItem>
                     <SelectItem value="qwen2.5-0.5b">Qwen 2.5 0.5B</SelectItem>
+                    {(customModels ?? []).length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground border-t mt-1 pt-2">
+                          Imported Models
+                        </div>
+                        {customModels!.map((m) => (
+                          <SelectItem key={m.id} value={`custom:${m.id}:${m.name}`}>
+                            {m.name} {m.parameter_count ? `(${m.parameter_count})` : ""}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
