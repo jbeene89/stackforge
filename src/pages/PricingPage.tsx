@@ -321,6 +321,11 @@ export default function PricingPage() {
                 );
               })}
             </div>
+
+            {/* ROI Calculator */}
+            <div className="mt-6 sm:mt-10 glass rounded-xl p-4 sm:p-6">
+              <ROICalculator />
+            </div>
           </TabsContent>
 
           {/* ── Usage Tab ── */}
