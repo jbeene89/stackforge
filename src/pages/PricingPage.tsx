@@ -13,6 +13,8 @@ import {
   Check, X, Zap, CreditCard, ArrowRight, Crown, Sparkles,
   BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock, ShoppingCart, Plus,
 } from "lucide-react";
+import { ROICalculator } from "@/components/pricing/ROICalculator";
+import { SaleCountdownBanner, SaleComparisonTable } from "@/components/pricing/SaleCountdown";
 
 const TIERS = {
   free: { name: "Free", product_id: null, price_id: null, credits: 50 },
@@ -218,6 +220,7 @@ export default function PricingPage() {
 
           {/* ── Plans Tab ── */}
           <TabsContent value="plans">
+            <SaleCountdownBanner />
             {credits && (
               <div className="glass rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                 <div className="flex items-center gap-3 sm:gap-4">
@@ -317,6 +320,11 @@ export default function PricingPage() {
                   </motion.div>
                 );
               })}
+            </div>
+
+            {/* ROI Calculator */}
+            <div className="mt-6 sm:mt-10 glass rounded-xl p-4 sm:p-6">
+              <ROICalculator />
             </div>
           </TabsContent>
 
@@ -479,6 +487,7 @@ export default function PricingPage() {
                     );
                   })}
                 </div>
+                <SaleComparisonTable />
               </div>
             </div>
           </TabsContent>
