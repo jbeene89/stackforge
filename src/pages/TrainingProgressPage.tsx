@@ -259,11 +259,13 @@ function JobCard({
 export default function TrainingProgressPage() {
   const { data: jobs, isLoading } = useTrainingJobs();
   const { data: datasets } = useDatasets();
+  const { data: customModels } = useCustomModels();
   const createJob = useCreateTrainingJob();
   const updateJob = useUpdateTrainingJob();
   const deleteJob = useDeleteTrainingJob();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDatasetId, setNewDatasetId] = useState("");
   const [newModel, setNewModel] = useState("phi-3-mini");
