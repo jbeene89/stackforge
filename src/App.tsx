@@ -101,6 +101,7 @@ const App = () => (
                 <Route path="/terms" element={<TermsOfServicePage />} />
                 <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                <Route path="/first-win" element={<ProtectedRoute><FirstWinPage /></ProtectedRoute>} />
                 <Route path="/slm-lab" element={<AppLayout />}>
                   <Route index element={<SLMLabPage />} />
                 </Route>
