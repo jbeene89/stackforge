@@ -220,6 +220,7 @@ export default function PricingPage() {
 
           {/* ── Plans Tab ── */}
           <TabsContent value="plans">
+            <SaleCountdownBanner />
             {credits && (
               <div className="glass rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                 <div className="flex items-center gap-3 sm:gap-4">
