@@ -487,6 +487,7 @@ export default function PricingPage() {
                     );
                   })}
                 </div>
+                <SaleComparisonTable />
               </div>
             </div>
           </TabsContent>
