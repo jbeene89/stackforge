@@ -138,6 +138,12 @@ export default function PricingPage() {
     }
     if (params.get("topup") === "success") {
       toast.success("Credits purchased! Your balance has been updated.");
+      // Fire Google Ads purchase conversion for credit top-up
+      if (typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'conversion', {
+          send_to: 'AW-17413895911/8119CPinsJUcEOfty-9A',
+        });
+      }
       window.history.replaceState({}, "", "/pricing");
     }
   }, []);
