@@ -67,6 +67,7 @@ const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage")
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const HarvestInboxPage = lazy(() => import("./pages/HarvestInboxPage"));
 const AIHubPage = lazy(() => import("./pages/AIHubPage"));
+const FirstWinPage = lazy(() => import("./pages/FirstWinPage"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
 const SystemHealthPage = lazy(() => import("./pages/admin/SystemHealthPage"));
 const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
