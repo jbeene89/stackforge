@@ -99,8 +99,8 @@ export default function SignupPage() {
     try {
       await signUp(email, password);
       // Fire Google Ads signup conversion
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'conversion', {
+      if (typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'conversion', {
           send_to: 'AW-17413895911/signup',
         });
       }
