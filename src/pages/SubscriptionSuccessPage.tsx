@@ -53,6 +53,12 @@ export default function SubscriptionSuccessPage() {
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
+    // Fire Google Ads purchase conversion
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'conversion', {
+        send_to: 'AW-17413895911/8119CPinsJUcEOfty-9A',
+      });
+    }
     // Refetch credits after a short delay to allow webhook processing
     const timer = setTimeout(() => refetch(), 2000);
     const timer2 = setTimeout(() => refetch(), 5000);
