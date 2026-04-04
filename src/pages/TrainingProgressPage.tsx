@@ -6,8 +6,10 @@ import {
   useUpdateTrainingJob,
   useDeleteTrainingJob,
   useDatasets,
+  useCustomModels,
   type TrainingJob,
 } from "@/hooks/useTrainingData";
+import ImportModelDialog from "@/components/ImportModelDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
