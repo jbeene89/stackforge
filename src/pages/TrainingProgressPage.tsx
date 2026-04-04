@@ -306,9 +306,14 @@ export default function TrainingProgressPage() {
             Track offline fine-tuning jobs — log epochs, monitor loss curves, and pick up where you left off.
           </p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="shrink-0">
-          <Plus className="h-4 w-4 mr-1" /> New Job
-        </Button>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" onClick={() => setShowImport(true)}>
+            <Download className="h-4 w-4 mr-1" /> Import Model
+          </Button>
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" /> New Job
+          </Button>
+        </div>
       </div>
 
       {/* Summary strip */}
