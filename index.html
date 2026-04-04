@@ -99,7 +99,13 @@
   <meta name="twitter:description" content="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today.">
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Inline loading skeleton for fast FCP -->
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1008;color:#e85d04;font-family:system-ui,sans-serif;flex-direction:column;gap:12px">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="animation:spin 1s linear infinite"><circle cx="24" cy="24" r="20" stroke="#e85d04" stroke-width="4" opacity="0.3"/><path d="M44 24a20 20 0 01-20 20" stroke="#e85d04" stroke-width="4" stroke-linecap="round"/></svg>
+        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
