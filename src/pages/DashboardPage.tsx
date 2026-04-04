@@ -385,7 +385,8 @@ export default function DashboardPage() {
         </button>
       </motion.form>
 
-      {/* ── FIRST WIN ACCELERATOR ── */}
+      {/* ── FIRST WIN / CONTINUE CARD ── */}
+      <ContinueWhereYouLeftOff />
       <FirstWinAccelerator />
 
       {/* ── LOW CREDITS NUDGE ── */}

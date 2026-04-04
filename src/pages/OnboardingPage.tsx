@@ -105,7 +105,13 @@ export default function OnboardingPage() {
           description: selectedTemplate ? `Based on ${selectedTemplate} template` : "",
           tags: buildType ? [buildType] : [],
         });
-        navigate("/projects");
+        // Route new users to their first-win experience based on goal
+        const isFirstSession = !localStorage.getItem("first_win_completed");
+        if (isFirstSession && buildType) {
+          navigate(`/first-win?goal=${buildType}`);
+        } else {
+          navigate("/projects");
+        }
       } catch (e: any) {
         toast.error(e.message || "Failed to create project");
       } finally {
