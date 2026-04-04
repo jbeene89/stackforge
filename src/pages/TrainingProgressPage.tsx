@@ -451,6 +451,9 @@ export default function TrainingProgressPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Import model dialog */}
+      <ImportModelDialog open={showImport} onOpenChange={setShowImport} />
     </div>
   );
 }
