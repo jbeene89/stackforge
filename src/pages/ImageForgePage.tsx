@@ -123,7 +123,6 @@ export default function ImageForgePage() {
   }, [spokenResults, stage, result]);
 
   const selectedModelInfo = IMAGE_MODELS.find(m => m.id === imageModel);
-  const isStability = selectedModelInfo?.provider === "stability";
 
   const generate = async () => {
     if (!prompt.trim()) { toast.error("Enter a vision first"); return; }
