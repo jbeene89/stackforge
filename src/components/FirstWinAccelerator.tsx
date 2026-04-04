@@ -37,8 +37,10 @@ export function FirstWinAccelerator() {
   const [dismissed, setDismissed] = useState(() =>
     localStorage.getItem("first_win_dismissed") === "true"
   );
+  const completed = localStorage.getItem("first_win_completed") === "true";
 
-  if (dismissed) return null;
+  // Hide if dismissed OR if user already completed first-win flow
+  if (dismissed || completed) return null;
 
   const handleDismiss = () => {
     localStorage.setItem("first_win_dismissed", "true");

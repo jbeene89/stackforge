@@ -67,6 +67,7 @@ const DemoModuleBuilderPage = lazy(() => import("./pages/DemoModuleBuilderPage")
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const HarvestInboxPage = lazy(() => import("./pages/HarvestInboxPage"));
 const AIHubPage = lazy(() => import("./pages/AIHubPage"));
+const FirstWinPage = lazy(() => import("./pages/FirstWinPage"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
 const SystemHealthPage = lazy(() => import("./pages/admin/SystemHealthPage"));
 const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
@@ -100,6 +101,7 @@ const App = () => (
                 <Route path="/terms" element={<TermsOfServicePage />} />
                 <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                <Route path="/first-win" element={<ProtectedRoute><FirstWinPage /></ProtectedRoute>} />
                 <Route path="/slm-lab" element={<AppLayout />}>
                   <Route index element={<SLMLabPage />} />
                 </Route>
