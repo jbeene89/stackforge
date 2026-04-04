@@ -86,10 +86,7 @@ const CHARACTERS = [
 const IMAGE_MODELS = [
   { id: "google/gemini-3.1-flash-image-preview", name: "Flash (Fast)", desc: "Quick, pro quality", provider: "gemini" },
   { id: "google/gemini-3-pro-image-preview", name: "Pro (Best)", desc: "Highest quality", provider: "gemini" },
-  { id: "sd3-large-turbo", name: "SD3 Turbo", desc: "Fast Stable Diffusion", provider: "stability" },
-  { id: "sd3-large", name: "SD3 Large", desc: "Best SD quality", provider: "stability" },
-  { id: "stable-image-core", name: "SD Core", desc: "Balanced speed/quality", provider: "stability" },
-  { id: "stable-image-ultra", name: "SD Ultra", desc: "Photorealistic", provider: "stability" },
+  { id: "google/gemini-2.5-flash-image", name: "Nano (Budget)", desc: "Low cost generation", provider: "gemini" },
 ];
 
 interface PerspectiveResult {
@@ -126,7 +123,6 @@ export default function ImageForgePage() {
   }, [spokenResults, stage, result]);
 
   const selectedModelInfo = IMAGE_MODELS.find(m => m.id === imageModel);
-  const isStability = selectedModelInfo?.provider === "stability";
 
   const generate = async () => {
     if (!prompt.trim()) { toast.error("Enter a vision first"); return; }
@@ -141,7 +137,7 @@ export default function ImageForgePage() {
         body: {
           prompt: prompt.trim(),
           selectedPerspectives: CHARACTERS.map(c => c.id),
-          imageModel: isStability ? "__skip_image__" : imageModel,
+          imageModel,
         },
       });
 
@@ -160,23 +156,8 @@ export default function ImageForgePage() {
       setStage("sketching");
       await new Promise(r => setTimeout(r, 1200));
 
-      let finalImage = perspData.image;
-      let synthesizedPrompt = perspData.synthesizedPrompt;
-
-      // Step 2: If Stability model selected, generate image via Stability API
-      if (isStability) {
-        const { data: sdData, error: sdError } = await supabase.functions.invoke("stability-generate", {
-          body: {
-            prompt: synthesizedPrompt,
-            model: imageModel,
-            negative_prompt: "blurry, low quality, distorted, deformed",
-          },
-        });
-
-        if (sdError) throw sdError;
-        if (sdData?.error) throw new Error(sdData.error);
-        finalImage = sdData.image;
-      }
+      const finalImage = perspData.image;
+      const synthesizedPrompt = perspData.synthesizedPrompt;
 
       setResult({
         image: finalImage,
@@ -728,14 +709,8 @@ export default function ImageForgePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Gemini</div>
-                    {IMAGE_MODELS.filter(m => m.provider === "gemini").map(m => (
-                      <SelectItem key={m.id} value={m.id}>
-                        <span className="text-xs">{m.name}</span>
-                      </SelectItem>
-                    ))}
-                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-1 border-t border-border/30 pt-2">Stable Diffusion</div>
-                    {IMAGE_MODELS.filter(m => m.provider === "stability").map(m => (
+                    <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">AI Models</div>
+                    {IMAGE_MODELS.map(m => (
                       <SelectItem key={m.id} value={m.id}>
                         <span className="text-xs">{m.name}</span>
                       </SelectItem>
