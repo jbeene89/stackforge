@@ -86,10 +86,7 @@ const CHARACTERS = [
 const IMAGE_MODELS = [
   { id: "google/gemini-3.1-flash-image-preview", name: "Flash (Fast)", desc: "Quick, pro quality", provider: "gemini" },
   { id: "google/gemini-3-pro-image-preview", name: "Pro (Best)", desc: "Highest quality", provider: "gemini" },
-  { id: "sd3-large-turbo", name: "SD3 Turbo", desc: "Fast Stable Diffusion", provider: "stability" },
-  { id: "sd3-large", name: "SD3 Large", desc: "Best SD quality", provider: "stability" },
-  { id: "stable-image-core", name: "SD Core", desc: "Balanced speed/quality", provider: "stability" },
-  { id: "stable-image-ultra", name: "SD Ultra", desc: "Photorealistic", provider: "stability" },
+  { id: "google/gemini-2.5-flash-image", name: "Nano (Budget)", desc: "Low cost generation", provider: "gemini" },
 ];
 
 interface PerspectiveResult {
