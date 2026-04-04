@@ -98,6 +98,12 @@ export default function SignupPage() {
     setIsLoading(true);
     try {
       await signUp(email, password);
+      // Fire Google Ads signup conversion
+      if (typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'conversion', {
+          send_to: 'AW-17413895911/signup',
+        });
+      }
     } catch (err: any) {
       toast.error(err.message || "Signup failed");
     } finally {
