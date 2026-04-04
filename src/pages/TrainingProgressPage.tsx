@@ -6,8 +6,10 @@ import {
   useUpdateTrainingJob,
   useDeleteTrainingJob,
   useDatasets,
+  useCustomModels,
   type TrainingJob,
 } from "@/hooks/useTrainingData";
+import ImportModelDialog from "@/components/ImportModelDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +41,7 @@ import {
   Trash2,
   TrendingDown,
   BarChart3,
+  Download,
 } from "lucide-react";
 import {
   LineChart,
@@ -256,11 +259,13 @@ function JobCard({
 export default function TrainingProgressPage() {
   const { data: jobs, isLoading } = useTrainingJobs();
   const { data: datasets } = useDatasets();
+  const { data: customModels } = useCustomModels();
   const createJob = useCreateTrainingJob();
   const updateJob = useUpdateTrainingJob();
   const deleteJob = useDeleteTrainingJob();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDatasetId, setNewDatasetId] = useState("");
   const [newModel, setNewModel] = useState("phi-3-mini");
@@ -301,9 +306,14 @@ export default function TrainingProgressPage() {
             Track offline fine-tuning jobs — log epochs, monitor loss curves, and pick up where you left off.
           </p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="shrink-0">
-          <Plus className="h-4 w-4 mr-1" /> New Job
-        </Button>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" onClick={() => setShowImport(true)}>
+            <Download className="h-4 w-4 mr-1" /> Import Model
+          </Button>
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" /> New Job
+          </Button>
+        </div>
       </div>
 
       {/* Summary strip */}
@@ -397,6 +407,18 @@ export default function TrainingProgressPage() {
                     <SelectItem value="llama-3.2-3b">Llama 3.2 3B</SelectItem>
                     <SelectItem value="qwen2.5-1.5b">Qwen 2.5 1.5B</SelectItem>
                     <SelectItem value="qwen2.5-0.5b">Qwen 2.5 0.5B</SelectItem>
+                    {(customModels ?? []).length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground border-t mt-1 pt-2">
+                          Imported Models
+                        </div>
+                        {customModels!.map((m) => (
+                          <SelectItem key={m.id} value={`custom:${m.id}:${m.name}`}>
+                            {m.name} {m.parameter_count ? `(${m.parameter_count})` : ""}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -429,6 +451,9 @@ export default function TrainingProgressPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Import model dialog */}
+      <ImportModelDialog open={showImport} onOpenChange={setShowImport} />
     </div>
   );
 }
