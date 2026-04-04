@@ -27,6 +27,7 @@ import { motion } from "framer-motion";
 import { OnboardingTour, type OnboardingTourHandle } from "@/components/OnboardingTour";
 import { TourMenu } from "@/components/TourMenu";
 import { FirstWinAccelerator } from "@/components/FirstWinAccelerator";
+import { ContinueWhereYouLeftOff } from "@/components/ContinueWhereYouLeftOff";
 import { LowCreditsNudge } from "@/components/LowCreditsNudge";
 
 // ── FONTS ────────────────────────────────────────────────────────────────────
