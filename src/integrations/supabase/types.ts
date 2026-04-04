@@ -154,6 +154,48 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_models: {
+        Row: {
+          created_at: string
+          format: string | null
+          id: string
+          model_family: string | null
+          name: string
+          notes: string | null
+          parameter_count: string | null
+          source: string
+          source_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          format?: string | null
+          id?: string
+          model_family?: string | null
+          name: string
+          notes?: string | null
+          parameter_count?: string | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          format?: string | null
+          id?: string
+          model_family?: string | null
+          name?: string
+          notes?: string | null
+          parameter_count?: string | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dataset_samples: {
         Row: {
           builder: string | null
