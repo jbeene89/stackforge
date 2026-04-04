@@ -13,6 +13,8 @@ import {
   Check, X, Zap, CreditCard, ArrowRight, Crown, Sparkles,
   BarChart3, Coins, Loader2, TrendingDown, TrendingUp, Gift, Lock, ShoppingCart, Plus,
 } from "lucide-react";
+import { ROICalculator } from "@/components/pricing/ROICalculator";
+import { SaleCountdownBanner, SaleComparisonTable } from "@/components/pricing/SaleCountdown";
 
 const TIERS = {
   free: { name: "Free", product_id: null, price_id: null, credits: 50 },
