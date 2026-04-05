@@ -146,6 +146,8 @@ export default function PricingPage() {
           send_to: 'AW-17413895911/8119CPinsJUcEOfty-9A',
         });
       }
+      // GTM custom event
+      (window as any).dataLayer?.push({ event: 'credit_purchase', type: 'topup' });
       window.history.replaceState({}, "", "/pricing");
     }
   }, []);
