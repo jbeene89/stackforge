@@ -53,13 +53,7 @@ export default function SubscriptionSuccessPage() {
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
-    // Fire Google Ads purchase conversion
-    if (typeof (window as any).gtag === 'function') {
-      (window as any).gtag('event', 'conversion', {
-        send_to: 'AW-17413895911/8119CPinsJUcEOfty-9A',
-      });
-    }
-    // GTM custom event
+    // GTM custom event — GA4 & Google Ads conversion tags fire via GTM
     (window as any).dataLayer?.push({ event: 'subscription_purchase' });
     // Refetch credits after a short delay to allow webhook processing
     const timer = setTimeout(() => refetch(), 2000);
