@@ -114,6 +114,8 @@ export default function SignupPage() {
   };
 
   const handleSocialLogin = async (provider: string) => {
+    // GTM custom event for social signup attempt
+    (window as any).dataLayer?.push({ event: 'signup_attempt', method: provider });
     if (provider === "google") {
       await signInWithGoogle();
     } else if (provider === "apple") {
