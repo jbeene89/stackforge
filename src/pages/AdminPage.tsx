@@ -44,6 +44,18 @@ const SOCIAL_POSTS = [
     emoji: "💼",
     posts: [
       {
+        title: "🔥 Image Forge drop",
+        body: `Shipped something wild this week.\n\nSoupy Lab now has an AI Image Forge — type a prompt, get an image. No API keys. No Midjourney subscription. No waiting in queues.\n\nIt's built right into the platform. 2 credits per generation.\n\nWhy? Because every AI builder eventually needs visuals — for demos, for products, for content. This removes one more dependency.\n\n50 free credits on signup. That's 25 images to play with.\n\n${SITE_URL}/image-forge`,
+      },
+      {
+        title: "⚡ First Win flow",
+        body: `I was losing 80% of signups before they ever used the product.\n\nThe fix: skip the dashboard. After signup, new users now land directly in a guided experience — generate an image in 30 seconds flat.\n\nNo choices. No menus. Just: prompt → result → dopamine.\n\nThen we show them what else they can do.\n\nConversion lesson: don't ask new users to explore. Hand them a win.\n\n${SITE_URL}/signup`,
+      },
+      {
+        title: "💰 ROI Calculator launch",
+        body: `Added an interactive ROI calculator to our pricing page.\n\nPick your use case → see exactly what your credits buy → compare DIY API costs.\n\nTurns out most people don't realize how much they're spending on scattered AI subscriptions.\n\nSoupy's $2.50 starter pack suddenly looks very different when you see the math.\n\n${SITE_URL}/pricing`,
+      },
+      {
         title: "Guest demo launch",
         body: `Just added something I've been wanting to build for a while — a guest demo for Soupy Lab.\n\nYou can now try the module builder without signing up. Pick a preset (email classifier, scope summarizer, red team critic), tweak the system prompt, and run it live.\n\n5 free test runs. No account needed.\n\nI know "no-code AI" sounds like marketing fluff, but this is genuinely different — you're designing the reasoning, not just typing into a chatbox.\n\nWould love honest feedback from anyone who tries it.\n\n${SITE_URL}/demo/module-builder`,
       },
@@ -64,6 +76,18 @@ const SOCIAL_POSTS = [
     emoji: "📘",
     posts: [
       {
+        title: "🎨 Image Forge is live",
+        body: `Just added AI image generation to my app. Type what you want, get an image. No extra accounts needed.\n\n50 free credits when you sign up — that's 25 images to mess around with.\n\nTry it: ${SITE_URL}/image-forge`,
+      },
+      {
+        title: "⚡ 30-second AI win",
+        body: `New users on Soupy Lab now generate their first AI image within 30 seconds of signing up. No tutorials. No setup. Just type and go.\n\nFree to try: ${SITE_URL}/signup`,
+      },
+      {
+        title: "💸 Easter Sale — 50% off",
+        body: `Running a 50% off sale on all Soupy Lab plans this week.\n\nStarter pack is $2.50. Pro is $14.50/mo. Both include AI image generation, module building, and model training tools.\n\nCalculate your ROI: ${SITE_URL}/pricing`,
+      },
+      {
         title: "Casual share",
         body: `Been working on something cool — an app that lets you build AI-powered tools without being an ML engineer. Pick models, wire them up, deploy to your phone. Check it out: ${SITE_URL}`,
       },
@@ -79,6 +103,10 @@ const SOCIAL_POSTS = [
     color: "bg-[hsl(235,86%,65%)]",
     emoji: "🎮",
     posts: [
+      {
+        title: "🎨 Image Forge",
+        body: `new feature drop — **Image Forge** on Soupy\n\ntype a prompt → get AI art. 2 credits per image. no API keys needed.\n\npaid users get unrestricted generation 👀\n\n${SITE_URL}/image-forge`,
+      },
       {
         title: "Server drop",
         body: `yo just shipped something — **Soupy** lets you build AI pipelines visually and deploy them to Android 🤖\n\npick your models (GPT-5, Gemini, etc), set guardrails, chain them together, hit deploy\n\nfree tier has 50 credits/mo\n${SITE_URL}`,
@@ -100,12 +128,20 @@ const SOCIAL_POSTS = [
     emoji: "𝕏",
     posts: [
       {
-        title: "Demo announcement",
-        body: `you can now try soupy's module builder without signing up\n\npick a preset, tweak the prompt, hit run, see live AI output\n\n5 free tests. 30 seconds to start.\n\n${SITE_URL}/demo/module-builder`,
+        title: "🎨 Image Forge",
+        body: `shipped AI image generation inside Soupy\n\ntype prompt → get image\nno API keys. no midjourney. 2 credits.\n\n50 free credits on signup\n\n${SITE_URL}/image-forge`,
       },
       {
-        title: "Builder philosophy",
-        body: `hot take: the best AI apps won't be built by prompting one model really hard\n\nthey'll be built by wiring specialists together — classifier → critic → formatter\n\nthat's what soupy does\n${SITE_URL}`,
+        title: "⚡ 30s to first win",
+        body: `new users now generate their first AI image in 30 seconds\n\nno dashboard. no choices. just: sign up → type → result\n\nthat's where activation lives\n\n${SITE_URL}/signup`,
+      },
+      {
+        title: "💸 50% off everything",
+        body: `easter sale on soupy lab\n\nstarter: $2.50\npro: $14.50/mo\n\nAI images + module builder + model training\n\n${SITE_URL}/pricing`,
+      },
+      {
+        title: "Demo announcement",
+        body: `you can now try soupy's module builder without signing up\n\npick a preset, tweak the prompt, hit run, see live AI output\n\n5 free tests. 30 seconds to start.\n\n${SITE_URL}/demo/module-builder`,
       },
       {
         title: "Short banger",
@@ -119,6 +155,26 @@ const SOCIAL_POSTS = [
     color: "bg-[hsl(16,100%,50%)]",
     emoji: "🔴",
     posts: [
+      {
+        title: "r/microsaas — Image Forge launch",
+        body: `Title: Added AI image generation to my platform — no API keys needed\n\nHey r/microsaas,\n\nJust shipped Image Forge on Soupy Lab. Users type a prompt and get AI-generated images directly in the app.\n\nNo Stability AI key. No OpenAI billing. No Midjourney queue. 2 credits per image.\n\nWhy I built it: every AI builder I talked to eventually needed visuals — for demos, for products, for social. Having it built-in removes a whole dependency.\n\n50 free credits on signup (25 images). Paid users get unrestricted generation.\n\nTry it: ${SITE_URL}/image-forge\n\nFeedback welcome — especially on quality vs. what you're used to from other tools.`,
+      },
+      {
+        title: "r/microsaas — first win activation",
+        body: `Title: I was losing 80% of signups before they did anything — here's what I changed\n\nReal problem: users signed up, landed on the dashboard, saw 6 options, picked none, left.\n\n163 onboarding completions → 28 dashboard engagements. Brutal.\n\nThe fix: skip the dashboard entirely for first-time users. Route them straight into generating an AI image. One prompt, one button, one result.\n\n30 seconds from signup to dopamine hit.\n\nEarly results look way better. The lesson: don't ask new users to explore. Hand them a win.\n\n${SITE_URL}/signup`,
+      },
+      {
+        title: "r/SideProject — Easter sale + ROI calc",
+        body: `Title: Running 50% off + built an ROI calculator to prove the value\n\nHey r/SideProject,\n\nTwo things I shipped this week for Soupy Lab:\n\n1. Easter Sale — 50% off all plans. Starter pack is $2.50, Pro is $14.50/mo\n2. Interactive ROI Calculator — pick your use case, see exactly what credits buy you, compare to DIY API costs\n\nThe calculator was a direct response to people saying "I don't understand what credits get me." Now they can see: 100 credits = 50 AI images, or 20 module runs, or a mix.\n\nTry the calculator: ${SITE_URL}/pricing\n\nSolo founder, bootstrapped, feedback always welcome.`,
+      },
+      {
+        title: "r/LocalLLaMA — import your own models",
+        body: `Title: You can now import custom models into Soupy Lab for training\n\nHey r/LocalLLaMA,\n\nNew feature: model import. Bring your own GGUF, ONNX, SafeTensors, or PyTorch models into Soupy Lab from HuggingFace, Ollama, or local files.\n\nOnce imported, you can:\n• Build training datasets with our perspective engine\n• Run cognitive fingerprinting to understand your model's strengths\n• Export fine-tuned configs back to your local setup\n\nThis isn't cloud training — it's dataset engineering that makes your local training better.\n\n${SITE_URL}/model-zoo\n\nWhat formats/sources would you want supported next?`,
+      },
+      {
+        title: "r/artificial — 30s activation challenge",
+        body: `Title: Can you get value from an AI tool in 30 seconds?\n\nI challenged myself: new user signs up, generates their first AI image in under 30 seconds.\n\nNo tutorial. No onboarding video. No feature tour.\n\nJust: sign up → type a prompt → see the result.\n\nIt forced me to strip everything. No dashboard on first visit. No choices. One path, one outcome.\n\nHonest question for this community: what's the fastest you've gotten real value from an AI tool after first opening it?\n\n${SITE_URL}/signup`,
+      },
       {
         title: "r/microsaas — guest demo",
         body: `Title: Added a guest demo to my AI platform — try building a module without signing up\n\nHey r/microsaas,\n\nI posted about Soupy Lab a while back and got some good feedback. One thing that kept coming up: "let me try it before I make an account."\n\nSo I built that. There's now a guest demo at ${SITE_URL}/demo/module-builder where you can:\n\n• Pick a preset (email classifier, scope summarizer, or red team critic)\n• Edit the system prompt, role, temperature\n• Hit "Run Test" and get live streaming AI output\n• 5 free runs, no account needed\n\nThe whole point is to show that this isn't another chatbot wrapper. Each module has a defined job, explicit boundaries, and traceable output. You're designing the reasoning, not just typing.\n\nIf you try it, I'd genuinely love to hear what breaks or what feels weird. Solo founder here, so every bit of feedback actually gets read.\n\n${SITE_URL}`,
