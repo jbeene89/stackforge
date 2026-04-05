@@ -220,9 +220,11 @@ export function useCreateModule() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["modules"] });
       toast.success("Module created");
+      // GTM custom event
+      (window as any).dataLayer?.push({ event: 'module_created', module_type: data?.type });
     },
     onError: (e: Error) => toast.error(e.message),
   });

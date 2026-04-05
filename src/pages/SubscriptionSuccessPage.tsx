@@ -59,6 +59,8 @@ export default function SubscriptionSuccessPage() {
         send_to: 'AW-17413895911/8119CPinsJUcEOfty-9A',
       });
     }
+    // GTM custom event
+    (window as any).dataLayer?.push({ event: 'subscription_purchase' });
     // Refetch credits after a short delay to allow webhook processing
     const timer = setTimeout(() => refetch(), 2000);
     const timer2 = setTimeout(() => refetch(), 5000);

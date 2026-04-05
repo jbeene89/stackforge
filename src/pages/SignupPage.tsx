@@ -104,6 +104,8 @@ export default function SignupPage() {
           send_to: 'AW-17413895911/signup',
         });
       }
+      // GTM custom event
+      (window as any).dataLayer?.push({ event: 'signup_complete', method: 'email' });
     } catch (err: any) {
       toast.error(err.message || "Signup failed");
     } finally {
