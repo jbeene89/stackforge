@@ -3384,13 +3384,25 @@ export default function SLMLabPage() {
 
   useEffect(() => {
     const urlStep = searchParams.get("step");
+    const urlTab = searchParams.get("tab");
+
+    // Handle tab=popcorn shortcut — jump to step 4 (export/popcorn)
+    if (urlTab === "popcorn") {
+      if (step !== 4) setStep(4);
+      // Auto-select the first dataset if none selected
+      if (!activeDatasetId && datasets && datasets.length > 0) {
+        setActiveDatasetId(datasets[0].id);
+      }
+      return;
+    }
+
     if (urlStep !== null) {
       const parsed = parseInt(urlStep, 10);
       if (!isNaN(parsed) && parsed !== step) {
         setStep(parsed);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, datasets]);
 
   const cachedDatasetRef = useRef<TrainingDataset | null>(null);
   const liveDataset = datasets?.find(d => d.id === activeDatasetId);
