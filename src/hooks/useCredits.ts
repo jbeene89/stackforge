@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { cacheGetAll, cachePutAll, cachePut } from "@/lib/offlineCache";
 
 export interface UserCredits {
   credits_balance: number;
@@ -16,28 +17,38 @@ export function useCredits() {
   return useQuery({
     queryKey: ["user-credits", user?.id],
     enabled: !!user,
-    refetchInterval: 30000, // refresh every 30s
+    refetchInterval: 30000,
     queryFn: async (): Promise<UserCredits> => {
-      const { data, error } = await supabase
-        .from("user_credits")
-        .select("credits_balance, credits_used, monthly_allowance, tier, last_reset_at")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      // If no row yet (existing user before migration), create one
-      if (!data) {
-        const { data: inserted, error: insertErr } = await supabase
+      try {
+        const { data, error } = await supabase
           .from("user_credits")
-          .insert({ user_id: user!.id } as any)
-          .select("credits_balance, credits_used, monthly_allowance, tier, last_reset_at")
-          .single();
-        if (insertErr) throw insertErr;
-        return inserted as unknown as UserCredits;
-      }
+          .select("*")
+          .eq("user_id", user!.id)
+          .maybeSingle();
 
-      return data as unknown as UserCredits;
+        if (error) throw error;
+
+        if (!data) {
+          const { data: inserted, error: insertErr } = await supabase
+            .from("user_credits")
+            .insert({ user_id: user!.id } as any)
+            .select("*")
+            .single();
+          if (insertErr) throw insertErr;
+          cachePut("user_credits", inserted as any).catch(() => {});
+          return inserted as unknown as UserCredits;
+        }
+
+        cachePut("user_credits", data as any).catch(() => {});
+        return data as unknown as UserCredits;
+      } catch (e) {
+        if (!navigator.onLine) {
+          const cached = await cacheGetAll<any>("user_credits");
+          const mine = cached.find(c => c.user_id === user!.id);
+          if (mine) return mine as UserCredits;
+        }
+        throw e;
+      }
     },
   });
 }
@@ -49,15 +60,27 @@ export function useCreditTransactions(limit = 20) {
     queryKey: ["credit-transactions", user?.id, limit],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("credit_transactions")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(limit);
+      try {
+        const { data, error } = await supabase
+          .from("credit_transactions")
+          .select("*")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false })
+          .limit(limit);
 
-      if (error) throw error;
-      return data as any[];
+        if (error) throw error;
+        cachePutAll("credit_transactions", data as any[]).catch(() => {});
+        return data as any[];
+      } catch (e) {
+        if (!navigator.onLine) {
+          const cached = await cacheGetAll<any>("credit_transactions");
+          return cached
+            .filter(t => t.user_id === user!.id)
+            .sort((a: any, b: any) => b.created_at.localeCompare(a.created_at))
+            .slice(0, limit);
+        }
+        throw e;
+      }
     },
   });
 }

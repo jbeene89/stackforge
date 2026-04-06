@@ -1,15 +1,39 @@
-// Offline-first IndexedDB cache for training data
-// Caches: training_datasets, dataset_samples, training_jobs
-// Syncs pending mutations when back online with conflict detection
+// Offline-first IndexedDB cache for all user data
+// Caches all user-owned tables and syncs pending mutations when back online
 
 const DB_NAME = "soupy-offline";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
-type StoreName = "training_datasets" | "dataset_samples" | "training_jobs" | "pending_mutations" | "sync_conflicts";
+const ALL_STORES = [
+  "training_datasets",
+  "dataset_samples",
+  "training_jobs",
+  "modules",
+  "projects",
+  "stacks",
+  "runs",
+  "custom_models",
+  "profiles",
+  "user_credits",
+  "credit_transactions",
+  "cognitive_fingerprints",
+  "deploy_pipeline_status",
+  "founder_interviews",
+  "mobile_captures",
+  "perspective_jobs",
+  "project_messages",
+  "pending_mutations",
+  "sync_conflicts",
+] as const;
+
+export type StoreName = (typeof ALL_STORES)[number];
+
+// Tables that support mutation queueing (user-owned, CRUD-capable)
+export type MutableStore = Exclude<StoreName, "pending_mutations" | "sync_conflicts" | "credit_transactions" | "user_credits">;
 
 interface PendingMutation {
   id: string;
-  store: Exclude<StoreName, "pending_mutations" | "sync_conflicts">;
+  store: MutableStore;
   action: "insert" | "update" | "delete";
   payload: Record<string, any>;
   created_at: string;
@@ -45,6 +69,49 @@ function openDB(): Promise<IDBDatabase> {
         if (!db.objectStoreNames.contains("sync_conflicts")) {
           const conflictStore = db.createObjectStore("sync_conflicts", { keyPath: "id" });
           conflictStore.createIndex("by_resolved", "resolved", { unique: false });
+        }
+      }
+      if (oldVersion < 3) {
+        // Add all new stores for full offline data support
+        const newStores = [
+          "modules",
+          "projects",
+          "stacks",
+          "runs",
+          "custom_models",
+          "profiles",
+          "user_credits",
+          "credit_transactions",
+          "cognitive_fingerprints",
+          "deploy_pipeline_status",
+          "founder_interviews",
+          "mobile_captures",
+          "perspective_jobs",
+          "project_messages",
+        ];
+        for (const name of newStores) {
+          if (!db.objectStoreNames.contains(name)) {
+            const store = db.createObjectStore(name, { keyPath: "id" });
+            // Add useful indexes
+            if (name === "project_messages") {
+              store.createIndex("by_project", "project_id", { unique: false });
+            }
+            if (name === "perspective_jobs") {
+              store.createIndex("by_dataset", "dataset_id", { unique: false });
+            }
+            if (name === "cognitive_fingerprints") {
+              store.createIndex("by_dataset", "dataset_id", { unique: false });
+            }
+            if (name === "deploy_pipeline_status") {
+              store.createIndex("by_dataset", "dataset_id", { unique: false });
+            }
+            if (name === "founder_interviews") {
+              store.createIndex("by_dataset", "dataset_id", { unique: false });
+            }
+            if (name === "mobile_captures") {
+              store.createIndex("by_dataset", "dataset_id", { unique: false });
+            }
+          }
         }
       }
     };
@@ -126,6 +193,16 @@ export async function cacheDelete(store: StoreName, id: string): Promise<void> {
   });
 }
 
+export async function cacheClear(store: StoreName): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readwrite");
+    tx.objectStore(store).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 // Pending mutations queue
 export async function queueMutation(mutation: Omit<PendingMutation, "id" | "created_at">): Promise<void> {
   const entry: PendingMutation = {
@@ -184,7 +261,6 @@ export async function resolveConflict(
   if (!conflict) return;
 
   if (resolution === "local") {
-    // Push local version to server
     const table = conflict.store;
     const { id: recordId, ...updates } = conflict.local_version;
     if (conflict.mutation_action === "update") {
@@ -192,18 +268,15 @@ export async function resolveConflict(
     } else if (conflict.mutation_action === "delete") {
       await supabase.from(table).delete().eq("id", recordId);
     }
-    // Update local cache
     if (conflict.mutation_action === "delete") {
       await cacheDelete(table as StoreName, recordId);
     } else {
       await cachePut(table as StoreName, conflict.local_version as any);
     }
   } else {
-    // Accept server version — update local cache
     await cachePut(conflict.store as StoreName, conflict.server_version as any);
   }
 
-  // Mark resolved
   const updated: SyncConflict = { ...conflict, resolved: true, resolution };
   await cachePut("sync_conflicts" as StoreName, updated as any);
 }
@@ -229,7 +302,6 @@ export async function syncPendingMutations(
       if (mutation.action === "insert") {
         const { error } = await supabase.from(table).insert(mutation.payload);
         if (error) {
-          // Duplicate key = record already exists on server (e.g. synced from another device)
           if (error.code === "23505") {
             await clearPendingMutation(mutation.id);
             synced++;
@@ -240,11 +312,9 @@ export async function syncPendingMutations(
       } else if (mutation.action === "update") {
         const { id, ...updates } = mutation.payload;
 
-        // Fetch server version to check for conflicts
         const { data: serverRow } = await supabase.from(table).select("*").eq("id", id).single();
 
         if (serverRow && serverRow.updated_at && mutation.created_at < serverRow.updated_at) {
-          // Server was modified after our offline edit — conflict!
           await addConflict({
             store: table,
             record_id: id,
@@ -261,7 +331,6 @@ export async function syncPendingMutations(
         const { error } = await supabase.from(table).update(updates).eq("id", id);
         if (error) throw error;
       } else if (mutation.action === "delete") {
-        // Check if record still exists
         const { data: serverRow } = await supabase
           .from(table)
           .select("*")
@@ -269,7 +338,6 @@ export async function syncPendingMutations(
           .single();
 
         if (serverRow && serverRow.updated_at && mutation.created_at < serverRow.updated_at) {
-          // Server row was modified after our delete intent — conflict
           await addConflict({
             store: table,
             record_id: mutation.payload.id,
@@ -285,7 +353,6 @@ export async function syncPendingMutations(
 
         const { error } = await supabase.from(table).delete().eq("id", mutation.payload.id);
         if (error) {
-          // Already deleted = no conflict
           if (error.code === "PGRST116") {
             await clearPendingMutation(mutation.id);
             synced++;
