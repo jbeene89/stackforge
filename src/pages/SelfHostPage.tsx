@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { SEOHead } from "@/components/SEOHead";
 import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
 import { useDatasets } from "@/hooks/useTrainingData";
