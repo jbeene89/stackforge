@@ -21,6 +21,7 @@ import { HowItWorksVideos } from "@/components/landing/HowItWorksVideos";
 import { ForgeDoodle } from "@/components/landing/ForgeDoodle";
 import { PhotoTransform } from "@/components/landing/PhotoTransform";
 import { WhatsNewPanel } from "@/components/landing/WhatsNewPanel";
+import { OfflineDemo } from "@/components/landing/OfflineDemo";
 
 // ------- SALE COUNTDOWN BANNER -------
 
@@ -938,6 +939,16 @@ export default function LandingPage() {
                 <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
               </motion.div>
             ))}
+          </motion.div>
+
+          {/* Live animated offline demo */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-8"
+          >
+            <OfflineDemo />
           </motion.div>
 
           <motion.div
