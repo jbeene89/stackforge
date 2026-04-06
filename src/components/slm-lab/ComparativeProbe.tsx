@@ -10,7 +10,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { toast } from "sonner";
 import {
   Brain, RefreshCw, ScanEye, Eye, ChevronDown, ChevronRight,
-  ArrowRight, AlertTriangle, CheckCircle2, Minus
+  ArrowRight, AlertTriangle, CheckCircle2, Minus,
+  Wrench, Shield, Layers, Lightbulb, Heart, Users
 } from "lucide-react";
 
 interface ComparativeProbeProps {
