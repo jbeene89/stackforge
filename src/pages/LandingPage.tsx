@@ -221,7 +221,7 @@ function InlineSocialProof() {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
