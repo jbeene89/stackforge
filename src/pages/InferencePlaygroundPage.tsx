@@ -337,17 +337,30 @@ export default function InferencePlaygroundPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Hero */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Terminal className="h-6 w-6 text-[hsl(var(--forge-cyan))]" />
-          <h1 className="text-2xl font-bold font-display">Inference Playground</h1>
-          <Badge variant="outline" className="text-[9px] h-4">Phase 3</Badge>
+      {/* Hero — landing-ready context for cold visitors */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Terminal className="h-7 w-7 text-[hsl(var(--forge-cyan))]" />
+            <h1 className="text-3xl font-bold font-display tracking-tight">Run AI Models in Your Browser</h1>
+          </div>
+          <p className="text-base text-muted-foreground max-w-2xl leading-relaxed">
+            No servers. No API keys. No data leaves your device.{" "}
+            <span className="text-foreground font-medium">Load an open-source model directly in your browser</span>{" "}
+            and chat with it — even offline. Powered by WebGPU, everything runs 100% on your hardware.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground max-w-2xl">
-          Run inference on-device — either in your browser via WebGPU or through a local Ollama instance.
-          All processing stays private, no data leaves your device.
-        </p>
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--forge-emerald))]/10 text-[hsl(var(--forge-emerald))] px-2.5 py-1 font-medium">
+            <WifiOff className="h-3 w-3" /> Works offline
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--forge-cyan))]/10 text-[hsl(var(--forge-cyan))] px-2.5 py-1 font-medium">
+            <Cpu className="h-3 w-3" /> On-device inference
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--forge-amber))]/10 text-[hsl(var(--forge-amber))] px-2.5 py-1 font-medium">
+            <Zap className="h-3 w-3" /> 7 models, 360M–3.5B
+          </span>
+        </div>
       </div>
 
       {/* Mode Selector */}
