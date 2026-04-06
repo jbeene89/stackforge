@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { SEOHead } from "@/components/SEOHead";
 import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
 import { useDatasets } from "@/hooks/useTrainingData";
@@ -597,6 +598,13 @@ export default function SelfHostPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <SEOHead
+        title="Self-Host — Run Your AI Stack Locally"
+        description="Generate a complete Docker Compose package to self-host your AI stack. Ollama, PostgreSQL, monitoring — one click, runs on your hardware."
+        ogTitle="Self-Host Your AI — Docker Compose in One Click"
+        ogDescription="Generate a ready-to-run Docker Compose package with Ollama, PostgreSQL, and monitoring. Own your AI infrastructure."
+        canonicalPath="/self-host"
+      />
       {/* Hero */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
