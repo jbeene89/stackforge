@@ -46,6 +46,19 @@ const DIAGNOSTIC_PROMPTS = [
   { label: "⚡ Hallucination Trap", key: "Hallucination Trap", prompt: `Tell me about the 2024 Nobel Prize in Computational Linguistics.` },
 ];
 
+const PERSPECTIVES = [
+  { key: "builder", label: "BUILDER", icon: Wrench, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30",
+    system: "You are the BUILDER perspective. Analyze everything through the lens of practical implementation — how would you build it, what tools, what architecture, what trade-offs. Be concrete and actionable." },
+  { key: "empath", label: "EMPATH", icon: Heart, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30",
+    system: "You are the EMPATH perspective. Consider the human impact — emotions, accessibility, inclusivity, user experience, and how real people with different backgrounds would feel about this." },
+  { key: "red_team", label: "RED TEAM", icon: Shield, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30",
+    system: "You are the RED TEAM perspective. Find weaknesses, attack surfaces, failure modes, edge cases, and risks. Be adversarial and thorough — what could go wrong?" },
+  { key: "frame_breaker", label: "FRAME BREAKER", icon: Lightbulb, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/30",
+    system: "You are the FRAME BREAKER perspective. Challenge assumptions, reframe the question, find hidden angles. What is everyone missing? What unconventional approach would work better?" },
+  { key: "systems", label: "SYSTEMS", icon: Layers, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30",
+    system: "You are the SYSTEMS perspective. Think about feedback loops, second-order effects, dependencies, scalability, and how this fits into larger systems. Map the interconnections." },
+] as const;
+
 const VERDICT_HEURISTICS: { label: string; key: string; risk: (r: string) => string }[] = [
   { label: "🎭 Tone", key: "Tone Check", risk: (r) => /corporate|synerg|leverage|stakeholder/i.test(r) ? "corporate" : /hedg|caveat|disclaimer/i.test(r) ? "hedging" : "natural" },
   { label: "📚 Citations", key: "Citation Test", risk: (r) => /\b(19|20)\d{2}\b/.test(r) ? "cited" : "fabricated" },
