@@ -591,22 +591,44 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* ════════════════════ TRANSFORM YOUR PHOTO ════════════════════ */}
-      <PhotoTransform />
-
-      {/* ════════════════════ SOCIAL PROOF — RIGHT AFTER HERO ════════════════════ */}
-      <InlineSocialProof />
-
-      {/* ════════════════════ ANTI-PATTERN ════════════════════ */}
-      <section className="relative py-6 sm:py-8 px-4 sm:px-6">
-        <FFXDivider className="mb-5" />
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs sm:text-sm text-muted-foreground font-medium">
-            <span className="font-bold text-foreground font-display tracking-wide">Soupy is not a wrapper around ChatGPT.</span>{" "}
-            It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
-          </p>
+      {/* ════════════════════ TWO-ROW: SOCIAL PROOF + OFFLINE ════════════════════ */}
+      <section className="py-8 sm:py-14 px-3 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          {/* Left: Social proof & stats */}
+          <div>
+            <InlineSocialProof />
+          </div>
+          {/* Right: Offline demo — high up for technical users */}
+          <div className="flex flex-col justify-center">
+            <div className="mb-4 text-center lg:text-left">
+              <Badge variant="outline" className="text-[10px] mb-2 border-forge-emerald/30 text-forge-emerald font-semibold">
+                <WifiOff className="h-3 w-3 mr-1" /> Works Offline
+              </Badge>
+              <h3 className="text-base sm:text-xl font-display font-bold tracking-wide">
+                AI that runs on <span className="gradient-text">your device</span>
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium">
+                No server. No API key. No internet. Your data never leaves your machine.
+              </p>
+            </div>
+            <OfflineDemo />
+          </div>
         </div>
-        <FFXDivider className="mt-5" />
+      </section>
+
+      {/* ════════════════════ TWO-ROW: PHOTO TRANSFORM + ANTI-PATTERN ════════════════════ */}
+      <section className="py-6 sm:py-10 px-3 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
+          <PhotoTransform />
+          <div className="text-center lg:text-left">
+            <FFXDivider className="mb-5 lg:hidden" />
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+              <span className="font-bold text-foreground font-display tracking-wide">Soupy is not a wrapper around ChatGPT.</span>{" "}
+              It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
+            </p>
+            <FFXDivider className="mt-5 lg:hidden" />
+          </div>
+        </div>
       </section>
 
       {/* ════════════════════ INTERACTIVE DEMO ════════════════════ */}
