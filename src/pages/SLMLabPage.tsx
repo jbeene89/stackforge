@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,6 +50,8 @@ import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } fr
 import { ForgeRing } from "@/components/ForgeRing";
 import { SLMModePicker, type SLMMode } from "@/components/SLMModePicker";
 import { EasyModeWizard } from "@/components/EasyModeWizard";
+
+const ComparativeProbe = lazy(() => import("@/components/slm-lab/ComparativeProbe").then(m => ({ default: m.ComparativeProbe })));
 
 // ── Perspective config ──
 const PERSPECTIVE_CONFIG = {
