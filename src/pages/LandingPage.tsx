@@ -172,8 +172,8 @@ function InlineSocialProof() {
   ];
 
   return (
-    <section className="py-8 sm:py-16 px-3 sm:px-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="py-0">
+      <div className="max-w-full">
         {/* Stats row — 2x2 on mobile, 4-col on desktop */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -221,7 +221,7 @@ function InlineSocialProof() {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -591,22 +591,44 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* ════════════════════ TRANSFORM YOUR PHOTO ════════════════════ */}
-      <PhotoTransform />
-
-      {/* ════════════════════ SOCIAL PROOF — RIGHT AFTER HERO ════════════════════ */}
-      <InlineSocialProof />
-
-      {/* ════════════════════ ANTI-PATTERN ════════════════════ */}
-      <section className="relative py-6 sm:py-8 px-4 sm:px-6">
-        <FFXDivider className="mb-5" />
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs sm:text-sm text-muted-foreground font-medium">
-            <span className="font-bold text-foreground font-display tracking-wide">Soupy is not a wrapper around ChatGPT.</span>{" "}
-            It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
-          </p>
+      {/* ════════════════════ TWO-ROW: SOCIAL PROOF + OFFLINE ════════════════════ */}
+      <section className="py-8 sm:py-14 px-3 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          {/* Left: Social proof & stats */}
+          <div>
+            <InlineSocialProof />
+          </div>
+          {/* Right: Offline demo — high up for technical users */}
+          <div className="flex flex-col justify-center">
+            <div className="mb-4 text-center lg:text-left">
+              <Badge variant="outline" className="text-[10px] mb-2 border-forge-emerald/30 text-forge-emerald font-semibold">
+                <WifiOff className="h-3 w-3 mr-1" /> Works Offline
+              </Badge>
+              <h3 className="text-base sm:text-xl font-display font-bold tracking-wide">
+                AI that runs on <span className="gradient-text">your device</span>
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium">
+                No server. No API key. No internet. Your data never leaves your machine.
+              </p>
+            </div>
+            <OfflineDemo />
+          </div>
         </div>
-        <FFXDivider className="mt-5" />
+      </section>
+
+      {/* ════════════════════ TWO-ROW: PHOTO TRANSFORM + ANTI-PATTERN ════════════════════ */}
+      <section className="py-6 sm:py-10 px-3 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
+          <PhotoTransform />
+          <div className="text-center lg:text-left">
+            <FFXDivider className="mb-5 lg:hidden" />
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+              <span className="font-bold text-foreground font-display tracking-wide">Soupy is not a wrapper around ChatGPT.</span>{" "}
+              It's a modular AI development kitchen where every ingredient has a defined role, explicit boundaries, and traceable flavor.
+            </p>
+            <FFXDivider className="mt-5 lg:hidden" />
+          </div>
+        </div>
       </section>
 
       {/* ════════════════════ INTERACTIVE DEMO ════════════════════ */}
@@ -875,100 +897,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ════════════════════ OFFLINE INFERENCE DEMO ════════════════════ */}
-      <section className="py-10 sm:py-24 px-3 sm:px-6 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-8 sm:mb-14"
-          >
-            <Badge variant="outline" className="text-[10px] mb-3 sm:mb-4 border-forge-emerald/30 text-forge-emerald font-semibold">
-              <WifiOff className="h-3 w-3 mr-1" /> No Internet Required
-            </Badge>
-            <h2 className="text-lg sm:text-2xl md:text-4xl font-display font-bold mb-2 sm:mb-3 tracking-wide">
-              AI That Runs in Your{" "}
-              <span className="gradient-text">Browser</span>
-            </h2>
-            <p className="text-[11px] sm:text-sm text-muted-foreground max-w-xl mx-auto font-medium leading-relaxed">
-              Load a model once, run it forever — no server, no API key, no internet.
-              Your data never leaves your device.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8"
-          >
-            {[
-              {
-                icon: Globe,
-                title: "WebGPU Inference",
-                desc: "Run 360M–3.5B parameter models directly in Chrome or Edge. No Ollama, no Docker, no terminal.",
-                color: "text-forge-cyan",
-                border: "border-forge-cyan/30",
-              },
-              {
-                icon: Download,
-                title: "Download Once, Run Forever",
-                desc: "Models are cached in your browser. After the first download, inference works with airplane mode on.",
-                color: "text-forge-emerald",
-                border: "border-forge-emerald/30",
-              },
-              {
-                icon: Lock,
-                title: "Zero Data Exposure",
-                desc: "Every token is generated on your GPU. No prompts, no outputs, no telemetry ever hits a server.",
-                color: "text-forge-gold",
-                border: "border-forge-gold/30",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`ffx-card glass rounded-xl p-5 sm:p-6 border-l-4 ${item.border}`}
-              >
-                <item.icon className={`h-5 w-5 ${item.color} mb-3`} />
-                <h3 className="text-sm font-bold font-display mb-1.5">{item.title}</h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Live animated offline demo */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-8"
-          >
-            <OfflineDemo />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <Link to="/inference">
-              <Button size="lg" variant="outline" className="font-bold border-forge-emerald/30 hover:border-forge-emerald/60 hover:glow-primary transition-all text-sm min-h-[48px] gap-2">
-                <Brain className="h-4 w-4" />
-                Try Browser Inference <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <p className="text-[10px] text-muted-foreground mt-2">
-              Works in Chrome 113+ and Edge 113+ · No signup required to test
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      {/* Offline section moved to top two-row layout */}
 
       {/* ════════════════════ CTA ════════════════════ */}
       <section className="py-10 sm:py-24 px-3 sm:px-6 relative overflow-hidden">

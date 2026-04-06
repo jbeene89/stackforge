@@ -31,6 +31,7 @@ function TypewriterText({ text, speed = 18 }: { text: string; speed?: number }) 
 export function OfflineDemo() {
   const [step, setStep] = useState(0);
   const [wifiOff, setWifiOff] = useState(false);
+  const [cycle, setCycle] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export function OfflineDemo() {
       setTimeout(() => {
         setStep(0);
         setWifiOff(false);
-        // restart after reset
+        setCycle((c) => c + 1);
         const restart = setTimeout(() => {
           setWifiOff(true);
           const t2 = setTimeout(() => setStep(1), 1200);
@@ -62,11 +63,9 @@ export function OfflineDemo() {
     );
 
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [cycle]);
 
   const visibleMessages = DEMO_MESSAGES.slice(0, step);
-  const isTyping = step > 0 && step <= DEMO_MESSAGES.length;
-  const lastMsg = step > 0 ? DEMO_MESSAGES[step - 1] : null;
 
   return (
     <div className="relative max-w-2xl mx-auto">
@@ -81,7 +80,7 @@ export function OfflineDemo() {
           </div>
           <div className="flex-1 flex justify-center">
             <div className="bg-background/60 rounded-md px-3 py-0.5 text-[10px] text-muted-foreground font-mono">
-              soupylab.com/inference
+              localhost — on-device inference
             </div>
           </div>
           {/* Airplane mode badge */}
@@ -103,13 +102,13 @@ export function OfflineDemo() {
         </div>
 
         {/* App content area */}
-        <div className="p-3 sm:p-4 min-h-[220px] sm:min-h-[280px] flex flex-col">
+        <div className="p-3 sm:p-4 min-h-[200px] sm:min-h-[260px] flex flex-col">
           {/* Model status bar */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/30">
             <div className="flex items-center gap-2">
               <Cpu className="h-3.5 w-3.5 text-forge-cyan" />
               <span className="text-[10px] sm:text-xs font-mono font-semibold text-foreground/80">
-                Phi-3.5 Mini (3.8B)
+                Local SLM via Ollama
               </span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -133,7 +132,7 @@ export function OfflineDemo() {
                 const isLast = i === visibleMessages.length - 1;
                 return (
                   <motion.div
-                    key={`${msg.role}-${i}`}
+                    key={`${msg.role}-${i}-${cycle}`}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
@@ -163,7 +162,7 @@ export function OfflineDemo() {
 
             {/* Thinking indicator */}
             <AnimatePresence>
-              {isTyping && lastMsg?.role === "user" && (
+              {step > 0 && step <= DEMO_MESSAGES.length && DEMO_MESSAGES[step - 1]?.role === "user" && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -181,7 +180,7 @@ export function OfflineDemo() {
             </AnimatePresence>
           </div>
 
-          {/* Performance bar */}
+          {/* Performance bar — labeled as simulation */}
           <AnimatePresence>
             {step >= 2 && wifiOff && (
               <motion.div
@@ -192,19 +191,23 @@ export function OfflineDemo() {
                 <div className="flex items-center gap-3 text-[9px] sm:text-[10px] text-muted-foreground font-mono">
                   <span>
                     <CheckCircle2 className="h-3 w-3 text-forge-emerald inline mr-0.5" />
-                    12.4 tok/s
+                    No network calls
                   </span>
-                  <span>GPU: WebGPU</span>
-                  <span>Latency: 0ms network</span>
+                  <span>GPU: Local</span>
                 </div>
                 <span className="text-[9px] font-bold text-forge-emerald uppercase tracking-wider">
-                  100% Local
+                  100% On-Device
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Honest label */}
+      <p className="text-center text-[9px] text-muted-foreground/60 mt-2 font-medium">
+        Simulated demo — actual inference runs via Ollama or WebGPU on your hardware
+      </p>
     </div>
   );
 }
