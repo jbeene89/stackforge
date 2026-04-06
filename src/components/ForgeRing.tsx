@@ -854,10 +854,10 @@ export function ForgeRing() {
       {activeIndex < STATIONS.length - 1 && (
         <motion.div className="fr-scroll-hint"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}>
-          <div className="fr-scroll-arrow" style={{ borderColor: station.accent }} />
-          <div className="fr-scroll-arrow" style={{ borderColor: station.accent }} />
-          <span className="fr-scroll-label" style={{ color: station.accent }}>
-            {isMobile ? "SWIPE UP" : "NEXT STATION"}
+          <div className="fr-scroll-arrow" style={{ borderColor: STATIONS[activeIndex + 1].accent }} />
+          <div className="fr-scroll-arrow" style={{ borderColor: STATIONS[activeIndex + 1].accent }} />
+          <span className="fr-scroll-label" style={{ color: STATIONS[activeIndex + 1].accent }}>
+            {isMobile ? "SWIPE UP" : `NEXT: ${STATIONS[activeIndex + 1].name}`}
           </span>
         </motion.div>
       )}
