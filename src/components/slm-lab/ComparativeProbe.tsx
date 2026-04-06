@@ -108,6 +108,20 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
 
   const [customPrompt, setCustomPrompt] = useState("");
 
+  // 5-perspective probe state
+  interface PerspectiveResult {
+    perspective: string;
+    perspectiveLabel: string;
+    diagnosticLabel: string;
+    prompt: string;
+    responseA: string;
+    responseB: string;
+  }
+  const [perspectiveResults, setPerspectiveResults] = useState<PerspectiveResult[]>([]);
+  const [perspectiveComparing, setPerspectiveComparing] = useState(false);
+  const [perspectiveProgress, setPerspectiveProgress] = useState({ current: 0, total: 0 });
+  const [expandedPerspective, setExpandedPerspective] = useState<string | null>(null);
+
   // Fetch models from Ollama
   useEffect(() => {
     (async () => {
