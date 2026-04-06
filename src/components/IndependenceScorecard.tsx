@@ -43,7 +43,7 @@ const CAPABILITIES: Capability[] = [
     description: "Run prompts against your SLM",
     level: "local",
     icon: Brain,
-    tip: "Ollama runs 100% on-device via Device Console or Inference Playground",
+    tip: "WebGPU in-browser inference or Ollama on-device via Inference Playground",
     actionLabel: "Open Console",
     actionUrl: "/console",
   },
