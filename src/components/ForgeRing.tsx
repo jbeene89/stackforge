@@ -87,7 +87,7 @@ const Fonts = ({ isMobile }: { isMobile: boolean }) => (
       transform: translateY(-50%);
       font-family: 'Space Mono', monospace; font-size: 8px;
       letter-spacing: 0.3em; white-space: nowrap;
-      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+      opacity: 0.4; transition: opacity 0.3s; pointer-events: none;
     }
     .fr-station-dot:hover .fr-station-dot-label,
     .fr-station-dot.active .fr-station-dot-label { opacity: 1; }
@@ -575,6 +575,19 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
                 </div>
               )}
 
+              {/* Outcome frame */}
+              <p style={{
+                fontFamily: "Chakra Petch, sans-serif",
+                fontSize: isMobile ? 13 : 14,
+                color: station.accent,
+                marginBottom: isMobile ? 8 : 12,
+                fontWeight: 400, lineHeight: 1.6,
+                fontStyle: "italic",
+                opacity: 0.85,
+              }}>
+                {station.outcomeFrame}
+              </p>
+
               <p style={{
                 fontFamily: "Chakra Petch, sans-serif",
                 fontSize: isMobile ? 13 : 14,
@@ -624,11 +637,16 @@ function StationPanel({ station, isActive, direction, isMobile, navigate }: {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}>
                 <button className="fr-cta"
-                  style={{ background: station.accent, color: "#1a1f2e" }}
+                  style={{ background: station.accent, color: "#1a1f2e", flexDirection: "column", gap: 2 }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1.1)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1)"; }}>
-                  {station.emoji} {cta}
-                  <span style={{ fontFamily: "Space Mono, monospace", fontSize: 14 }}>→</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {station.emoji} {cta}
+                    <span style={{ fontFamily: "Space Mono, monospace", fontSize: 14 }}>→</span>
+                  </span>
+                  <span style={{ fontFamily: "Chakra Petch, sans-serif", fontSize: 10, fontWeight: 400, letterSpacing: "0.05em", opacity: 0.7 }}>
+                    {station.ctaOutcome}
+                  </span>
                 </button>
               </motion.div>
             </div>
