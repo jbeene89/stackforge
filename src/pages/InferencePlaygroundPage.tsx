@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { SEOHead } from "@/components/SEOHead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -337,6 +338,13 @@ export default function InferencePlaygroundPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <SEOHead
+        title="Run AI in Your Browser — No Server Needed"
+        description="Load open-source AI models directly in your browser and chat with them offline. No API keys, no servers — 100% private, on-device inference powered by WebGPU."
+        ogTitle="Run AI in Your Browser — No Server Needed"
+        ogDescription="Load open-source models (360M–3.5B) directly in your browser. Works offline, no API keys, no data leaves your device. Powered by WebGPU."
+        canonicalPath="/inference"
+      />
       {/* Hero — landing-ready context for cold visitors */}
       <div className="space-y-4">
         <div className="space-y-2">
