@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -14,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Terminal,
   Wifi,
@@ -27,14 +29,25 @@ import {
   RotateCcw,
   Loader2,
   AlertTriangle,
-  CheckCircle2,
-  Copy,
+  Smartphone,
   ChevronDown,
   ChevronUp,
-  Smartphone,
+  Globe,
+  Download,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  isWebGPUAvailable,
+  loadModel,
+  unloadModel,
+  streamBrowserInference,
+  BROWSER_MODELS,
+  getLoadedModelId,
+  type WebLLMModel,
+} from "@/lib/webllm";
+import type { MLCEngineInterface, InitProgressReport } from "@mlc-ai/web-llm";
 
 // ─── Types ──────────────────────────────────────────────────
 interface Message {
@@ -62,6 +75,8 @@ interface InferenceStats {
   eval_duration_ms?: number;
 }
 
+type InferenceMode = "ollama" | "browser";
+
 // ─── Helpers ────────────────────────────────────────────────
 function formatSize(bytes: number): string {
   if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
@@ -69,24 +84,42 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1e3).toFixed(0)} KB`;
 }
 
-function StatusDot({ status }: { status: ConnectionState["status"] }) {
+function StatusDot({ status }: { status: ConnectionState["status"] | "loading" }) {
   const colors: Record<string, string> = {
     disconnected: "bg-muted-foreground",
     connecting: "bg-[hsl(var(--forge-amber))] animate-pulse",
     connected: "bg-[hsl(var(--forge-emerald))]",
     error: "bg-destructive",
+    loading: "bg-[hsl(var(--forge-amber))] animate-pulse",
   };
   return <span className={cn("inline-block h-2 w-2 rounded-full", colors[status])} />;
 }
 
 // ─── Main Page ──────────────────────────────────────────────
 export default function InferencePlaygroundPage() {
+  // Mode
+  const [mode, setMode] = useState<InferenceMode>(
+    isWebGPUAvailable() ? "browser" : "ollama"
+  );
+  const webGPUSupported = isWebGPUAvailable();
+
+  // Ollama state
   const [connection, setConnection] = useState<ConnectionState>({
     status: "disconnected",
     url: localStorage.getItem("ollama-url") || "http://localhost:11434",
     models: [],
   });
-  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedOllamaModel, setSelectedOllamaModel] = useState("");
+
+  // Browser (WebLLM) state
+  const [browserModelId, setBrowserModelId] = useState(
+    localStorage.getItem("webllm-model") || BROWSER_MODELS[0].model_id
+  );
+  const [browserEngine, setBrowserEngine] = useState<MLCEngineInterface | null>(null);
+  const [browserLoadProgress, setBrowserLoadProgress] = useState<{ text: string; progress: number } | null>(null);
+  const [browserReady, setBrowserReady] = useState(false);
+
+  // Shared state
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [systemPrompt, setSystemPrompt] = useState(
@@ -99,6 +132,8 @@ export default function InferencePlaygroundPage() {
   const [showSettings, setShowSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const isReady = mode === "ollama" ? connection.status === "connected" : browserReady;
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -114,9 +149,12 @@ export default function InferencePlaygroundPage() {
   useEffect(() => {
     localStorage.setItem("ollama-system-prompt", systemPrompt);
   }, [systemPrompt]);
+  useEffect(() => {
+    localStorage.setItem("webllm-model", browserModelId);
+  }, [browserModelId]);
 
-  // ── Connect ───────────────────────────────────────────────
-  const connect = useCallback(async () => {
+  // ── Ollama Connect ────────────────────────────────────────
+  const connectOllama = useCallback(async () => {
     setConnection((c) => ({ ...c, status: "connecting", error: undefined }));
     try {
       const res = await fetch(`${connection.url}/api/tags`, {
@@ -126,8 +164,8 @@ export default function InferencePlaygroundPage() {
       const data = await res.json();
       const models: OllamaModel[] = data.models || [];
       setConnection((c) => ({ ...c, status: "connected", models }));
-      if (models.length > 0 && !selectedModel) {
-        setSelectedModel(models[0].name);
+      if (models.length > 0 && !selectedOllamaModel) {
+        setSelectedOllamaModel(models[0].name);
       }
       toast.success(`Connected — ${models.length} model${models.length !== 1 ? "s" : ""} found`);
     } catch (e: any) {
@@ -140,11 +178,46 @@ export default function InferencePlaygroundPage() {
       setConnection((c) => ({ ...c, status: "error", error: msg }));
       toast.error(msg);
     }
-  }, [connection.url, selectedModel]);
+  }, [connection.url, selectedOllamaModel]);
 
-  // ── Send message ──────────────────────────────────────────
+  // ── Browser Model Load ────────────────────────────────────
+  const loadBrowserModel = useCallback(async () => {
+    if (!webGPUSupported) {
+      toast.error("Your browser does not support WebGPU");
+      return;
+    }
+    setBrowserReady(false);
+    setBrowserLoadProgress({ text: "Initializing...", progress: 0 });
+
+    try {
+      const engine = await loadModel(browserModelId, (report: InitProgressReport) => {
+        setBrowserLoadProgress({
+          text: report.text,
+          progress: Math.round(report.progress * 100),
+        });
+      });
+      setBrowserEngine(engine);
+      setBrowserReady(true);
+      setBrowserLoadProgress(null);
+      toast.success("Model loaded — ready for offline inference");
+    } catch (e: any) {
+      console.error("[WebLLM] Load error:", e);
+      setBrowserLoadProgress(null);
+      setBrowserReady(false);
+      toast.error(e.message || "Failed to load model");
+    }
+  }, [browserModelId, webGPUSupported]);
+
+  const unloadBrowserModel = useCallback(async () => {
+    await unloadModel();
+    setBrowserEngine(null);
+    setBrowserReady(false);
+    toast.info("Model unloaded");
+  }, []);
+
+  // ── Send message (unified) ────────────────────────────────
   const sendMessage = useCallback(async () => {
-    if (!input.trim() || streaming) return;
+    if (!input.trim() || streaming || !isReady) return;
 
     const userMsg: Message = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMsg];
@@ -160,62 +233,83 @@ export default function InferencePlaygroundPage() {
     abortRef.current = controller;
 
     try {
-      const ollamaMessages = [
-        ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+      const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+        ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
         ...newMessages.map((m) => ({ role: m.role, content: m.content })),
       ];
 
-      const res = await fetch(`${connection.url}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: ollamaMessages,
-          stream: true,
-          options: {
-            temperature,
-            num_predict: maxTokens,
+      if (mode === "browser" && browserEngine) {
+        // ── Browser inference via WebLLM ──
+        let accumulated = "";
+        await streamBrowserInference(browserEngine, {
+          messages: chatMessages,
+          temperature,
+          max_tokens: maxTokens,
+          signal: controller.signal,
+          onDelta: (text) => {
+            accumulated += text;
+            setMessages((prev) => {
+              const copy = [...prev];
+              copy[copy.length - 1] = { role: "assistant", content: accumulated };
+              return copy;
+            });
           },
-        }),
-        signal: controller.signal,
-      });
+          onStats: (s) => {
+            setStats({
+              tokens_per_second: s.tokensPerSecond,
+              total_tokens: s.totalTokens,
+              eval_duration_ms: s.durationMs,
+            });
+          },
+        });
+      } else {
+        // ── Ollama inference ──
+        const res = await fetch(`${connection.url}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: selectedOllamaModel,
+            messages: chatMessages,
+            stream: true,
+            options: { temperature, num_predict: maxTokens },
+          }),
+          signal: controller.signal,
+        });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
 
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("No response body");
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error("No response body");
 
-      const decoder = new TextDecoder();
-      let accumulated = "";
+        const decoder = new TextDecoder();
+        let accumulated = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter(Boolean);
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n").filter(Boolean);
 
-        for (const line of lines) {
-          try {
-            const json = JSON.parse(line);
-            if (json.message?.content) {
-              accumulated += json.message.content;
-              setMessages((prev) => {
-                const copy = [...prev];
-                copy[copy.length - 1] = { role: "assistant", content: accumulated };
-                return copy;
-              });
-            }
-            if (json.done && json.eval_count) {
-              setStats({
-                tokens_per_second:
-                  json.eval_count / (json.eval_duration / 1e9),
-                total_tokens: json.eval_count,
-                eval_duration_ms: json.eval_duration / 1e6,
-              });
-            }
-          } catch {
-            // skip non-JSON lines
+          for (const line of lines) {
+            try {
+              const json = JSON.parse(line);
+              if (json.message?.content) {
+                accumulated += json.message.content;
+                setMessages((prev) => {
+                  const copy = [...prev];
+                  copy[copy.length - 1] = { role: "assistant", content: accumulated };
+                  return copy;
+                });
+              }
+              if (json.done && json.eval_count) {
+                setStats({
+                  tokens_per_second: json.eval_count / (json.eval_duration / 1e9),
+                  total_tokens: json.eval_count,
+                  eval_duration_ms: json.eval_duration / 1e6,
+                });
+              }
+            } catch { /* skip */ }
           }
         }
       }
@@ -226,10 +320,7 @@ export default function InferencePlaygroundPage() {
         toast.error(e.message || "Inference failed");
         setMessages((prev) => {
           const copy = [...prev];
-          copy[copy.length - 1] = {
-            role: "assistant",
-            content: `⚠️ Error: ${e.message}`,
-          };
+          copy[copy.length - 1] = { role: "assistant", content: `⚠️ Error: ${e.message}` };
           return copy;
         });
       }
@@ -237,14 +328,12 @@ export default function InferencePlaygroundPage() {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [input, messages, streaming, connection.url, selectedModel, systemPrompt, temperature, maxTokens]);
+  }, [input, messages, streaming, isReady, mode, browserEngine, connection.url, selectedOllamaModel, systemPrompt, temperature, maxTokens]);
 
   const stopGeneration = () => abortRef.current?.abort();
+  const clearChat = () => { setMessages([]); setStats(null); };
 
-  const clearChat = () => {
-    setMessages([]);
-    setStats(null);
-  };
+  const selectedBrowserModel = BROWSER_MODELS.find((m) => m.model_id === browserModelId);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -256,57 +345,150 @@ export default function InferencePlaygroundPage() {
           <Badge variant="outline" className="text-[9px] h-4">Phase 3</Badge>
         </div>
         <p className="text-sm text-muted-foreground max-w-2xl">
-          Connect to a local Ollama instance running on your phone or LAN.
-          Chat with your deployed SLM in real-time — all inference stays on-device.
+          Run inference on-device — either in your browser via WebGPU or through a local Ollama instance.
+          All processing stays private, no data leaves your device.
         </p>
       </div>
 
-      {/* Connection Bar */}
-      <Card>
-        <CardContent className="py-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="flex items-center gap-2 shrink-0">
-              <StatusDot status={connection.status} />
-              <span className="text-xs font-semibold capitalize">{connection.status}</span>
+      {/* Mode Selector */}
+      <Tabs value={mode} onValueChange={(v) => setMode(v as InferenceMode)} className="w-full">
+        <TabsList className="grid w-full max-w-sm grid-cols-2">
+          <TabsTrigger value="browser" className="gap-1.5 text-xs" disabled={!webGPUSupported}>
+            <Globe className="h-3 w-3" />
+            Browser (WebGPU)
+          </TabsTrigger>
+          <TabsTrigger value="ollama" className="gap-1.5 text-xs">
+            <Smartphone className="h-3 w-3" />
+            Ollama (LAN)
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* Connection / Model Loading Bar */}
+      {mode === "ollama" ? (
+        <Card>
+          <CardContent className="py-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="flex items-center gap-2 shrink-0">
+                <StatusDot status={connection.status} />
+                <span className="text-xs font-semibold capitalize">{connection.status}</span>
+              </div>
+              <Input
+                value={connection.url}
+                onChange={(e) =>
+                  setConnection((c) => ({ ...c, url: e.target.value, status: "disconnected" }))
+                }
+                placeholder="http://localhost:11434"
+                className="font-mono text-xs h-8 flex-1"
+              />
+              <Button
+                size="sm"
+                className="h-8 gap-1.5 shrink-0"
+                onClick={connectOllama}
+                disabled={connection.status === "connecting"}
+              >
+                {connection.status === "connecting" ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : connection.status === "connected" ? (
+                  <RotateCcw className="h-3 w-3" />
+                ) : (
+                  <Wifi className="h-3 w-3" />
+                )}
+                {connection.status === "connected" ? "Refresh" : "Connect"}
+              </Button>
             </div>
-            <Input
-              value={connection.url}
-              onChange={(e) =>
-                setConnection((c) => ({ ...c, url: e.target.value, status: "disconnected" }))
-              }
-              placeholder="http://localhost:11434"
-              className="font-mono text-xs h-8 flex-1"
-            />
-            <Button
-              size="sm"
-              className="h-8 gap-1.5 shrink-0"
-              onClick={connect}
-              disabled={connection.status === "connecting"}
-            >
-              {connection.status === "connecting" ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : connection.status === "connected" ? (
-                <RotateCcw className="h-3 w-3" />
-              ) : (
-                <Wifi className="h-3 w-3" />
-              )}
-              {connection.status === "connected" ? "Refresh" : "Connect"}
-            </Button>
-          </div>
-          {connection.error && (
-            <div className="mt-2 flex items-center gap-2 text-xs text-destructive">
-              <AlertTriangle className="h-3 w-3" />
-              <span>{connection.error}</span>
-            </div>
-          )}
-          {connection.status === "disconnected" && (
-            <p className="mt-2 text-[10px] text-muted-foreground">
-              💡 Run <code className="px-1 py-0.5 rounded bg-secondary text-foreground/70">ollama serve</code> on
-              your phone (via Termux) or PC, then enter the IP address above.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {connection.error && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-destructive">
+                <AlertTriangle className="h-3 w-3" />
+                <span>{connection.error}</span>
+              </div>
+            )}
+            {connection.status === "disconnected" && (
+              <p className="mt-2 text-[10px] text-muted-foreground">
+                💡 Run <code className="px-1 py-0.5 rounded bg-secondary text-foreground/70">ollama serve</code> on
+                your phone (via Termux) or PC, then enter the IP address above.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-3 space-y-3">
+            {!webGPUSupported ? (
+              <div className="flex items-center gap-2 text-xs text-destructive">
+                <AlertTriangle className="h-3 w-3" />
+                <span>WebGPU not available in this browser. Try Chrome 113+ or Edge 113+.</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <StatusDot status={browserReady ? "connected" : browserLoadProgress ? "loading" : "disconnected"} />
+                    <span className="text-xs font-semibold">
+                      {browserReady ? "Ready" : browserLoadProgress ? "Loading…" : "Not loaded"}
+                    </span>
+                  </div>
+                  <Select value={browserModelId} onValueChange={setBrowserModelId} disabled={!!browserLoadProgress}>
+                    <SelectTrigger className="h-8 text-xs flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BROWSER_MODELS.map((m) => (
+                        <SelectItem key={m.model_id} value={m.model_id} className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <span>{m.label}</span>
+                            <Badge variant="outline" className="text-[8px] h-3.5">{m.size}</Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {browserReady ? (
+                    <Button size="sm" variant="outline" className="h-8 gap-1.5 shrink-0" onClick={unloadBrowserModel}>
+                      <X className="h-3 w-3" /> Unload
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="h-8 gap-1.5 shrink-0"
+                      onClick={loadBrowserModel}
+                      disabled={!!browserLoadProgress}
+                    >
+                      {browserLoadProgress ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Download className="h-3 w-3" />
+                      )}
+                      {browserLoadProgress ? "Loading…" : "Load Model"}
+                    </Button>
+                  )}
+                </div>
+                {browserLoadProgress && (
+                  <div className="space-y-1.5">
+                    <Progress
+                      value={browserLoadProgress.progress}
+                      className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-[hsl(var(--forge-cyan))] [&>div]:to-[hsl(var(--forge-emerald))]"
+                    />
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {browserLoadProgress.text}
+                    </p>
+                  </div>
+                )}
+                {!browserReady && !browserLoadProgress && (
+                  <div className="flex items-start gap-2 text-[10px] text-muted-foreground">
+                    <WifiOff className="h-3 w-3 mt-0.5 text-[hsl(var(--forge-emerald))] shrink-0" />
+                    <span>
+                      Models download once and are cached in your browser.
+                      After loading, inference works <strong>100% offline</strong> — no server needed.
+                      {selectedBrowserModel && ` Requires ~${selectedBrowserModel.vram} VRAM.`}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
@@ -321,6 +503,12 @@ export default function InferencePlaygroundPage() {
                   {stats.tokens_per_second?.toFixed(1)} tok/s
                 </Badge>
               )}
+              {mode === "browser" && browserReady && (
+                <Badge variant="outline" className="text-[9px] gap-1 border-[hsl(var(--forge-emerald))]/30 text-[hsl(var(--forge-emerald))]">
+                  <WifiOff className="h-2.5 w-2.5" />
+                  Offline
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={clearChat}>
@@ -332,11 +520,17 @@ export default function InferencePlaygroundPage() {
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                <Smartphone className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                {mode === "browser" ? (
+                  <Globe className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                ) : (
+                  <Smartphone className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                )}
                 <p className="text-sm text-muted-foreground font-medium">No messages yet</p>
                 <p className="text-xs text-muted-foreground/70 mt-1 max-w-xs">
-                  {connection.status === "connected"
+                  {isReady
                     ? "Type a message below to start chatting with your SLM"
+                    : mode === "browser"
+                    ? "Load a model above to begin offline inference"
                     : "Connect to an Ollama instance above to begin"}
                 </p>
               </div>
@@ -377,12 +571,8 @@ export default function InferencePlaygroundPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                placeholder={
-                  connection.status === "connected"
-                    ? "Type a message…"
-                    : "Connect to Ollama first"
-                }
-                disabled={connection.status !== "connected"}
+                placeholder={isReady ? "Type a message…" : mode === "browser" ? "Load a model first" : "Connect to Ollama first"}
+                disabled={!isReady}
                 className="text-sm h-9"
               />
               {streaming ? (
@@ -399,7 +589,7 @@ export default function InferencePlaygroundPage() {
                   size="sm"
                   className="h-9 gap-1 shrink-0"
                   onClick={sendMessage}
-                  disabled={!input.trim() || connection.status !== "connected"}
+                  disabled={!input.trim() || !isReady}
                 >
                   <Send className="h-3.5 w-3.5" />
                 </Button>
@@ -426,41 +616,43 @@ export default function InferencePlaygroundPage() {
 
         {/* Settings panel */}
         <div className="space-y-4">
-          {/* Model selector */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs flex items-center gap-1.5">
-                <Cpu className="h-3.5 w-3.5" /> Model
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {connection.models.length > 0 ? (
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Select model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {connection.models.map((m) => (
-                      <SelectItem key={m.name} value={m.name} className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <span>{m.name}</span>
-                          <Badge variant="outline" className="text-[8px] h-3.5">
-                            {formatSize(m.size)}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-[10px] text-muted-foreground">
-                  {connection.status === "connected"
-                    ? "No models found — pull one with ollama pull"
-                    : "Connect to see available models"}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Model selector — Ollama only */}
+          {mode === "ollama" && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs flex items-center gap-1.5">
+                  <Cpu className="h-3.5 w-3.5" /> Model
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {connection.models.length > 0 ? (
+                  <Select value={selectedOllamaModel} onValueChange={setSelectedOllamaModel}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {connection.models.map((m) => (
+                        <SelectItem key={m.name} value={m.name} className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <span>{m.name}</span>
+                            <Badge variant="outline" className="text-[8px] h-3.5">
+                              {formatSize(m.size)}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground">
+                    {connection.status === "connected"
+                      ? "No models found — pull one with ollama pull"
+                      : "Connect to see available models"}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Parameters */}
           <Card>
@@ -534,19 +726,32 @@ export default function InferencePlaygroundPage() {
           </Card>
 
           {/* Quick tips */}
-          <div className="rounded-lg border border-[hsl(var(--forge-cyan))]/20 bg-[hsl(var(--forge-cyan))]/5 p-3 space-y-1.5">
-            <p className="text-[10px] font-semibold text-[hsl(var(--forge-cyan))]">
-              💡 Quick Setup
-            </p>
-            <ul className="text-[10px] text-foreground/70 space-y-1 list-disc pl-3">
-              <li>
-                On phone: <code className="px-1 rounded bg-secondary">ollama serve</code> in Termux
-              </li>
-              <li>Find phone IP: <code className="px-1 rounded bg-secondary">ifconfig wlan0</code></li>
-              <li>Enter <code className="px-1 rounded bg-secondary">http://PHONE_IP:11434</code> above</li>
-              <li>Same Wi-Fi network required</li>
-            </ul>
-          </div>
+          {mode === "ollama" ? (
+            <div className="rounded-lg border border-[hsl(var(--forge-cyan))]/20 bg-[hsl(var(--forge-cyan))]/5 p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold text-[hsl(var(--forge-cyan))]">
+                💡 Quick Setup
+              </p>
+              <ul className="text-[10px] text-foreground/70 space-y-1 list-disc pl-3">
+                <li>On phone: <code className="px-1 rounded bg-secondary">ollama serve</code> in Termux</li>
+                <li>Find phone IP: <code className="px-1 rounded bg-secondary">ifconfig wlan0</code></li>
+                <li>Enter <code className="px-1 rounded bg-secondary">http://PHONE_IP:11434</code> above</li>
+                <li>Same Wi-Fi network required</li>
+              </ul>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-[hsl(var(--forge-emerald))]/20 bg-[hsl(var(--forge-emerald))]/5 p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold text-[hsl(var(--forge-emerald))]">
+                🧠 Browser Inference
+              </p>
+              <ul className="text-[10px] text-foreground/70 space-y-1 list-disc pl-3">
+                <li>Models download once and are <strong>cached in your browser</strong></li>
+                <li>All inference runs via WebGPU — <strong>no server, no internet</strong></li>
+                <li>Works in Chrome 113+, Edge 113+, or any WebGPU-enabled browser</li>
+                <li>Smaller models (360M–1.7B) work well on most devices</li>
+                <li>Larger models (3B+) need a dedicated GPU with sufficient VRAM</li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
