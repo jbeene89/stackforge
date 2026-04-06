@@ -343,8 +343,10 @@ type Station = {
   bg: string;
   description: string;
   mobileDescription?: string;
+  outcomeFrame: string;
   actions: StationAction[];
   cta: string;
+  ctaOutcome: string;
   ctaHref: string;
   emberColor: string;
 };
@@ -364,6 +366,7 @@ const STATIONS: Station[] = [
     bg: "radial-gradient(ellipse 80% 60% at 30% 60%, rgba(255,107,53,0.07) 0%, transparent 60%), radial-gradient(ellipse 50% 80% at 80% 20%, rgba(255,60,0,0.04) 0%, transparent 60%)",
     description: "Bring in raw knowledge. Every great model starts with quality ore.",
     mobileDescription: "Capture raw knowledge from anywhere. Voice interviews and file uploads work great on mobile.",
+    outcomeFrame: "Your model is only as good as its training data. Start here.",
     actions: [
       { icon: "🧠", title: "FOUNDER INTERVIEW", desc: "AI extracts your expertise through conversation", href: "/slm-lab?step=0" },
       { icon: "🌐", title: "WEB SCRAPE", desc: "Pull structured knowledge from URLs", href: "/slm-lab?step=2&mode=scrape", desktopOnly: true },
@@ -372,6 +375,7 @@ const STATIONS: Station[] = [
       { icon: "🤗", title: "HUGGING FACE", desc: "Import from thousands of curated datasets", href: "/slm-lab?step=2&mode=huggingface" },
     ],
     cta: "START SMELTING",
+    ctaOutcome: "clean your dataset in minutes",
     ctaHref: "/slm-lab?step=1",
     emberColor: "#FF6B35",
   },
@@ -389,6 +393,7 @@ const STATIONS: Station[] = [
     bg: "radial-gradient(ellipse 80% 60% at 70% 40%, rgba(0,229,255,0.06) 0%, transparent 60%), radial-gradient(ellipse 40% 70% at 20% 80%, rgba(0,102,255,0.05) 0%, transparent 60%)",
     description: "Five cognitive lenses reshape raw data into structured intelligence.",
     mobileDescription: "Heavy compute runs on desktop. Check pipeline status and tweak settings from here.",
+    outcomeFrame: "This is where raw data becomes structured thinking. Your model learns to reason.",
     actions: [
       { icon: "🍿", title: "POPCORN INJECTION", desc: "Densify stock knowledge — zero data needed", href: "/slm-lab?step=4&mode=popcorn", desktopOnly: true },
       { icon: "🔨", title: "CDPT PIPELINE", desc: "Builder · Red Team · Systems · Frame Breaker · Empath", href: "/slm-lab?step=2&mode=cdpt", desktopOnly: true },
@@ -397,6 +402,7 @@ const STATIONS: Station[] = [
       { icon: "🎛️", title: "BIAS WEIGHTS", desc: "Dial in perspective ratios before forging", href: "/slm-lab?step=4&mode=bias", desktopOnly: true },
     ],
     cta: "VIEW PIPELINE",
+    ctaOutcome: "watch your model learn in real-time",
     ctaHref: "/training",
     emberColor: "#00E5FF",
   },
@@ -414,6 +420,7 @@ const STATIONS: Station[] = [
     bg: "radial-gradient(ellipse 70% 60% at 50% 70%, rgba(127,255,0,0.05) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 20% 30%, rgba(0,200,0,0.04) 0%, transparent 60%)",
     description: "Every pair gets judged. Sharpen what's good. Discard what's dull.",
     mobileDescription: "Swipe through training samples like a deck of cards. Built for touch.",
+    outcomeFrame: "Bad data makes bad models. One pass here saves hours of retraining.",
     actions: [
       { icon: "👆", title: "SWIPE REVIEW", desc: "Tinder-style approve / reject — perfect for touch", href: "/review" },
       { icon: "🔍", title: "QUALITY SCAN", desc: "Auto-flag low-quality or duplicate pairs", href: "/slm-lab?step=3&mode=scan" },
@@ -421,6 +428,7 @@ const STATIONS: Station[] = [
       { icon: "📊", title: "DATASET STATS", desc: "Coverage, balance, and quality metrics", href: "/slm-lab?step=3&mode=stats" },
     ],
     cta: "START SWIPING",
+    ctaOutcome: "curate production-ready data in minutes",
     ctaHref: "/review",
     emberColor: "#7FFF00",
   },
@@ -438,6 +446,7 @@ const STATIONS: Station[] = [
     bg: "radial-gradient(ellipse 80% 50% at 60% 30%, rgba(180,79,255,0.06) 0%, transparent 60%), radial-gradient(ellipse 50% 70% at 30% 70%, rgba(100,0,200,0.04) 0%, transparent 60%)",
     description: "The finished blade. Package your training kit and deploy your model.",
     mobileDescription: "Get your model running on this device. Follow the phone deploy guide.",
+    outcomeFrame: "You built it. Now own it — deploy to your device and run offline forever.",
     actions: [
       { icon: "📦", title: "EXPORT TRAINING KIT", desc: "JSONL + train.py + config — ready to run", href: "/slm-lab?step=4&mode=export", desktopOnly: true },
       { icon: "📱", title: "PHONE DEPLOY", desc: "Ship your model to Android via Termux/Ollama", href: "/deploy/phone" },
@@ -446,6 +455,7 @@ const STATIONS: Station[] = [
       { icon: "🖥️", title: "SELF-HOST SETUP", desc: "Docker + Ollama + Open WebUI — zero cloud", href: "/self-host", desktopOnly: true },
     ],
     cta: "DEPLOY TO PHONE",
+    ctaOutcome: "get your AI running on-device today",
     ctaHref: "/deploy/phone",
     emberColor: "#B44FFF",
   },
