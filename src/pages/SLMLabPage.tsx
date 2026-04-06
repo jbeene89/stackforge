@@ -2500,6 +2500,7 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
    const [probing, setProbing] = useState(false);
    const [probingAll, setProbingAll] = useState(false);
    const [probeAllProgress, setProbeAllProgress] = useState(0);
+   const [probeMode, setProbeMode] = useState<"single" | "compare">("single");
   const createJob = useCreateTrainingJob();
 
   const approvedSamples = samples?.filter(s => s.status === "approved") || [];
