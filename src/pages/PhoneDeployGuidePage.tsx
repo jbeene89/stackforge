@@ -714,7 +714,7 @@ export default function PhoneDeployGuidePage() {
       {/* Privacy callout */}
       <div className="rounded-lg border border-[hsl(var(--forge-emerald))]/20 bg-[hsl(var(--forge-emerald))]/5 p-4 text-center">
         <WifiOff className="h-6 w-6 mx-auto text-[hsl(var(--forge-emerald))] mb-2" />
-        <p className="text-sm font-semibold">100% Private. 100% Offline. 100% Yours.</p>
+        <p className="text-sm font-semibold">100% Private. Runs on-device. 100% Yours.</p>
         <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
           Once deployed, your SLM runs entirely on your phone. No data leaves your device.
           No API calls. No cloud dependency. Your captures, your model, your insights.
