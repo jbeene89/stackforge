@@ -582,8 +582,94 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
         </div>
       )}
 
+      {/* 5-Perspective Probe Results */}
+      {perspectiveResults.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">5-Perspective Comparison</span>
+            <Badge variant="outline" className="text-[9px]">{perspectiveResults.length} probes</Badge>
+          </div>
+
+          {DIAGNOSTIC_PROMPTS.map(dp => {
+            const perspectivesForThis = perspectiveResults.filter(r => r.diagnosticLabel === dp.label);
+            if (perspectivesForThis.length === 0) return null;
+            const isOpen = expandedPerspective === dp.key;
+            return (
+              <Collapsible key={dp.key} open={isOpen} onOpenChange={() => setExpandedPerspective(isOpen ? null : dp.key)}>
+                <Card className="border-border">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between cursor-pointer">
+                        <span className="text-xs font-medium">{dp.label}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[8px]">{perspectivesForThis.length} perspectives</Badge>
+                          {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+                  </CardHeader>
+                  <CollapsibleContent>
+                    <CardContent className="px-4 pb-3 pt-0 space-y-2">
+                      {perspectivesForThis.map(pr => {
+                        const pConfig = PERSPECTIVES.find(p => p.key === pr.perspective);
+                        const PIcon = pConfig?.icon || Brain;
+                        const lengthDelta = pr.responseB.length - pr.responseA.length;
+                        return (
+                          <div key={pr.perspective} className={`rounded-lg border p-3 space-y-2 ${pConfig?.border || "border-border"} ${pConfig?.bg || ""}`}>
+                            <div className="flex items-center gap-2">
+                              <PIcon className={`h-3.5 w-3.5 ${pConfig?.color || "text-muted-foreground"}`} />
+                              <span className={`text-[10px] font-bold ${pConfig?.color || "text-muted-foreground"}`}>{pr.perspectiveLabel}</span>
+                              <span className={`text-[9px] font-mono ml-auto ${lengthDelta > 0 ? "text-forge-emerald" : lengthDelta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                                {lengthDelta > 0 ? "+" : ""}{lengthDelta} chars
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="rounded-md border border-blue-500/20 bg-blue-500/5 p-2">
+                                <p className="text-[9px] font-semibold text-blue-400 mb-1">A: {modelA}</p>
+                                <p className="text-[10px] text-foreground/80 leading-relaxed">{pr.responseA.slice(0, 250)}{pr.responseA.length > 250 ? "…" : ""}</p>
+                              </div>
+                              <div className="rounded-md border border-purple-500/20 bg-purple-500/5 p-2">
+                                <p className="text-[9px] font-semibold text-purple-400 mb-1">B: {modelB}</p>
+                                <p className="text-[10px] text-foreground/80 leading-relaxed">{pr.responseB.slice(0, 250)}{pr.responseB.length > 250 ? "…" : ""}</p>
+                              </div>
+                            </div>
+                            {pr.responseA !== pr.responseB && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-5 px-2 text-[8px] text-destructive"
+                                onClick={() => {
+                                  onFlagForUnlearn(`[5P] ${pr.perspectiveLabel} × ${pr.diagnosticLabel}: behavioral shift`);
+                                  toast.success(`Flagged ${pr.perspectiveLabel} perspective shift`);
+                                }}
+                              >
+                                🚩 Flag this perspective shift
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            );
+          })}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] text-muted-foreground"
+            onClick={() => { setPerspectiveResults([]); setExpandedPerspective(null); }}
+          >
+            Clear perspective probes
+          </Button>
+        </div>
+      )}
+
       {/* Empty state */}
-      {results.length === 0 && !comparing && (
+      {results.length === 0 && perspectiveResults.length === 0 && !comparing && !perspectiveComparing && (
         <Card className="bg-muted/30 border-dashed">
           <CardContent className="py-4 text-center">
             <Brain className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
@@ -591,7 +677,7 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
               Select two models and run comparative probes to see what changed between them.
             </p>
             <p className="text-[10px] text-muted-foreground/60 mt-1">
-              Compare base vs. fine-tuned, or preview unlearning effects
+              Compare base vs. fine-tuned, or use 5-Perspective Probe for deep CDPT analysis
             </p>
           </CardContent>
         </Card>
