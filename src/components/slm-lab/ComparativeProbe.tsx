@@ -158,6 +158,67 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
     return data.response || "(empty)";
   }, [ollamaHost]);
 
+  const probeModelWithSystem = useCallback(async (model: string, systemPrompt: string, prompt: string): Promise<string> => {
+    const res = await fetch(`${ollamaHost}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt },
+        ],
+        stream: false,
+      }),
+    });
+    if (!res.ok) throw new Error(`Model ${model} unreachable`);
+    const data = await res.json();
+    return data.message?.content || "(empty)";
+  }, [ollamaHost]);
+
+  const runPerspectiveProbe = useCallback(async () => {
+    if (!modelA.trim() || !modelB.trim()) {
+      toast.error("Select two models to compare");
+      return;
+    }
+    if (modelA === modelB) {
+      toast.error("Pick two different models for comparison");
+      return;
+    }
+    const total = DIAGNOSTIC_PROMPTS.length * PERSPECTIVES.length;
+    setPerspectiveComparing(true);
+    setPerspectiveResults([]);
+    setPerspectiveProgress({ current: 0, total });
+
+    let count = 0;
+    for (const dp of DIAGNOSTIC_PROMPTS) {
+      for (const p of PERSPECTIVES) {
+        try {
+          const [respA, respB] = await Promise.all([
+            probeModelWithSystem(modelA, p.system, dp.prompt),
+            probeModelWithSystem(modelB, p.system, dp.prompt),
+          ]);
+          setPerspectiveResults(prev => [...prev, {
+            perspective: p.key,
+            perspectiveLabel: p.label,
+            diagnosticLabel: dp.label,
+            prompt: dp.prompt,
+            responseA: respA,
+            responseB: respB,
+          }]);
+        } catch (e: any) {
+          toast.error(e?.message || "Perspective probe failed");
+          setPerspectiveComparing(false);
+          return;
+        }
+        count++;
+        setPerspectiveProgress({ current: count, total });
+      }
+    }
+    setPerspectiveComparing(false);
+    toast.success(`5-Perspective Probe complete — ${total} comparisons across both models`);
+  }, [modelA, modelB, probeModelWithSystem]);
+
   const runComparison = useCallback(async (prompts: typeof DIAGNOSTIC_PROMPTS) => {
     if (!modelA.trim() || !modelB.trim()) {
       toast.error("Select two models to compare");
