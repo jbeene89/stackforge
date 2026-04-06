@@ -204,7 +204,13 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Pricing — Free, Builder & Pro Plans" description="Compare Soupy pricing plans. Start free with 50 credits, upgrade to Builder or Pro for more AI modules, pipeline runs, and advanced features. No credit card required." />
+      <SEOHead
+        title="Pricing — Free, Builder & Pro Plans"
+        description="Compare Soupy pricing plans. Start free with 50 credits, upgrade to Builder or Pro for more AI modules, pipeline runs, and advanced features. No credit card required."
+        ogTitle="Soupy Pricing — Start Free, Scale When Ready"
+        ogDescription="Free tier with 50 credits. Builder plan for serious projects. Pro plan for teams. No credit card required to start."
+        canonicalPath="/pricing"
+      />
       <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
         <div className="flex items-center gap-2.5 sm:gap-3 mb-1.5 sm:mb-2">
           <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />

@@ -3489,6 +3489,13 @@ export default function SLMLabPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
+      <SEOHead
+        title="SLM Lab — Train Small Language Models"
+        description="Build and fine-tune small language models from your own data. 4-stage pipeline: Smelter, Forge, Grindstone, Workbench. Export to GGUF, run on-device."
+        ogTitle="SLM Lab — Train Your Own AI Model"
+        ogDescription="Turn plain-English data into a fine-tuned small language model. Curate, train, evaluate, and export — all from your browser."
+        canonicalPath="/slm-lab"
+      />
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 gap-2 border-b border-border">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Brain className="h-5 w-5 text-forge-amber" />
