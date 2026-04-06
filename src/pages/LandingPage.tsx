@@ -172,8 +172,8 @@ function InlineSocialProof() {
   ];
 
   return (
-    <section className="py-8 sm:py-16 px-3 sm:px-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="py-0">
+      <div className="max-w-full">
         {/* Stats row — 2x2 on mobile, 4-col on desktop */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
