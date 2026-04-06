@@ -348,8 +348,30 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
             </>
           )}
         </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="text-[10px] h-8 gap-1.5"
+          disabled={comparing || perspectiveComparing || !modelA.trim() || !modelB.trim()}
+          onClick={runPerspectiveProbe}
+        >
+          {perspectiveComparing ? (
+            <>
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              {perspectiveProgress.current}/{perspectiveProgress.total}…
+            </>
+          ) : (
+            <>
+              <Users className="h-3.5 w-3.5" />
+              5-Perspective Probe
+            </>
+          )}
+        </Button>
         {comparing && (
           <Progress value={(progress / DIAGNOSTIC_PROMPTS.length) * 100} className="flex-1 h-2 min-w-[80px]" />
+        )}
+        {perspectiveComparing && (
+          <Progress value={(perspectiveProgress.current / Math.max(perspectiveProgress.total, 1)) * 100} className="flex-1 h-2 min-w-[80px]" />
         )}
       </div>
 
