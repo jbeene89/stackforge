@@ -182,7 +182,7 @@ function InlineSocialProof() {
           {[
             { value: "12", label: "Module Types", color: "text-primary" },
             { value: "< 5 min", label: "Idea → Deploy", color: "text-forge-gold" },
-            { value: "100%", label: "Offline Capable", color: "text-forge-cyan" },
+            { value: "✓", label: "Offline Data & Sync", color: "text-forge-cyan" },
             { value: "$0", label: "To Start", color: "text-forge-emerald" },
           ].map((s, i) => (
             <motion.div
