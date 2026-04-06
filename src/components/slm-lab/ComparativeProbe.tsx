@@ -10,7 +10,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { toast } from "sonner";
 import {
   Brain, RefreshCw, ScanEye, Eye, ChevronDown, ChevronRight,
-  ArrowRight, AlertTriangle, CheckCircle2, Minus
+  ArrowRight, AlertTriangle, CheckCircle2, Minus,
+  Wrench, Shield, Layers, Lightbulb, Heart, Users
 } from "lucide-react";
 
 interface ComparativeProbeProps {
@@ -44,6 +45,19 @@ const DIAGNOSTIC_PROMPTS = [
   { label: "🌐 Domain Knowledge", key: "Domain Knowledge", prompt: `Explain machine learning to a 12-year-old.` },
   { label: "⚡ Hallucination Trap", key: "Hallucination Trap", prompt: `Tell me about the 2024 Nobel Prize in Computational Linguistics.` },
 ];
+
+const PERSPECTIVES = [
+  { key: "builder", label: "BUILDER", icon: Wrench, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30",
+    system: "You are the BUILDER perspective. Analyze everything through the lens of practical implementation — how would you build it, what tools, what architecture, what trade-offs. Be concrete and actionable." },
+  { key: "empath", label: "EMPATH", icon: Heart, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30",
+    system: "You are the EMPATH perspective. Consider the human impact — emotions, accessibility, inclusivity, user experience, and how real people with different backgrounds would feel about this." },
+  { key: "red_team", label: "RED TEAM", icon: Shield, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30",
+    system: "You are the RED TEAM perspective. Find weaknesses, attack surfaces, failure modes, edge cases, and risks. Be adversarial and thorough — what could go wrong?" },
+  { key: "frame_breaker", label: "FRAME BREAKER", icon: Lightbulb, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/30",
+    system: "You are the FRAME BREAKER perspective. Challenge assumptions, reframe the question, find hidden angles. What is everyone missing? What unconventional approach would work better?" },
+  { key: "systems", label: "SYSTEMS", icon: Layers, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30",
+    system: "You are the SYSTEMS perspective. Think about feedback loops, second-order effects, dependencies, scalability, and how this fits into larger systems. Map the interconnections." },
+] as const;
 
 const VERDICT_HEURISTICS: { label: string; key: string; risk: (r: string) => string }[] = [
   { label: "🎭 Tone", key: "Tone Check", risk: (r) => /corporate|synerg|leverage|stakeholder/i.test(r) ? "corporate" : /hedg|caveat|disclaimer/i.test(r) ? "hedging" : "natural" },
@@ -94,6 +108,20 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
 
   const [customPrompt, setCustomPrompt] = useState("");
 
+  // 5-perspective probe state
+  interface PerspectiveResult {
+    perspective: string;
+    perspectiveLabel: string;
+    diagnosticLabel: string;
+    prompt: string;
+    responseA: string;
+    responseB: string;
+  }
+  const [perspectiveResults, setPerspectiveResults] = useState<PerspectiveResult[]>([]);
+  const [perspectiveComparing, setPerspectiveComparing] = useState(false);
+  const [perspectiveProgress, setPerspectiveProgress] = useState({ current: 0, total: 0 });
+  const [expandedPerspective, setExpandedPerspective] = useState<string | null>(null);
+
   // Fetch models from Ollama
   useEffect(() => {
     (async () => {
@@ -129,6 +157,67 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
     const data = await res.json();
     return data.response || "(empty)";
   }, [ollamaHost]);
+
+  const probeModelWithSystem = useCallback(async (model: string, systemPrompt: string, prompt: string): Promise<string> => {
+    const res = await fetch(`${ollamaHost}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt },
+        ],
+        stream: false,
+      }),
+    });
+    if (!res.ok) throw new Error(`Model ${model} unreachable`);
+    const data = await res.json();
+    return data.message?.content || "(empty)";
+  }, [ollamaHost]);
+
+  const runPerspectiveProbe = useCallback(async () => {
+    if (!modelA.trim() || !modelB.trim()) {
+      toast.error("Select two models to compare");
+      return;
+    }
+    if (modelA === modelB) {
+      toast.error("Pick two different models for comparison");
+      return;
+    }
+    const total = DIAGNOSTIC_PROMPTS.length * PERSPECTIVES.length;
+    setPerspectiveComparing(true);
+    setPerspectiveResults([]);
+    setPerspectiveProgress({ current: 0, total });
+
+    let count = 0;
+    for (const dp of DIAGNOSTIC_PROMPTS) {
+      for (const p of PERSPECTIVES) {
+        try {
+          const [respA, respB] = await Promise.all([
+            probeModelWithSystem(modelA, p.system, dp.prompt),
+            probeModelWithSystem(modelB, p.system, dp.prompt),
+          ]);
+          setPerspectiveResults(prev => [...prev, {
+            perspective: p.key,
+            perspectiveLabel: p.label,
+            diagnosticLabel: dp.label,
+            prompt: dp.prompt,
+            responseA: respA,
+            responseB: respB,
+          }]);
+        } catch (e: any) {
+          toast.error(e?.message || "Perspective probe failed");
+          setPerspectiveComparing(false);
+          return;
+        }
+        count++;
+        setPerspectiveProgress({ current: count, total });
+      }
+    }
+    setPerspectiveComparing(false);
+    toast.success(`5-Perspective Probe complete — ${total} comparisons across both models`);
+  }, [modelA, modelB, probeModelWithSystem]);
 
   const runComparison = useCallback(async (prompts: typeof DIAGNOSTIC_PROMPTS) => {
     if (!modelA.trim() || !modelB.trim()) {
@@ -259,8 +348,30 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
             </>
           )}
         </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="text-[10px] h-8 gap-1.5"
+          disabled={comparing || perspectiveComparing || !modelA.trim() || !modelB.trim()}
+          onClick={runPerspectiveProbe}
+        >
+          {perspectiveComparing ? (
+            <>
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              {perspectiveProgress.current}/{perspectiveProgress.total}…
+            </>
+          ) : (
+            <>
+              <Users className="h-3.5 w-3.5" />
+              5-Perspective Probe
+            </>
+          )}
+        </Button>
         {comparing && (
           <Progress value={(progress / DIAGNOSTIC_PROMPTS.length) * 100} className="flex-1 h-2 min-w-[80px]" />
+        )}
+        {perspectiveComparing && (
+          <Progress value={(perspectiveProgress.current / Math.max(perspectiveProgress.total, 1)) * 100} className="flex-1 h-2 min-w-[80px]" />
         )}
       </div>
 
@@ -471,8 +582,94 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
         </div>
       )}
 
+      {/* 5-Perspective Probe Results */}
+      {perspectiveResults.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">5-Perspective Comparison</span>
+            <Badge variant="outline" className="text-[9px]">{perspectiveResults.length} probes</Badge>
+          </div>
+
+          {DIAGNOSTIC_PROMPTS.map(dp => {
+            const perspectivesForThis = perspectiveResults.filter(r => r.diagnosticLabel === dp.label);
+            if (perspectivesForThis.length === 0) return null;
+            const isOpen = expandedPerspective === dp.key;
+            return (
+              <Collapsible key={dp.key} open={isOpen} onOpenChange={() => setExpandedPerspective(isOpen ? null : dp.key)}>
+                <Card className="border-border">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between cursor-pointer">
+                        <span className="text-xs font-medium">{dp.label}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[8px]">{perspectivesForThis.length} perspectives</Badge>
+                          {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+                  </CardHeader>
+                  <CollapsibleContent>
+                    <CardContent className="px-4 pb-3 pt-0 space-y-2">
+                      {perspectivesForThis.map(pr => {
+                        const pConfig = PERSPECTIVES.find(p => p.key === pr.perspective);
+                        const PIcon = pConfig?.icon || Brain;
+                        const lengthDelta = pr.responseB.length - pr.responseA.length;
+                        return (
+                          <div key={pr.perspective} className={`rounded-lg border p-3 space-y-2 ${pConfig?.border || "border-border"} ${pConfig?.bg || ""}`}>
+                            <div className="flex items-center gap-2">
+                              <PIcon className={`h-3.5 w-3.5 ${pConfig?.color || "text-muted-foreground"}`} />
+                              <span className={`text-[10px] font-bold ${pConfig?.color || "text-muted-foreground"}`}>{pr.perspectiveLabel}</span>
+                              <span className={`text-[9px] font-mono ml-auto ${lengthDelta > 0 ? "text-forge-emerald" : lengthDelta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                                {lengthDelta > 0 ? "+" : ""}{lengthDelta} chars
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="rounded-md border border-blue-500/20 bg-blue-500/5 p-2">
+                                <p className="text-[9px] font-semibold text-blue-400 mb-1">A: {modelA}</p>
+                                <p className="text-[10px] text-foreground/80 leading-relaxed">{pr.responseA.slice(0, 250)}{pr.responseA.length > 250 ? "…" : ""}</p>
+                              </div>
+                              <div className="rounded-md border border-purple-500/20 bg-purple-500/5 p-2">
+                                <p className="text-[9px] font-semibold text-purple-400 mb-1">B: {modelB}</p>
+                                <p className="text-[10px] text-foreground/80 leading-relaxed">{pr.responseB.slice(0, 250)}{pr.responseB.length > 250 ? "…" : ""}</p>
+                              </div>
+                            </div>
+                            {pr.responseA !== pr.responseB && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-5 px-2 text-[8px] text-destructive"
+                                onClick={() => {
+                                  onFlagForUnlearn(`[5P] ${pr.perspectiveLabel} × ${pr.diagnosticLabel}: behavioral shift`);
+                                  toast.success(`Flagged ${pr.perspectiveLabel} perspective shift`);
+                                }}
+                              >
+                                🚩 Flag this perspective shift
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            );
+          })}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] text-muted-foreground"
+            onClick={() => { setPerspectiveResults([]); setExpandedPerspective(null); }}
+          >
+            Clear perspective probes
+          </Button>
+        </div>
+      )}
+
       {/* Empty state */}
-      {results.length === 0 && !comparing && (
+      {results.length === 0 && perspectiveResults.length === 0 && !comparing && !perspectiveComparing && (
         <Card className="bg-muted/30 border-dashed">
           <CardContent className="py-4 text-center">
             <Brain className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
@@ -480,7 +677,7 @@ export function ComparativeProbe({ baseModel, domain, ollamaHost, onFlagForUnlea
               Select two models and run comparative probes to see what changed between them.
             </p>
             <p className="text-[10px] text-muted-foreground/60 mt-1">
-              Compare base vs. fine-tuned, or preview unlearning effects
+              Compare base vs. fine-tuned, or use 5-Perspective Probe for deep CDPT analysis
             </p>
           </CardContent>
         </Card>
