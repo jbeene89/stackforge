@@ -2495,6 +2495,9 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
   const [unlearnInput, setUnlearnInput] = useState("");
   const [includeNegativeLora, setIncludeNegativeLora] = useState(false);
   const [layerStrategy, setLayerStrategy] = useState<"all" | "knowledge" | "style" | "reasoning">("all");
+  const [probeInput, setProbeInput] = useState("");
+  const [probeResults, setProbeResults] = useState<{ prompt: string; response: string; flagged: boolean }[]>([]);
+  const [probing, setProbing] = useState(false);
   const createJob = useCreateTrainingJob();
 
   const approvedSamples = samples?.filter(s => s.status === "approved") || [];
