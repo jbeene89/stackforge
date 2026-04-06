@@ -353,7 +353,7 @@ export default function InferencePlaygroundPage() {
       {/* Mode Selector */}
       <Tabs value={mode} onValueChange={(v) => setMode(v as InferenceMode)} className="w-full">
         <TabsList className="grid w-full max-w-sm grid-cols-2">
-          <TabsTrigger value="browser" className="gap-1.5 text-xs" disabled={!webGPUSupported}>
+          <TabsTrigger value="browser" className="gap-1.5 text-xs">
             <Globe className="h-3 w-3" />
             Browser (WebGPU)
           </TabsTrigger>
@@ -363,6 +363,28 @@ export default function InferencePlaygroundPage() {
           </TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {/* WebGPU not supported banner */}
+      {mode === "browser" && !webGPUSupported && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="py-4 space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              WebGPU is not available in your browser
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Browser-based inference requires WebGPU, which is supported in <strong>Chrome 113+</strong>, <strong>Edge 113+</strong>, and <strong>Opera 99+</strong>.
+              Firefox and Safari don't fully support it yet.
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setMode("ollama")}>
+                <Smartphone className="h-3 w-3" /> Switch to Ollama mode
+              </Button>
+              <span className="text-[10px] text-muted-foreground">— works with any browser via local server</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Connection / Model Loading Bar */}
       {mode === "ollama" ? (
@@ -414,12 +436,7 @@ export default function InferencePlaygroundPage() {
       ) : (
         <Card>
           <CardContent className="py-3 space-y-3">
-            {!webGPUSupported ? (
-              <div className="flex items-center gap-2 text-xs text-destructive">
-                <AlertTriangle className="h-3 w-3" />
-                <span>WebGPU not available in this browser. Try Chrome 113+ or Edge 113+.</span>
-              </div>
-            ) : (
+            {!webGPUSupported ? null : (
               <>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <div className="flex items-center gap-2 shrink-0">
@@ -463,6 +480,22 @@ export default function InferencePlaygroundPage() {
                     </Button>
                   )}
                 </div>
+
+                {/* Pre-download warning */}
+                {!browserReady && !browserLoadProgress && selectedBrowserModel && (
+                  <div className="rounded-lg border border-[hsl(var(--forge-amber))]/20 bg-[hsl(var(--forge-amber))]/5 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[hsl(var(--forge-amber))]">
+                      <Download className="h-3.5 w-3.5" />
+                      One-time download: {selectedBrowserModel.size}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      This model downloads <strong>{selectedBrowserModel.size}</strong> once and is permanently cached in your browser.
+                      After loading, it runs <strong>100% offline forever</strong> — no server, no internet, no data leaves your device.
+                      Requires a GPU with ~{selectedBrowserModel.vram} VRAM.
+                    </p>
+                  </div>
+                )}
+
                 {browserLoadProgress && (
                   <div className="space-y-1.5">
                     <Progress
@@ -472,16 +505,6 @@ export default function InferencePlaygroundPage() {
                     <p className="text-[10px] text-muted-foreground truncate">
                       {browserLoadProgress.text}
                     </p>
-                  </div>
-                )}
-                {!browserReady && !browserLoadProgress && (
-                  <div className="flex items-start gap-2 text-[10px] text-muted-foreground">
-                    <WifiOff className="h-3 w-3 mt-0.5 text-[hsl(var(--forge-emerald))] shrink-0" />
-                    <span>
-                      Models download once and are cached in your browser.
-                      After loading, inference works <strong>100% offline</strong> — no server needed.
-                      {selectedBrowserModel && ` Requires ~${selectedBrowserModel.vram} VRAM.`}
-                    </span>
                   </div>
                 )}
               </>
