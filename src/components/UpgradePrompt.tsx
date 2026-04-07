@@ -14,7 +14,7 @@ export function UpgradePrompt({ featureName, requiredTier, currentTier }: Upgrad
   const navigate = useNavigate();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="absolute inset-0 z-40 flex items-center justify-center">
       {/* Blurred backdrop that lets the page content show through */}
       <div className="absolute inset-0 bg-background/60 backdrop-blur-md" />
 
