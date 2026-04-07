@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -152,8 +152,39 @@ function AppCard({
   );
 }
 
+const STEPS = [
+  { icon: "🏋️", label: "Train on PC", anchor: "section-train" },
+  { icon: "📦", label: "Get .gguf file", anchor: "section-prerequisites" },
+  { icon: "📲", label: "Transfer to phone", anchor: "section-transfer" },
+  { icon: "🤖", label: "Load in app", anchor: "section-apps" },
+  { icon: "✨", label: "Run locally", anchor: "section-troubleshooting" },
+];
+
 // ─── Main Page ───────────────────────────────────────────────
 export default function PhoneDeployGuidePage() {
+  const [activeAnchor, setActiveAnchor] = useState(STEPS[0].anchor);
+
+  useEffect(() => {
+    const ids = STEPS.map((s) => s.anchor);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Pick the topmost visible section
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length > 0) {
+          setActiveAnchor(visible[0].target.id);
+        }
+      },
+      { rootMargin: "-10% 0px -60% 0px", threshold: 0 }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Hero */}
@@ -170,23 +201,28 @@ export default function PhoneDeployGuidePage() {
 
       {/* Quick path — clickable anchors */}
       <div className="flex items-center gap-2 flex-wrap text-xs sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 -mx-2 px-2 rounded-lg">
-        {[
-          { icon: "🏋️", label: "Train on PC", anchor: "section-train" },
-          { icon: "📦", label: "Get .gguf file", anchor: "section-prerequisites" },
-          { icon: "📲", label: "Transfer to phone", anchor: "section-transfer" },
-          { icon: "🤖", label: "Load in app", anchor: "section-apps" },
-          { icon: "✨", label: "Run locally", anchor: "section-troubleshooting" },
-        ].map((step, i) => (
-          <span key={i} className="flex items-center gap-1.5">
-            {i > 0 && <ArrowRight className="h-3 w-3 text-muted-foreground/50" />}
-            <button
-              onClick={() => document.getElementById(step.anchor)?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="px-2 py-1 rounded-md bg-secondary/50 border border-border/40 font-medium hover:bg-primary/15 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer"
-            >
-              {step.icon} {step.label}
-            </button>
-          </span>
-        ))}
+        {STEPS.map((step, i) => {
+          const isActive = activeAnchor === step.anchor;
+          return (
+            <span key={i} className="flex items-center gap-1.5">
+              {i > 0 && <ArrowRight className={`h-3 w-3 transition-colors ${
+                STEPS.findIndex((s) => s.anchor === activeAnchor) > i
+                  ? "text-primary/60"
+                  : "text-muted-foreground/50"
+              }`} />}
+              <button
+                onClick={() => document.getElementById(step.anchor)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                className={`px-2 py-1 rounded-md font-medium transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-primary/20 border border-primary/50 text-primary shadow-[0_0_8px_hsl(var(--primary)/0.15)]"
+                    : "bg-secondary/50 border border-border/40 hover:bg-primary/15 hover:border-primary/40 hover:text-primary"
+                }`}
+              >
+                {step.icon} {step.label}
+              </button>
+            </span>
+          );
+        })}
       </div>
 
       {/* Prerequisites */}
