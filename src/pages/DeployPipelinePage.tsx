@@ -741,7 +741,6 @@ PARAMETER num_ctx 1024
   const blobUrl = triggerDownload(blob, filename);
   return { blobUrl, filename };
 }
-}
 
 // ─── Main Page ───────────────────────────────────────────────
 export default function DeployPipelinePage() {
