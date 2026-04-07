@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDatasets, useSamples, exportDatasetAsJsonl, generateInjectionScript, type DatasetSample } from "@/hooks/useTrainingData";
 import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
@@ -35,6 +35,8 @@ import {
   Monitor,
 } from "lucide-react";
 import { toast } from "sonner";
+import { triggerDownload } from "@/lib/downloadHelper";
+import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 
 // ─── Training Script Generator ───────────────────────────────
 function generateTrainScript(
@@ -526,14 +528,9 @@ Once you have this bundle, everything runs 100% offline:
   }
 
   const blob = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${slug}-${fullOffline ? "offline-bundle" : "training-kit"}.zip`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  const filename = `${slug}-${fullOffline ? "offline-bundle" : "training-kit"}.zip`;
+  const blobUrl = triggerDownload(blob, filename);
+  return { blobUrl, filename };
 }
 
 // ─── Code Block Component ────────────────────────────────────
@@ -740,14 +737,9 @@ PARAMETER num_ctx 1024
   );
 
   const blob = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "popcorn-only-kit.zip";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  const filename = "popcorn-only-kit.zip";
+  const blobUrl = triggerDownload(blob, filename);
+  return { blobUrl, filename };
 }
 
 // ─── Main Page ───────────────────────────────────────────────
@@ -770,6 +762,7 @@ export default function DeployPipelinePage() {
   const [loraRank, setLoraRank] = useState(16);
   const [lr] = useState(0.0002);
   const [downloading, setDownloading] = useState(false);
+  const [fallbackDialog, setFallbackDialog] = useState<{ open: boolean; blobUrl: string | null; filename: string }>({ open: false, blobUrl: null, filename: "" });
   const [selectedGPU, setSelectedGPU] = useState<GPUProfile>(GPU_PROFILES[0]);
   const [selectedOllamaModel, setSelectedOllamaModel] = useState<OllamaModel | null>(null);
   const [deployPlatform, setDeployPlatform] = useState<"ios" | "android">("ios");
@@ -802,27 +795,23 @@ export default function DeployPipelinePage() {
   }, [approvedCount, matchedTemplate, selectedDataset, isPopcornOnly]);
 
   const handleDownloadKit = async (fullOffline: boolean = false) => {
-    if (isPopcornOnly) {
-      setDownloading(true);
-      try {
-        await downloadPopcornOnlyKit(baseModel);
-        toast.success("Popcorn Only kit downloaded! 🍿 No data needed.");
-      } catch (e: any) {
-        toast.error(e.message);
-      }
-      setDownloading(false);
-      return;
-    }
-    if (!samples || !selectedDataset) return;
     setDownloading(true);
     try {
-      await downloadTrainingKit(
-        samples, selectedDataset.name, baseModel, epochs, loraRank, lr,
-        fullOffline,
-        matchedTemplate?.systemPrompt,
-        matchedTemplate?.slug
-      );
-      toast.success(fullOffline ? "Full offline bundle downloaded!" : "Training kit downloaded!");
+      if (isPopcornOnly) {
+        const result = await downloadPopcornOnlyKit(baseModel);
+        setFallbackDialog({ open: true, blobUrl: result.blobUrl, filename: result.filename });
+        toast.success("Popcorn Only kit ready! 🍿");
+      } else {
+        if (!samples || !selectedDataset) { setDownloading(false); return; }
+        const result = await downloadTrainingKit(
+          samples, selectedDataset.name, baseModel, epochs, loraRank, lr,
+          fullOffline,
+          matchedTemplate?.systemPrompt,
+          matchedTemplate?.slug
+        );
+        setFallbackDialog({ open: true, blobUrl: result.blobUrl, filename: result.filename });
+        toast.success(fullOffline ? "Full offline bundle ready!" : "Training kit ready!");
+      }
     } catch (e: any) {
       toast.error(e.message);
     }
@@ -1486,6 +1475,13 @@ export default function DeployPipelinePage() {
           </div>
         </StepCard>
       </div>
+
+      <DownloadFallbackDialog
+        open={fallbackDialog.open}
+        onOpenChange={(open) => setFallbackDialog((prev) => ({ ...prev, open }))}
+        blobUrl={fallbackDialog.blobUrl}
+        filename={fallbackDialog.filename}
+      />
     </div>
   );
 }
