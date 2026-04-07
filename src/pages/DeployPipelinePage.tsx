@@ -795,7 +795,6 @@ export default function DeployPipelinePage() {
   }, [approvedCount, matchedTemplate, selectedDataset, isPopcornOnly]);
 
   const handleDownloadKit = async (fullOffline: boolean = false) => {
-    if (isPopcornOnly) {
     setDownloading(true);
     try {
       if (isPopcornOnly) {
@@ -803,7 +802,7 @@ export default function DeployPipelinePage() {
         setFallbackDialog({ open: true, blobUrl: result.blobUrl, filename: result.filename });
         toast.success("Popcorn Only kit ready! 🍿");
       } else {
-        if (!samples || !selectedDataset) return;
+        if (!samples || !selectedDataset) { setDownloading(false); return; }
         const result = await downloadTrainingKit(
           samples, selectedDataset.name, baseModel, epochs, loraRank, lr,
           fullOffline,
