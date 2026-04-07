@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { triggerDownload } from "@/lib/downloadHelper";
+import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import { useProjects, useModules, useStacks } from "@/hooks/useSupabaseData";
 import { streamAI } from "@/hooks/useSupabaseData";
 import {
@@ -102,15 +104,13 @@ export default function ExportStudioPage() {
     toast.success("Copied to clipboard");
   };
 
+  const [fallbackDialog, setFallbackDialog] = useState<{ open: boolean; blobUrl: string | null; filename: string }>({ open: false, blobUrl: null, filename: "" });
+
   const downloadOutput = () => {
     const blob = new Blob([output], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${selectedFormat || "export"}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Downloaded");
+    const filename = `${selectedFormat || "export"}.md`;
+    const blobUrl = triggerDownload(blob, filename);
+    setFallbackDialog({ open: true, blobUrl, filename });
   };
 
   return (
@@ -239,6 +239,12 @@ export default function ExportStudioPage() {
           </pre>
         </ScrollArea>
       </div>
+      <DownloadFallbackDialog
+        open={fallbackDialog.open}
+        onOpenChange={(v) => setFallbackDialog(prev => ({ ...prev, open: v }))}
+        blobUrl={fallbackDialog.blobUrl}
+        filename={fallbackDialog.filename}
+      />
     </div>
   );
 }

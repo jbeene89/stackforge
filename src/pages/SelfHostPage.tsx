@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { triggerDownload } from "@/lib/downloadHelper";
+import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import { SEOHead } from "@/components/SEOHead";
 import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
@@ -360,6 +362,7 @@ export default function SelfHostPage() {
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [datasetPreview, setDatasetPreview] = useState<{ count: number; rows: Array<{ input: string; output: string }> } | null>(null);
+  const [fallbackDialog, setFallbackDialog] = useState<{ open: boolean; blobUrl: string | null; filename: string }>({ open: false, blobUrl: null, filename: "" });
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   // Fetch dataset preview when a dataset is selected
@@ -575,12 +578,9 @@ export default function SelfHostPage() {
       }
 
       const blob = await zip.generateAsync({ type: "blob" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${config.projectName}.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const filename = `${config.projectName}.zip`;
+      const blobUrl = triggerDownload(blob, filename);
+      setFallbackDialog({ open: true, blobUrl, filename });
 
       setGenerated(true);
       toast.success("Package generated and downloading!");
@@ -1038,6 +1038,12 @@ export default function SelfHostPage() {
           </Card>
         </div>
       </div>
+      <DownloadFallbackDialog
+        open={fallbackDialog.open}
+        onOpenChange={(v) => setFallbackDialog(prev => ({ ...prev, open: v }))}
+        blobUrl={fallbackDialog.blobUrl}
+        filename={fallbackDialog.filename}
+      />
     </div>
   );
 }
