@@ -362,6 +362,7 @@ export default function SelfHostPage() {
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [datasetPreview, setDatasetPreview] = useState<{ count: number; rows: Array<{ input: string; output: string }> } | null>(null);
+  const [fallbackDialog, setFallbackDialog] = useState<{ open: boolean; blobUrl: string | null; filename: string }>({ open: false, blobUrl: null, filename: "" });
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   // Fetch dataset preview when a dataset is selected
@@ -1037,6 +1038,12 @@ export default function SelfHostPage() {
           </Card>
         </div>
       </div>
+      <DownloadFallbackDialog
+        open={fallbackDialog.open}
+        onOpenChange={(v) => setFallbackDialog(prev => ({ ...prev, open: v }))}
+        blobUrl={fallbackDialog.blobUrl}
+        filename={fallbackDialog.filename}
+      />
     </div>
   );
 }
