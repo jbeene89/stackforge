@@ -530,8 +530,10 @@ Once you have this bundle, everything runs 100% offline:
   const a = document.createElement("a");
   a.href = url;
   a.download = `${slug}-${fullOffline ? "offline-bundle" : "training-kit"}.zip`;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 // ─── Code Block Component ────────────────────────────────────
@@ -742,8 +744,10 @@ PARAMETER num_ctx 1024
   const a = document.createElement("a");
   a.href = url;
   a.download = "popcorn-only-kit.zip";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 // ─── Main Page ───────────────────────────────────────────────
