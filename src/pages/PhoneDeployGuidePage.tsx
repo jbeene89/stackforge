@@ -240,7 +240,9 @@ export default function PhoneDeployGuidePage() {
       </Card>
 
       {/* RAM Checker */}
-      <RamChecker />
+      <div id="section-transfer">
+        <RamChecker />
+      </div>
 
       {/* Platform Tabs */}
       <Tabs defaultValue="ios" className="space-y-4" id="section-apps">
@@ -673,7 +675,7 @@ export default function PhoneDeployGuidePage() {
       </Tabs>
 
       {/* Troubleshooting */}
-      <Card>
+      <Card id="section-troubleshooting">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-[hsl(var(--forge-amber))]" />
