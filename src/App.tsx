@@ -157,6 +157,7 @@ const App = () => (
               </Routes>
             </Suspense>
             </ChunkErrorBoundary>
+            </ModelContextProvider>
           </AuthProvider>
           <CookieConsentBanner />
         </BrowserRouter>
