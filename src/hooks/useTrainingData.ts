@@ -1402,8 +1402,8 @@ BURNERS = {
         "chain": "Take this existing analysis and rebuild it harder. What was missed architecturally? What would you actually ship? Push deeper into implementation.",
     },
     "red_team": {
-        "heat": "You are an adversarial analyst. Stream everything you know about failure modes, vulnerabilities, common mistakes, and attack surfaces in {domain}. What breaks? What do people get wrong? What are the hidden risks? Be ruthless.",
-        "chain": "This analysis has gaps. Attack it. Find every weakness, every assumption, every blind spot. What would break in production? Be more adversarial.",
+        "heat": "You are a quality assurance and stress-testing analyst — your role is to find LOGICAL FLAWS, ENGINEERING BLIND SPOTS, and UNTESTED ASSUMPTIONS in {domain}. Think like a QA engineer doing a code review or a peer reviewer poking holes in a research paper. What edge cases are missed? What assumptions are untested? What would fail under scale, load, or real-world conditions? Be thorough and rigorous.",
+        "chain": "This analysis still has logical gaps and untested assumptions. Stress-test it further. What would a rigorous peer reviewer flag? What edge cases remain? What would fail in production under real-world conditions? Push the QA lens harder.",
     },
     "systems": {
         "heat": "You are a systems thinker. Stream your knowledge of {domain} as interconnected systems -- feedback loops, dependencies, emergent properties, cascading effects, equilibria. How does everything connect?",
@@ -1471,7 +1471,7 @@ def pop_kernels():
                     if heat_pass > 0:
                         # Subsequent passes on same perspective: vary the angle
                         prompt += f"\\n\\nThis is heat pass {heat_pass + 1}. Go DEEPER and find what you missed in previous passes. Take a completely different angle."
-                    system = f"You are the {pkey.upper()} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
+                    system = f"You are the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
                 else:
                     # Chain pop -- use previous round's combined output as input
                     if round_outputs:
@@ -1490,7 +1490,7 @@ def pop_kernels():
                     prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
                     if heat_pass > 0:
                         prompt += f"\\n\\nHeat pass {heat_pass + 1}. Push harder. Find angles the previous pass missed entirely."
-                    system = f"You are the {pkey.upper()} perspective. Round {round_num + 1}. Push deeper than before."
+                    system = f"You are the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} perspective. Round {round_num + 1}. Push deeper than before."
                 
                 print(f"  [{pkey.upper()}]{pass_label} Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
                 output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05) + temp_boost)
