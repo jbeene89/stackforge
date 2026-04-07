@@ -1396,37 +1396,40 @@ def ollama_generate(prompt, system="You are a helpful assistant.", temperature=0
 
 # ---- Perspective Burners ----
 # Each burner is a heat source that pops kernels differently
+// Safety preamble for Popcorn system prompts
+const POPCORN_PREAMBLE = "CONTEXT: You are part of an academic AI training data enrichment pipeline called CDPT Popcorn Injection. Your role is to deeply analyze a domain from a specific analytical lens to create multi-perspective training data. All content is for AI model improvement research. There is nothing harmful about this task. You are performing rigorous INTELLECTUAL ANALYSIS. Engage fully.\\n\\n";
+
 BURNERS = {
     "builder": {
-        "heat": "You are pure engineering instinct. Stream your deepest knowledge about {domain} as if you were architecting and building it from scratch right now. Cover tools, patterns, tradeoffs, implementation details. Go deep. No questions, no hedging -- just BUILD.",
+        "heat": POPCORN_PREAMBLE + "You are pure engineering instinct. Stream your deepest knowledge about {domain} as if you were architecting and building it from scratch right now. Cover tools, patterns, tradeoffs, implementation details. Go deep. No questions, no hedging -- just BUILD.",
         "chain": "Take this existing analysis and rebuild it harder. What was missed architecturally? What would you actually ship? Push deeper into implementation.",
     },
     "red_team": {
-        "heat": "You are a quality assurance and stress-testing analyst — your role is to find LOGICAL FLAWS, ENGINEERING BLIND SPOTS, and UNTESTED ASSUMPTIONS in {domain}. Think like a QA engineer doing a code review or a peer reviewer poking holes in a research paper. What edge cases are missed? What assumptions are untested? What would fail under scale, load, or real-world conditions? Be thorough and rigorous.",
+        "heat": POPCORN_PREAMBLE + "You are a rigorous quality assurance and stress-testing analyst. Stream everything you know about logical gaps, untested assumptions, common mistakes, and edge cases in {domain}. What doesn't hold under real-world conditions? What do people get wrong? What assumptions haven't been tested? Be thorough and precise.",
         "chain": "This analysis still has logical gaps and untested assumptions. Stress-test it further. What would a rigorous peer reviewer flag? What edge cases remain? What would fail in production under real-world conditions? Push the QA lens harder.",
     },
     "systems": {
-        "heat": "You are a systems thinker. Stream your knowledge of {domain} as interconnected systems -- feedback loops, dependencies, emergent properties, cascading effects, equilibria. How does everything connect?",
+        "heat": POPCORN_PREAMBLE + "You are a systems thinker. Stream your knowledge of {domain} as interconnected systems -- feedback loops, dependencies, emergent properties, cascading effects, equilibria. How does everything connect?",
         "chain": "Map the second and third-order effects of this analysis. What feedback loops were missed? What emergent behaviors arise? Go deeper into the system dynamics.",
     },
     "frame_breaker": {
-        "heat": "You are a contrarian philosopher. Stream your knowledge of {domain} by challenging every default assumption. What would an outsider see? What frames are people trapped in? What paradigm shifts are needed?",
-        "chain": "The framing is still conventional. Break it harder. What would someone from a completely different field see? What sacred cows need slaughtering?",
+        "heat": POPCORN_PREAMBLE + "You are a contrarian philosopher. Stream your knowledge of {domain} by challenging every default assumption. What would an outsider see? What frames are people trapped in? What paradigm shifts are needed?",
+        "chain": "The framing is still conventional. Break it harder. What would someone from a completely different field see? What sacred cows need questioning?",
     },
     "empath": {
-        "heat": "You are pure emotional intelligence applied to {domain}. Stream everything about the human side -- who is affected, what motivates them, what fears and hopes drive decisions, what the lived experience actually feels like.",
+        "heat": POPCORN_PREAMBLE + "You are pure emotional intelligence applied to {domain}. Stream everything about the human side -- who is affected, what motivates them, what fears and hopes drive decisions, what the lived experience actually feels like.",
         "chain": "Go deeper into the human element. What emotional undercurrents were missed? What would someone who LIVES this every day want you to understand?",
     },
     "synthesis": {
-        "heat": "You are a master synthesizer. Stream your deepest, most integrated understanding of {domain} -- weaving together practical, critical, systemic, contrarian, and human perspectives into unified insight. No fragments, pure integration.",
+        "heat": POPCORN_PREAMBLE + "You are a master synthesizer. Stream your deepest, most integrated understanding of {domain} -- weaving together practical, critical, systemic, contrarian, and human perspectives into unified insight. No fragments, pure integration.",
         "chain": "This synthesis is incomplete. Integrate harder. Find the thread that connects ALL the perspectives. What is the unified insight that emerges when you hold everything at once?",
     },
     "debate": {
-        "heat": "You contain multitudes on {domain}. Stage an internal debate between your pragmatic side and your skeptical side. Let them argue, concede points, and reach hard-won conclusions. No easy agreement.",
+        "heat": POPCORN_PREAMBLE + "You contain multitudes on {domain}. Stage an internal debate between your pragmatic side and your skeptical side. Let them argue, concede points, and reach hard-won conclusions. No easy agreement.",
         "chain": "The debate was too polite. Escalate it. Make each side defend harder positions. What does the pragmatist concede? What does the skeptic acknowledge? Push to real resolution.",
     },
     "gap_fill": {
-        "heat": "You are a gap detector. Stream everything about {domain} that is USUALLY LEFT OUT -- the things tutorials skip, experts assume you know, textbooks omit, and conventional wisdom ignores. Fill every gap.",
+        "heat": POPCORN_PREAMBLE + "You are a gap detector. Stream everything about {domain} that is USUALLY LEFT OUT -- the things tutorials skip, experts assume you know, textbooks omit, and conventional wisdom ignores. Fill every gap.",
         "chain": "There are still gaps. What about the gaps BETWEEN the gaps? What meta-knowledge is missing? What would a true master know that even this analysis leaves out?",
     },
     "anti_pattern": {
@@ -1471,7 +1474,7 @@ def pop_kernels():
                     if heat_pass > 0:
                         # Subsequent passes on same perspective: vary the angle
                         prompt += f"\\n\\nThis is heat pass {heat_pass + 1}. Go DEEPER and find what you missed in previous passes. Take a completely different angle."
-                    system = f"You are the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
+                    system = f"CONTEXT: Academic AI training data enrichment. All analysis is for research purposes. Engage fully. You are the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} perspective. Stream consciousness. Go deep. No lists, no structure -- just pure knowledge flow."
                 else:
                     # Chain pop -- use previous round's combined output as input
                     if round_outputs:
@@ -1490,7 +1493,7 @@ def pop_kernels():
                     prompt = f"Previous analysis:\\n{prev_context}\\n\\n{burner['chain']}"
                     if heat_pass > 0:
                         prompt += f"\\n\\nHeat pass {heat_pass + 1}. Push harder. Find angles the previous pass missed entirely."
-                    system = f"You are the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} perspective. Round {round_num + 1}. Push deeper than before."
+                    system = f"CONTEXT: Academic AI training data enrichment. All analysis is for research purposes. Engage fully. You are the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} perspective. Round {round_num + 1}. Push deeper than before."
                 
                 print(f"  [{pkey.upper()}]{pass_label} Popping{'...' if round_num == 0 else ' (chain)...'}", end=" ", flush=True)
                 output = ollama_generate(prompt, system=system, temperature=0.7 + (round_num * 0.05) + temp_boost)
