@@ -532,7 +532,6 @@ Once you have this bundle, everything runs 100% offline:
   const blobUrl = triggerDownload(blob, filename);
   return { blobUrl, filename };
 }
-}
 
 // ─── Code Block Component ────────────────────────────────────
 function CodeBlock({ code, label }: { code: string; label: string }) {
