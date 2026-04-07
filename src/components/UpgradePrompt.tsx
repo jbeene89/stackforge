@@ -14,8 +14,8 @@ export function UpgradePrompt({ featureName, requiredTier, currentTier }: Upgrad
   const navigate = useNavigate();
 
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center">
-      {/* Blurred backdrop that lets the page content show through */}
+    <div className="fixed top-0 right-0 bottom-0 left-[56px] z-40 flex items-center justify-center">
+      {/* Blurred backdrop that lets the page content show through — offset for wheel nav */}
       <div className="absolute inset-0 bg-background/60 backdrop-blur-md" />
 
       <motion.div
