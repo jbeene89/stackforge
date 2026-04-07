@@ -995,9 +995,15 @@ export default function DeployPipelinePage() {
                   <SelectTrigger className="text-xs">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                    <SelectContent>
                     <SelectItem value="meta-llama/Llama-3.2-1B-Instruct">
                       Llama 3.2 1B
+                    </SelectItem>
+                    <SelectItem value="meta-llama/Llama-3.2-3B-Instruct">
+                      Llama 3.2 3B
+                    </SelectItem>
+                    <SelectItem value="mistralai/Mistral-7B-Instruct-v0.3">
+                      Mistral 7B
                     </SelectItem>
                     <SelectItem value="Qwen/Qwen2.5-0.5B-Instruct">
                       Qwen 2.5 0.5B
