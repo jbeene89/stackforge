@@ -19,9 +19,9 @@ export function UpgradePrompt({ featureName, requiredTier, currentTier }: Upgrad
       <div className="absolute inset-0 bg-background/60 backdrop-blur-md" />
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: "spring", damping: 24, stiffness: 300 }}
+        initial={{ opacity: 0, x: 80 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ type: "spring", damping: 28, stiffness: 260 }}
         className="relative z-10 mx-4 w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-2xl shadow-primary/10"
       >
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mx-auto mb-4">
