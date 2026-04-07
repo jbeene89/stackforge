@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
-  Flame, Hammer, Mountain, Wrench, Palette, Brain, Link2, Store,
+  Flame, Hammer, Mountain, Wrench, Palette, Brain, Link2, Store, X,
 } from "lucide-react";
+import { useModelContext } from "@/hooks/useModelContext";
 
 /* ── SPOKE DEFINITIONS ──────────────────────────────────────────────────── */
 export interface SubRoute {
