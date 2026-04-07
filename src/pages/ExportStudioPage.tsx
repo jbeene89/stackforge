@@ -102,15 +102,13 @@ export default function ExportStudioPage() {
     toast.success("Copied to clipboard");
   };
 
+  const [fallbackDialog, setFallbackDialog] = useState<{ open: boolean; blobUrl: string | null; filename: string }>({ open: false, blobUrl: null, filename: "" });
+
   const downloadOutput = () => {
     const blob = new Blob([output], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${selectedFormat || "export"}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Downloaded");
+    const filename = `${selectedFormat || "export"}.md`;
+    const blobUrl = triggerDownload(blob, filename);
+    setFallbackDialog({ open: true, blobUrl, filename });
   };
 
   return (

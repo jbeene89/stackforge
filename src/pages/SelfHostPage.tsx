@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { triggerDownload } from "@/lib/downloadHelper";
+import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import { SEOHead } from "@/components/SEOHead";
 import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
