@@ -19,6 +19,10 @@ import {
   Terminal,
 } from "lucide-react";
 import { useProjects, useModules, useStacks, useRuns } from "@/hooks/useSupabaseData";
+import { useModelContext } from "@/hooks/useModelContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
 import { TierBadge } from "@/components/TierBadge";
 import { IndependenceScorecard } from "@/components/IndependenceScorecard";
