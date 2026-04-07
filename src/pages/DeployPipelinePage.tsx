@@ -762,6 +762,7 @@ export default function DeployPipelinePage() {
   const [loraRank, setLoraRank] = useState(16);
   const [lr] = useState(0.0002);
   const [downloading, setDownloading] = useState(false);
+  const [fallbackDialog, setFallbackDialog] = useState<{ open: boolean; blobUrl: string | null; filename: string }>({ open: false, blobUrl: null, filename: "" });
   const [selectedGPU, setSelectedGPU] = useState<GPUProfile>(GPU_PROFILES[0]);
   const [selectedOllamaModel, setSelectedOllamaModel] = useState<OllamaModel | null>(null);
   const [deployPlatform, setDeployPlatform] = useState<"ios" | "android">("ios");
