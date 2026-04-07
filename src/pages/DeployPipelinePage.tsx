@@ -528,14 +528,10 @@ Once you have this bundle, everything runs 100% offline:
   }
 
   const blob = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${slug}-${fullOffline ? "offline-bundle" : "training-kit"}.zip`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  const filename = `${slug}-${fullOffline ? "offline-bundle" : "training-kit"}.zip`;
+  const blobUrl = triggerDownload(blob, filename);
+  return { blobUrl, filename };
+}
 }
 
 // ─── Code Block Component ────────────────────────────────────
@@ -742,14 +738,10 @@ PARAMETER num_ctx 1024
   );
 
   const blob = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "popcorn-only-kit.zip";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  const filename = "popcorn-only-kit.zip";
+  const blobUrl = triggerDownload(blob, filename);
+  return { blobUrl, filename };
+}
 }
 
 // ─── Main Page ───────────────────────────────────────────────
