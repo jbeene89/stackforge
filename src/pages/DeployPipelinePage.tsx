@@ -796,26 +796,23 @@ export default function DeployPipelinePage() {
 
   const handleDownloadKit = async (fullOffline: boolean = false) => {
     if (isPopcornOnly) {
-      setDownloading(true);
-      try {
-        await downloadPopcornOnlyKit(baseModel);
-        toast.success("Popcorn Only kit downloaded! 🍿 No data needed.");
-      } catch (e: any) {
-        toast.error(e.message);
-      }
-      setDownloading(false);
-      return;
-    }
-    if (!samples || !selectedDataset) return;
     setDownloading(true);
     try {
-      await downloadTrainingKit(
-        samples, selectedDataset.name, baseModel, epochs, loraRank, lr,
-        fullOffline,
-        matchedTemplate?.systemPrompt,
-        matchedTemplate?.slug
-      );
-      toast.success(fullOffline ? "Full offline bundle downloaded!" : "Training kit downloaded!");
+      if (isPopcornOnly) {
+        const result = await downloadPopcornOnlyKit(baseModel);
+        setFallbackDialog({ open: true, blobUrl: result.blobUrl, filename: result.filename });
+        toast.success("Popcorn Only kit ready! 🍿");
+      } else {
+        if (!samples || !selectedDataset) return;
+        const result = await downloadTrainingKit(
+          samples, selectedDataset.name, baseModel, epochs, loraRank, lr,
+          fullOffline,
+          matchedTemplate?.systemPrompt,
+          matchedTemplate?.slug
+        );
+        setFallbackDialog({ open: true, blobUrl: result.blobUrl, filename: result.filename });
+        toast.success(fullOffline ? "Full offline bundle ready!" : "Training kit ready!");
+      }
     } catch (e: any) {
       toast.error(e.message);
     }
