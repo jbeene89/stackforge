@@ -38,7 +38,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const selectedModel = model || "google/gemini-3.1-flash-image-preview";
+    const selectedModel = model || "google/gemini-2.5-flash-image";
     const cost = MODEL_COSTS[selectedModel] || MODEL_COSTS.default;
 
     // Credit check & deduction

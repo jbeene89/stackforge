@@ -73,7 +73,7 @@ async function generateWithPerspectives(apiKey: string, theme: string): Promise<
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3.1-flash-image-preview",
+        model: "google/gemini-2.5-flash-image",
         messages,
         modalities: ["image", "text"],
       }),
