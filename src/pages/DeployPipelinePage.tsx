@@ -996,14 +996,20 @@ export default function DeployPipelinePage() {
                     <SelectValue />
                   </SelectTrigger>
                     <SelectContent>
+                    <SelectItem value="TinyLlama/TinyLlama-1.1B-Chat-v1.0">
+                      TinyLlama 1.1B
+                    </SelectItem>
                     <SelectItem value="meta-llama/Llama-3.2-1B-Instruct">
                       Llama 3.2 1B
                     </SelectItem>
                     <SelectItem value="meta-llama/Llama-3.2-3B-Instruct">
                       Llama 3.2 3B
                     </SelectItem>
-                    <SelectItem value="mistralai/Mistral-7B-Instruct-v0.3">
-                      Mistral 7B
+                    <SelectItem value="google/gemma-2-2b-it">
+                      Gemma 2 2B
+                    </SelectItem>
+                    <SelectItem value="google/gemma-2-9b-it">
+                      Gemma 2 9B
                     </SelectItem>
                     <SelectItem value="Qwen/Qwen2.5-0.5B-Instruct">
                       Qwen 2.5 0.5B
@@ -1011,8 +1017,14 @@ export default function DeployPipelinePage() {
                     <SelectItem value="Qwen/Qwen2.5-1.5B-Instruct">
                       Qwen 2.5 1.5B
                     </SelectItem>
+                    <SelectItem value="Qwen/Qwen2.5-3B-Instruct">
+                      Qwen 2.5 3B
+                    </SelectItem>
                     <SelectItem value="microsoft/Phi-3-mini-4k-instruct">
-                      Phi-3 Mini
+                      Phi-3 Mini (3.8B)
+                    </SelectItem>
+                    <SelectItem value="mistralai/Mistral-7B-Instruct-v0.3">
+                      Mistral 7B
                     </SelectItem>
                   </SelectContent>
                 </Select>
