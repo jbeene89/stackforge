@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { triggerDownload } from "@/lib/downloadHelper";
+import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import { useProjects, useModules, useStacks } from "@/hooks/useSupabaseData";
 import { streamAI } from "@/hooks/useSupabaseData";
 import {
