@@ -157,7 +157,7 @@ export default function PhoneDeployGuidePage() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Hero */}
-      <div className="space-y-2">
+      <div className="space-y-2" id="section-train">
         <div className="flex items-center gap-2">
           <TabletSmartphone className="h-6 w-6 text-[hsl(var(--forge-cyan))]" />
           <h1 className="text-2xl font-bold font-display">Phone Deployment Guide</h1>
@@ -190,7 +190,7 @@ export default function PhoneDeployGuidePage() {
       </div>
 
       {/* Prerequisites */}
-      <Card>
+      <Card id="section-prerequisites">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Info className="h-4 w-4 text-[hsl(var(--forge-cyan))]" />
@@ -243,7 +243,7 @@ export default function PhoneDeployGuidePage() {
       <RamChecker />
 
       {/* Platform Tabs */}
-      <Tabs defaultValue="ios" className="space-y-4">
+      <Tabs defaultValue="ios" className="space-y-4" id="section-apps">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="ios" className="gap-1.5">
             <Apple className="h-4 w-4" /> iOS
