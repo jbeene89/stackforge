@@ -16,7 +16,7 @@ export interface SubRoute {
 export interface Spoke {
   id: string;
   label: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ElementType;
   emoji: string;
   accent: string;
   glow: string;
@@ -441,7 +441,7 @@ export function WheelNavigator() {
                       boxShadow: isActive ? spoke.glow : "none",
                     }}
                   >
-                    <Icon size={20} style={{ color: isActive ? spoke.accent : "hsl(var(--muted-foreground))" }} />
+                    <Icon size={20} className={isActive ? "" : "text-muted-foreground"} style={isActive ? { color: spoke.accent } : undefined} />
                   </div>
                   <span
                     className="text-[8px] font-bold tracking-[0.15em]"
