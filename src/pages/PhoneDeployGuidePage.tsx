@@ -157,7 +157,7 @@ export default function PhoneDeployGuidePage() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Hero */}
-      <div className="space-y-2">
+      <div className="space-y-2" id="section-train">
         <div className="flex items-center gap-2">
           <TabletSmartphone className="h-6 w-6 text-[hsl(var(--forge-cyan))]" />
           <h1 className="text-2xl font-bold font-display">Phone Deployment Guide</h1>
@@ -168,26 +168,29 @@ export default function PhoneDeployGuidePage() {
         </p>
       </div>
 
-      {/* Quick path */}
-      <div className="flex items-center gap-2 flex-wrap text-xs">
+      {/* Quick path — clickable anchors */}
+      <div className="flex items-center gap-2 flex-wrap text-xs sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 -mx-2 px-2 rounded-lg">
         {[
-          { icon: "🏋️", label: "Train on PC" },
-          { icon: "📦", label: "Get .gguf file" },
-          { icon: "📲", label: "Transfer to phone" },
-          { icon: "🤖", label: "Load in app" },
-          { icon: "✨", label: "Run locally" },
+          { icon: "🏋️", label: "Train on PC", anchor: "section-train" },
+          { icon: "📦", label: "Get .gguf file", anchor: "section-prerequisites" },
+          { icon: "📲", label: "Transfer to phone", anchor: "section-transfer" },
+          { icon: "🤖", label: "Load in app", anchor: "section-apps" },
+          { icon: "✨", label: "Run locally", anchor: "section-troubleshooting" },
         ].map((step, i) => (
           <span key={i} className="flex items-center gap-1.5">
             {i > 0 && <ArrowRight className="h-3 w-3 text-muted-foreground/50" />}
-            <span className="px-2 py-1 rounded-md bg-secondary/50 border border-border/40 font-medium">
+            <button
+              onClick={() => document.getElementById(step.anchor)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="px-2 py-1 rounded-md bg-secondary/50 border border-border/40 font-medium hover:bg-primary/15 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer"
+            >
               {step.icon} {step.label}
-            </span>
+            </button>
           </span>
         ))}
       </div>
 
       {/* Prerequisites */}
-      <Card>
+      <Card id="section-prerequisites">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Info className="h-4 w-4 text-[hsl(var(--forge-cyan))]" />
@@ -237,10 +240,12 @@ export default function PhoneDeployGuidePage() {
       </Card>
 
       {/* RAM Checker */}
-      <RamChecker />
+      <div id="section-transfer">
+        <RamChecker />
+      </div>
 
       {/* Platform Tabs */}
-      <Tabs defaultValue="ios" className="space-y-4">
+      <Tabs defaultValue="ios" className="space-y-4" id="section-apps">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="ios" className="gap-1.5">
             <Apple className="h-4 w-4" /> iOS
@@ -670,7 +675,7 @@ export default function PhoneDeployGuidePage() {
       </Tabs>
 
       {/* Troubleshooting */}
-      <Card>
+      <Card id="section-troubleshooting">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-[hsl(var(--forge-amber))]" />
