@@ -401,6 +401,9 @@ export default function DashboardPage() {
         <IndependenceScorecard compact />
       </div>
 
+      {/* ── YOUR DATASETS (click to activate pipeline ring) ── */}
+      <DatasetQuickAccess />
+
       {/* ── STAT GRID ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, marginBottom: 32 }}>
         <StatCard id={undefined} label="DEPLOYED" value={deployedCount} icon={CheckCircle2} accent="#7FFF00" />
