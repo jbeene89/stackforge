@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
-  Flame, Hammer, Mountain, Wrench, Palette, Brain, Link2, Store,
+  Flame, Hammer, Mountain, Wrench, Palette, Brain, Link2, Store, X,
 } from "lucide-react";
+import { useModelContext } from "@/hooks/useModelContext";
 
 /* ── SPOKE DEFINITIONS ──────────────────────────────────────────────────── */
 export interface SubRoute {
@@ -152,7 +153,175 @@ function HexCenter({ size = 36 }: { size?: number }) {
   );
 }
 
-/* ── WHEEL NAVIGATOR ───────────────────────────────────────────────────── */
+/* ── PIPELINE RING (inner ring overlay) ─────────────────────────────── */
+const STAGE_COLORS: Record<string, string> = {
+  data: "#00E5FF",
+  train: "#7FFF00",
+  test: "#FF6B35",
+  export: "#FFD700",
+  deploy: "#B44FFF",
+};
+
+function PipelineRing({
+  expanded,
+  navigate,
+}: {
+  expanded: boolean;
+  navigate: (path: string) => void;
+}) {
+  const { activeModel, clearActiveModel } = useModelContext();
+  const [hoveredStage, setHoveredStage] = useState<string | null>(null);
+
+  if (!activeModel) return null;
+
+  const { stages, datasetName } = activeModel;
+  const completedCount = stages.filter((s) => s.complete).length;
+
+  return (
+    <div className="w-full border-t border-[hsl(var(--border))] pt-2 pb-1">
+      {/* Model name + close */}
+      <div className="flex items-center gap-1 px-2 mb-1.5">
+        <span
+          className="text-[8px] font-bold tracking-[0.15em] truncate flex-1"
+          style={{
+            fontFamily: "'Orbitron', monospace",
+            color: "#00E5FF",
+          }}
+        >
+          {expanded ? datasetName.toUpperCase() : "⬡"}
+        </span>
+        {expanded && (
+          <button
+            onClick={clearActiveModel}
+            className="p-0.5 rounded hover:bg-[hsl(var(--muted))] cursor-pointer"
+          >
+            <X size={10} className="text-muted-foreground" />
+          </button>
+        )}
+      </div>
+
+      {/* Progress bar (collapsed) */}
+      {!expanded && (
+        <div className="px-2 mb-1">
+          <div
+            className="h-1 rounded-full overflow-hidden"
+            style={{ background: "hsl(var(--muted))" }}
+          >
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: "linear-gradient(90deg, #00E5FF, #7FFF00)" }}
+              initial={{ width: 0 }}
+              animate={{ width: `${(completedCount / stages.length) * 100}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Stage buttons */}
+      {stages.map((stage) => {
+        const color = STAGE_COLORS[stage.key] || "#00E5FF";
+        const isHovered = hoveredStage === stage.key;
+
+        return (
+          <div key={stage.key} className="relative">
+            <button
+              onClick={() => {
+                if (stage.complete || !stage.prerequisite) {
+                  navigate(stage.route);
+                }
+              }}
+              onMouseEnter={() => setHoveredStage(stage.key)}
+              onMouseLeave={() => setHoveredStage(null)}
+              className={cn(
+                "w-full flex items-center gap-2 px-3 py-1 transition-all cursor-pointer",
+                !stage.complete && stage.prerequisite && "opacity-40"
+              )}
+              style={{
+                background: stage.complete ? `${color}10` : "transparent",
+              }}
+            >
+              {/* Stage dot */}
+              <div
+                className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[8px]"
+                style={{
+                  background: stage.complete ? color : "transparent",
+                  border: `1.5px solid ${stage.complete ? color : "hsl(var(--muted-foreground))"}`,
+                  boxShadow: stage.complete ? `0 0 8px ${color}50` : "none",
+                }}
+              >
+                {stage.complete ? "✓" : ""}
+              </div>
+
+              <AnimatePresence>
+                {expanded && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    className="text-[9px] font-bold tracking-[0.12em]"
+                    style={{
+                      fontFamily: "'Space Mono', monospace",
+                      color: stage.complete ? color : "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    {stage.icon} {stage.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+
+            {/* Prerequisite tooltip */}
+            <AnimatePresence>
+              {isHovered && !stage.complete && stage.prerequisite && expanded && (
+                <motion.div
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 8 }}
+                  className="absolute left-full top-0 ml-2 z-50 px-3 py-2 rounded-md whitespace-nowrap"
+                  style={{
+                    background: "hsl(var(--card))",
+                    border: `1px solid ${color}40`,
+                    boxShadow: `0 4px 16px rgba(0,0,0,0.3), 0 0 8px ${color}20`,
+                    maxWidth: 220,
+                    whiteSpace: "normal",
+                  }}
+                >
+                  <p
+                    className="text-[9px] font-medium"
+                    style={{
+                      fontFamily: "'Space Mono', monospace",
+                      color: "hsl(var(--foreground))",
+                    }}
+                  >
+                    {stage.prerequisite}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
+
+      {/* Progress summary */}
+      {expanded && (
+        <div className="px-3 pt-1">
+          <span
+            className="text-[8px] tracking-[0.1em]"
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              color: "hsl(var(--muted-foreground))",
+            }}
+          >
+            {completedCount}/{stages.length} COMPLETE
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 export function WheelNavigator() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -331,6 +500,9 @@ export function WheelNavigator() {
               </div>
             );
           })}
+
+          {/* ── MODEL PIPELINE RING ── */}
+          <PipelineRing expanded={expanded} navigate={navigate} />
 
           {/* Bottom spacer + dashboard/settings */}
           <div className="flex-1" />
