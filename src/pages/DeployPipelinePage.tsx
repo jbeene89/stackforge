@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDatasets, useSamples, exportDatasetAsJsonl, generateInjectionScript, type DatasetSample } from "@/hooks/useTrainingData";
 import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
@@ -35,6 +35,8 @@ import {
   Monitor,
 } from "lucide-react";
 import { toast } from "sonner";
+import { triggerDownload } from "@/lib/downloadHelper";
+import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 
 // ─── Training Script Generator ───────────────────────────────
 function generateTrainScript(
