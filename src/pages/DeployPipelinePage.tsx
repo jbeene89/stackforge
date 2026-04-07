@@ -1475,6 +1475,13 @@ export default function DeployPipelinePage() {
           </div>
         </StepCard>
       </div>
+
+      <DownloadFallbackDialog
+        open={fallbackDialog.open}
+        onOpenChange={(open) => setFallbackDialog((prev) => ({ ...prev, open }))}
+        blobUrl={fallbackDialog.blobUrl}
+        filename={fallbackDialog.filename}
+      />
     </div>
   );
 }
