@@ -28,7 +28,7 @@ export function TierProtectedRoute({
   const isLocked = userTier !== "admin" && !allowedTiers.includes(userTier);
 
   return (
-    <div className="relative min-h-full">
+    <>
       {/* Always render the page — locked users see it blurred behind the overlay */}
       <div className={isLocked ? "pointer-events-none select-none" : ""}>
         {children}
@@ -40,6 +40,6 @@ export function TierProtectedRoute({
           currentTier={userTier}
         />
       )}
-    </div>
+    </>
   );
 }
