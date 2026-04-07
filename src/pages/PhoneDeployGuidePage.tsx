@@ -168,20 +168,23 @@ export default function PhoneDeployGuidePage() {
         </p>
       </div>
 
-      {/* Quick path */}
-      <div className="flex items-center gap-2 flex-wrap text-xs">
+      {/* Quick path — clickable anchors */}
+      <div className="flex items-center gap-2 flex-wrap text-xs sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 -mx-2 px-2 rounded-lg">
         {[
-          { icon: "🏋️", label: "Train on PC" },
-          { icon: "📦", label: "Get .gguf file" },
-          { icon: "📲", label: "Transfer to phone" },
-          { icon: "🤖", label: "Load in app" },
-          { icon: "✨", label: "Run locally" },
+          { icon: "🏋️", label: "Train on PC", anchor: "section-train" },
+          { icon: "📦", label: "Get .gguf file", anchor: "section-prerequisites" },
+          { icon: "📲", label: "Transfer to phone", anchor: "section-transfer" },
+          { icon: "🤖", label: "Load in app", anchor: "section-apps" },
+          { icon: "✨", label: "Run locally", anchor: "section-troubleshooting" },
         ].map((step, i) => (
           <span key={i} className="flex items-center gap-1.5">
             {i > 0 && <ArrowRight className="h-3 w-3 text-muted-foreground/50" />}
-            <span className="px-2 py-1 rounded-md bg-secondary/50 border border-border/40 font-medium">
+            <button
+              onClick={() => document.getElementById(step.anchor)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="px-2 py-1 rounded-md bg-secondary/50 border border-border/40 font-medium hover:bg-primary/15 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer"
+            >
               {step.icon} {step.label}
-            </span>
+            </button>
           </span>
         ))}
       </div>
