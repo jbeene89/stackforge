@@ -321,7 +321,7 @@ function PipelineRing({
   );
 }
 
-
+/* ── MAIN NAVIGATOR ──────────────────────────────────────────────────── */
 export function WheelNavigator() {
   const location = useLocation();
   const navigate = useNavigate();
