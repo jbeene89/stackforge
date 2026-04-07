@@ -333,6 +333,9 @@ export function WheelNavigator() {
             );
           })}
 
+          {/* ── MODEL PIPELINE RING ── */}
+          <PipelineRing expanded={expanded} navigate={navigate} />
+
           {/* Bottom spacer + dashboard/settings */}
           <div className="flex-1" />
           <div className="w-full border-t border-[hsl(var(--border))] pt-2">
