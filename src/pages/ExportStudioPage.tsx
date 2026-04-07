@@ -239,6 +239,14 @@ export default function ExportStudioPage() {
           </pre>
         </ScrollArea>
       </div>
+      <DownloadFallbackDialog
+        open={fallbackDialog.open}
+        onOpenChange={(v) => setFallbackDialog(prev => ({ ...prev, open: v }))}
+        blobUrl={fallbackDialog.blobUrl}
+        filename={fallbackDialog.filename}
+      />
     </div>
+  );
+}
   );
 }

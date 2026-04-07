@@ -577,12 +577,9 @@ export default function SelfHostPage() {
       }
 
       const blob = await zip.generateAsync({ type: "blob" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${config.projectName}.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const filename = `${config.projectName}.zip`;
+      const blobUrl = triggerDownload(blob, filename);
+      setFallbackDialog({ open: true, blobUrl, filename });
 
       setGenerated(true);
       toast.success("Package generated and downloading!");
