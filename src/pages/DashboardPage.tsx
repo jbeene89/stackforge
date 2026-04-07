@@ -84,6 +84,108 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }
 
 const FILTERS = ["ALL", "STACK", "MODULE", "WEB", "ANDROID"];
 
+// ── DATASET QUICK ACCESS ─────────────────────────────────────────────────────
+function DatasetQuickAccess() {
+  const { user } = useAuth();
+  const { activeModel, setActiveDataset } = useModelContext();
+
+  const { data: datasets } = useQuery({
+    queryKey: ["dashboard-datasets", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("training_datasets")
+        .select("id, name, sample_count, status, domain")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false })
+        .limit(6);
+      return data ?? [];
+    },
+  });
+
+  if (!datasets || datasets.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <span
+          className="sl-mono"
+          style={{
+            fontSize: 9,
+            letterSpacing: "0.3em",
+            color: "hsl(var(--muted-foreground))",
+          }}
+        >
+          YOUR DATASETS
+        </span>
+        <span
+          className="sl-mono"
+          style={{ fontSize: 8, color: "#00E5FF", opacity: 0.6 }}
+        >
+          click to track pipeline →
+        </span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 8 }}>
+        {datasets.map((ds) => {
+          const isSelected = activeModel?.datasetId === ds.id;
+          return (
+            <motion.button
+              key={ds.id}
+              onClick={() => setActiveDataset(ds.id, ds.name)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="text-left cursor-pointer"
+              style={{
+                background: isSelected ? "rgba(0,229,255,0.08)" : "hsl(var(--card))",
+                border: `1px solid ${isSelected ? "#00E5FF" : "hsl(var(--border))"}`,
+                padding: "12px 14px",
+                transition: "border-color 0.2s",
+                boxShadow: isSelected ? "0 0 12px rgba(0,229,255,0.15)" : "none",
+              }}
+            >
+              <div
+                className="sl-mono"
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: isSelected ? "#00E5FF" : "hsl(var(--foreground))",
+                  marginBottom: 4,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {ds.name}
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span
+                  className="sl-mono"
+                  style={{ fontSize: 8, color: "hsl(var(--muted-foreground))" }}
+                >
+                  {ds.sample_count} samples
+                </span>
+                <span
+                  style={{
+                    fontSize: 7,
+                    padding: "1px 6px",
+                    background: ds.status === "ready" ? "rgba(127,255,0,0.1)" : "rgba(255,107,53,0.1)",
+                    color: ds.status === "ready" ? "#7FFF00" : "#FF6B35",
+                    fontFamily: "'Space Mono', monospace",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  {ds.status.toUpperCase()}
+                </span>
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
 // ── STAT CARD ────────────────────────────────────────────────────────────────
 function StatCard({
   label,
