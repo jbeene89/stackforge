@@ -1,7 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
+import { WheelNavigator } from "./WheelNavigator";
 import bgNight from "@/assets/bg-landscape.jpg";
 import bgDay from "@/assets/bg-landscape-day.jpg";
 
@@ -65,7 +64,7 @@ export function AppLayout() {
   };
 
   return (
-    <SidebarProvider>
+    <>
       <LayoutFonts />
       <div
         className="sl-layout min-h-screen flex w-full relative"
@@ -79,140 +78,140 @@ export function AppLayout() {
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-background/55 dark:bg-background/50 pointer-events-none" />
         <div className="relative z-10 flex w-full min-h-screen">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* ── HEADER ── */}
-          <header
-            className="sl-header flex items-center h-12 px-4 gap-3"
-            style={{
-              background: "hsl(var(--background) / 0.95)",
-              borderBottom: "1px solid hsl(var(--border))",
-              backdropFilter: "blur(8px)",
-              flexShrink: 0,
-            }}
-          >
-            <SidebarTrigger className="text-muted-foreground" />
+          {/* Wheel Navigator replaces sidebar */}
+          <WheelNavigator />
 
-            {/* Search bar */}
-            <button className="sl-search" onClick={() => setOpen(true)}>
-              <Search style={{ width: 12, height: 12, flexShrink: 0 }} />
-              <span style={{ flex: 1, textAlign: "left" }}>SEARCH…</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 2, opacity: 0.4, fontSize: 9 }}>
-                <Command style={{ width: 10, height: 10 }} />K
-              </span>
-            </button>
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* ── HEADER ── */}
+            <header
+              className="sl-header flex items-center h-12 px-4 gap-3"
+              style={{
+                background: "hsl(var(--background) / 0.95)",
+                borderBottom: "1px solid hsl(var(--border))",
+                backdropFilter: "blur(8px)",
+                flexShrink: 0,
+              }}
+            >
+              {/* Search bar */}
+              <button className="sl-search" onClick={() => setOpen(true)}>
+                <Search style={{ width: 12, height: 12, flexShrink: 0 }} />
+                <span style={{ flex: 1, textAlign: "left" }}>SEARCH…</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 2, opacity: 0.4, fontSize: 9 }}>
+                  <Command style={{ width: 10, height: 10 }} />K
+                </span>
+              </button>
 
-            <div style={{ flex: 1 }} />
+              <div style={{ flex: 1 }} />
 
-            {/* User menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    border: "1px solid rgba(0,229,255,0.2)",
-                    padding: 0,
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    background: "transparent",
-                    flexShrink: 0,
-                  }}
+              {/* User menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      border: "1px solid rgba(0,229,255,0.2)",
+                      padding: 0,
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      background: "transparent",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Avatar style={{ width: 30, height: 30 }}>
+                      {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+                      <AvatarFallback
+                        style={{
+                          background: "rgba(0,229,255,0.1)",
+                          color: "#00E5FF",
+                          fontSize: 10,
+                          fontFamily: "Space Mono, monospace",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-52"
+                  style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 0 }}
                 >
-                  <Avatar style={{ width: 30, height: 30 }}>
-                    {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-                    <AvatarFallback
+                  <div style={{ padding: "12px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
+                    <p
                       style={{
-                        background: "rgba(0,229,255,0.1)",
-                        color: "#00E5FF",
-                        fontSize: 10,
-                        fontFamily: "Space Mono, monospace",
+                        fontSize: 11,
                         fontWeight: 700,
+                        color: "hsl(var(--foreground))",
+                        fontFamily: "Orbitron, monospace",
+                        letterSpacing: "0.05em",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-52"
-                style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 0 }}
-              >
-                <div style={{ padding: "12px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
-                  <p
+                      {displayName.toUpperCase()}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 10,
+                        color: "hsl(var(--muted-foreground))",
+                        fontFamily: "Space Mono, monospace",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        marginTop: 2,
+                      }}
+                    >
+                      {user?.email}
+                    </p>
+                  </div>
+                  <DropdownMenuSeparator style={{ background: "hsl(var(--border))" }} />
+                  <DropdownMenuItem
+                    onClick={() => navigate("/account")}
                     style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "hsl(var(--foreground))",
-                      fontFamily: "Orbitron, monospace",
-                      letterSpacing: "0.05em",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {displayName.toUpperCase()}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 10,
-                      color: "hsl(var(--muted-foreground))",
                       fontFamily: "Space Mono, monospace",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginTop: 2,
+                      fontSize: 10,
+                      letterSpacing: "0.15em",
+                      color: "hsl(var(--muted-foreground))",
+                      cursor: "pointer",
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--foreground))")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
                   >
-                    {user?.email}
-                  </p>
-                </div>
-                <DropdownMenuSeparator style={{ background: "hsl(var(--border))" }} />
-                <DropdownMenuItem
-                  onClick={() => navigate("/account")}
-                  style={{
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: 10,
-                    letterSpacing: "0.15em",
-                    color: "hsl(var(--muted-foreground))",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--foreground))")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
-                >
-                  <Settings style={{ width: 12, height: 12, marginRight: 8 }} /> SETTINGS
-                </DropdownMenuItem>
-                <DropdownMenuSeparator style={{ background: "hsl(var(--border))" }} />
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  style={{
-                    fontFamily: "Space Mono, monospace",
-                    fontSize: 10,
-                    letterSpacing: "0.15em",
-                    color: "#FF6B35",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF4500")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                >
-                  <LogOut style={{ width: 12, height: 12, marginRight: 8 }} /> SIGN OUT
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </header>
+                    <Settings style={{ width: 12, height: 12, marginRight: 8 }} /> SETTINGS
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator style={{ background: "hsl(var(--border))" }} />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    style={{
+                      fontFamily: "Space Mono, monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.15em",
+                      color: "#FF6B35",
+                      cursor: "pointer",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#FF4500")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                  >
+                    <LogOut style={{ width: 12, height: 12, marginRight: 8 }} /> SIGN OUT
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </header>
 
-          {/* ── MAIN CONTENT ── */}
-          <main className="flex-1 overflow-auto">
-            <Outlet />
-          </main>
-        </div>
+            {/* ── MAIN CONTENT ── */}
+            <main className="flex-1 overflow-auto">
+              <Outlet />
+            </main>
+          </div>
         </div>
       </div>
-      
+
       <CommandPalette open={open} onOpenChange={setOpen} />
-    </SidebarProvider>
+    </>
   );
 }
