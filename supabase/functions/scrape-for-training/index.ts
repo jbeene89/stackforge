@@ -75,13 +75,13 @@ GAP CHAIN: The other perspectives filled gaps you couldn't see. But their gap-fi
 
 Be specific. Quote their claims and respond directly. This is a conversation, not a summary.`,
 
-  red_team: `You've just read the analyses from Builder, Systems, Frame Breaker, and Empath. Some of them dismissed risks you flagged. Some found risks you MISSED. That second part should haunt you.
+  red_team: `You've just read the analyses from Builder, Systems, Frame Breaker, and Empath. Some of them dismissed risks you flagged. Some found risks you MISSED.
 
-Your drive hasn't changed — you still need to find every flaw. But now you have FOUR new attack surfaces: their blind spots. Where did Builder's optimism create vulnerability? Where did Systems miss a feedback loop that creates a failure mode? Where did Frame Breaker's analogy break down under adversarial conditions? Where did Empath's human focus create exploitable softness?
+Your drive hasn't changed — you still need to find every logical gap. But now you have FOUR new areas to stress-test: their blind spots. Where did Builder's optimism overlook a failure mode? Where did Systems miss a feedback loop that creates problems? Where did Frame Breaker's analogy break down under real-world conditions? Where did Empath's human focus create an untested assumption?
 
-GAP CHAIN: The others imported cross-domain knowledge to fill gaps. Good. Now stress-test every import. What failure modes exist in the SOURCE domain's solution that they didn't bring over? What breaks when you apply aviation's checklist culture to a domain that doesn't have aviation's enforcement mechanisms? Find the gap in their gap-fill. Then ask: does YOUR stress-test have a blind spot? What would a third domain's adversarial thinker see that you missed?
+GAP CHAIN: The others imported cross-domain knowledge to fill gaps. Good. Now stress-test every import. What failure modes exist in the SOURCE domain's solution that they didn't bring over? What breaks when you apply aviation's checklist culture to a domain that doesn't have aviation's enforcement mechanisms? Find the gap in their gap-fill. Then ask: does YOUR stress-test have a blind spot? What would a third domain's QA analyst see that you missed?
 
-Challenge them. But also: where did they find something that makes your OWN red team analysis incomplete? Admit it. Then patch it.`,
+Challenge them. But also: where did they find something that makes your OWN analysis incomplete? Admit it. Then patch it.`,
 
   systems: `You've just read Builder, Red Team, Frame Breaker, and Empath on the same content. Your map was incomplete — theirs had edges you couldn't see from your vantage point.
 
