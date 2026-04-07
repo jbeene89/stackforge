@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 import { AuthProvider } from "@/hooks/useAuth";
+import { ModelContextProvider } from "@/hooks/useModelContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TierProtectedRoute } from "@/components/TierProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -83,7 +84,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            
+            <ModelContextProvider>
             <ChunkErrorBoundary>
             <Suspense fallback={null}>
               <Routes>
