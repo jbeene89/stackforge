@@ -293,6 +293,10 @@ export default function AccountPage() {
                 size="sm"
                 onClick={async () => {
                   const { data } = await supabase.functions.invoke("customer-portal");
+                  if (data?.error === "no_customer") {
+                    toast.error("No active subscription found. Subscribe first from the Pricing page.");
+                    return;
+                  }
                   if (data?.url) window.open(data.url, "_blank");
                 }}
               >

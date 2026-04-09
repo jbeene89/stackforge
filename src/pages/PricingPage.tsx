@@ -196,6 +196,10 @@ export default function PricingPage() {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
+      if (data?.error === "no_customer") {
+        toast.error("No active subscription found. Subscribe first to manage billing.");
+        return;
+      }
       if (data?.url) window.open(data.url, "_blank");
     } catch (err: any) {
       toast.error(err.message || "Failed to open portal");
