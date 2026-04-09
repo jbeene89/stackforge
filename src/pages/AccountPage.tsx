@@ -16,6 +16,7 @@ import { TierBadge } from "@/components/TierBadge";
 import { useCredits } from "@/hooks/useCredits";
 
 import { CancelFlowDialog } from "@/components/CancelFlowDialog";
+import DeveloperKeysSection from "@/components/DeveloperKeysSection";
 import { Pause, Settings2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -257,6 +258,10 @@ export default function AccountPage() {
           </div>
         ))}
       </div>
+
+      <Separator />
+
+      <DeveloperKeysSection />
 
       <Separator />
 
