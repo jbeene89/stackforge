@@ -261,6 +261,10 @@ export default function AccountPage() {
 
       <Separator />
 
+      <DeveloperKeysSection />
+
+      <Separator />
+
       <ReferralSection />
 
       <Separator />
