@@ -81,7 +81,7 @@ export default function AccountPage() {
     if (!error && data) setApiKeys(data as ApiKey[]);
   };
 
-  useEffect(() => { fetchKeys(); }, []);
+  useEffect(() => { if (user) fetchKeys(); }, [user]);
 
   const handleSave = () => {
     updateProfile.mutate({ display_name: name });
