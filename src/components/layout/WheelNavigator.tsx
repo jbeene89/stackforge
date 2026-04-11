@@ -357,9 +357,8 @@ export function WheelNavigator() {
   }, [isMobile]);
 
   const handleSpokeClick = (spoke: Spoke) => {
-    setActiveSpoke(spoke.id);
-    // Navigate to the first submenu route
-    navigate(spoke.submenu[0].path);
+    // Toggle submenu open/closed — don't navigate away
+    setActiveSpoke((prev) => (prev === spoke.id ? null : spoke.id));
   };
 
   const handleSubClick = (path: string) => {
