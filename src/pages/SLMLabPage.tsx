@@ -52,6 +52,7 @@ import { SLMModePicker, type SLMMode } from "@/components/SLMModePicker";
 import { EasyModeWizard } from "@/components/EasyModeWizard";
 
 const ComparativeProbe = lazy(() => import("@/components/slm-lab/ComparativeProbe").then(m => ({ default: m.ComparativeProbe })));
+import { DPOPairGenerator } from "@/components/slm-lab/DPOPairGenerator";
 
 // ── Perspective config ──
 const PERSPECTIVE_CONFIG = {
