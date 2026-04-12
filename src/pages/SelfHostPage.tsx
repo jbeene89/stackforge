@@ -583,15 +583,21 @@ export default function SelfHostPage() {
         }, null, 2));
         folder.file("scripts/POPCORN_README.md",
           `# Popcorn Injection - Bias Heat\n\n` +
-          `Densify your model using its own knowledge. Zero data upload.\n\n` +
-          `## Usage\n\n` +
-          `\`\`\`bash\npython3 scripts/inject.py\n\`\`\`\n\n` +
+          `Two modes: **Sealed Bag** (stock knowledge) and **Open Air** (your data).\n\n` +
+          `## Sealed Bag (default)\n\n` +
+          `Densify your model using its own knowledge. Zero data needed.\n\n` +
+          `\`\`\`bash\npython3 scripts/inject.py\n# or explicitly:\npython3 scripts/inject.py --mode sealed\n\`\`\`\n\n` +
+          `## 🍿 Open Air Popcorn\n\n` +
+          `Throw YOUR data on the fire. Drop .json/.jsonl into \`to-train/\` and run:\n\n` +
+          `\`\`\`bash\npython3 scripts/inject.py --mode open-air\n# custom seed folder:\npython3 scripts/inject.py --mode open-air --seed-dir my-data/\n\`\`\`\n\n` +
+          `Each record gets expanded through every CDPT perspective burner.\n` +
+          `DPO pairs, messages, plain text — all supported.\n\n` +
           `## Bias Presets\n\n` +
           `Edit \`scripts/injection_config.json\` to change weights (0-3x per perspective).\n` +
           `See presets: even_heat, novelty_seeker, paranoid_builder, deep_empathy.\n\n` +
           `## How It Works\n\n` +
           `Each CDPT perspective is a burner. Weight > 1x = multiple passes.\n` +
-          `Output: \`injection_output/popcorn_dataset.jsonl\` ready for training.\n`
+          `Output: \`injection_output/popcorn_dataset.jsonl\` (sealed) or \`open_air_dataset.jsonl\` (open air)\n`
         );
       }
 
