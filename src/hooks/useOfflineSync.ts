@@ -39,7 +39,7 @@ export function useOfflineSync() {
 
     try {
       const result = await syncPendingMutations(supabase);
-      console.log(`[OfflineSync] Synced ${result.synced}, failed ${result.failed}, conflicts ${result.conflicts}`);
+      // Sync complete — result.synced / result.failed / result.conflicts tracked silently
 
       if (result.conflicts > 0) {
         toast.warning(`${result.conflicts} conflict${result.conflicts > 1 ? "s" : ""} detected — review in sidebar`, {
