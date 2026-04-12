@@ -476,11 +476,11 @@ export default function SelfHostPage() {
           `python3 scripts/train.py --data-dir "$DATA_DIR" --model ${config.ollamaModel}\n`
         );
 
-        // Full train.py that auto-loads all files from data/
+        // Full train.py that auto-loads all files from to-train/
         folder.file(
           "scripts/train.py",
           `#!/usr/bin/env python3\n` +
-          `"""Auto-loader training script — scans data/ for .json and .jsonl files."""\n` +
+          `"""Auto-loader training script — scans to-train/ for .json and .jsonl files."""\n` +
           `import argparse, json, glob, os, sys\n\n` +
           `def load_file(path):\n` +
           `    """Load a single .json or .jsonl file into a list of records."""\n` +
@@ -509,7 +509,7 @@ export default function SelfHostPage() {
           `    return rows\n\n` +
           `def main():\n` +
           `    parser = argparse.ArgumentParser(description="Train on all data in a folder")\n` +
-          `    parser.add_argument("--data-dir", default="data", help="Folder to scan for .json/.jsonl")\n` +
+          `    parser.add_argument("--data-dir", default="to-train", help="Folder to scan for .json/.jsonl")\n` +
           `    parser.add_argument("--model", default="llama3.2:1b", help="Base model name")\n` +
           `    parser.add_argument("--output", default="merged_training_data.jsonl", help="Merged output file")\n` +
           `    args = parser.parse_args()\n\n` +
