@@ -1552,6 +1552,145 @@ def pop_kernels():
     
     return all_samples
 
+# ---- Open Air Popcorn: Seeded Mode ----
+# Instead of popping stock knowledge, heat YOUR data through perspectives
+def pop_open_air(seed_dir="to-train"):
+    """Load .json/.jsonl from seed_dir and run each pair through perspective burners."""
+    import glob as _glob
+    
+    files = sorted(_glob.glob(os.path.join(seed_dir, "*.json")) + _glob.glob(os.path.join(seed_dir, "*.jsonl")))
+    if not files:
+        print(f"\\n[OPEN AIR] No .json or .jsonl files found in {seed_dir}/")
+        print(f"  Drop your training data into {seed_dir}/ and re-run.")
+        return []
+    
+    # Load all seed records
+    seeds = []
+    for fp in files:
+        with open(fp, "r", encoding="utf-8") as f:
+            first = f.readline().strip()
+            f.seek(0)
+            if first.startswith("{"):
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        seeds.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        seeds.append({"text": line})
+            else:
+                try:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        seeds.extend(data)
+                    else:
+                        seeds.append(data)
+                except:
+                    pass
+        print(f"  📄 {os.path.basename(fp)}: loaded")
+    
+    if not seeds:
+        print("[OPEN AIR] No records found in seed files.")
+        return []
+    
+    print(f"\\n🍿 OPEN AIR POPCORN: {len(seeds)} seed records x {len(PERSPECTIVES)} perspectives")
+    print(f"   Throwing your data on the fire and letting perspectives expand it.\\n")
+    
+    all_samples = []
+    
+    for idx, seed in enumerate(seeds):
+        # Extract the content from various formats
+        content = ""
+        if "messages" in seed and isinstance(seed["messages"], list):
+            content = "\\n".join(f"[{m.get('role','?')}]: {m.get('content','')}" for m in seed["messages"])
+        elif "prompt" in seed:
+            content = f"Prompt: {seed['prompt']}"
+            if "chosen" in seed:
+                content += f"\\nGood answer: {seed['chosen']}"
+            if "rejected" in seed:
+                content += f"\\nBad answer: {seed['rejected']}"
+        elif "input" in seed and "output" in seed:
+            content = f"Input: {seed['input']}\\nOutput: {seed['output']}"
+        elif "text" in seed:
+            content = seed["text"]
+        elif "content" in seed:
+            content = seed["content"]
+        else:
+            content = json.dumps(seed)[:2000]
+        
+        if len(content.strip()) < 20:
+            continue
+        
+        print(f"\\n  Seed {idx + 1}/{len(seeds)}: {content[:80]}...")
+        
+        round_outputs = {}
+        for pkey in PERSPECTIVES:
+            if pkey not in BURNERS:
+                continue
+            weight = WEIGHTS.get(pkey, 1)
+            if weight <= 0:
+                continue
+            burner = BURNERS[pkey]
+            
+            for heat_pass in range(weight):
+                pass_label = f" (pass {heat_pass + 1}/{weight})" if weight > 1 else ""
+                temp_boost = heat_pass * 0.08
+                
+                prompt = f"Here is a training data record to analyze and expand:\\n\\n{content}\\n\\n{burner['heat'].format(domain=DOMAIN)}"
+                if heat_pass > 0:
+                    prompt += f"\\n\\nHeat pass {heat_pass + 1}. Find completely different angles from your previous analysis."
+                system = f"CONTEXT: Academic AI training data enrichment (Open Air Popcorn). You are expanding existing training data through the {pkey.upper().replace('RED_TEAM', 'QUALITY ASSURANCE')} lens. Analyze the given data deeply and produce enriched, perspective-specific output. Go deep."
+                
+                print(f"    [{pkey.upper()}]{pass_label}", end=" ", flush=True)
+                output = ollama_generate(prompt, system=system, temperature=0.7 + temp_boost)
+                
+                if output and len(output) > 50:
+                    if pkey in round_outputs and heat_pass > 0:
+                        round_outputs[pkey] += f"\\n\\n[HEAT PASS {heat_pass + 1}]\\n" + output
+                    else:
+                        round_outputs[pkey] = output
+                    print(f"popped! ({len(output)} chars)")
+                else:
+                    print("dud")
+        
+        # Build enriched sample
+        if len(round_outputs) >= 2:
+            enriched_parts = [f"<{k.upper()}>{v}</{k.upper()}>" for k, v in round_outputs.items()]
+            enriched_output = "\\n\\n".join(enriched_parts)
+            
+            # Preserve original user content as the prompt
+            user_content = content if len(content) < 2000 else content[:2000]
+            sample = {
+                "messages": [
+                    {"role": "user", "content": user_content},
+                    {"role": "assistant", "content": enriched_output}
+                ],
+                "metadata": {
+                    "source": "open_air_popcorn",
+                    "seed_index": idx,
+                    "perspectives_popped": list(round_outputs.keys()),
+                    "pop_count": len(round_outputs),
+                }
+            }
+            all_samples.append(sample)
+            
+            # Per-perspective samples
+            for pkey, pcontent in round_outputs.items():
+                all_samples.append({
+                    "messages": [
+                        {"role": "user", "content": user_content},
+                        {"role": "assistant", "content": f"<{pkey.upper()}>{pcontent}</{pkey.upper()}>"}
+                    ],
+                    "metadata": {
+                        "source": "open_air_popcorn",
+                        "seed_index": idx,
+                        "perspective": pkey,
+                    }
+                })
+    
+    return all_samples
+
 # ---- Zone config ----
 def generate_train_config(sample_count):
     zone_config = {}
@@ -1578,10 +1717,24 @@ def generate_train_config(sample_count):
 
 # ---- Main ----
 def main():
+    import argparse as _ap
+    parser = _ap.ArgumentParser(description="Soupy CDPT Popcorn Injection")
+    parser.add_argument("--mode", choices=["sealed", "open-air"], default="sealed",
+                        help="sealed = stock knowledge only, open-air = expand your seed data")
+    parser.add_argument("--seed-dir", default="to-train",
+                        help="Folder to read seed .json/.jsonl from (open-air mode)")
+    args = parser.parse_args()
+    
     print("=" * 60)
-    print("  POPCORN MODE")
-    print("  Base model = bag | Knowledge = kernels | CDPT = heat")
-    print("  Nothing added. Everything expanded.")
+    if args.mode == "open-air":
+        print("  🍿 OPEN AIR POPCORN")
+        print(f"  Seed data from: {args.seed_dir}/")
+        print("  Your data = kernels | CDPT perspectives = heat")
+        print("  Everything you brought gets expanded through every lens.")
+    else:
+        print("  POPCORN MODE (Sealed Bag)")
+        print("  Base model = bag | Knowledge = kernels | CDPT = heat")
+        print("  Nothing added. Everything expanded.")
     print("=" * 60)
     
     # Pre-flight: check Ollama is reachable and model is available
@@ -1605,40 +1758,53 @@ def main():
         sys.exit(1)
     
     # Pop
-    samples = pop_kernels()
+    if args.mode == "open-air":
+        samples = pop_open_air(args.seed_dir)
+    else:
+        samples = pop_kernels()
     
     if not samples:
         print("[ERROR] No kernels popped. Check Ollama connection.")
         sys.exit(1)
     
     # Save
-    dataset_path = OUTPUT_DIR / "popcorn_dataset.jsonl"
+    suffix = "open_air" if args.mode == "open-air" else "popcorn"
+    dataset_path = OUTPUT_DIR / f"{suffix}_dataset.jsonl"
     with open(dataset_path, "w") as f:
         for s in samples:
             f.write(json.dumps(s) + "\\n")
     
     config = generate_train_config(len(samples))
+    config["mode"] = args.mode
     config_path = OUTPUT_DIR / "injection_config.json"
     with open(config_path, "w") as f:
         json.dump(config, f, indent=2)
     
     # Calculate expansion
     perspective_count = len([p for p in PERSPECTIVES if p in BURNERS])
-    expansion = perspective_count * NUM_ROUNDS
-    
-    print(f"\\n{'=' * 60}")
-    print(f"  POPCORN COMPLETE")
-    print(f"{'=' * 60}")
-    print(f"  Kernels popped:     {len(samples)}")
-    print(f"  Perspectives:       {perspective_count} burners")
-    print(f"  Rounds:             {NUM_ROUNDS}")
-    print(f"  Expansion:          ~{expansion}x cognitive density")
-    print(f"  Zones:              {', '.join(ZONES)}")
-    print(f"  Intensity:          {INTENSITY}x")
-    print(f"\\n  Output: {dataset_path}")
-    print(f"  Config: {config_path}")
-    print(f"\\n  Next: python3 train.py")
-    print(f"  Same bag. Same kernels. {expansion}x the volume.")
+    if args.mode == "open-air":
+        print(f"\\n{'=' * 60}")
+        print(f"  🍿 OPEN AIR COMPLETE")
+        print(f"{'=' * 60}")
+        print(f"  Seeds expanded:     {len(samples)}")
+        print(f"  Perspectives:       {perspective_count} burners")
+        print(f"  Output: {dataset_path}")
+        print(f"\\n  Your data, {perspective_count}x richer.")
+    else:
+        expansion = perspective_count * NUM_ROUNDS
+        print(f"\\n{'=' * 60}")
+        print(f"  POPCORN COMPLETE")
+        print(f"{'=' * 60}")
+        print(f"  Kernels popped:     {len(samples)}")
+        print(f"  Perspectives:       {perspective_count} burners")
+        print(f"  Rounds:             {NUM_ROUNDS}")
+        print(f"  Expansion:          ~{expansion}x cognitive density")
+        print(f"  Zones:              {', '.join(ZONES)}")
+        print(f"  Intensity:          {INTENSITY}x")
+        print(f"\\n  Output: {dataset_path}")
+        print(f"  Config: {config_path}")
+        print(f"\\n  Next: python3 train.py")
+        print(f"  Same bag. Same kernels. {expansion}x the volume.")
 
 if __name__ == "__main__":
     main()
