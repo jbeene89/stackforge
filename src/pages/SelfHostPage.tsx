@@ -659,6 +659,33 @@ export default function SelfHostPage() {
         }
       }
 
+      // Always ensure data/ folder exists with a README even without a bundled dataset
+      if (!selectedSource.startsWith("dataset:") || !(await supabase.from("dataset_samples").select("id", { count: "exact", head: true }).eq("dataset_id", selectedSource.split(":")[1] || "").eq("status", "approved")).count) {
+        // Only add if data/README.md wasn't already added above
+        if (!selectedSource.startsWith("dataset:")) {
+          folder.file(`data/.gitkeep`, "");
+          folder.file(`data/README.md`,
+            `# Training Data Folder\n\n` +
+            `Drop any \`.json\` or \`.jsonl\` files into this folder.\n` +
+            `The training script automatically discovers and merges everything here.\n\n` +
+            `## Supported Formats\n\n` +
+            `| Format | Example |\n` +
+            `|--------|---------|\n` +
+            `| DPO pairs | \`{"prompt":"...","chosen":"...","rejected":"..."}\` |\n` +
+            `| Messages | \`{"messages":[{"role":"user","content":"..."},...]}\` |\n` +
+            `| Plain text | \`{"text":"..."}\` |\n` +
+            `| JSON array | \`[{"input":"...","output":"..."},  ...]\` |\n\n` +
+            `## Usage\n\n` +
+            `\`\`\`bash\n` +
+            `# Train on everything in data/\n` +
+            `./scripts/train.sh\n\n` +
+            `# Or run directly\n` +
+            `python3 scripts/train.py --data-dir data/ --model ${config.ollamaModel}\n` +
+            `\`\`\`\n`
+          );
+        }
+      }
+
       const blob = await zip.generateAsync({ type: "blob" });
       const filename = `${config.projectName}.zip`;
       const blobUrl = triggerDownload(blob, filename);
