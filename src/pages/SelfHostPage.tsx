@@ -453,7 +453,7 @@ export default function SelfHostPage() {
         folder.file(
           "scripts/train.sh",
           `#!/bin/bash\n# Training Environment Setup\n` +
-          `# This script sets up a venv, scans data/ for .json and .jsonl files, and trains\n\n` +
+          `# This script sets up a venv, scans to-train/ for .json and .jsonl files, and trains\n\n` +
           `set -e\n\n` +
           `if [ ! -d "venv" ]; then\n` +
           `  python3 -m venv venv\n` +
@@ -462,12 +462,12 @@ export default function SelfHostPage() {
           `else\n` +
           `  source venv/bin/activate\n` +
           `fi\n\n` +
-          `# Auto-discover all .json and .jsonl files in data/\n` +
-          `DATA_DIR="\${1:-data}"\n` +
+          `# Auto-discover all .json and .jsonl files in to-train/\n` +
+          `DATA_DIR="\${1:-to-train}"\n` +
           `FILES=$(find "$DATA_DIR" -maxdepth 1 -type f \\( -name "*.json" -o -name "*.jsonl" \\) | sort)\n\n` +
           `if [ -z "$FILES" ]; then\n` +
           `  echo "No .json or .jsonl files found in $DATA_DIR/"\n` +
-          `  echo "Drop your training data into the data/ folder and re-run."\n` +
+          `  echo "Drop your training data into the to-train/ folder and re-run."\n` +
           `  exit 1\n` +
           `fi\n\n` +
           `echo "Found training files:"\n` +
@@ -629,9 +629,9 @@ export default function SelfHostPage() {
           });
 
           const datasetSlug = (dataset?.name || "dataset").toLowerCase().replace(/\s+/g, "-");
-          folder.file(`data/${datasetSlug}.jsonl`, lines.join("\n"));
-          folder.file(`data/README.md`,
-            `# Training Data Folder\n\n` +
+          folder.file(`to-train/${datasetSlug}.jsonl`, lines.join("\n"));
+          folder.file(`to-train/README.md`,
+            `# TO TRAIN\n\n` +
             `Drop any \`.json\` or \`.jsonl\` files into this folder.\n` +
             `The training script automatically discovers and merges everything here.\n\n` +
             `## Bundled Dataset: ${dataset?.name || "Unknown"}\n\n` +
@@ -647,10 +647,10 @@ export default function SelfHostPage() {
             `| JSON array | \`[{"input":"...","output":"..."},  ...]\` |\n\n` +
             `## Usage\n\n` +
             `\`\`\`bash\n` +
-            `# Train on everything in data/\n` +
+            `# Train on everything in to-train/\n` +
             `./scripts/train.sh\n\n` +
             `# Or run directly\n` +
-            `python3 scripts/train.py --data-dir data/ --model ${config.ollamaModel}\n` +
+            `python3 scripts/train.py --data-dir to-train/ --model ${config.ollamaModel}\n` +
             `\`\`\`\n`
           );
           toast.info(`Bundled ${samples.length} approved samples from "${dataset?.name}"`);
@@ -663,9 +663,9 @@ export default function SelfHostPage() {
       if (!selectedSource.startsWith("dataset:") || !(await supabase.from("dataset_samples").select("id", { count: "exact", head: true }).eq("dataset_id", selectedSource.split(":")[1] || "").eq("status", "approved")).count) {
         // Only add if data/README.md wasn't already added above
         if (!selectedSource.startsWith("dataset:")) {
-          folder.file(`data/.gitkeep`, "");
-          folder.file(`data/README.md`,
-            `# Training Data Folder\n\n` +
+          folder.file(`to-train/.gitkeep`, "");
+          folder.file(`to-train/README.md`,
+            `# TO TRAIN\n\n` +
             `Drop any \`.json\` or \`.jsonl\` files into this folder.\n` +
             `The training script automatically discovers and merges everything here.\n\n` +
             `## Supported Formats\n\n` +
@@ -677,10 +677,10 @@ export default function SelfHostPage() {
             `| JSON array | \`[{"input":"...","output":"..."},  ...]\` |\n\n` +
             `## Usage\n\n` +
             `\`\`\`bash\n` +
-            `# Train on everything in data/\n` +
+            `# Train on everything in to-train/\n` +
             `./scripts/train.sh\n\n` +
             `# Or run directly\n` +
-            `python3 scripts/train.py --data-dir data/ --model ${config.ollamaModel}\n` +
+            `python3 scripts/train.py --data-dir to-train/ --model ${config.ollamaModel}\n` +
             `\`\`\`\n`
           );
         }
