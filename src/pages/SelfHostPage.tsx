@@ -433,6 +433,47 @@ export default function SelfHostPage() {
       folder.file("start.sh", generateStartScript(config));
       folder.file("README.md", generateReadme(config, COMPONENTS));
       folder.file(".env", generateEnvFile(config));
+      
+      // Shared data bus spec
+      folder.file("to-train/DATA_BUS_SPEC.md", [
+        "# `to-train/` — Shared Local Data Bus",
+        "",
+        "This folder is the universal exchange point for all Soupy ecosystem apps.",
+        "Any app that produces training data writes here. Any app that consumes reads here.",
+        "",
+        "## File Naming Convention",
+        "",
+        "```",
+        "{source}_{descriptor}.jsonl",
+        "```",
+        "",
+        "| Source Prefix | App |",
+        "|--------------|-----|",
+        "| `soupy_` | Soupy (CDPT pipeline, smelted data) |",
+        "| `lifecard_` | LifeCard (personal knowledge pairs) |",
+        "| `sace_` | SACE Affect Radar (emotion-tagged) |",
+        "| `openair_` | Open Air Popcorn (expanded data) |",
+        "| `dpo_` | DPO Generator (preference pairs) |",
+        "| `manual_` | Manual drops |",
+        "",
+        "## Supported Formats",
+        "",
+        "| Format | Shape |",
+        "|--------|-------|",
+        "| Messages | `{\"messages\": [{\"role\": \"user\", ...}, ...]}` |",
+        "| DPO | `{\"prompt\": \"...\", \"chosen\": \"...\", \"rejected\": \"...\"}` |",
+        "| Input/Output | `{\"input\": \"...\", \"output\": \"...\"}` |",
+        "| Plain text | `{\"text\": \"...\"}` |",
+        "",
+        "## Rules",
+        "",
+        "- Never overwrite another app's files",
+        "- Use unique filenames prefixed with your app name",
+        "- `train.py` and `inject.py --mode open-air` auto-discover everything here",
+        "- Set `SOUPY_TRAIN_DIR` env var to share across apps",
+        "",
+        "Full spec: https://stackforge.lovable.app/to-train-spec.md",
+      ].join("\n"));
 
       // Pipeline script stub
       if (config.components.pipeline) {
