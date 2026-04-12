@@ -111,7 +111,7 @@ export default function VisualChatroom() {
       } catch (e: any) {
         if (attempt < MAX_RETRIES) {
           const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s
-          console.log(`${char.name} attempt ${attempt + 1} failed, retrying in ${delay / 1000}s...`);
+          // Retry silently
           await new Promise(res => setTimeout(res, delay));
         } else {
           toast.error(`${char.name} failed after ${MAX_RETRIES + 1} attempts`);
