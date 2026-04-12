@@ -313,9 +313,10 @@ function generateReadme(config: PackageConfig, components: PackageComponent[]): 
 
   md += `\n## Popcorn Injection (Bias Heat)\n\n`;
   md += `Included in \`scripts/\` when CDPT Pipeline is enabled:\n\n`;
-  md += `- \`inject.py\` — Densify your model using its own knowledge (zero data upload)\n`;
+  md += `- \`inject.py\` — Two modes: Sealed Bag (stock knowledge) and Open Air (your data)\n`;
   md += `- \`injection_config.json\` — Perspective weights & 4 bias presets\n`;
-  md += `- Run: \`python3 scripts/inject.py\` then train on the output\n\n`;
+  md += `- Sealed: \`python3 scripts/inject.py\`\n`;
+  md += `- Open Air: \`python3 scripts/inject.py --mode open-air\` (reads from \`to-train/\`)\n\n`;
 
   md += `## Stopping\n\n`;
   md += `\`\`\`bash\ndocker compose down\n\`\`\`\n\n`;
