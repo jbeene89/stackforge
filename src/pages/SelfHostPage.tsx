@@ -453,7 +453,7 @@ export default function SelfHostPage() {
         folder.file(
           "scripts/train.sh",
           `#!/bin/bash\n# Training Environment Setup\n` +
-          `# This script sets up a venv and runs LoRA fine-tuning\n\n` +
+          `# This script sets up a venv, scans data/ for .json and .jsonl files, and trains\n\n` +
           `set -e\n\n` +
           `if [ ! -d "venv" ]; then\n` +
           `  python3 -m venv venv\n` +
@@ -462,8 +462,78 @@ export default function SelfHostPage() {
           `else\n` +
           `  source venv/bin/activate\n` +
           `fi\n\n` +
-          `echo "Training environment ready."\n` +
-          `echo "Place your training script and run it from here."\n`
+          `# Auto-discover all .json and .jsonl files in data/\n` +
+          `DATA_DIR="\${1:-data}"\n` +
+          `FILES=$(find "$DATA_DIR" -maxdepth 1 -type f \\( -name "*.json" -o -name "*.jsonl" \\) | sort)\n\n` +
+          `if [ -z "$FILES" ]; then\n` +
+          `  echo "No .json or .jsonl files found in $DATA_DIR/"\n` +
+          `  echo "Drop your training data into the data/ folder and re-run."\n` +
+          `  exit 1\n` +
+          `fi\n\n` +
+          `echo "Found training files:"\n` +
+          `echo "$FILES" | while read f; do echo "  → $f ($(wc -l < \\"$f\\") lines)"; done\n` +
+          `echo ""\n\n` +
+          `python3 scripts/train.py --data-dir "$DATA_DIR" --model ${config.ollamaModel}\n`
+        );
+
+        // Full train.py that auto-loads all files from data/
+        folder.file(
+          "scripts/train.py",
+          `#!/usr/bin/env python3\n` +
+          `"""Auto-loader training script — scans data/ for .json and .jsonl files."""\n` +
+          `import argparse, json, glob, os, sys\n\n` +
+          `def load_file(path):\n` +
+          `    """Load a single .json or .jsonl file into a list of records."""\n` +
+          `    rows = []\n` +
+          `    with open(path, "r", encoding="utf-8") as f:\n` +
+          `        # Try JSONL first (one JSON object per line)\n` +
+          `        first_line = f.readline().strip()\n` +
+          `        f.seek(0)\n` +
+          `        if first_line.startswith("{"):\n` +
+          `            for line in f:\n` +
+          `                line = line.strip()\n` +
+          `                if not line:\n` +
+          `                    continue\n` +
+          `                try:\n` +
+          `                    rows.append(json.loads(line))\n` +
+          `                except json.JSONDecodeError:\n` +
+          `                    rows.append({"text": line})\n` +
+          `        else:\n` +
+          `            # Try as a single JSON array/object\n` +
+          `            f.seek(0)\n` +
+          `            data = json.load(f)\n` +
+          `            if isinstance(data, list):\n` +
+          `                rows.extend(data)\n` +
+          `            else:\n` +
+          `                rows.append(data)\n` +
+          `    return rows\n\n` +
+          `def main():\n` +
+          `    parser = argparse.ArgumentParser(description="Train on all data in a folder")\n` +
+          `    parser.add_argument("--data-dir", default="data", help="Folder to scan for .json/.jsonl")\n` +
+          `    parser.add_argument("--model", default="llama3.2:1b", help="Base model name")\n` +
+          `    parser.add_argument("--output", default="merged_training_data.jsonl", help="Merged output file")\n` +
+          `    args = parser.parse_args()\n\n` +
+          `    files = sorted(glob.glob(os.path.join(args.data_dir, "*.json")) +\n` +
+          `                    glob.glob(os.path.join(args.data_dir, "*.jsonl")))\n\n` +
+          `    if not files:\n` +
+          `        print(f"❌ No .json or .jsonl files found in {args.data_dir}/")\n` +
+          `        sys.exit(1)\n\n` +
+          `    all_rows = []\n` +
+          `    for fp in files:\n` +
+          `        rows = load_file(fp)\n` +
+          `        print(f"  📄 {os.path.basename(fp)}: {len(rows)} records")\n` +
+          `        all_rows.extend(rows)\n\n` +
+          `    print(f"\\n📊 Total: {len(all_rows)} records from {len(files)} file(s)")\n\n` +
+          `    # Write merged dataset\n` +
+          `    merged_path = os.path.join(args.data_dir, args.output)\n` +
+          `    with open(merged_path, "w", encoding="utf-8") as out:\n` +
+          `        for row in all_rows:\n` +
+          `            out.write(json.dumps(row, ensure_ascii=False) + "\\n")\n` +
+          `    print(f"✅ Merged dataset written to {merged_path}")\n` +
+          `    print(f"\\nReady for training with: {args.model}")\n` +
+          `    print(f"  → {merged_path} ({len(all_rows)} rows)")\n\n` +
+          `if __name__ == "__main__":\n` +
+          `    main()\n`
         );
       }
 
@@ -561,14 +631,26 @@ export default function SelfHostPage() {
           const datasetSlug = (dataset?.name || "dataset").toLowerCase().replace(/\s+/g, "-");
           folder.file(`data/${datasetSlug}.jsonl`, lines.join("\n"));
           folder.file(`data/README.md`,
-            `# Bundled Dataset: ${dataset?.name || "Unknown"}\n\n` +
+            `# Training Data Folder\n\n` +
+            `Drop any \`.json\` or \`.jsonl\` files into this folder.\n` +
+            `The training script automatically discovers and merges everything here.\n\n` +
+            `## Bundled Dataset: ${dataset?.name || "Unknown"}\n\n` +
             `- **Samples**: ${samples.length} approved pairs\n` +
             `- **Domain**: ${dataset?.domain || "general"}\n` +
             `- **Format**: JSONL (messages format)\n\n` +
+            `## Supported Formats\n\n` +
+            `| Format | Example |\n` +
+            `|--------|---------|\n` +
+            `| DPO pairs | \`{"prompt":"...","chosen":"...","rejected":"..."}\` |\n` +
+            `| Messages | \`{"messages":[{"role":"user","content":"..."},...]}\` |\n` +
+            `| Plain text | \`{"text":"..."}\` |\n` +
+            `| JSON array | \`[{"input":"...","output":"..."},  ...]\` |\n\n` +
             `## Usage\n\n` +
-            `Use this file directly with your training script:\n\n` +
             `\`\`\`bash\n` +
-            `python3 train.py --data data/${datasetSlug}.jsonl --model ${config.ollamaModel}\n` +
+            `# Train on everything in data/\n` +
+            `./scripts/train.sh\n\n` +
+            `# Or run directly\n` +
+            `python3 scripts/train.py --data-dir data/ --model ${config.ollamaModel}\n` +
             `\`\`\`\n`
           );
           toast.info(`Bundled ${samples.length} approved samples from "${dataset?.name}"`);
