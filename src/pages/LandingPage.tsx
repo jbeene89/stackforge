@@ -583,8 +583,6 @@ export default function LandingPage() {
             {/* AI Doodle — unique for every visitor */}
             <ForgeDoodle />
 
-            {/* Hero video */}
-            <HeroVideo />
           </motion.div>
         </div>
 
@@ -891,6 +889,13 @@ export default function LandingPage() {
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ════════════════════ HERO VIDEO (moved down for pacing) ════════════════════ */}
+      <section className="py-6 sm:py-10 px-3 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <HeroVideo />
         </div>
       </section>
 
