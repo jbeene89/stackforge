@@ -640,9 +640,9 @@ export default function KnowledgeRefineryPage() {
       {/* Download fallback */}
       <DownloadFallbackDialog
         open={!!fallbackUrl}
-        url={fallbackUrl ?? ""}
+        onOpenChange={(open) => { if (!open) setFallbackUrl(null); }}
+        blobUrl={fallbackUrl}
         filename={`${modelLabel.replace(/\s+/g, "-").toLowerCase()}_knowledge-extract.jsonl`}
-        onClose={() => setFallbackUrl(null)}
       />
     </div>
   );
