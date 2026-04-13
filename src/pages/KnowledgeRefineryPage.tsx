@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import JSZip from "jszip";
 import { motion, AnimatePresence } from "framer-motion";
 import { useModelContext, BASE_MODEL_CATALOG, CUSTOM_MODEL_ID } from "@/hooks/useModelContext";
 import { useAuth } from "@/hooks/useAuth";
