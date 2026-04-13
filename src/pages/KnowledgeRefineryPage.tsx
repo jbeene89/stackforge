@@ -588,8 +588,11 @@ export default function KnowledgeRefineryPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button onClick={handleExport} className="flex-1">
-                    <Download className="mr-2 h-4 w-4" /> Download JSONL
+                  <Button variant="outline" onClick={handleExport} className="flex-1">
+                    <Download className="mr-2 h-4 w-4" /> JSONL Only
+                  </Button>
+                  <Button onClick={handleExportZip} className="flex-1">
+                    <Package className="mr-2 h-4 w-4" /> Full Packet (ZIP)
                   </Button>
                   <Button variant="outline" onClick={goNext}>
                     Next <ArrowRight className="ml-2 h-4 w-4" />
