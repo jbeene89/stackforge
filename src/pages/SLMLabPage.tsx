@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/SEOHead";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
