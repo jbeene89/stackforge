@@ -166,6 +166,161 @@ export default function KnowledgeRefineryPage() {
     toast.success("Knowledge corpus exported — run it through Popcorn → Stream Quantize → HumanAI");
   };
 
+  const handleExportZip = async () => {
+    const zip = new JSZip();
+    const slug = modelLabel.replace(/\s+/g, "-").toLowerCase();
+    const folderName = `${slug}-refinery-packet`;
+    const folder = zip.folder(folderName)!;
+
+    // 1. Raw extracted JSONL
+    const jsonl = extractedPairs.map(p => JSON.stringify(p)).join("\n");
+    folder.file(`to-train/${slug}_knowledge-extract.jsonl`, jsonl);
+
+    // 2. DATA_BUS_SPEC.md
+    folder.file("to-train/DATA_BUS_SPEC.md", [
+      "# `to-train/` — Shared Local Data Bus",
+      "",
+      "This folder is the universal exchange point for all Soupy ecosystem apps.",
+      "Any app that produces training data writes here. Any app that consumes reads here.",
+      "",
+      "## File Naming Convention",
+      "",
+      "```",
+      "{source}_{descriptor}.jsonl",
+      "```",
+      "",
+      "| Source Prefix | App |",
+      "|--------------|-----|",
+      "| `soupy_` | Soupy (CDPT pipeline, smelted data) |",
+      "| `lifecard_` | LifeCard (personal knowledge pairs) |",
+      "| `sace_` | SACE Affect Radar (emotion-tagged) |",
+      "| `openair_` | Open Air Popcorn (expanded data) |",
+      "| `refinery_` | Knowledge Refinery (extracted/refined) |",
+      "| `dpo_` | DPO Generator (preference pairs) |",
+      "| `manual_` | Manual drops |",
+      "",
+      "## Supported Formats",
+      "",
+      "| Format | Shape |",
+      "|--------|-------|",
+      "| Messages | `{\"messages\": [{\"role\": \"user\", ...}, ...]}` |",
+      "| DPO | `{\"prompt\": \"...\", \"chosen\": \"...\", \"rejected\": \"...\"}` |",
+      "| Input/Output | `{\"input\": \"...\", \"output\": \"...\"}` |",
+      "| Plain text | `{\"text\": \"...\"}` |",
+      "",
+      "## Rules",
+      "",
+      "- Never overwrite another app's files",
+      "- Use unique filenames prefixed with your app name",
+      "- `train.py` auto-discovers everything here",
+      "- Set `SOUPY_TRAIN_DIR` env var to share across apps",
+    ].join("\n"));
+
+    // 3. train.py (auto-loader)
+    folder.file("train.py", [
+      '#!/usr/bin/env python3',
+      '"""Auto-loader training script — scans to-train/ for .json and .jsonl files."""',
+      'import argparse, json, glob, os, sys',
+      '',
+      'def load_file(path):',
+      '    """Load a single .json or .jsonl file into a list of records."""',
+      '    rows = []',
+      '    with open(path, "r", encoding="utf-8") as f:',
+      '        first_line = f.readline().strip()',
+      '        f.seek(0)',
+      '        if first_line.startswith("{"):',
+      '            for line in f:',
+      '                line = line.strip()',
+      '                if not line:',
+      '                    continue',
+      '                try:',
+      '                    rows.append(json.loads(line))',
+      '                except json.JSONDecodeError:',
+      '                    rows.append({"text": line})',
+      '        else:',
+      '            f.seek(0)',
+      '            data = json.load(f)',
+      '            if isinstance(data, list):',
+      '                rows.extend(data)',
+      '            else:',
+      '                rows.append(data)',
+      '    return rows',
+      '',
+      'def main():',
+      '    parser = argparse.ArgumentParser(description="Train on all data in to-train/")',
+      '    parser.add_argument("--data-dir", default="to-train", help="Folder to scan")',
+      `    parser.add_argument("--model", default="${resolvedModel}", help="Base model name")`,
+      '    parser.add_argument("--output", default="merged_training_data.jsonl", help="Merged output")',
+      '    args = parser.parse_args()',
+      '',
+      '    files = sorted(glob.glob(os.path.join(args.data_dir, "*.json")) +',
+      '                    glob.glob(os.path.join(args.data_dir, "*.jsonl")))',
+      '',
+      '    if not files:',
+      '        print(f"❌ No .json or .jsonl files found in {args.data_dir}/")',
+      '        sys.exit(1)',
+      '',
+      '    all_rows = []',
+      '    for fp in files:',
+      '        rows = load_file(fp)',
+      '        print(f"  📄 {os.path.basename(fp)}: {len(rows)} records")',
+      '        all_rows.extend(rows)',
+      '',
+      '    print(f"\\n📊 Total: {len(all_rows)} records from {len(files)} file(s)")',
+      '',
+      '    merged_path = os.path.join(args.data_dir, args.output)',
+      '    with open(merged_path, "w", encoding="utf-8") as out:',
+      '        for row in all_rows:',
+      '            out.write(json.dumps(row, ensure_ascii=False) + "\\n")',
+      '    print(f"✅ Merged dataset written to {merged_path}")',
+      '    print(f"\\nReady for training with: {args.model}")',
+      '',
+      'if __name__ == "__main__":',
+      '    main()',
+    ].join("\n"));
+
+    // 4. README
+    folder.file("README.md", [
+      `# ${modelLabel} — Knowledge Refinery Packet`,
+      "",
+      "## What's inside",
+      "",
+      `- \`to-train/${slug}_knowledge-extract.jsonl\` — Raw knowledge extracted from the Donor model`,
+      "- `to-train/DATA_BUS_SPEC.md` — Data bus format specification",
+      "- `train.py` — Auto-loader script that merges all JSONL in to-train/ and trains",
+      "",
+      "## Workflow",
+      "",
+      "1. Run the JSONL through **Popcorn** (densification)",
+      "2. Run through **Stream Quantize** (garbage filter)",
+      "3. Run through **HumanAI** (5D emotional weighting)",
+      "4. Drop refined files back into `to-train/`",
+      "5. Run: `python3 train.py`",
+      "",
+      `## Base Model: ${modelLabel}`,
+      `## Domains: ${selectedDomains.filter(d => d !== "Custom…").join(", ")}`,
+      `## Pairs: ${extractedPairs.length}`,
+    ].join("\n"));
+
+    // 5. manifest.json
+    folder.file("to-train/manifest.json", JSON.stringify({
+      created: new Date().toISOString(),
+      source: "knowledge-refinery",
+      model: resolvedModel,
+      model_label: modelLabel,
+      domains: selectedDomains.filter(d => d !== "Custom…"),
+      pair_count: extractedPairs.length,
+      files: [`${slug}_knowledge-extract.jsonl`],
+    }, null, 2));
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const filename = `${folderName}.zip`;
+    const url = triggerDownload(blob, filename);
+    if (url) setFallbackUrl(url);
+    markComplete("export");
+    toast.success("Full refinery packet exported as ZIP with train.py");
+  };
+
   const handleImport = async (files: FileList | null) => {
     if (!files?.length) return;
     const fileArr = Array.from(files);
