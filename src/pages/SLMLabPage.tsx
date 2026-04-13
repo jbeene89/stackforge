@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/SEOHead";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -1418,11 +1419,15 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     setVideoAnalysisText("");
 
     try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) throw new Error("Not signed in. Please log in and try again.");
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-video-frames`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({
           frames: videoFrames,
