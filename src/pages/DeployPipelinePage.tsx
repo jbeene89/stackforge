@@ -757,7 +757,9 @@ export default function DeployPipelinePage() {
       setSelectedDatasetId(paramId);
     }
   }, [searchParams, datasets, selectedDatasetId]);
-  const [baseModel, setBaseModel] = useState("meta-llama/Llama-3.2-1B-Instruct");
+  const { selectedBaseModel, setSelectedBaseModel, customModelPath, setCustomModelPath, resolvedBaseModel } = useModelContext();
+  const baseModel = resolvedBaseModel;
+  const setBaseModel = setSelectedBaseModel;
   const [epochs, setEpochs] = useState(3);
   const [loraRank, setLoraRank] = useState(16);
   const [lr] = useState(0.0002);
