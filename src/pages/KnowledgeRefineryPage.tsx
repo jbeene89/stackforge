@@ -41,42 +41,6 @@ const DOMAIN_PRESETS = [
   "Engineering", "Sociology", "Literature", "Geography", "Custom…",
 ];
 
-/* ── Simulated probe questions per domain ─────────────────────── */
-function generateProbes(domain: string, count: number): string[] {
-  const templates = [
-    `What are the fundamental principles of ${domain}?`,
-    `Explain a common misconception in ${domain}.`,
-    `What is the most important recent development in ${domain}?`,
-    `How does ${domain} intersect with everyday life?`,
-    `Describe the key terminology a beginner should know in ${domain}.`,
-    `What are the major open problems in ${domain}?`,
-    `How has ${domain} evolved over the last decade?`,
-    `What practical applications emerge from ${domain}?`,
-    `Compare two competing theories or approaches in ${domain}.`,
-    `What would a 5-minute lecture on ${domain} cover?`,
-    `Explain ${domain} as if teaching a curious teenager.`,
-    `What ethical considerations arise in ${domain}?`,
-  ];
-  return templates.slice(0, count);
-}
-
-/* ── Fake extraction result ──────────────────────────────────── */
-function fakeExtraction(model: string, domains: string[]): object[] {
-  const pairs: object[] = [];
-  domains.forEach(d => {
-    const probes = generateProbes(d, 6);
-    probes.forEach(q => {
-      pairs.push({
-        messages: [
-          { role: "user", content: q },
-          { role: "assistant", content: `[${model}] Knowledge response for "${d}": This is a simulated extraction. In production, Ollama inference runs here and captures the model's actual latent knowledge as structured output.` },
-        ],
-        _meta: { source_model: model, domain: d, extraction_type: "probe" },
-      });
-    });
-  });
-  return pairs;
-}
 
 /* ── Bench result type ───────────────────────────────────────── */
 interface BenchResult {
