@@ -72,6 +72,7 @@ const FirstWinPage = lazy(() => import("./pages/FirstWinPage"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
 const SystemHealthPage = lazy(() => import("./pages/admin/SystemHealthPage"));
 const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
+const KnowledgeRefineryPage = lazy(() => import("./pages/KnowledgeRefineryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -146,6 +147,7 @@ const App = () => (
                   <Route path="/harvest" element={<HarvestInboxPage />} />
                   <Route path="/training" element={<TrainingProgressPage />} />
                   <Route path="/runs" element={<RunsPage />} />
+                  <Route path="/knowledge-refinery" element={<KnowledgeRefineryPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/users" element={<UserManagementPage />} />
                   <Route path="/admin/health" element={<SystemHealthPage />} />

@@ -7,6 +7,7 @@ import {
   Smartphone, SwatchBook, Terminal, Server, ChevronRight, ChevronDown,
   Zap, Hammer, Send, Compass, Cog, ToggleLeft, ToggleRight,
   Database, Sparkles, Users, HeartPulse, BarChart3, Megaphone, ShieldCheck,
+  Beaker,
 } from "lucide-react";
 import { CreditsBadge } from "@/components/CreditsBadge";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -138,6 +139,7 @@ const simpleSections: NavSection[] = [
           { title: "Swipe Review", url: "/review", icon: SwatchBook, tip: "Approve or reject training data", desc: "Swipe right on good data" },
           { title: "Training Jobs", url: "/training", icon: Activity, tip: "Monitor training progress", desc: "Watch your model learn" },
           { title: "Capture Data", url: "/capture", icon: Smartphone, tip: "Capture training data from your phone", desc: "Use your phone to gather data" },
+          { title: "Knowledge Refinery", url: "/knowledge-refinery", icon: Beaker, tip: "Extract → refine → retrain → bench", desc: "Twin-model knowledge pipeline", accent: "#FF6B35" },
           { title: "Harvest Inbox", url: "/harvest", icon: Zap, tip: "Import images from the Harvester Chrome extension", desc: "Clip images from the web" },
         ],
       },
