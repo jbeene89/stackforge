@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import JSZip from "jszip";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import { useModelContext, BASE_MODEL_CATALOG, CUSTOM_MODEL_ID } from "@/hooks/useModelContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -40,42 +41,6 @@ const DOMAIN_PRESETS = [
   "Engineering", "Sociology", "Literature", "Geography", "Custom…",
 ];
 
-/* ── Simulated probe questions per domain ─────────────────────── */
-function generateProbes(domain: string, count: number): string[] {
-  const templates = [
-    `What are the fundamental principles of ${domain}?`,
-    `Explain a common misconception in ${domain}.`,
-    `What is the most important recent development in ${domain}?`,
-    `How does ${domain} intersect with everyday life?`,
-    `Describe the key terminology a beginner should know in ${domain}.`,
-    `What are the major open problems in ${domain}?`,
-    `How has ${domain} evolved over the last decade?`,
-    `What practical applications emerge from ${domain}?`,
-    `Compare two competing theories or approaches in ${domain}.`,
-    `What would a 5-minute lecture on ${domain} cover?`,
-    `Explain ${domain} as if teaching a curious teenager.`,
-    `What ethical considerations arise in ${domain}?`,
-  ];
-  return templates.slice(0, count);
-}
-
-/* ── Fake extraction result ──────────────────────────────────── */
-function fakeExtraction(model: string, domains: string[]): object[] {
-  const pairs: object[] = [];
-  domains.forEach(d => {
-    const probes = generateProbes(d, 6);
-    probes.forEach(q => {
-      pairs.push({
-        messages: [
-          { role: "user", content: q },
-          { role: "assistant", content: `[${model}] Knowledge response for "${d}": This is a simulated extraction. In production, Ollama inference runs here and captures the model's actual latent knowledge as structured output.` },
-        ],
-        _meta: { source_model: model, domain: d, extraction_type: "probe" },
-      });
-    });
-  });
-  return pairs;
-}
 
 /* ── Bench result type ───────────────────────────────────────── */
 interface BenchResult {
@@ -143,17 +108,75 @@ export default function KnowledgeRefineryPage() {
     const domains = selectedDomains.filter(d => d !== "Custom…");
     if (customDomain.trim()) domains.push(customDomain.trim());
 
-    // Simulate progressive extraction
-    for (let i = 0; i <= 100; i += 5) {
-      await new Promise(r => setTimeout(r, 120));
-      setExtractionProgress(i);
+    if (domains.length === 0) {
+      toast.error("Select at least one domain");
+      setExtracting(false);
+      return;
     }
 
-    const pairs = fakeExtraction(resolvedModel, domains);
-    setExtractedPairs(pairs);
-    setExtracting(false);
-    markComplete("extract");
-    toast.success(`Extracted ${pairs.length} knowledge pairs across ${domains.length} domains`);
+    // Start a progress animation while we wait for the API
+    const progressInterval = setInterval(() => {
+      setExtractionProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + (90 - prev) * 0.08;
+      });
+    }, 300);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        toast.error("You must be logged in to extract knowledge");
+        setExtracting(false);
+        clearInterval(progressInterval);
+        return;
+      }
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/knowledge-extract`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ domains, model_label: modelLabel }),
+        },
+      );
+
+      clearInterval(progressInterval);
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Unknown error" }));
+        if (resp.status === 402) {
+          toast.error(err.error || "Insufficient credits for extraction");
+        } else if (resp.status === 429) {
+          toast.error("Rate limited — please wait a moment and try again");
+        } else {
+          toast.error(err.error || "Extraction failed");
+        }
+        setExtracting(false);
+        setExtractionProgress(0);
+        return;
+      }
+
+      const result = await resp.json();
+      setExtractionProgress(100);
+      setExtractedPairs(result.pairs || []);
+      markComplete("extract");
+
+      const msg = result.domains_failed > 0
+        ? `Extracted ${result.pairs.length} pairs (${result.domains_failed} domain(s) failed — credits refunded)`
+        : `Extracted ${result.pairs.length} knowledge pairs across ${result.domains_processed} domains`;
+      toast.success(msg);
+    } catch (e) {
+      clearInterval(progressInterval);
+      console.error("Knowledge extraction error:", e);
+      toast.error("Network error during extraction");
+      setExtractionProgress(0);
+    } finally {
+      setExtracting(false);
+    }
   };
 
   const handleExport = () => {
