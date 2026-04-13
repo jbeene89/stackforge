@@ -987,43 +987,29 @@ export default function DeployPipelinePage() {
                 <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
                   Base Model
                 </label>
-                <Select value={baseModel} onValueChange={setBaseModel}>
+                <Select value={selectedBaseModel} onValueChange={setBaseModel}>
                   <SelectTrigger className="text-xs">
                     <SelectValue />
                   </SelectTrigger>
-                    <SelectContent>
-                    <SelectItem value="TinyLlama/TinyLlama-1.1B-Chat-v1.0">
-                      TinyLlama 1.1B
-                    </SelectItem>
-                    <SelectItem value="meta-llama/Llama-3.2-1B-Instruct">
-                      Llama 3.2 1B
-                    </SelectItem>
-                    <SelectItem value="meta-llama/Llama-3.2-3B-Instruct">
-                      Llama 3.2 3B
-                    </SelectItem>
-                    <SelectItem value="google/gemma-2-2b-it">
-                      Gemma 2 2B
-                    </SelectItem>
-                    <SelectItem value="google/gemma-2-9b-it">
-                      Gemma 2 9B
-                    </SelectItem>
-                    <SelectItem value="Qwen/Qwen2.5-0.5B-Instruct">
-                      Qwen 2.5 0.5B
-                    </SelectItem>
-                    <SelectItem value="Qwen/Qwen2.5-1.5B-Instruct">
-                      Qwen 2.5 1.5B
-                    </SelectItem>
-                    <SelectItem value="Qwen/Qwen2.5-3B-Instruct">
-                      Qwen 2.5 3B
-                    </SelectItem>
-                    <SelectItem value="microsoft/Phi-3-mini-4k-instruct">
-                      Phi-3 Mini (3.8B)
-                    </SelectItem>
-                    <SelectItem value="mistralai/Mistral-7B-Instruct-v0.3">
-                      Mistral 7B
+                  <SelectContent>
+                    {BASE_MODEL_CATALOG.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={CUSTOM_MODEL_ID}>
+                      ✏️ Custom model…
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                {selectedBaseModel === CUSTOM_MODEL_ID && (
+                  <Input
+                    className="mt-2 text-xs"
+                    placeholder="HuggingFace ID or local path (e.g. user/my-model)"
+                    value={customModelPath}
+                    onChange={(e) => setCustomModelPath(e.target.value)}
+                  />
+                )}
               </div>
               <div>
                 <label className="text-[10px] font-semibold text-muted-foreground block mb-1">
