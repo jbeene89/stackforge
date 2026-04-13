@@ -127,7 +127,7 @@ export function OfflineDemo() {
 
           {/* Chat messages */}
           <div ref={containerRef} className="flex-1 space-y-2.5 overflow-hidden">
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="wait">
               {visibleMessages.map((msg, i) => {
                 const isLast = i === visibleMessages.length - 1;
                 return (

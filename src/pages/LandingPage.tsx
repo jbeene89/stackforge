@@ -591,6 +591,9 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
+      {/* ════════════════════ INTERACTIVE DEMO (high up for instant value) ════════════════════ */}
+      <InteractiveDemo />
+
       {/* ════════════════════ TWO-ROW: SOCIAL PROOF + OFFLINE ════════════════════ */}
       <section className="py-8 sm:py-14 px-3 sm:px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
@@ -630,9 +633,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ════════════════════ INTERACTIVE DEMO ════════════════════ */}
-      <InteractiveDemo />
 
       {/* ════════════════════ THREE DIFFERENTIATORS ════════════════════ */}
       <section id="how-it-works" className="py-12 sm:py-24 px-3 sm:px-6 relative">
@@ -855,9 +855,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ════════════════════ HOW IT WORKS VIDEOS ════════════════════ */}
-      <HowItWorksVideos />
-
       {/* ════════════════════ REAL USE CASES ════════════════════ */}
       <section id="use-cases" className="py-10 sm:py-24 px-3 sm:px-6">
         <div className="max-w-5xl mx-auto">
@@ -897,7 +894,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Offline section moved to top two-row layout */}
+      {/* ════════════════════ HOW IT WORKS VIDEOS (deep-dive, lower priority) ════════════════════ */}
+      <HowItWorksVideos />
 
       {/* ════════════════════ CTA ════════════════════ */}
       <section className="py-10 sm:py-24 px-3 sm:px-6 relative overflow-hidden">
