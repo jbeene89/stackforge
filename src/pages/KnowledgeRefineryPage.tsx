@@ -18,7 +18,7 @@ import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import {
   Download, Upload, Play, FlaskConical, Beaker, ArrowRight,
   CheckCircle2, Circle, Loader2, FileJson, Package, Swords,
-  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp, RefreshCw,
+  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp, RefreshCw, X,
 } from "lucide-react";
 
 /* ── Step definitions ─────────────────────────────────────────── */
