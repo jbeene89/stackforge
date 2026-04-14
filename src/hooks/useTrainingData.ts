@@ -1408,19 +1408,48 @@ if __name__ == "__main__":
     print(f"   Seq Length: {HYPERPARAMS['max_seq_length']}")
     print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
     print()
+
+    # Start live progress server
+    update_progress(
+        status="initializing",
+        model=BASE_MODEL,
+        dataset=DATASET_FILE,
+        total_epochs=HYPERPARAMS["epochs"],
+    )
+    _srv = start_progress_server()
+
     hw = check_hardware()
     check_hf_auth()
     print()
 
-    if USE_CPU_ONLY:
-        train_cpu_fallback()
-    elif hw == "cuda":
-        train_with_unsloth()
-    elif hw == "rocm":
-        train_with_rocm()
-    else:
-        print("Non-NVIDIA/AMD environment detected - using CPU fallback path.")
-        train_cpu_fallback()
+    try:
+        if USE_CPU_ONLY:
+            train_cpu_fallback()
+        elif hw == "cuda":
+            train_with_unsloth()
+        elif hw == "rocm":
+            train_with_rocm()
+        else:
+            print("Non-NVIDIA/AMD environment detected - using CPU fallback path.")
+            train_cpu_fallback()
+        update_progress(status="completed", eta_seconds=0)
+    except KeyboardInterrupt:
+        update_progress(status="stopped")
+        print("\\n[!] Training interrupted by user")
+    except Exception as e:
+        update_progress(status="failed", error=str(e))
+        print(f"\\n[!] Training failed: {e}")
+        raise
+
+    # Keep server alive briefly so UI can read final status
+    if _srv:
+        print(f"\\n  Progress server still running on port {PROGRESS_PORT}")
+        print(f"  Press Ctrl+C to exit.")
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
 `;
 }
 
