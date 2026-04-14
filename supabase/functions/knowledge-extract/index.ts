@@ -146,10 +146,8 @@ serve(async (req) => {
 
           if (answer && answer.length > 20) {
             allPairs.push({
-              messages: [
-                { role: "user", content: q },
-                { role: "assistant", content: answer },
-              ],
+              input: q,
+              output: answer,
               _meta: {
                 source_model: model_label || "unknown",
                 domain,
