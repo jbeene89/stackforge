@@ -111,35 +111,92 @@ function JobCard({
   const currentEpoch = (metrics.current_epoch as number) || 0;
   const totalEpochs = (hp.epochs as number) || 3;
   const progressPct = job.status === "completed" ? 100 : Math.round((currentEpoch / totalEpochs) * 100);
+  const [liveConnected, setLiveConnected] = useState(false);
 
-  // Auto-simulate epoch progress when job is running
+  // Poll local train.py progress server when job is running
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (job.status === "running") {
-      const epoch = (metrics.current_epoch as number) || 0;
-      const total = (hp.epochs as number) || 3;
-      if (epoch < total) {
-        intervalRef.current = setInterval(() => {
-          const curMetrics = job.metrics || {};
-          const curEpoch = (curMetrics.current_epoch as number) || 0;
-          const nextEpoch = curEpoch + 1;
-          const fakeLoss = Math.max(0.01, 2.5 * Math.exp(-0.6 * nextEpoch) + (Math.random() * 0.1 - 0.05));
-          const lossHistory = ((curMetrics.loss_history as any[]) || []).concat({ epoch: nextEpoch, loss: parseFloat(fakeLoss.toFixed(4)) });
-
-          if (nextEpoch >= total) {
-            onUpdate(job.id, {
-              status: "completed",
-              metrics: { ...curMetrics, current_epoch: total, current_loss: fakeLoss, loss_history: lossHistory, completed_at: new Date().toISOString() },
-            });
-          } else {
-            onUpdate(job.id, {
-              metrics: { ...curMetrics, current_epoch: nextEpoch, current_loss: fakeLoss, loss_history: lossHistory, eta_minutes: Math.round((total - nextEpoch) * 8) },
-            });
-          }
-        }, 3000); // 3 seconds per epoch
-      }
+    if (job.status !== "running") {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setLiveConnected(false);
+      return;
     }
+
+    const port = (hp as any).progress_port || 5678;
+    let failCount = 0;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`http://localhost:${port}/progress`, { signal: AbortSignal.timeout(2000) });
+        if (!res.ok) throw new Error("bad status");
+        const data = await res.json();
+        failCount = 0;
+        setLiveConnected(true);
+
+        const lossHistory = (data.loss_history || []).map((p: any) => ({
+          epoch: p.epoch ?? p.step,
+          loss: p.loss,
+        }));
+
+        const updatedMetrics: Record<string, any> = {
+          ...metrics,
+          current_epoch: data.epoch ?? currentEpoch,
+          current_loss: data.loss,
+          loss_history: lossHistory.length > 0 ? lossHistory : metrics.loss_history,
+          eta_minutes: data.eta_seconds != null ? Math.round(data.eta_seconds / 60) : metrics.eta_minutes,
+          live_step: data.step,
+          live_total_steps: data.total_steps,
+        };
+
+        if (data.status === "completed") {
+          onUpdate(job.id, {
+            status: "completed",
+            metrics: { ...updatedMetrics, completed_at: new Date().toISOString() },
+          });
+        } else if (data.status === "failed") {
+          onUpdate(job.id, {
+            status: "failed",
+            metrics: { ...updatedMetrics, error: data.error },
+          });
+        } else {
+          onUpdate(job.id, { metrics: updatedMetrics });
+        }
+      } catch {
+        failCount++;
+        if (failCount > 5) setLiveConnected(false);
+        // If never connected, fall back to simulation after 10 failures
+        if (failCount > 10 && !liveConnected) {
+          simulateEpoch();
+        }
+      }
+    };
+
+    // Fallback simulation for when train.py isn't running the progress server
+    const simulateEpoch = () => {
+      const curMetrics = job.metrics || {};
+      const curEpoch = (curMetrics.current_epoch as number) || 0;
+      const total = (hp.epochs as number) || 3;
+      if (curEpoch >= total) return;
+      const nextEpoch = curEpoch + 1;
+      const fakeLoss = Math.max(0.01, 2.5 * Math.exp(-0.6 * nextEpoch) + (Math.random() * 0.1 - 0.05));
+      const lossHistory = ((curMetrics.loss_history as any[]) || []).concat({ epoch: nextEpoch, loss: parseFloat(fakeLoss.toFixed(4)) });
+      if (nextEpoch >= total) {
+        onUpdate(job.id, {
+          status: "completed",
+          metrics: { ...curMetrics, current_epoch: total, current_loss: fakeLoss, loss_history: lossHistory, completed_at: new Date().toISOString() },
+        });
+      } else {
+        onUpdate(job.id, {
+          metrics: { ...curMetrics, current_epoch: nextEpoch, current_loss: fakeLoss, loss_history: lossHistory, eta_minutes: Math.round((total - nextEpoch) * 8) },
+        });
+      }
+    };
+
+    // Poll every 2 seconds
+    poll();
+    intervalRef.current = setInterval(poll, 2000);
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
