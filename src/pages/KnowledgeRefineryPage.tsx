@@ -18,7 +18,7 @@ import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import {
   Download, Upload, Play, FlaskConical, Beaker, ArrowRight,
   CheckCircle2, Circle, Loader2, FileJson, Package, Swords,
-  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp, RefreshCw,
+  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp, RefreshCw, X,
 } from "lucide-react";
 
 /* ── Step definitions ─────────────────────────────────────────── */
@@ -51,12 +51,14 @@ const FORMAT_LABELS: Record<ConvertFormat, string> = {
 };
 
 function FormatConverter() {
-  const [file, setFile] = useState<File | null>(null);
-  const [detectedFormat, setDetectedFormat] = useState<ConvertFormat | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileData, setFileData] = useState<{ name: string; rows: any[]; detected: ConvertFormat }[]>([]);
   const [targetFormat, setTargetFormat] = useState<ConvertFormat>("input_output");
   const [preview, setPreview] = useState<string>("");
-  const [rowCount, setRowCount] = useState(0);
-  const [rawRows, setRawRows] = useState<any[]>([]);
+  const [converting, setConverting] = useState(false);
+
+  const totalRows = fileData.reduce((s, f) => s + f.rows.length, 0);
+  const isBatch = files.length > 1;
 
   const detectFormat = useCallback((row: any): ConvertFormat => {
     if (row.messages && Array.isArray(row.messages)) return "messages";
@@ -65,123 +67,177 @@ function FormatConverter() {
     return "text";
   }, []);
 
-  const handleFile = useCallback(async (f: File) => {
-    setFile(f);
+  const parseFile = useCallback(async (f: File) => {
     const text = await f.text();
     const lines = text.trim().split("\n").filter(Boolean);
     const parsed = lines.map(l => { try { return JSON.parse(l); } catch { return { text: l }; } });
-    setRawRows(parsed);
-    setRowCount(parsed.length);
-    if (parsed.length > 0) {
-      const fmt = detectFormat(parsed[0]);
-      setDetectedFormat(fmt);
-      setPreview(JSON.stringify(parsed[0], null, 2).slice(0, 300));
-      // Auto-suggest the best target
+    const detected = parsed.length > 0 ? detectFormat(parsed[0]) : "text" as ConvertFormat;
+    return { name: f.name, rows: parsed, detected };
+  }, [detectFormat]);
+
+  const handleFiles = useCallback(async (newFiles: FileList | File[]) => {
+    const arr = Array.from(newFiles);
+    if (arr.length === 0) return;
+    setFiles(arr);
+    const parsed = await Promise.all(arr.map(parseFile));
+    setFileData(parsed);
+    if (parsed.length > 0 && parsed[0].rows.length > 0) {
+      setPreview(JSON.stringify(parsed[0].rows[0], null, 2).slice(0, 300));
+      const fmt = parsed[0].detected;
       if (fmt !== "input_output") setTargetFormat("input_output");
       else setTargetFormat("messages");
     }
-  }, [detectFormat]);
+  }, [parseFile]);
 
-  const convert = useCallback(() => {
-    if (rawRows.length === 0 || !detectedFormat) return;
-
-    const converted = rawRows.map(row => {
-      // ── Extract input/output from source format ──
+  const convertRows = useCallback((rows: any[], detected: ConvertFormat) => {
+    return rows.map(row => {
       let inp = "", out = "";
-      if (detectedFormat === "messages") {
+      if (detected === "messages") {
         const msgs: any[] = row.messages || [];
         inp = msgs.find((m: any) => m.role === "user")?.content || "";
         out = msgs.find((m: any) => m.role === "assistant")?.content || "";
-      } else if (detectedFormat === "dpo") {
-        inp = row.prompt || "";
-        out = row.chosen || "";
-      } else if (detectedFormat === "input_output") {
-        inp = row.input || "";
-        out = row.output || "";
+      } else if (detected === "dpo") {
+        inp = row.prompt || ""; out = row.chosen || "";
+      } else if (detected === "input_output") {
+        inp = row.input || ""; out = row.output || "";
       } else {
-        inp = row.text || row.content || row.input || row.prompt || JSON.stringify(row);
-        out = "";
+        inp = row.text || row.content || row.input || row.prompt || JSON.stringify(row); out = "";
       }
-
-      // ── Convert to target format ──
       switch (targetFormat) {
         case "input_output":
           return { input: inp, output: out, ...(row._meta ? { _meta: row._meta } : {}) };
         case "messages":
-          return {
-            messages: [
-              { role: "user", content: inp },
-              ...(out ? [{ role: "assistant", content: out }] : []),
-            ],
-            ...(row._meta ? { _meta: row._meta } : {}),
-          };
+          return { messages: [{ role: "user", content: inp }, ...(out ? [{ role: "assistant", content: out }] : [])], ...(row._meta ? { _meta: row._meta } : {}) };
         case "dpo":
           return { prompt: inp, chosen: out, rejected: "", ...(row._meta ? { _meta: row._meta } : {}) };
         case "text":
           return { text: out ? `${inp}\n${out}` : inp };
-        default:
-          return row;
+        default: return row;
       }
     });
+  }, [targetFormat]);
 
-    const jsonl = converted.map(r => JSON.stringify(r)).join("\n");
-    const name = file?.name?.replace(/\.jsonl?$/i, "") || "converted";
-    const blob = new Blob([jsonl], { type: "application/jsonl" });
-    triggerDownload(blob, `${name}_${targetFormat}.jsonl`);
-    toast.success(`Converted ${converted.length} rows → ${FORMAT_LABELS[targetFormat]}`);
-  }, [rawRows, detectedFormat, targetFormat, file]);
+  const convert = useCallback(async () => {
+    if (fileData.length === 0) return;
+    setConverting(true);
+    try {
+      if (fileData.length === 1) {
+        // Single file — direct download
+        const { rows, detected, name } = fileData[0];
+        const converted = convertRows(rows, detected);
+        const jsonl = converted.map(r => JSON.stringify(r)).join("\n");
+        const baseName = name.replace(/\.jsonl?$/i, "");
+        triggerDownload(new Blob([jsonl], { type: "application/jsonl" }), `${baseName}_${targetFormat}.jsonl`);
+        toast.success(`Converted ${converted.length} rows → ${FORMAT_LABELS[targetFormat]}`);
+      } else {
+        // Batch — ZIP output
+        const JSZip = (await import("jszip")).default;
+        const zip = new JSZip();
+        let totalConverted = 0;
+        for (const { rows, detected, name } of fileData) {
+          const converted = convertRows(rows, detected);
+          totalConverted += converted.length;
+          const jsonl = converted.map(r => JSON.stringify(r)).join("\n");
+          const baseName = name.replace(/\.jsonl?$/i, "");
+          zip.file(`${baseName}_${targetFormat}.jsonl`, jsonl);
+        }
+        const blob = await zip.generateAsync({ type: "blob" });
+        triggerDownload(blob, `batch_${targetFormat}_${fileData.length}files.zip`);
+        toast.success(`Batch converted ${totalConverted} rows across ${fileData.length} files → ZIP`);
+      }
+    } catch (err) {
+      toast.error("Conversion failed");
+    } finally {
+      setConverting(false);
+    }
+  }, [fileData, convertRows, targetFormat]);
+
+  const removeFile = (idx: number) => {
+    const newFiles = files.filter((_, i) => i !== idx);
+    const newData = fileData.filter((_, i) => i !== idx);
+    setFiles(newFiles);
+    setFileData(newData);
+    if (newData.length > 0 && newData[0].rows.length > 0) {
+      setPreview(JSON.stringify(newData[0].rows[0], null, 2).slice(0, 300));
+    } else {
+      setPreview("");
+    }
+  };
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-medium">
         <RefreshCw className="h-4 w-4 text-primary" /> Format Converter
+        {isBatch && <Badge variant="secondary" className="text-[10px]">Batch</Badge>}
       </div>
       <p className="text-xs text-muted-foreground">
-        Convert existing JSONL between formats — messages ↔ input/output ↔ DPO ↔ text.
+        Convert JSONL between formats. Drop multiple files for batch conversion → ZIP output.
       </p>
 
       {/* File drop */}
       <label className="flex items-center justify-center border border-dashed rounded-lg p-4 cursor-pointer hover:bg-muted/30 transition-colors">
         <div className="text-center">
           <FileJson className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-          <span className="text-xs font-medium">{file ? file.name : "Drop a JSONL file"}</span>
-          {rowCount > 0 && <span className="text-xs text-muted-foreground ml-2">({rowCount} rows)</span>}
+          <span className="text-xs font-medium">
+            {files.length === 0 ? "Drop JSONL file(s)" : `${files.length} file${files.length > 1 ? "s" : ""} loaded`}
+          </span>
+          {totalRows > 0 && <span className="text-xs text-muted-foreground ml-2">({totalRows} rows total)</span>}
         </div>
         <input
           type="file"
           accept=".jsonl,.json"
+          multiple
           className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+          onChange={e => { if (e.target.files) handleFiles(e.target.files); }}
         />
       </label>
 
-      {detectedFormat && (
+      {/* File list for batch */}
+      {fileData.length > 1 && (
+        <div className="space-y-1 max-h-32 overflow-auto">
+          {fileData.map((fd, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs bg-muted/20 rounded px-2 py-1">
+              <FileJson className="h-3 w-3 text-muted-foreground shrink-0" />
+              <span className="truncate flex-1">{fd.name}</span>
+              <Badge variant="outline" className="text-[9px] shrink-0">{FORMAT_LABELS[fd.detected]}</Badge>
+              <span className="text-muted-foreground shrink-0">{fd.rows.length}r</span>
+              <button onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive shrink-0">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {fileData.length > 0 && (
         <div className="space-y-3">
-          {/* Detected + preview */}
           <div className="bg-muted/30 rounded-lg p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">Detected: {FORMAT_LABELS[detectedFormat]}</Badge>
+              {fileData.length === 1 && (
+                <Badge variant="outline" className="text-xs">Detected: {FORMAT_LABELS[fileData[0].detected]}</Badge>
+              )}
               <ArrowRight className="h-3 w-3 text-muted-foreground" />
               <Select value={targetFormat} onValueChange={v => setTargetFormat(v as ConvertFormat)}>
                 <SelectTrigger className="w-[180px] h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.keys(FORMAT_LABELS) as ConvertFormat[])
-                    .filter(k => k !== detectedFormat)
-                    .map(k => (
-                      <SelectItem key={k} value={k} className="text-xs">{FORMAT_LABELS[k]}</SelectItem>
-                    ))}
+                  {(Object.keys(FORMAT_LABELS) as ConvertFormat[]).map(k => (
+                    <SelectItem key={k} value={k} className="text-xs">{FORMAT_LABELS[k]}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            {preview && (
+            {preview && !isBatch && (
               <pre className="text-[10px] text-muted-foreground overflow-auto max-h-24 font-mono">{preview}</pre>
             )}
           </div>
 
-          <Button size="sm" onClick={convert} className="w-full">
-            <RefreshCw className="mr-2 h-3.5 w-3.5" /> Convert & Download ({rowCount} rows)
+          <Button size="sm" onClick={convert} disabled={converting} className="w-full">
+            {converting ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-2 h-3.5 w-3.5" />}
+            {isBatch
+              ? `Convert ${fileData.length} files → ZIP (${totalRows} rows)`
+              : `Convert & Download (${totalRows} rows)`}
           </Button>
         </div>
       )}
