@@ -1367,6 +1367,11 @@ def train_with_rocm():
         training_args=training_args,
     )
 
+    total_steps = int(len(dataset) / HYPERPARAMS["batch_size"] / ${cpuOffload ? 4 : 2} * HYPERPARAMS["epochs"])
+    progress_cb = make_hf_callback(HYPERPARAMS["epochs"], total_steps)
+    if progress_cb:
+        trainer.add_callback(progress_cb)
+
     print("\\n>> Starting ROCm training with Five Perspective Pipeline tokens...")
     print(f"   GPU: {torch.cuda.get_device_name(0)}")
     print(f"   VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
