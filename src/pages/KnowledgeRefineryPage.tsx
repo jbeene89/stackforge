@@ -18,7 +18,7 @@ import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import {
   Download, Upload, Play, FlaskConical, Beaker, ArrowRight,
   CheckCircle2, Circle, Loader2, FileJson, Package, Swords,
-  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp,
+  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp, RefreshCw,
 } from "lucide-react";
 
 /* ── Step definitions ─────────────────────────────────────────── */
@@ -591,7 +591,7 @@ export default function KnowledgeRefineryPage() {
                     <Badge variant="outline">{extractedPairs.length} pairs</Badge>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>Format: messages (OpenAI chat)</span>
+                    <span>Format: input/output (train.py compatible)</span>
                     <span>•</span>
                     <span>Compatible with to-train/ bus</span>
                   </div>
@@ -609,6 +609,11 @@ export default function KnowledgeRefineryPage() {
                   <ArrowRight className="h-3 w-3 text-muted-foreground" />
                   <div className="bg-green-500/10 text-green-500 px-3 py-1.5 rounded-full">📥 Re-import</div>
                 </div>
+
+                {/* ── Format Converter ── */}
+                <Separator />
+                <FormatConverter />
+                <Separator />
 
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={handleExport} className="flex-1">
