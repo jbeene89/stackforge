@@ -1270,6 +1270,11 @@ def train_cpu_fallback():
         training_args=training_args,
     )
 
+    total_steps = int(len(dataset) / HYPERPARAMS["batch_size"] / 8 * HYPERPARAMS["epochs"])
+    progress_cb = make_hf_callback(HYPERPARAMS["epochs"], total_steps)
+    if progress_cb:
+        trainer.add_callback(progress_cb)
+
     print("\\n>> Starting CPU training with Five Perspective Pipeline tokens...")
     print(f"   Batch size: {HYPERPARAMS['batch_size']} (x8 gradient accumulation)")
     trainer.train()
