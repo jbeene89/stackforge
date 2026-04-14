@@ -724,8 +724,143 @@ with just RAM (16GB+ recommended). No GPU required.
 ` : ""}
 """
 
-import json, os, sys
+import json, os, sys, time, threading
 from pathlib import Path
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+# ── Live Progress Server ──────────────────────────────────────
+# Serves training progress on http://localhost:5678/progress
+# The web UI polls this endpoint to show real metrics.
+PROGRESS_PORT = int(os.environ.get("SOUPY_PROGRESS_PORT", "5678"))
+_progress = {
+    "status": "initializing",
+    "epoch": 0,
+    "total_epochs": 0,
+    "step": 0,
+    "total_steps": 0,
+    "loss": None,
+    "learning_rate": None,
+    "eta_seconds": None,
+    "loss_history": [],
+    "started_at": None,
+    "model": "",
+    "dataset": "",
+}
+_progress_lock = threading.Lock()
+
+def update_progress(**kwargs):
+    with _progress_lock:
+        _progress.update(kwargs)
+        # Also write to file for persistence
+        try:
+            with open("progress.json", "w") as f:
+                json.dump(_progress, f)
+        except Exception:
+            pass
+
+class ProgressHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/progress":
+            with _progress_lock:
+                body = json.dumps(_progress).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Headers", "*")
+            self.end_headers()
+            self.write = lambda b: None  # suppress broken pipe
+            try:
+                self.wfile.write(body)
+            except Exception:
+                pass
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.end_headers()
+
+    def log_message(self, format, *args):
+        pass  # Suppress HTTP logs
+
+def start_progress_server():
+    try:
+        server = HTTPServer(("0.0.0.0", PROGRESS_PORT), ProgressHandler)
+        t = threading.Thread(target=server.serve_forever, daemon=True)
+        t.start()
+        print(f"  [Progress] Live metrics at http://localhost:{PROGRESS_PORT}/progress")
+        return server
+    except OSError:
+        print(f"  [Progress] Port {PROGRESS_PORT} busy — progress server skipped")
+        return None
+
+class SoupyProgressCallback:
+    """HuggingFace Trainer callback that feeds live metrics to the progress server."""
+    def __init__(self, total_epochs, total_steps):
+        self._total_epochs = total_epochs
+        self._total_steps = total_steps
+        self._start = time.time()
+        self._epoch_losses = []
+
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if logs is None:
+            return
+        elapsed = time.time() - self._start
+        loss = logs.get("loss")
+        lr = logs.get("learning_rate")
+        step = state.global_step if state else 0
+        epoch = state.epoch if state else 0
+        total = self._total_steps or 1
+        eta = (elapsed / max(step, 1)) * (total - step) if step > 0 else None
+
+        history = []
+        if loss is not None:
+            self._epoch_losses.append({"epoch": round(epoch, 2), "loss": round(loss, 4), "step": step})
+            history = self._epoch_losses[-200:]  # Keep last 200 points
+
+        update_progress(
+            status="training",
+            epoch=round(epoch, 2),
+            total_epochs=self._total_epochs,
+            step=step,
+            total_steps=self._total_steps,
+            loss=round(loss, 4) if loss is not None else None,
+            learning_rate=lr,
+            eta_seconds=round(eta) if eta else None,
+            loss_history=history,
+        )
+
+    def on_train_begin(self, args, state, control, **kwargs):
+        update_progress(status="training", started_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+
+    def on_train_end(self, args, state, control, **kwargs):
+        update_progress(status="completed", eta_seconds=0)
+
+    def on_epoch_begin(self, args, state, control, **kwargs):
+        epoch = state.epoch if state else 0
+        update_progress(epoch=round(epoch, 2))
+
+def make_hf_callback(total_epochs, total_steps):
+    """Create a HuggingFace-compatible TrainerCallback from SoupyProgressCallback."""
+    try:
+        from transformers import TrainerCallback
+        cb = SoupyProgressCallback(total_epochs, total_steps)
+        class HFCallback(TrainerCallback):
+            def on_log(self, args, state, control, logs=None, **kwargs):
+                cb.on_log(args, state, control, logs, **kwargs)
+            def on_train_begin(self, args, state, control, **kwargs):
+                cb.on_train_begin(args, state, control, **kwargs)
+            def on_train_end(self, args, state, control, **kwargs):
+                cb.on_train_end(args, state, control, **kwargs)
+            def on_epoch_begin(self, args, state, control, **kwargs):
+                cb.on_epoch_begin(args, state, control, **kwargs)
+        return HFCallback()
+    except ImportError:
+        return None
 
 BASE_MODEL = "${hfModelId}"
 DATASET_FILE = "${dataset.name.toLowerCase().replace(/\s+/g, "-")}-dataset.jsonl"
@@ -1039,8 +1174,14 @@ def train_with_unsloth():
         training_args=training_args,
     )
 
+    total_steps = int(len(dataset) / HYPERPARAMS["batch_size"] / ${cpuOffload ? 4 : 1} * HYPERPARAMS["epochs"])
+    progress_cb = make_hf_callback(HYPERPARAMS["epochs"], total_steps)
+
     print("\\n>> Starting GPU training with Unsloth...")
     trainer.train()
+    # Note: Unsloth's trainer may not support custom callbacks directly,
+    # so we update progress manually after training
+    update_progress(status="completed", epoch=HYPERPARAMS["epochs"], eta_seconds=0)
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
 
@@ -1128,6 +1269,11 @@ def train_cpu_fallback():
         dataset=dataset,
         training_args=training_args,
     )
+
+    total_steps = int(len(dataset) / HYPERPARAMS["batch_size"] / 8 * HYPERPARAMS["epochs"])
+    progress_cb = make_hf_callback(HYPERPARAMS["epochs"], total_steps)
+    if progress_cb:
+        trainer.add_callback(progress_cb)
 
     print("\\n>> Starting CPU training with Five Perspective Pipeline tokens...")
     print(f"   Batch size: {HYPERPARAMS['batch_size']} (x8 gradient accumulation)")
@@ -1221,6 +1367,11 @@ def train_with_rocm():
         training_args=training_args,
     )
 
+    total_steps = int(len(dataset) / HYPERPARAMS["batch_size"] / ${cpuOffload ? 4 : 2} * HYPERPARAMS["epochs"])
+    progress_cb = make_hf_callback(HYPERPARAMS["epochs"], total_steps)
+    if progress_cb:
+        trainer.add_callback(progress_cb)
+
     print("\\n>> Starting ROCm training with Five Perspective Pipeline tokens...")
     print(f"   GPU: {torch.cuda.get_device_name(0)}")
     print(f"   VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
@@ -1257,19 +1408,48 @@ if __name__ == "__main__":
     print(f"   Seq Length: {HYPERPARAMS['max_seq_length']}")
     print(f"   Special Tokens: {len(SPECIAL_TOKENS)} perspective markers")
     print()
+
+    # Start live progress server
+    update_progress(
+        status="initializing",
+        model=BASE_MODEL,
+        dataset=DATASET_FILE,
+        total_epochs=HYPERPARAMS["epochs"],
+    )
+    _srv = start_progress_server()
+
     hw = check_hardware()
     check_hf_auth()
     print()
 
-    if USE_CPU_ONLY:
-        train_cpu_fallback()
-    elif hw == "cuda":
-        train_with_unsloth()
-    elif hw == "rocm":
-        train_with_rocm()
-    else:
-        print("Non-NVIDIA/AMD environment detected - using CPU fallback path.")
-        train_cpu_fallback()
+    try:
+        if USE_CPU_ONLY:
+            train_cpu_fallback()
+        elif hw == "cuda":
+            train_with_unsloth()
+        elif hw == "rocm":
+            train_with_rocm()
+        else:
+            print("Non-NVIDIA/AMD environment detected - using CPU fallback path.")
+            train_cpu_fallback()
+        update_progress(status="completed", eta_seconds=0)
+    except KeyboardInterrupt:
+        update_progress(status="stopped")
+        print("\\n[!] Training interrupted by user")
+    except Exception as e:
+        update_progress(status="failed", error=str(e))
+        print(f"\\n[!] Training failed: {e}")
+        raise
+
+    # Keep server alive briefly so UI can read final status
+    if _srv:
+        print(f"\\n  Progress server still running on port {PROGRESS_PORT}")
+        print(f"  Press Ctrl+C to exit.")
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
 `;
 }
 
