@@ -221,6 +221,7 @@ function JobCard({
               {cfg.label}
             </Badge>
           </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Progress */}
