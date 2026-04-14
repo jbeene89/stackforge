@@ -18,7 +18,7 @@ import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import {
   Download, Upload, Play, FlaskConical, Beaker, ArrowRight,
   CheckCircle2, Circle, Loader2, FileJson, Package, Swords,
-  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp,
+  Brain, Copy, Flame, Sparkles, ArrowDown, FileUp, RefreshCw,
 } from "lucide-react";
 
 /* ── Step definitions ─────────────────────────────────────────── */
@@ -40,6 +40,154 @@ const DOMAIN_PRESETS = [
   "Linguistics", "Art & Design", "Music Theory", "Cooking & Nutrition",
   "Engineering", "Sociology", "Literature", "Geography", "Custom…",
 ];
+/* ── Format Converter (inline) ────────────────────────────────── */
+type ConvertFormat = "input_output" | "messages" | "dpo" | "text";
+
+const FORMAT_LABELS: Record<ConvertFormat, string> = {
+  input_output: "Input / Output",
+  messages: "Messages (chat)",
+  dpo: "DPO (preference pairs)",
+  text: "Text-only",
+};
+
+function FormatConverter() {
+  const [file, setFile] = useState<File | null>(null);
+  const [detectedFormat, setDetectedFormat] = useState<ConvertFormat | null>(null);
+  const [targetFormat, setTargetFormat] = useState<ConvertFormat>("input_output");
+  const [preview, setPreview] = useState<string>("");
+  const [rowCount, setRowCount] = useState(0);
+  const [rawRows, setRawRows] = useState<any[]>([]);
+
+  const detectFormat = useCallback((row: any): ConvertFormat => {
+    if (row.messages && Array.isArray(row.messages)) return "messages";
+    if (row.prompt && (row.chosen || row.rejected)) return "dpo";
+    if (row.input !== undefined && row.output !== undefined) return "input_output";
+    return "text";
+  }, []);
+
+  const handleFile = useCallback(async (f: File) => {
+    setFile(f);
+    const text = await f.text();
+    const lines = text.trim().split("\n").filter(Boolean);
+    const parsed = lines.map(l => { try { return JSON.parse(l); } catch { return { text: l }; } });
+    setRawRows(parsed);
+    setRowCount(parsed.length);
+    if (parsed.length > 0) {
+      const fmt = detectFormat(parsed[0]);
+      setDetectedFormat(fmt);
+      setPreview(JSON.stringify(parsed[0], null, 2).slice(0, 300));
+      // Auto-suggest the best target
+      if (fmt !== "input_output") setTargetFormat("input_output");
+      else setTargetFormat("messages");
+    }
+  }, [detectFormat]);
+
+  const convert = useCallback(() => {
+    if (rawRows.length === 0 || !detectedFormat) return;
+
+    const converted = rawRows.map(row => {
+      // ── Extract input/output from source format ──
+      let inp = "", out = "";
+      if (detectedFormat === "messages") {
+        const msgs: any[] = row.messages || [];
+        inp = msgs.find((m: any) => m.role === "user")?.content || "";
+        out = msgs.find((m: any) => m.role === "assistant")?.content || "";
+      } else if (detectedFormat === "dpo") {
+        inp = row.prompt || "";
+        out = row.chosen || "";
+      } else if (detectedFormat === "input_output") {
+        inp = row.input || "";
+        out = row.output || "";
+      } else {
+        inp = row.text || row.content || row.input || row.prompt || JSON.stringify(row);
+        out = "";
+      }
+
+      // ── Convert to target format ──
+      switch (targetFormat) {
+        case "input_output":
+          return { input: inp, output: out, ...(row._meta ? { _meta: row._meta } : {}) };
+        case "messages":
+          return {
+            messages: [
+              { role: "user", content: inp },
+              ...(out ? [{ role: "assistant", content: out }] : []),
+            ],
+            ...(row._meta ? { _meta: row._meta } : {}),
+          };
+        case "dpo":
+          return { prompt: inp, chosen: out, rejected: "", ...(row._meta ? { _meta: row._meta } : {}) };
+        case "text":
+          return { text: out ? `${inp}\n${out}` : inp };
+        default:
+          return row;
+      }
+    });
+
+    const jsonl = converted.map(r => JSON.stringify(r)).join("\n");
+    const name = file?.name?.replace(/\.jsonl?$/i, "") || "converted";
+    const blob = new Blob([jsonl], { type: "application/jsonl" });
+    triggerDownload(blob, `${name}_${targetFormat}.jsonl`);
+    toast.success(`Converted ${converted.length} rows → ${FORMAT_LABELS[targetFormat]}`);
+  }, [rawRows, detectedFormat, targetFormat, file]);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <RefreshCw className="h-4 w-4 text-primary" /> Format Converter
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Convert existing JSONL between formats — messages ↔ input/output ↔ DPO ↔ text.
+      </p>
+
+      {/* File drop */}
+      <label className="flex items-center justify-center border border-dashed rounded-lg p-4 cursor-pointer hover:bg-muted/30 transition-colors">
+        <div className="text-center">
+          <FileJson className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+          <span className="text-xs font-medium">{file ? file.name : "Drop a JSONL file"}</span>
+          {rowCount > 0 && <span className="text-xs text-muted-foreground ml-2">({rowCount} rows)</span>}
+        </div>
+        <input
+          type="file"
+          accept=".jsonl,.json"
+          className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+        />
+      </label>
+
+      {detectedFormat && (
+        <div className="space-y-3">
+          {/* Detected + preview */}
+          <div className="bg-muted/30 rounded-lg p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">Detected: {FORMAT_LABELS[detectedFormat]}</Badge>
+              <ArrowRight className="h-3 w-3 text-muted-foreground" />
+              <Select value={targetFormat} onValueChange={v => setTargetFormat(v as ConvertFormat)}>
+                <SelectTrigger className="w-[180px] h-7 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(FORMAT_LABELS) as ConvertFormat[])
+                    .filter(k => k !== detectedFormat)
+                    .map(k => (
+                      <SelectItem key={k} value={k} className="text-xs">{FORMAT_LABELS[k]}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {preview && (
+              <pre className="text-[10px] text-muted-foreground overflow-auto max-h-24 font-mono">{preview}</pre>
+            )}
+          </div>
+
+          <Button size="sm" onClick={convert} className="w-full">
+            <RefreshCw className="mr-2 h-3.5 w-3.5" /> Convert & Download ({rowCount} rows)
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 /* ── Bench result type ───────────────────────────────────────── */
@@ -591,7 +739,7 @@ export default function KnowledgeRefineryPage() {
                     <Badge variant="outline">{extractedPairs.length} pairs</Badge>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>Format: messages (OpenAI chat)</span>
+                    <span>Format: input/output (train.py compatible)</span>
                     <span>•</span>
                     <span>Compatible with to-train/ bus</span>
                   </div>
@@ -609,6 +757,11 @@ export default function KnowledgeRefineryPage() {
                   <ArrowRight className="h-3 w-3 text-muted-foreground" />
                   <div className="bg-green-500/10 text-green-500 px-3 py-1.5 rounded-full">📥 Re-import</div>
                 </div>
+
+                {/* ── Format Converter ── */}
+                <Separator />
+                <FormatConverter />
+                <Separator />
 
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={handleExport} className="flex-1">
