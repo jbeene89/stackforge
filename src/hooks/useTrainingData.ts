@@ -1174,8 +1174,14 @@ def train_with_unsloth():
         training_args=training_args,
     )
 
+    total_steps = int(len(dataset) / HYPERPARAMS["batch_size"] / ${cpuOffload ? 4 : 1} * HYPERPARAMS["epochs"])
+    progress_cb = make_hf_callback(HYPERPARAMS["epochs"], total_steps)
+
     print("\\n>> Starting GPU training with Unsloth...")
     trainer.train()
+    # Note: Unsloth's trainer may not support custom callbacks directly,
+    # so we update progress manually after training
+    update_progress(status="completed", epoch=HYPERPARAMS["epochs"], eta_seconds=0)
     model.save_pretrained(f"{OUTPUT_DIR}/lora")
     print(f"\\n[OK] LoRA adapter saved to {OUTPUT_DIR}/lora")
 
