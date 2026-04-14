@@ -210,11 +210,17 @@ function JobCard({
             <CardTitle className="text-sm font-semibold truncate">{job.name}</CardTitle>
             <p className="text-[10px] text-muted-foreground mt-0.5">{datasetName}</p>
           </div>
-          <Badge variant="outline" className={`text-[10px] shrink-0 ${cfg.color}`}>
-            <Icon className="h-2.5 w-2.5 mr-1" />
-            {cfg.label}
-          </Badge>
-        </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {job.status === "running" && (
+              <Badge variant="outline" className={`text-[9px] ${liveConnected ? "bg-[hsl(var(--forge-emerald))]/15 text-[hsl(var(--forge-emerald))] border-[hsl(var(--forge-emerald))]/30" : "bg-muted text-muted-foreground"}`}>
+                {liveConnected ? "● Live" : "○ Sim"}
+              </Badge>
+            )}
+            <Badge variant="outline" className={`text-[10px] ${cfg.color}`}>
+              <Icon className="h-2.5 w-2.5 mr-1" />
+              {cfg.label}
+            </Badge>
+          </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Progress */}
