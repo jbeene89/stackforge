@@ -550,16 +550,34 @@ export default function LandingPage() {
               <span className="text-foreground font-semibold"> No coding required.</span>
             </p>
 
-            {/* Mobile: full-width stacked buttons with bigger touch targets */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 mb-4">
+            {/* PRIMARY CTAs — pay-once quick flows */}
+            <div className="flex flex-col sm:flex-row items-stretch justify-center gap-2.5 sm:gap-3 mb-3 max-w-2xl mx-auto">
+              <Link to="/quick-slm" className="flex-1">
+                <Button size="lg" className="gradient-primary text-primary-foreground px-6 py-5 sm:py-6 text-sm sm:text-base font-bold group w-full glow-primary min-h-[56px]">
+                  <Brain className="mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                  Make Specific SLM
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform shrink-0" />
+                </Button>
+              </Link>
+              <Link to="/quick-pairs" className="flex-1">
+                <Button size="lg" className="gradient-primary text-primary-foreground px-6 py-5 sm:py-6 text-sm sm:text-base font-bold group w-full glow-primary min-h-[56px]">
+                  <FileCode className="mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                  Compile Training Pairs
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform shrink-0" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Secondary actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4">
               <Link to="/signup" className="w-full sm:w-auto">
-                <Button size="lg" className="gradient-primary text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-sm sm:text-base font-bold group w-full sm:w-auto glow-primary min-h-[52px]">
-                  Start Building Free <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
+                <Button size="sm" variant="outline" className="w-full sm:w-auto font-semibold border-primary/20 hover:border-primary/40 min-h-[40px]">
+                  Start Building Free
                 </Button>
               </Link>
               <Link to="/demo/module-builder" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto py-5 sm:py-6 text-sm sm:text-base font-semibold border-primary/20 hover:border-primary/40 hover:glow-primary transition-all min-h-[52px]">
-                  <Play className="h-4 w-4" /> Try Live Demo
+                <Button size="sm" variant="ghost" className="gap-1.5 w-full sm:w-auto font-semibold min-h-[40px]">
+                  <Play className="h-3.5 w-3.5" /> Try Live Demo
                 </Button>
               </Link>
             </div>

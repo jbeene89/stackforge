@@ -73,6 +73,8 @@ const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage")
 const SystemHealthPage = lazy(() => import("./pages/admin/SystemHealthPage"));
 const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
 const KnowledgeRefineryPage = lazy(() => import("./pages/KnowledgeRefineryPage"));
+const QuickSLMPage = lazy(() => import("./pages/QuickSLMPage"));
+const QuickPairsPage = lazy(() => import("./pages/QuickPairsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -103,6 +105,8 @@ const App = () => (
                 <Route path="/terms" element={<TermsOfServicePage />} />
                 <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                <Route path="/quick-slm" element={<QuickSLMPage />} />
+                <Route path="/quick-pairs" element={<QuickPairsPage />} />
                 <Route path="/first-win" element={<ProtectedRoute><FirstWinPage /></ProtectedRoute>} />
                 <Route path="/slm-lab" element={<AppLayout />}>
                   <Route index element={<SLMLabPage />} />
