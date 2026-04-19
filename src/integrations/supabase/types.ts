@@ -780,6 +780,66 @@ export type Database = {
         }
         Relationships: []
       }
+      paid_quick_jobs: {
+        Row: {
+          artifact_filename: string | null
+          artifact_path: string | null
+          config: Json
+          created_at: string
+          error_message: string | null
+          flow: string
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          preview_summary: Json | null
+          price_cents: number
+          price_credits: number
+          ready_at: string | null
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artifact_filename?: string | null
+          artifact_path?: string | null
+          config?: Json
+          created_at?: string
+          error_message?: string | null
+          flow: string
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          preview_summary?: Json | null
+          price_cents?: number
+          price_credits?: number
+          ready_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artifact_filename?: string | null
+          artifact_path?: string | null
+          config?: Json
+          created_at?: string
+          error_message?: string | null
+          flow?: string
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          preview_summary?: Json | null
+          price_cents?: number
+          price_credits?: number
+          ready_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       perspective_jobs: {
         Row: {
           batch_id: string
