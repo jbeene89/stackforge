@@ -37,7 +37,7 @@ export function SEOHead({ title, description, ogTitle, ogDescription, ogType = "
     setMeta('meta[property="og:type"]', "content", ogType);
 
     if (canonicalPath) {
-      const url = `https://stackforge.lovable.app${canonicalPath}`;
+      const url = `https://soupylab.com${canonicalPath}`;
       setMeta('meta[property="og:url"]', "content", url);
       let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
       if (!link) {

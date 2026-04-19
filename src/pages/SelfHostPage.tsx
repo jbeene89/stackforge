@@ -472,7 +472,7 @@ export default function SelfHostPage() {
         "- `train.py` and `inject.py --mode open-air` auto-discover everything here",
         "- Set `SOUPY_TRAIN_DIR` env var to share across apps",
         "",
-        "Full spec: https://stackforge.lovable.app/to-train-spec.md",
+        "Full spec: https://soupylab.com/to-train-spec.md",
       ].join("\n"));
 
       // Pipeline script stub

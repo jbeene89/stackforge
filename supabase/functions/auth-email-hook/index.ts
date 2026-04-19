@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "stackforge"
+const SITE_NAME = "SoupyLab"
 const SENDER_DOMAIN = "notify.soupylab.com"
 const ROOT_DOMAIN = "soupylab.com"
 const FROM_DOMAIN = "soupylab.com" // Domain shown in From address (may be root or sender subdomain)
@@ -46,7 +46,7 @@ const FROM_DOMAIN = "soupylab.com" // Domain shown in From address (may be root 
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://stackforge.lovable.app"
+const SAMPLE_PROJECT_URL = "https://soupylab.com"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {

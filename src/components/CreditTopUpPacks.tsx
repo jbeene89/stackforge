@@ -340,7 +340,7 @@ export function CreditTopUpPacks({ compact = false, className = "" }: CreditTopU
               <span className="font-semibold text-foreground">ChatGPT</span> — $20/mo forever, they own the model, your data trains their AI, goes offline = you're stuck
             </p>
             <p className="text-[10px] text-muted-foreground">
-              <span className="font-semibold text-primary">StackForge</span> — one-time credit purchase, you own the model, runs offline on your hardware, no recurring fees
+              <span className="font-semibold text-primary">SoupyLab</span> — one-time credit purchase, you own the model, runs offline on your hardware, no recurring fees
             </p>
           </div>
         </div>
