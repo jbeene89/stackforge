@@ -37,11 +37,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check if user has admin role via user_roles table (if it exists)
-    // For now, we use a simple allowlist approach via an env var or
-    // fall back to checking a hardcoded admin email pattern.
-    // In production, use the user_roles table pattern.
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Enforce admin tier — only admins may manage announcements
+    const { data: creds } = await adminClient
+      .from("user_credits")
+      .select("tier")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!creds || creds.tier !== "admin") {
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const body = await req.json();
     const { action } = body;
