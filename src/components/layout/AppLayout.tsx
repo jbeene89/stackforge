@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
 import { WheelNavigator } from "./WheelNavigator";
+import { CreditBumpBanner } from "@/components/CreditBumpBanner";
 import bgNight from "@/assets/bg-landscape.jpg";
 import bgDay from "@/assets/bg-landscape-day.jpg";
 
@@ -82,6 +83,7 @@ export function AppLayout() {
           <WheelNavigator />
 
           <div className="flex-1 flex flex-col min-w-0">
+            <CreditBumpBanner />
             {/* ── HEADER ── */}
             <header
               className="sl-header flex items-center h-12 px-4 gap-3"
