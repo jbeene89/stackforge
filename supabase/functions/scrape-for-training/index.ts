@@ -179,10 +179,34 @@ serve(async (req) => {
     const { url, dataset_id, domain_hint, offload_perspective, debate_mode, synthesis_mode } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
 
+    // SSRF protection: only allow http(s) public URLs and block internal/metadata IPs
+    let parsedUrl: URL;
+    try { parsedUrl = new URL(url); } catch { throw new Error("Invalid URL"); }
+    if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+      throw new Error("Only http(s) URLs are allowed");
+    }
+    const host = parsedUrl.hostname.toLowerCase();
+    const blockedHosts = ["localhost", "0.0.0.0", "metadata.google.internal", "metadata.goog"];
+    const isBlockedIp =
+      /^127\./.test(host) ||
+      /^10\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+      /^169\.254\./.test(host) ||
+      /^::1$/.test(host) ||
+      /^fc[0-9a-f]{2}:/.test(host) ||
+      /^fe80:/.test(host);
+    if (blockedHosts.includes(host) || isBlockedIp || host.endsWith(".internal") || host.endsWith(".local")) {
+      throw new Error("URL host is not allowed");
+    }
+
     // Step 1: Fetch webpage
     let pageContent = "";
     try {
-      const resp = await fetch(url, { headers: { "User-Agent": "Soupy-DatasetBot/1.0" } });
+      const resp = await fetch(parsedUrl.toString(), {
+        headers: { "User-Agent": "Soupy-DatasetBot/1.0" },
+        redirect: "error",
+      });
       if (!resp.ok) throw new Error(`Failed to fetch: ${resp.status}`);
       const html = await resp.text();
       pageContent = html
