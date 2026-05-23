@@ -258,6 +258,27 @@ export type Database = {
           },
         ]
       }
+      demo_rate_limit: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       deploy_pipeline_status: {
         Row: {
           completed: boolean
@@ -1448,6 +1469,28 @@ export type Database = {
       }
     }
     Functions: {
+      check_demo_rate_limit: {
+        Args: {
+          _endpoint: string
+          _ip_hash: string
+          _max_requests: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
+      deduct_user_credits: {
+        Args: {
+          _cost: number
+          _description: string
+          _transaction_type?: string
+          _user_id: string
+        }
+        Returns: {
+          new_balance: number
+          reason: string
+          success: boolean
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1472,6 +1515,15 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      refund_user_credits: {
+        Args: {
+          _amount: number
+          _description: string
+          _transaction_type?: string
+          _user_id: string
+        }
+        Returns: number
       }
     }
     Enums: {

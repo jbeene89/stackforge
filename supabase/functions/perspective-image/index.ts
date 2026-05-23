@@ -116,38 +116,32 @@ serve(async (req) => {
 
     const userId = userData.user.id;
 
-    // --- Credit check & deduction ---
+    // --- Atomic credit deduction ---
     const CREDIT_COST = 5;
-    const { data: credits, error: credErr } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-
-    if (credErr || !credits) {
-      return new Response(JSON.stringify({ error: "Credits not found" }), {
-        status: 402,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (credits.credits_balance < CREDIT_COST) {
-      return new Response(JSON.stringify({ error: "Insufficient credits", balance: credits.credits_balance, cost: CREDIT_COST }), {
-        status: 402,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const newBalance = credits.credits_balance - CREDIT_COST;
-    const newUsed = credits.credits_used + CREDIT_COST;
-    await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
-    await supabase.from("credit_transactions").insert({
-      user_id: userId,
-      amount: -CREDIT_COST,
-      balance_after: newBalance,
-      description: "Perspective image generation",
-      transaction_type: "deduction",
+    const { data: deductRows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
+      _user_id: userId,
+      _cost: CREDIT_COST,
+      _description: "Perspective image generation",
+      _transaction_type: "deduction",
     });
+    if (deductErr) {
+      return new Response(JSON.stringify({ error: "Credit deduction failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const deduct = Array.isArray(deductRows) ? deductRows[0] : deductRows;
+    if (!deduct?.success) {
+      return new Response(JSON.stringify({
+        error: deduct?.reason === "insufficient_credits" ? "Insufficient credits" : "Credit deduction failed",
+        cost: CREDIT_COST,
+      }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const newBalance = deduct.new_balance;
+
 
     // --- Process request ---
     const { prompt, selectedPerspectives, imageModel } = await req.json();

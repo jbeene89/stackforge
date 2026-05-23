@@ -18,43 +18,29 @@ const CHARACTER_PROMPTS: Record<string, string> = {
 };
 
 async function deductCredits(supabase: ReturnType<typeof createClient>, userId: string, model: string): Promise<{ ok: boolean; balance?: number; error?: string }> {
-  const { data: credits, error: credErr } = await supabase
-    .from("user_credits")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-
-  if (credErr || !credits) return { ok: false, error: "Credits not found" };
-  if (credits.credits_balance < IMAGE_GEN_COST) {
-    return { ok: false, error: "Insufficient credits", balance: credits.credits_balance };
-  }
-
-  const newBalance = credits.credits_balance - IMAGE_GEN_COST;
-  const newUsed = credits.credits_used + IMAGE_GEN_COST;
-
-  await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
-  await supabase.from("credit_transactions").insert({
-    user_id: userId,
-    amount: -IMAGE_GEN_COST,
-    balance_after: newBalance,
-    description: `Visual Chatroom image (${model})`,
-    transaction_type: "deduction",
+  const { data: rows, error } = await supabase.rpc("deduct_user_credits", {
+    _user_id: userId,
+    _cost: IMAGE_GEN_COST,
+    _description: `Visual Chatroom image (${model})`,
+    _transaction_type: "deduction",
   });
-
-  return { ok: true, balance: newBalance };
+  if (error) return { ok: false, error: "Credit deduction failed" };
+  const r = Array.isArray(rows) ? rows[0] : rows;
+  if (!r?.success) {
+    return { ok: false, error: r?.reason === "insufficient_credits" ? "Insufficient credits" : "Credit deduction failed" };
+  }
+  return { ok: true, balance: r.new_balance };
 }
 
 async function refundCredits(supabase: ReturnType<typeof createClient>, userId: string, reason: string): Promise<void> {
-  const { data: credits } = await supabase.from("user_credits").select("*").eq("user_id", userId).single();
-  if (!credits) return;
-  const newBalance = credits.credits_balance + IMAGE_GEN_COST;
-  const newUsed = Math.max(0, credits.credits_used - IMAGE_GEN_COST);
-  await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
-  await supabase.from("credit_transactions").insert({
-    user_id: userId, amount: IMAGE_GEN_COST, balance_after: newBalance,
-    description: `Refund: ${reason}`, transaction_type: "refund",
+  await supabase.rpc("refund_user_credits", {
+    _user_id: userId,
+    _amount: IMAGE_GEN_COST,
+    _description: `Refund: ${reason}`,
+    _transaction_type: "refund",
   });
 }
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

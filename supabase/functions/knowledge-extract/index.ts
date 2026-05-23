@@ -39,43 +39,27 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Credit check
+    // Atomic credit deduction
     const totalCost = domains.length * COST_PER_DOMAIN;
-    const { data: credits, error: credErr } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-
-    if (credErr || !credits) throw new Error("Credits not found");
-    if (credits.credits_balance < totalCost) {
+    const { data: deductRows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
+      _user_id: user.id,
+      _cost: totalCost,
+      _description: `Knowledge Refinery: ${domains.length} domains`,
+      _transaction_type: "deduction",
+    });
+    if (deductErr) throw deductErr;
+    const deduct = Array.isArray(deductRows) ? deductRows[0] : deductRows;
+    if (!deduct?.success) {
       return new Response(
         JSON.stringify({
-          error: "Insufficient credits",
-          balance: credits.credits_balance,
+          error: deduct?.reason === "insufficient_credits" ? "Insufficient credits" : "Credit deduction failed",
           cost: totalCost,
         }),
-        {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    const newBalance = deduct.new_balance;
 
-    // Deduct credits up front
-    const newBalance = credits.credits_balance - totalCost;
-    const newUsed = credits.credits_used + totalCost;
-    await supabase
-      .from("user_credits")
-      .update({ credits_balance: newBalance, credits_used: newUsed })
-      .eq("user_id", user.id);
-    await supabase.from("credit_transactions").insert({
-      user_id: user.id,
-      amount: -totalCost,
-      balance_after: newBalance,
-      description: `Knowledge Refinery: ${domains.length} domains`,
-      transaction_type: "deduction",
-    });
 
     // Generate probes per domain and call AI
     const allPairs: any[] = [];
@@ -162,25 +146,17 @@ serve(async (req) => {
       }
     }
 
-    // Refund credits for failed domains
+    // Refund credits for failed domains (atomic)
     if (refundDomains > 0) {
       const refundAmount = refundDomains * COST_PER_DOMAIN;
-      const refundBalance = newBalance + refundAmount;
-      await supabase
-        .from("user_credits")
-        .update({
-          credits_balance: refundBalance,
-          credits_used: newUsed - refundAmount,
-        })
-        .eq("user_id", user.id);
-      await supabase.from("credit_transactions").insert({
-        user_id: user.id,
-        amount: refundAmount,
-        balance_after: refundBalance,
-        description: `Refund: ${refundDomains} failed domain(s)`,
-        transaction_type: "refund",
+      await supabase.rpc("refund_user_credits", {
+        _user_id: user.id,
+        _amount: refundAmount,
+        _description: `Refund: ${refundDomains} failed domain(s)`,
+        _transaction_type: "refund",
       });
     }
+
 
     return new Response(
       JSON.stringify({
