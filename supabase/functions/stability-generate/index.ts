@@ -41,35 +41,26 @@ serve(async (req) => {
     const selectedModel = model || "google/gemini-2.5-flash-image";
     const cost = MODEL_COSTS[selectedModel] || MODEL_COSTS.default;
 
-    // Credit check & deduction
-    const { data: credits, error: credErr } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-
-    if (credErr || !credits) throw new Error("Credits not found");
-    if (credits.credits_balance < cost) {
+    // Atomic credit deduction
+    const { data: deductRows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
+      _user_id: userId,
+      _cost: cost,
+      _description: `Image generation (${selectedModel.split("/").pop()})`,
+      _transaction_type: "deduction",
+    });
+    if (deductErr) throw deductErr;
+    const deduct = Array.isArray(deductRows) ? deductRows[0] : deductRows;
+    if (!deduct?.success) {
       return new Response(JSON.stringify({
-        error: "Insufficient credits",
-        balance: credits.credits_balance,
+        error: deduct?.reason === "insufficient_credits" ? "Insufficient credits" : "Credit deduction failed",
         cost,
       }), {
         status: 402,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const newBalance = deduct.new_balance;
 
-    const newBalance = credits.credits_balance - cost;
-    const newUsed = credits.credits_used + cost;
-    await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
-    await supabase.from("credit_transactions").insert({
-      user_id: userId,
-      amount: -cost,
-      balance_after: newBalance,
-      description: `Image generation (${selectedModel.split("/").pop()})`,
-      transaction_type: "deduction",
-    });
 
     // Build the prompt — incorporate negative_prompt as guidance
     let fullPrompt = prompt;
@@ -95,18 +86,14 @@ serve(async (req) => {
       const errorText = await resp.text();
       console.error("AI gateway error:", resp.status, errorText);
 
-      // Refund credits on failure
-      await supabase.from("user_credits").update({
-        credits_balance: credits.credits_balance,
-        credits_used: credits.credits_used,
-      }).eq("user_id", userId);
-      await supabase.from("credit_transactions").insert({
-        user_id: userId,
-        amount: cost,
-        balance_after: credits.credits_balance,
-        description: `Refund: AI gateway error ${resp.status}`,
-        transaction_type: "refund",
+      // Refund credits on failure (atomic)
+      await supabase.rpc("refund_user_credits", {
+        _user_id: userId,
+        _amount: cost,
+        _description: `Refund: AI gateway error ${resp.status}`,
+        _transaction_type: "refund",
       });
+
 
       if (resp.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait and try again." }), {
