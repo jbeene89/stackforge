@@ -110,28 +110,15 @@ serve(async (req) => {
     if (referral) {
       const shareAmount = Math.floor(price * (Number(referral.revenue_share_pct) / 100));
       if (shareAmount > 0) {
-        // Credit referrer
-        const { data: referrerCredits } = await supabase
-          .from("user_credits")
-          .select("*")
-          .eq("user_id", referral.referrer_id)
-          .single();
+        // Credit referrer (atomic)
+        const newRefBalance = await supabase.rpc("refund_user_credits", {
+          _user_id: referral.referrer_id,
+          _amount: shareAmount,
+          _description: `Referral bonus from purchase: ${template.name}`,
+          _transaction_type: "referral",
+        });
 
-        if (referrerCredits) {
-          const newRefBalance = referrerCredits.credits_balance + shareAmount;
-          await supabase
-            .from("user_credits")
-            .update({ credits_balance: newRefBalance })
-            .eq("user_id", referral.referrer_id);
-
-          await supabase.from("credit_transactions").insert({
-            user_id: referral.referrer_id,
-            amount: shareAmount,
-            balance_after: newRefBalance,
-            description: `Referral bonus from purchase: ${template.name}`,
-            transaction_type: "referral",
-          });
-
+        if (newRefBalance.data !== null) {
           await supabase.from("referral_earnings").insert({
             referrer_id: referral.referrer_id,
             referred_user_id: buyerId,
@@ -141,6 +128,7 @@ serve(async (req) => {
         }
       }
     }
+
 
     return new Response(
       JSON.stringify({ success: true, template_data: template.template_data }),
