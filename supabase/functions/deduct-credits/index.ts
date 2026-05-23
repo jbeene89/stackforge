@@ -47,50 +47,33 @@ serve(async (req) => {
     const { model, description } = await req.json();
     const cost = MODEL_COSTS[model] || MODEL_COSTS["default"];
 
-    // Get current balance
-    const { data: credits, error: credErr } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-
-    if (credErr || !credits) throw new Error("Credits not found");
-    if (credits.credits_balance < cost) {
-      return new Response(JSON.stringify({ 
-        error: "Insufficient credits", 
-        balance: credits.credits_balance, 
-        cost 
+    // Atomic credit deduction (TOCTOU-safe)
+    const { data: rows, error: rpcErr } = await supabase.rpc("deduct_user_credits", {
+      _user_id: user.id,
+      _cost: cost,
+      _description: description || `AI run (${model || "default"})`,
+      _transaction_type: "deduction",
+    });
+    if (rpcErr) throw rpcErr;
+    const r = Array.isArray(rows) ? rows[0] : rows;
+    if (!r?.success) {
+      return new Response(JSON.stringify({
+        error: r?.reason === "insufficient_credits" ? "Insufficient credits" : "Credit deduction failed",
+        cost,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 402,
       });
     }
 
-    const newBalance = credits.credits_balance - cost;
-    const newUsed = credits.credits_used + cost;
-
-    // Deduct
-    await supabase
-      .from("user_credits")
-      .update({ credits_balance: newBalance, credits_used: newUsed })
-      .eq("user_id", user.id);
-
-    // Log transaction
-    await supabase.from("credit_transactions").insert({
-      user_id: user.id,
-      amount: -cost,
-      balance_after: newBalance,
-      description: description || `AI run (${model || "default"})`,
-      transaction_type: "deduction",
-    });
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      cost, 
-      balance: newBalance 
+    return new Response(JSON.stringify({
+      success: true,
+      cost,
+      balance: r.new_balance,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

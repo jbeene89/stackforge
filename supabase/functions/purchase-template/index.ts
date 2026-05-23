@@ -42,70 +42,57 @@ serve(async (req) => {
 
     const price = template.price_credits;
 
-    // Check if already purchased
-    const { data: existing } = await supabase
-      .from("template_purchases")
-      .select("id")
-      .eq("buyer_id", buyerId)
-      .eq("template_id", template_id)
-      .limit(1);
-    if (existing && existing.length > 0) throw new Error("Already purchased");
-
-    // Check buyer credits
-    const { data: buyerCredits, error: credErr } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", buyerId)
-      .single();
-    if (credErr || !buyerCredits) throw new Error("Could not fetch credits");
-    if (buyerCredits.credits_balance < price) throw new Error("Insufficient credits");
-
-    // Deduct from buyer
-    const newBuyerBalance = buyerCredits.credits_balance - price;
-    await supabase
-      .from("user_credits")
-      .update({ credits_balance: newBuyerBalance, credits_used: buyerCredits.credits_used + price })
-      .eq("user_id", buyerId);
-
-    // Log buyer transaction
-    await supabase.from("credit_transactions").insert({
-      user_id: buyerId,
-      amount: -price,
-      balance_after: newBuyerBalance,
-      description: `Purchased template: ${template.name}`,
-      transaction_type: "purchase",
-    });
-
-    // Credit the seller
-    const { data: sellerCredits } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", template.creator_id)
-      .single();
-
-    if (sellerCredits) {
-      const sellerEarning = price; // seller gets full price
-      const newSellerBalance = sellerCredits.credits_balance + sellerEarning;
-      await supabase
-        .from("user_credits")
-        .update({ credits_balance: newSellerBalance })
-        .eq("user_id", template.creator_id);
-
-      await supabase.from("credit_transactions").insert({
-        user_id: template.creator_id,
-        amount: sellerEarning,
-        balance_after: newSellerBalance,
-        description: `Sale: ${template.name}`,
-        transaction_type: "sale",
-      });
-    }
-
-    // Record purchase
-    await supabase.from("template_purchases").insert({
+    // Record purchase first — unique constraint on (buyer_id, template_id)
+    // makes this the atomic guard against duplicate purchases / race conditions.
+    const { error: purchaseErr } = await supabase.from("template_purchases").insert({
       buyer_id: buyerId,
       template_id: template_id,
       credits_paid: price,
     });
+    if (purchaseErr) {
+      // 23505 = unique_violation -> already purchased
+      if ((purchaseErr as { code?: string }).code === "23505") {
+        throw new Error("Already purchased");
+      }
+      throw purchaseErr;
+    }
+
+    // Atomic credit deduction
+    const { data: deductRows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
+      _user_id: buyerId,
+      _cost: price,
+      _description: `Purchased template: ${template.name}`,
+      _transaction_type: "purchase",
+    });
+    if (deductErr) {
+      // Roll back the purchase row
+      await supabase.from("template_purchases")
+        .delete()
+        .eq("buyer_id", buyerId)
+        .eq("template_id", template_id);
+      throw deductErr;
+    }
+    const deduct = Array.isArray(deductRows) ? deductRows[0] : deductRows;
+    if (!deduct?.success) {
+      await supabase.from("template_purchases")
+        .delete()
+        .eq("buyer_id", buyerId)
+        .eq("template_id", template_id);
+      return new Response(
+        JSON.stringify({ error: "Insufficient credits" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 402 }
+      );
+    }
+    const newBuyerBalance = deduct.new_balance;
+
+    // Credit the seller (atomic)
+    await supabase.rpc("refund_user_credits", {
+      _user_id: template.creator_id,
+      _amount: price,
+      _description: `Sale: ${template.name}`,
+      _transaction_type: "sale",
+    });
+
 
     // Increment downloads
     await supabase
