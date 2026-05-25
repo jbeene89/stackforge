@@ -611,6 +611,10 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════ INTERACTIVE DEMO (high up for instant value) ════════════════════ */}
+      {/* Live trust signals — aggregate counts, no PII */}
+      <TrustStrip />
+
+      {/* ════════════════════ INTERACTIVE DEMO (high up for instant value) ════════════════════ */}
       <InteractiveDemo />
 
       {/* ════════════════════ TWO-ROW: SOCIAL PROOF + OFFLINE ════════════════════ */}
