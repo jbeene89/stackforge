@@ -8,8 +8,54 @@ const corsHeaders = {
 };
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
-const COST_PER_DOMAIN = 2; // credits per domain probed
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
+const ALLOWED_MODELS = new Set([
+  "google/gemini-3-flash-preview",
+  "google/gemini-3.5-flash",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-pro",
+  "openai/gpt-5-mini",
+  "openai/gpt-5",
+  "openai/gpt-5.4-mini",
+  "openai/gpt-5.4",
+  "openai/gpt-5.5",
+]);
+const REASONING_MODELS = new Set([
+  "google/gemini-3.5-flash",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-2.5-pro",
+  "openai/gpt-5.4",
+  "openai/gpt-5.4-mini",
+  "openai/gpt-5.5",
+]);
+const ALLOWED_EFFORTS = new Set(["minimal", "low", "medium", "high", "xhigh"]);
+const EFFORT_RANK: Record<string, number> = { minimal: 0, low: 1, medium: 2, high: 3, xhigh: 4 };
+function capForTier(tier: string): string {
+  switch (tier) {
+    case "admin": return "xhigh";
+    case "pro": return "high";
+    case "builder": return "medium";
+    default: return "low";
+  }
+}
+function clampEffort(req: string, tier: string): string {
+  const cap = capForTier(tier);
+  return EFFORT_RANK[req] <= EFFORT_RANK[cap] ? req : cap;
+}
+const COST_PER_DOMAIN_DEFAULT = 2;
+const MODEL_COST: Record<string, number> = {
+  "google/gemini-3-flash-preview": 2,
+  "google/gemini-3.5-flash": 2,
+  "google/gemini-3.1-pro-preview": 6,
+  "google/gemini-2.5-flash": 2,
+  "google/gemini-2.5-pro": 5,
+  "openai/gpt-5-mini": 3,
+  "openai/gpt-5": 8,
+  "openai/gpt-5.4-mini": 6,
+  "openai/gpt-5.4": 12,
+  "openai/gpt-5.5": 14,
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
