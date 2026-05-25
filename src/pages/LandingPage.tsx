@@ -523,6 +523,7 @@ export default function LandingPage() {
       </nav>
 
       <SaleBanner />
+      <StickyMobileCTA />
 
       {/* ════════════════════ HERO ════════════════════ */}
       <section ref={heroRef} className="relative pt-28 sm:pt-40 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
