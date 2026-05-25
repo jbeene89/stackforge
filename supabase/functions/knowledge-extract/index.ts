@@ -78,19 +78,34 @@ serve(async (req) => {
     } = await supabase.auth.getUser(token);
     if (authErr || !user) throw new Error("Not authenticated");
 
-    const { domains, model_label } = await req.json();
+    const { domains, model_label, model: requestedModel, reasoningEffort } = await req.json();
     if (!Array.isArray(domains) || domains.length === 0)
       throw new Error("domains must be a non-empty array");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const MODEL = (typeof requestedModel === "string" && ALLOWED_MODELS.has(requestedModel))
+      ? requestedModel
+      : DEFAULT_MODEL;
+    const COST_PER_DOMAIN = MODEL_COST[MODEL] || COST_PER_DOMAIN_DEFAULT;
+
+    // Look up user tier for effort cap
+    const { data: creditsRow } = await supabase
+      .from("user_credits")
+      .select("tier")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const tier = (creditsRow?.tier as string) || "free";
+    const effortValid = typeof reasoningEffort === "string" && ALLOWED_EFFORTS.has(reasoningEffort);
+    const effort = effortValid ? clampEffort(reasoningEffort, tier) : null;
+
     // Atomic credit deduction
     const totalCost = domains.length * COST_PER_DOMAIN;
     const { data: deductRows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
       _user_id: user.id,
       _cost: totalCost,
-      _description: `Knowledge Refinery: ${domains.length} domains`,
+      _description: `Knowledge Refinery: ${domains.length} domains (${MODEL})`,
       _transaction_type: "deduction",
     });
     if (deductErr) throw deductErr;
