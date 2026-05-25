@@ -7,17 +7,57 @@ const corsHeaders = {
 };
 
 const MODEL_COSTS: Record<string, number> = {
+  // Gemini text
   "google/gemini-3-flash-preview": 2,
+  "google/gemini-3.5-flash": 2,
+  "google/gemini-3.1-flash-lite-preview": 1,
+  "google/gemini-3.1-pro-preview": 6,
   "google/gemini-2.5-flash": 2,
   "google/gemini-2.5-flash-lite": 1,
   "google/gemini-2.5-pro": 5,
-  "google/gemini-3.1-pro-preview": 5,
+  // OpenAI text
   "openai/gpt-5-nano": 2,
   "openai/gpt-5-mini": 3,
   "openai/gpt-5": 8,
   "openai/gpt-5.2": 10,
+  "openai/gpt-5.4-nano": 3,
+  "openai/gpt-5.4-mini": 6,
+  "openai/gpt-5.4": 12,
+  "openai/gpt-5.4-pro": 18,
+  "openai/gpt-5.5": 14,
+  "openai/gpt-5.5-pro": 22,
   default: 2,
 };
+
+const ALLOWED_MODELS = new Set(Object.keys(MODEL_COSTS).filter((k) => k !== "default"));
+const REASONING_MODELS = new Set([
+  "google/gemini-3.5-flash",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-2.5-pro",
+  "openai/gpt-5.2",
+  "openai/gpt-5.4",
+  "openai/gpt-5.4-mini",
+  "openai/gpt-5.4-nano",
+  "openai/gpt-5.4-pro",
+  "openai/gpt-5.5",
+  "openai/gpt-5.5-pro",
+]);
+const ALLOWED_EFFORTS = new Set(["minimal", "low", "medium", "high", "xhigh"]);
+
+// Tier-based effort cap (matches src/lib/aiModels.ts)
+const EFFORT_RANK: Record<string, number> = { minimal: 0, low: 1, medium: 2, high: 3, xhigh: 4 };
+function capForTier(tier: string): string {
+  switch (tier) {
+    case "admin": return "xhigh";
+    case "pro": return "high";
+    case "builder": return "medium";
+    default: return "low";
+  }
+}
+function clampEffort(requested: string, tier: string): string {
+  const cap = capForTier(tier);
+  return EFFORT_RANK[requested] <= EFFORT_RANK[cap] ? requested : cap;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -37,11 +77,23 @@ serve(async (req) => {
     if (userError || !userData.user) throw new Error("Not authenticated");
     const userId = userData.user.id;
 
-    const { messages, mode } = await req.json();
+    const { messages, mode, model: requestedModel, reasoningEffort } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const model = "google/gemini-3-flash-preview";
+    // Look up the user's tier to validate model + effort access
+    const { data: creditsRow } = await supabase
+      .from("user_credits")
+      .select("tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const tier = (creditsRow?.tier as string) || "free";
+
+    // Validate and select model
+    const safeModel = (typeof requestedModel === "string" && ALLOWED_MODELS.has(requestedModel))
+      ? requestedModel
+      : "google/gemini-3-flash-preview";
+    const model = safeModel;
     const cost = MODEL_COSTS[model] || MODEL_COSTS.default;
 
     // Atomic credit deduction (TOCTOU-safe)
@@ -74,20 +126,30 @@ serve(async (req) => {
 
     const systemPrompt = systemPrompts[mode] || systemPrompts.general;
 
+    // Build request body — attach reasoning.effort only when model + effort are valid
+    const reqBody: Record<string, unknown> = {
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages,
+      ],
+      stream: true,
+    };
+    if (
+      REASONING_MODELS.has(model) &&
+      typeof reasoningEffort === "string" &&
+      ALLOWED_EFFORTS.has(reasoningEffort)
+    ) {
+      reqBody.reasoning = { effort: clampEffort(reasoningEffort, tier) };
+    }
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        stream: true,
-      }),
+      body: JSON.stringify(reqBody),
     });
 
     if (!response.ok) {

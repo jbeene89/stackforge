@@ -8,8 +8,54 @@ const corsHeaders = {
 };
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
-const COST_PER_DOMAIN = 2; // credits per domain probed
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
+const ALLOWED_MODELS = new Set([
+  "google/gemini-3-flash-preview",
+  "google/gemini-3.5-flash",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-pro",
+  "openai/gpt-5-mini",
+  "openai/gpt-5",
+  "openai/gpt-5.4-mini",
+  "openai/gpt-5.4",
+  "openai/gpt-5.5",
+]);
+const REASONING_MODELS = new Set([
+  "google/gemini-3.5-flash",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-2.5-pro",
+  "openai/gpt-5.4",
+  "openai/gpt-5.4-mini",
+  "openai/gpt-5.5",
+]);
+const ALLOWED_EFFORTS = new Set(["minimal", "low", "medium", "high", "xhigh"]);
+const EFFORT_RANK: Record<string, number> = { minimal: 0, low: 1, medium: 2, high: 3, xhigh: 4 };
+function capForTier(tier: string): string {
+  switch (tier) {
+    case "admin": return "xhigh";
+    case "pro": return "high";
+    case "builder": return "medium";
+    default: return "low";
+  }
+}
+function clampEffort(req: string, tier: string): string {
+  const cap = capForTier(tier);
+  return EFFORT_RANK[req] <= EFFORT_RANK[cap] ? req : cap;
+}
+const COST_PER_DOMAIN_DEFAULT = 2;
+const MODEL_COST: Record<string, number> = {
+  "google/gemini-3-flash-preview": 2,
+  "google/gemini-3.5-flash": 2,
+  "google/gemini-3.1-pro-preview": 6,
+  "google/gemini-2.5-flash": 2,
+  "google/gemini-2.5-pro": 5,
+  "openai/gpt-5-mini": 3,
+  "openai/gpt-5": 8,
+  "openai/gpt-5.4-mini": 6,
+  "openai/gpt-5.4": 12,
+  "openai/gpt-5.5": 14,
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
@@ -32,19 +78,34 @@ serve(async (req) => {
     } = await supabase.auth.getUser(token);
     if (authErr || !user) throw new Error("Not authenticated");
 
-    const { domains, model_label } = await req.json();
+    const { domains, model_label, model: requestedModel, reasoningEffort } = await req.json();
     if (!Array.isArray(domains) || domains.length === 0)
       throw new Error("domains must be a non-empty array");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const MODEL = (typeof requestedModel === "string" && ALLOWED_MODELS.has(requestedModel))
+      ? requestedModel
+      : DEFAULT_MODEL;
+    const COST_PER_DOMAIN = MODEL_COST[MODEL] || COST_PER_DOMAIN_DEFAULT;
+
+    // Look up user tier for effort cap
+    const { data: creditsRow } = await supabase
+      .from("user_credits")
+      .select("tier")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const tier = (creditsRow?.tier as string) || "free";
+    const effortValid = typeof reasoningEffort === "string" && ALLOWED_EFFORTS.has(reasoningEffort);
+    const effort = effortValid ? clampEffort(reasoningEffort, tier) : null;
+
     // Atomic credit deduction
     const totalCost = domains.length * COST_PER_DOMAIN;
     const { data: deductRows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
       _user_id: user.id,
       _cost: totalCost,
-      _description: `Knowledge Refinery: ${domains.length} domains`,
+      _description: `Knowledge Refinery: ${domains.length} domains (${MODEL})`,
       _transaction_type: "deduction",
     });
     if (deductErr) throw deductErr;
@@ -78,25 +139,27 @@ serve(async (req) => {
       const systemPrompt = `You are a knowledge extraction engine. The user will ask a series of questions about "${domain}". For each question, provide a thorough, information-dense answer that captures the core knowledge a small language model should retain about this topic. Be specific, cite key concepts, use precise terminology. No fluff — pure knowledge density.`;
 
       try {
+        const body: Record<string, unknown> = {
+          model: MODEL,
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: probes.map((q, i) => `Question ${i + 1}: ${q}`).join("\n\n"),
+            },
+          ],
+          temperature: 0.3,
+        };
+        if (effort && REASONING_MODELS.has(MODEL)) {
+          body.reasoning = { effort };
+        }
         const resp = await fetch(GATEWAY, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            model: MODEL,
-            messages: [
-              { role: "system", content: systemPrompt },
-              {
-                role: "user",
-                content: probes
-                  .map((q, i) => `Question ${i + 1}: ${q}`)
-                  .join("\n\n"),
-              },
-            ],
-            temperature: 0.3,
-          }),
+          body: JSON.stringify(body),
         });
 
         if (!resp.ok) {

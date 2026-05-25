@@ -22,6 +22,8 @@ import { ForgeDoodle } from "@/components/landing/ForgeDoodle";
 import { PhotoTransform } from "@/components/landing/PhotoTransform";
 import { WhatsNewPanel } from "@/components/landing/WhatsNewPanel";
 import { OfflineDemo } from "@/components/landing/OfflineDemo";
+import { TrustStrip } from "@/components/landing/TrustStrip";
+import { StickyMobileCTA } from "@/components/landing/StickyMobileCTA";
 
 // ------- SALE COUNTDOWN BANNER -------
 
@@ -521,6 +523,7 @@ export default function LandingPage() {
       </nav>
 
       <SaleBanner />
+      <StickyMobileCTA />
 
       {/* ════════════════════ HERO ════════════════════ */}
       <section ref={heroRef} className="relative pt-28 sm:pt-40 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
@@ -606,6 +609,10 @@ export default function LandingPage() {
 
         <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
+
+      {/* ════════════════════ INTERACTIVE DEMO (high up for instant value) ════════════════════ */}
+      {/* Live trust signals — aggregate counts, no PII */}
+      <TrustStrip />
 
       {/* ════════════════════ INTERACTIVE DEMO (high up for instant value) ════════════════════ */}
       <InteractiveDemo />

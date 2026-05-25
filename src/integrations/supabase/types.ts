@@ -1467,6 +1467,15 @@ export type Database = {
         }
         Relationships: []
       }
+      public_stats: {
+        Row: {
+          credits_used_total: number | null
+          datasets_total: number | null
+          models_trained: number | null
+          users_total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_demo_rate_limit: {
@@ -1498,6 +1507,13 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_public_country_stats: {
+        Args: never
+        Returns: {
+          country: string
+          visits: number
+        }[]
       }
       move_to_dlq: {
         Args: {
