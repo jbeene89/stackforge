@@ -35,12 +35,12 @@ export function TrustStrip() {
   const { data: stats } = useQuery<PublicStats | null>({
     queryKey: ["public-stats"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("public_stats" as any)
+      const { data, error } = await (supabase as any)
+        .from("public_stats")
         .select("*")
         .maybeSingle();
       if (error) return null;
-      return data as PublicStats;
+      return (data as PublicStats) ?? null;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
