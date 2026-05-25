@@ -139,25 +139,27 @@ serve(async (req) => {
       const systemPrompt = `You are a knowledge extraction engine. The user will ask a series of questions about "${domain}". For each question, provide a thorough, information-dense answer that captures the core knowledge a small language model should retain about this topic. Be specific, cite key concepts, use precise terminology. No fluff — pure knowledge density.`;
 
       try {
+        const body: Record<string, unknown> = {
+          model: MODEL,
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: probes.map((q, i) => `Question ${i + 1}: ${q}`).join("\n\n"),
+            },
+          ],
+          temperature: 0.3,
+        };
+        if (effort && REASONING_MODELS.has(MODEL)) {
+          body.reasoning = { effort };
+        }
         const resp = await fetch(GATEWAY, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            model: MODEL,
-            messages: [
-              { role: "system", content: systemPrompt },
-              {
-                role: "user",
-                content: probes
-                  .map((q, i) => `Question ${i + 1}: ${q}`)
-                  .join("\n\n"),
-              },
-            ],
-            temperature: 0.3,
-          }),
+          body: JSON.stringify(body),
         });
 
         if (!resp.ok) {
