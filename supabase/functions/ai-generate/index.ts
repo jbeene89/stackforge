@@ -126,20 +126,30 @@ serve(async (req) => {
 
     const systemPrompt = systemPrompts[mode] || systemPrompts.general;
 
+    // Build request body — attach reasoning.effort only when model + effort are valid
+    const reqBody: Record<string, unknown> = {
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages,
+      ],
+      stream: true,
+    };
+    if (
+      REASONING_MODELS.has(model) &&
+      typeof reasoningEffort === "string" &&
+      ALLOWED_EFFORTS.has(reasoningEffort)
+    ) {
+      reqBody.reasoning = { effort: clampEffort(reasoningEffort, tier) };
+    }
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        stream: true,
-      }),
+      body: JSON.stringify(reqBody),
     });
 
     if (!response.ok) {
