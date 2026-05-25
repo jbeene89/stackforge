@@ -77,11 +77,23 @@ serve(async (req) => {
     if (userError || !userData.user) throw new Error("Not authenticated");
     const userId = userData.user.id;
 
-    const { messages, mode } = await req.json();
+    const { messages, mode, model: requestedModel, reasoningEffort } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const model = "google/gemini-3-flash-preview";
+    // Look up the user's tier to validate model + effort access
+    const { data: creditsRow } = await supabase
+      .from("user_credits")
+      .select("tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const tier = (creditsRow?.tier as string) || "free";
+
+    // Validate and select model
+    const safeModel = (typeof requestedModel === "string" && ALLOWED_MODELS.has(requestedModel))
+      ? requestedModel
+      : "google/gemini-3-flash-preview";
+    const model = safeModel;
     const cost = MODEL_COSTS[model] || MODEL_COSTS.default;
 
     // Atomic credit deduction (TOCTOU-safe)
