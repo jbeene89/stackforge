@@ -126,7 +126,8 @@ async function generatePairsBundle(config: any): Promise<{ filename: string; con
   const target = Math.max(20, Math.floor(Number(config.estimated_pairs ?? 50)));
   const format = config.format ?? "instruction";
 
-  const combined = [...fileTexts, ...sources].join("\n\n---\n\n").slice(0, 30000);
+  // Gemini 2.5 Flash handles ~1M tokens; cap at ~500K chars to stay well within window
+  const combined = [...fileTexts, ...sources].join("\n\n---\n\n").slice(0, 500000);
 
   const sys = `You convert raw source material into clean training pairs.
 Output ONLY raw JSONL (one JSON object per line, no markdown).
