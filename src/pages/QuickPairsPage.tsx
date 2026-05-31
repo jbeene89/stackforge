@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, FileText, Download, Loader2, Sparkles, ShieldCheck, Upload, X, Lock } from "lucide-react";
+import { ArrowLeft, FileText, Download, Loader2, Sparkles, ShieldCheck, Upload, X, Lock, FolderUp, FileArchive } from "lucide-react";
+import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -14,12 +15,31 @@ import { toast } from "sonner";
 
 interface UploadedFile { name: string; text: string; size: number; }
 
+// File extensions we can read as text for training-pair extraction
+const TEXT_EXTENSIONS = [
+  "txt", "md", "markdown", "rst", "json", "jsonl", "csv", "tsv", "yaml", "yml",
+  "xml", "html", "htm", "css", "js", "jsx", "ts", "tsx", "py", "rb", "go", "rs",
+  "java", "c", "cpp", "h", "hpp", "cs", "php", "sh", "bash", "sql", "toml", "ini",
+  "log", "tex", "ipynb", "swift", "kt", "lua", "r", "scala", "vue", "svelte",
+];
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB per file
+const MAX_TOTAL_BYTES = 100 * 1024 * 1024; // 100MB total decompressed
+const MAX_FILES = 5000;
+
+function isTextFile(name: string): boolean {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  return TEXT_EXTENSIONS.includes(ext);
+}
+
 export default function QuickPairsPage() {
   const { user } = useAuth();
   const { data: credits } = useCredits();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
+  const [extracting, setExtracting] = useState(false);
 
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [pasted, setPasted] = useState("");
@@ -85,17 +105,67 @@ export default function QuickPairsPage() {
     }
   }, [params, user]);
 
+  async function addFiles(incoming: UploadedFile[]) {
+    const merged = [...files];
+    let added = 0, skipped = 0, tooBig = 0;
+    let running = files.reduce((s, f) => s + f.size, 0);
+    for (const f of incoming) {
+      if (merged.length + 1 > MAX_FILES) { skipped++; continue; }
+      if (f.size > MAX_FILE_BYTES) { tooBig++; continue; }
+      if (running + f.size > MAX_TOTAL_BYTES) { skipped++; continue; }
+      merged.push(f); added++; running += f.size;
+    }
+    setFiles(merged);
+    if (added) toast.success(`Added ${added} file${added !== 1 ? "s" : ""}`);
+    if (tooBig) toast.warning(`${tooBig} file${tooBig !== 1 ? "s" : ""} skipped (over 5MB each)`);
+    if (skipped) toast.warning(`${skipped} file${skipped !== 1 ? "s" : ""} skipped (total cap reached)`);
+  }
+
   async function handleFiles(list: FileList | null) {
     if (!list) return;
-    const next: UploadedFile[] = [...files];
-    for (const f of Array.from(list)) {
-      if (f.size > 2 * 1024 * 1024) {
-        toast.error(`${f.name} too big (max 2MB)`); continue;
+    setExtracting(true);
+    try {
+      const incoming: UploadedFile[] = [];
+      for (const f of Array.from(list)) {
+        const path = (f as any).webkitRelativePath || f.name;
+        if (!isTextFile(path)) continue;
+        if (f.size > MAX_FILE_BYTES) {
+          toast.warning(`${path} skipped (over 5MB)`); continue;
+        }
+        const text = await f.text();
+        incoming.push({ name: path, text, size: f.size });
       }
-      const text = await f.text();
-      next.push({ name: f.name, text, size: f.size });
+      await addFiles(incoming);
+    } finally {
+      setExtracting(false);
     }
-    setFiles(next);
+  }
+
+  async function handleZip(list: FileList | null) {
+    if (!list || list.length === 0) return;
+    setExtracting(true);
+    try {
+      const incoming: UploadedFile[] = [];
+      for (const f of Array.from(list)) {
+        if (!f.name.toLowerCase().endsWith(".zip")) {
+          toast.warning(`${f.name} is not a ZIP`); continue;
+        }
+        const zip = await JSZip.loadAsync(await f.arrayBuffer());
+        const entries = Object.values(zip.files).filter((e) => !e.dir);
+        for (const entry of entries) {
+          if (!isTextFile(entry.name)) continue;
+          const text = await entry.async("string");
+          const size = new Blob([text]).size;
+          if (size > MAX_FILE_BYTES) continue;
+          incoming.push({ name: entry.name, text, size });
+        }
+      }
+      await addFiles(incoming);
+    } catch (e: any) {
+      toast.error("Failed to read ZIP", { description: e?.message });
+    } finally {
+      setExtracting(false);
+    }
   }
 
   async function handleBuy() {
@@ -167,30 +237,71 @@ export default function QuickPairsPage() {
 
             <Card className="p-6 space-y-5">
               <div className="space-y-2">
-                <Label>Upload files (TXT, MD, JSONL — max 2MB each)</Label>
+                <Label>Upload files, a whole folder, or a ZIP (max 5MB per file, 100MB total)</Label>
                 <input
                   ref={fileInputRef} type="file" multiple
-                  accept=".txt,.md,.jsonl,.json,.csv"
                   onChange={(e) => handleFiles(e.target.files)}
                   className="hidden"
                 />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-6 text-center text-sm text-muted-foreground hover:text-foreground transition"
-                >
-                  <Upload className="h-6 w-6 mx-auto mb-2" />
-                  Click to upload, or drag files here
-                </button>
+                <input
+                  ref={folderInputRef} type="file"
+                  /* @ts-expect-error non-standard but supported */
+                  webkitdirectory="" directory="" multiple
+                  onChange={(e) => handleFiles(e.target.files)}
+                  className="hidden"
+                />
+                <input
+                  ref={zipInputRef} type="file" multiple accept=".zip"
+                  onChange={(e) => handleZip(e.target.files)}
+                  className="hidden"
+                />
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={extracting}
+                    className="border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-4 text-center text-xs text-muted-foreground hover:text-foreground transition disabled:opacity-50"
+                  >
+                    <Upload className="h-5 w-5 mx-auto mb-1" /> Files
+                  </button>
+                  <button
+                    onClick={() => folderInputRef.current?.click()}
+                    disabled={extracting}
+                    className="border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-4 text-center text-xs text-muted-foreground hover:text-foreground transition disabled:opacity-50"
+                  >
+                    <FolderUp className="h-5 w-5 mx-auto mb-1" /> Folder
+                  </button>
+                  <button
+                    onClick={() => zipInputRef.current?.click()}
+                    disabled={extracting}
+                    className="border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-4 text-center text-xs text-muted-foreground hover:text-foreground transition disabled:opacity-50"
+                  >
+                    <FileArchive className="h-5 w-5 mx-auto mb-1" /> ZIP
+                  </button>
+                </div>
+                {extracting && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Extracting & reading files…
+                  </div>
+                )}
                 {files.length > 0 && (
-                  <div className="space-y-1">
-                    {files.map((f, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm bg-muted/40 rounded px-2 py-1">
-                        <span className="truncate">{f.name} <span className="text-muted-foreground">({(f.size / 1024).toFixed(1)}KB)</span></span>
-                        <button onClick={() => setFiles(files.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive">
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{files.length} file{files.length !== 1 ? "s" : ""} · {(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(2)}MB total</span>
+                      <button onClick={() => setFiles([])} className="hover:text-destructive">Clear all</button>
+                    </div>
+                    <div className="space-y-1 max-h-48 overflow-y-auto border border-border/40 rounded-md p-1">
+                      {files.slice(0, 100).map((f, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs bg-muted/40 rounded px-2 py-1">
+                          <span className="truncate font-mono">{f.name} <span className="text-muted-foreground">({(f.size / 1024).toFixed(1)}KB)</span></span>
+                          <button onClick={() => setFiles(files.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive ml-2 shrink-0">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {files.length > 100 && (
+                        <div className="text-xs text-muted-foreground text-center py-1">…and {files.length - 100} more</div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
