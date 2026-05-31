@@ -237,30 +237,71 @@ export default function QuickPairsPage() {
 
             <Card className="p-6 space-y-5">
               <div className="space-y-2">
-                <Label>Upload files (TXT, MD, JSONL — max 2MB each)</Label>
+                <Label>Upload files, a whole folder, or a ZIP (max 5MB per file, 100MB total)</Label>
                 <input
                   ref={fileInputRef} type="file" multiple
-                  accept=".txt,.md,.jsonl,.json,.csv"
                   onChange={(e) => handleFiles(e.target.files)}
                   className="hidden"
                 />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-6 text-center text-sm text-muted-foreground hover:text-foreground transition"
-                >
-                  <Upload className="h-6 w-6 mx-auto mb-2" />
-                  Click to upload, or drag files here
-                </button>
+                <input
+                  ref={folderInputRef} type="file"
+                  /* @ts-expect-error non-standard but supported */
+                  webkitdirectory="" directory="" multiple
+                  onChange={(e) => handleFiles(e.target.files)}
+                  className="hidden"
+                />
+                <input
+                  ref={zipInputRef} type="file" multiple accept=".zip"
+                  onChange={(e) => handleZip(e.target.files)}
+                  className="hidden"
+                />
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={extracting}
+                    className="border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-4 text-center text-xs text-muted-foreground hover:text-foreground transition disabled:opacity-50"
+                  >
+                    <Upload className="h-5 w-5 mx-auto mb-1" /> Files
+                  </button>
+                  <button
+                    onClick={() => folderInputRef.current?.click()}
+                    disabled={extracting}
+                    className="border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-4 text-center text-xs text-muted-foreground hover:text-foreground transition disabled:opacity-50"
+                  >
+                    <FolderUp className="h-5 w-5 mx-auto mb-1" /> Folder
+                  </button>
+                  <button
+                    onClick={() => zipInputRef.current?.click()}
+                    disabled={extracting}
+                    className="border-2 border-dashed border-border hover:border-primary/40 rounded-lg p-4 text-center text-xs text-muted-foreground hover:text-foreground transition disabled:opacity-50"
+                  >
+                    <FileArchive className="h-5 w-5 mx-auto mb-1" /> ZIP
+                  </button>
+                </div>
+                {extracting && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Extracting & reading files…
+                  </div>
+                )}
                 {files.length > 0 && (
-                  <div className="space-y-1">
-                    {files.map((f, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm bg-muted/40 rounded px-2 py-1">
-                        <span className="truncate">{f.name} <span className="text-muted-foreground">({(f.size / 1024).toFixed(1)}KB)</span></span>
-                        <button onClick={() => setFiles(files.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive">
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{files.length} file{files.length !== 1 ? "s" : ""} · {(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(2)}MB total</span>
+                      <button onClick={() => setFiles([])} className="hover:text-destructive">Clear all</button>
+                    </div>
+                    <div className="space-y-1 max-h-48 overflow-y-auto border border-border/40 rounded-md p-1">
+                      {files.slice(0, 100).map((f, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs bg-muted/40 rounded px-2 py-1">
+                          <span className="truncate font-mono">{f.name} <span className="text-muted-foreground">({(f.size / 1024).toFixed(1)}KB)</span></span>
+                          <button onClick={() => setFiles(files.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive ml-2 shrink-0">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {files.length > 100 && (
+                        <div className="text-xs text-muted-foreground text-center py-1">…and {files.length - 100} more</div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
