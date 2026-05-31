@@ -105,17 +105,67 @@ export default function QuickPairsPage() {
     }
   }, [params, user]);
 
+  async function addFiles(incoming: UploadedFile[]) {
+    const merged = [...files];
+    let added = 0, skipped = 0, tooBig = 0;
+    let running = files.reduce((s, f) => s + f.size, 0);
+    for (const f of incoming) {
+      if (merged.length + 1 > MAX_FILES) { skipped++; continue; }
+      if (f.size > MAX_FILE_BYTES) { tooBig++; continue; }
+      if (running + f.size > MAX_TOTAL_BYTES) { skipped++; continue; }
+      merged.push(f); added++; running += f.size;
+    }
+    setFiles(merged);
+    if (added) toast.success(`Added ${added} file${added !== 1 ? "s" : ""}`);
+    if (tooBig) toast.warning(`${tooBig} file${tooBig !== 1 ? "s" : ""} skipped (over 5MB each)`);
+    if (skipped) toast.warning(`${skipped} file${skipped !== 1 ? "s" : ""} skipped (total cap reached)`);
+  }
+
   async function handleFiles(list: FileList | null) {
     if (!list) return;
-    const next: UploadedFile[] = [...files];
-    for (const f of Array.from(list)) {
-      if (f.size > 2 * 1024 * 1024) {
-        toast.error(`${f.name} too big (max 2MB)`); continue;
+    setExtracting(true);
+    try {
+      const incoming: UploadedFile[] = [];
+      for (const f of Array.from(list)) {
+        const path = (f as any).webkitRelativePath || f.name;
+        if (!isTextFile(path)) continue;
+        if (f.size > MAX_FILE_BYTES) {
+          toast.warning(`${path} skipped (over 5MB)`); continue;
+        }
+        const text = await f.text();
+        incoming.push({ name: path, text, size: f.size });
       }
-      const text = await f.text();
-      next.push({ name: f.name, text, size: f.size });
+      await addFiles(incoming);
+    } finally {
+      setExtracting(false);
     }
-    setFiles(next);
+  }
+
+  async function handleZip(list: FileList | null) {
+    if (!list || list.length === 0) return;
+    setExtracting(true);
+    try {
+      const incoming: UploadedFile[] = [];
+      for (const f of Array.from(list)) {
+        if (!f.name.toLowerCase().endsWith(".zip")) {
+          toast.warning(`${f.name} is not a ZIP`); continue;
+        }
+        const zip = await JSZip.loadAsync(await f.arrayBuffer());
+        const entries = Object.values(zip.files).filter((e) => !e.dir);
+        for (const entry of entries) {
+          if (!isTextFile(entry.name)) continue;
+          const text = await entry.async("string");
+          const size = new Blob([text]).size;
+          if (size > MAX_FILE_BYTES) continue;
+          incoming.push({ name: entry.name, text, size });
+        }
+      }
+      await addFiles(incoming);
+    } catch (e: any) {
+      toast.error("Failed to read ZIP", { description: e?.message });
+    } finally {
+      setExtracting(false);
+    }
   }
 
   async function handleBuy() {
