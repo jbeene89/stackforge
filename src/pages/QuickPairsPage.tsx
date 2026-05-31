@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, FileText, Download, Loader2, Sparkles, ShieldCheck, Upload, X, Lock } from "lucide-react";
+import { ArrowLeft, FileText, Download, Loader2, Sparkles, ShieldCheck, Upload, X, Lock, FolderUp, FileArchive } from "lucide-react";
+import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,22 @@ import { useCredits } from "@/hooks/useCredits";
 import { toast } from "sonner";
 
 interface UploadedFile { name: string; text: string; size: number; }
+
+// File extensions we can read as text for training-pair extraction
+const TEXT_EXTENSIONS = [
+  "txt", "md", "markdown", "rst", "json", "jsonl", "csv", "tsv", "yaml", "yml",
+  "xml", "html", "htm", "css", "js", "jsx", "ts", "tsx", "py", "rb", "go", "rs",
+  "java", "c", "cpp", "h", "hpp", "cs", "php", "sh", "bash", "sql", "toml", "ini",
+  "log", "tex", "ipynb", "swift", "kt", "lua", "r", "scala", "vue", "svelte",
+];
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB per file
+const MAX_TOTAL_BYTES = 100 * 1024 * 1024; // 100MB total decompressed
+const MAX_FILES = 5000;
+
+function isTextFile(name: string): boolean {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  return TEXT_EXTENSIONS.includes(ext);
+}
 
 export default function QuickPairsPage() {
   const { user } = useAuth();
