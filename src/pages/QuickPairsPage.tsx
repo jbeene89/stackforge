@@ -37,6 +37,9 @@ export default function QuickPairsPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
+  const [extracting, setExtracting] = useState(false);
 
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [pasted, setPasted] = useState("");
