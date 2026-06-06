@@ -237,7 +237,14 @@ function JobCard({
         <div className="grid grid-cols-3 gap-2">
           <div className="text-center">
             <p className="text-[10px] text-muted-foreground">Model</p>
-            <p className="text-[11px] font-medium truncate">{job.base_model}</p>
+            <p
+              className="text-[11px] font-medium truncate"
+              title={job.base_model}
+            >
+              {job.base_model?.includes("/")
+                ? job.base_model.split("/").slice(-1)[0]
+                : job.base_model}
+            </p>
           </div>
           <div className="text-center">
             <p className="text-[10px] text-muted-foreground">Method</p>
@@ -474,13 +481,18 @@ export default function TrainingProgressPage() {
                     {(customModels ?? []).length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground border-t mt-1 pt-2">
-                          Imported Models
+                          Your Imported Models
                         </div>
-                        {customModels!.map((m) => (
-                          <SelectItem key={m.id} value={`custom:${m.id}:${m.name}`}>
-                            {m.name} {m.parameter_count ? `(${m.parameter_count})` : ""}
-                          </SelectItem>
-                        ))}
+                        {customModels!.map((m) => {
+                          // Use the real HF path / source URL so train.py & all downstream
+                          // scripts receive a valid model identifier — never the row id.
+                          const value = (m.source_url?.trim() || m.name).trim();
+                          return (
+                            <SelectItem key={m.id} value={value}>
+                              {m.name} {m.parameter_count ? `(${m.parameter_count})` : ""}
+                            </SelectItem>
+                          );
+                        })}
                       </>
                     )}
                   </SelectContent>

@@ -665,8 +665,17 @@ export default function KnowledgeRefineryPage() {
                           {m.label} ({m.params})
                         </SelectItem>
                       ))}
+                      <SelectItem value={CUSTOM_MODEL_ID}>
+                        ✏️ My own model…
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+                  {chosenModel === CUSTOM_MODEL_ID && (
+                    <p className="text-[11px] text-muted-foreground mt-2">
+                      Using <strong className="text-foreground">{resolvedModel}</strong>.
+                      Change it in the Deploy page or import a model first.
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
