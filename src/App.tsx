@@ -75,6 +75,8 @@ const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage")
 const KnowledgeRefineryPage = lazy(() => import("./pages/KnowledgeRefineryPage"));
 const QuickSLMPage = lazy(() => import("./pages/QuickSLMPage"));
 const QuickPairsPage = lazy(() => import("./pages/QuickPairsPage"));
+const OfflineLLMPage = lazy(() => import("./pages/OfflineLLMPage"));
+const TrainYourOwnLLMPage = lazy(() => import("./pages/TrainYourOwnLLMPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -107,6 +109,8 @@ const App = () => (
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/quick-slm" element={<QuickSLMPage />} />
                 <Route path="/quick-pairs" element={<QuickPairsPage />} />
+                <Route path="/offline-llm" element={<OfflineLLMPage />} />
+                <Route path="/train-your-own-llm" element={<TrainYourOwnLLMPage />} />
                 <Route path="/first-win" element={<ProtectedRoute><FirstWinPage /></ProtectedRoute>} />
                 <Route path="/slm-lab" element={<AppLayout />}>
                   <Route index element={<SLMLabPage />} />
