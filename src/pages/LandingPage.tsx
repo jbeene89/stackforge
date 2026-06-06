@@ -964,6 +964,8 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      <SoupySites />
+
       {/* ════════════════════ FOOTER ════════════════════ */}
       <footer className="relative py-8 sm:py-14 px-3 sm:px-6">
         <FFXDivider className="mb-6 sm:mb-10" />
