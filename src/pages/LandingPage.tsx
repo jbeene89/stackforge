@@ -24,6 +24,7 @@ import { WhatsNewPanel } from "@/components/landing/WhatsNewPanel";
 import { OfflineDemo } from "@/components/landing/OfflineDemo";
 import { TrustStrip } from "@/components/landing/TrustStrip";
 import { StickyMobileCTA } from "@/components/landing/StickyMobileCTA";
+import { SoupySites } from "@/components/SoupySites";
 
 // ------- SALE COUNTDOWN BANNER -------
 
