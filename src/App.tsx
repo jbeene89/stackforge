@@ -77,6 +77,7 @@ const QuickSLMPage = lazy(() => import("./pages/QuickSLMPage"));
 const QuickPairsPage = lazy(() => import("./pages/QuickPairsPage"));
 const OfflineLLMPage = lazy(() => import("./pages/OfflineLLMPage"));
 const TrainYourOwnLLMPage = lazy(() => import("./pages/TrainYourOwnLLMPage"));
+const PrivateAIModelPage = lazy(() => import("./pages/PrivateAIModelPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -111,6 +112,7 @@ const App = () => (
                 <Route path="/quick-pairs" element={<QuickPairsPage />} />
                 <Route path="/offline-llm" element={<OfflineLLMPage />} />
                 <Route path="/train-your-own-llm" element={<TrainYourOwnLLMPage />} />
+                <Route path="/private-ai-model" element={<PrivateAIModelPage />} />
                 <Route path="/first-win" element={<ProtectedRoute><FirstWinPage /></ProtectedRoute>} />
                 <Route path="/slm-lab" element={<AppLayout />}>
                   <Route index element={<SLMLabPage />} />
