@@ -24,6 +24,7 @@ import { WhatsNewPanel } from "@/components/landing/WhatsNewPanel";
 import { OfflineDemo } from "@/components/landing/OfflineDemo";
 import { TrustStrip } from "@/components/landing/TrustStrip";
 import { StickyMobileCTA } from "@/components/landing/StickyMobileCTA";
+import { SoupySites } from "@/components/SoupySites";
 
 // ------- SALE COUNTDOWN BANNER -------
 
@@ -962,6 +963,8 @@ export default function LandingPage() {
           </div>
         </motion.div>
       </section>
+
+      <SoupySites />
 
       {/* ════════════════════ FOOTER ════════════════════ */}
       <footer className="relative py-8 sm:py-14 px-3 sm:px-6">
