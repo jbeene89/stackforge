@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useModelContext, BASE_MODEL_CATALOG, CUSTOM_MODEL_ID } from "@/hooks/useModelContext";
 import { useSearchParams } from "react-router-dom";
-import { useDatasets, useSamples, exportDatasetAsJsonl, generateInjectionScript, type DatasetSample } from "@/hooks/useTrainingData";
+import { useDatasets, useSamples, exportDatasetAsJsonl, generateInjectionScript, useCustomModels, type DatasetSample } from "@/hooks/useTrainingData";
 import { useDeployStatus, DEPLOY_STEPS, type DeployStepKey } from "@/hooks/useDeployStatus";
 import { onDeviceSLMTemplates } from "@/data/on-device-slm-templates";
 import GPUSetupWizard, { GPU_PROFILES, type GPUProfile, type OllamaModel } from "@/components/GPUSetupWizard";
@@ -760,6 +760,7 @@ export default function DeployPipelinePage() {
     }
   }, [searchParams, datasets, selectedDatasetId]);
   const { selectedBaseModel, setSelectedBaseModel, customModelPath, setCustomModelPath, resolvedBaseModel } = useModelContext();
+  const { data: importedModels } = useCustomModels();
   const baseModel = resolvedBaseModel;
   const setBaseModel = setSelectedBaseModel;
   const [epochs, setEpochs] = useState(3);
@@ -998,6 +999,21 @@ export default function DeployPipelinePage() {
                         {m.label}
                       </SelectItem>
                     ))}
+                    {(importedModels ?? []).length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground border-t mt-1 pt-2">
+                          Your Imported Models
+                        </div>
+                        {importedModels!.map((m) => {
+                          const value = (m.source_url?.trim() || m.name).trim();
+                          return (
+                            <SelectItem key={m.id} value={value}>
+                              {m.name} {m.parameter_count ? `(${m.parameter_count})` : ""}
+                            </SelectItem>
+                          );
+                        })}
+                      </>
+                    )}
                     <SelectItem value={CUSTOM_MODEL_ID}>
                       ✏️ Custom model…
                     </SelectItem>
