@@ -64,7 +64,7 @@ export default function LoginPage() {
           transition={{ delay: 0.2 }}
           className="relative"
         >
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome back</h1>
+          <p className="text-4xl font-bold text-white mb-4">Welcome back</p>
           <p className="text-white/80 text-lg max-w-md">
             Continue building your AI-powered software. Your projects, modules, and stacks are waiting.
           </p>
@@ -177,6 +177,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -143,7 +143,7 @@ export default function SignupPage() {
           transition={{ delay: 0.2 }}
           className="relative"
         >
-          <h1 className="text-4xl font-bold text-white mb-4">Build AI that thinks like you</h1>
+          <p className="text-4xl font-bold text-white mb-4">Build AI that thinks like you</p>
           <p className="text-white/80 text-lg max-w-md">
             Train custom small language models on your data. No PhD required — just plain English.
           </p>
@@ -275,6 +275,8 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
