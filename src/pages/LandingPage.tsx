@@ -446,7 +446,7 @@ export default function LandingPage() {
       <WhatsNewPanel />
       <SEOHead
         title="No-Code AI Agent & Pipeline Builder"
-        description="Soupy is a visual AI platform to design agents, build multi-model pipelines, and deploy smart apps to web, Android, or edge devices — no coding or ML experience needed. Start free today."
+        description="Visual AI platform to design agents, build multi-model pipelines, and deploy to web, Android, or on-device — no code, no ML PhD. Start free."
       />
 
       {/* Nav */}
@@ -526,6 +526,7 @@ export default function LandingPage() {
       <SaleBanner />
       <StickyMobileCTA />
 
+      <main>
       {/* ════════════════════ HERO ════════════════════ */}
       <section ref={heroRef} className="relative pt-28 sm:pt-40 pb-6 sm:pb-12 px-3 sm:px-6 overflow-hidden">
         {/* gradient-mesh removed to prevent flicker with bg image */}
@@ -631,9 +632,9 @@ export default function LandingPage() {
               <Badge variant="outline" className="text-[10px] mb-2 border-forge-emerald/30 text-forge-emerald font-semibold">
                 <WifiOff className="h-3 w-3 mr-1" /> Works Offline
               </Badge>
-              <h3 className="text-base sm:text-xl font-display font-bold tracking-wide">
+              <h2 className="text-base sm:text-xl font-display font-bold tracking-wide">
                 AI that runs on <span className="gradient-text">your device</span>
-              </h3>
+              </h2>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium">
                 No server. No API key. No internet. Your data never leaves your machine.
               </p>
@@ -965,6 +966,7 @@ export default function LandingPage() {
       </section>
 
       <SoupySites />
+      </main>
 
       {/* ════════════════════ FOOTER ════════════════════ */}
       <footer className="relative py-8 sm:py-14 px-3 sm:px-6">

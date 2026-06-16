@@ -6,12 +6,14 @@ interface SEOHeadProps {
   ogTitle?: string;
   ogDescription?: string;
   ogType?: string;
+  /** Override the auto-detected path. Defaults to window.location.pathname. */
   canonicalPath?: string;
 }
 
 /**
- * Sets per-page <title>, <meta name="description">, and Open Graph tags for SEO.
- * Appends " | Soupy" to titles automatically.
+ * Sets per-page <title>, <meta name="description">, canonical, and Open Graph tags.
+ * Canonical + og:url always self-reference the current route so each page is
+ * correctly attributed by crawlers.
  */
 export function SEOHead({ title, description, ogTitle, ogDescription, ogType = "website", canonicalPath }: SEOHeadProps) {
   useEffect(() => {
@@ -36,17 +38,17 @@ export function SEOHead({ title, description, ogTitle, ogDescription, ogType = "
     setMeta('meta[property="og:description"]', "content", ogDescription || description);
     setMeta('meta[property="og:type"]', "content", ogType);
 
-    if (canonicalPath) {
-      const url = `https://soupylab.com${canonicalPath}`;
-      setMeta('meta[property="og:url"]', "content", url);
-      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "canonical";
-        document.head.appendChild(link);
-      }
-      link.href = url;
+    const path = canonicalPath ?? (typeof window !== "undefined" ? window.location.pathname : "/");
+    const url = `https://www.soupylab.com${path}`;
+    setMeta('meta[property="og:url"]', "content", url);
+
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "canonical";
+      document.head.appendChild(link);
     }
+    link.href = url;
   }, [title, description, ogTitle, ogDescription, ogType, canonicalPath]);
 
   return null;

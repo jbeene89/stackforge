@@ -1,8 +1,20 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /onboarding
+Disallow: /subscription-success
+Disallow: /admin
+Disallow: /account
 
 User-agent: Bingbot
 Allow: /
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /onboarding
+Disallow: /subscription-success
+Disallow: /admin
+Disallow: /account
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +24,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /onboarding
+Disallow: /subscription-success
+Disallow: /admin
+Disallow: /account
 
-Sitemap: https://soupylab.com/sitemap.xml
+Sitemap: https://www.soupylab.com/sitemap.xml

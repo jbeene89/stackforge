@@ -1,0 +1,23 @@
+# Soupy (SoupyLab)
+
+> Soupy is a no-code AI platform for building specialist Small Language Models (SLMs), AI agents, and multi-model pipelines from plain English. Train on your data, deploy to web, Android, or fully offline on-device.
+
+Soupy turns plain-English descriptions into trained, deployable AI modules. Users design single-purpose agents, wire them into pipelines, and ship them to the web, an Android phone, or their own PC — without writing code. The platform includes the SLM Lab (fine-tune small models on your data), Image Forge (multi-agent visual workflows), and a credit-based pay-as-you-go economy.
+
+## Pages
+
+- [Home](/): Platform overview, hero, social proof, and primary calls to action.
+- [Make a Specific SLM](/quick-slm): Pay-once flow to spec and download a ready-to-train Small Language Model bundle.
+- [Compile Training Pairs](/quick-pairs): Generate clean training pair datasets in JSONL from a description.
+- [SLM Lab](/slm-lab): The full Small Language Model training workspace — data, train, test, export, deploy.
+- [Private AI Model](/private-ai-model): Build a private model you own end-to-end, including bring-your-own base models.
+- [Offline LLM](/offline-llm): Run language models 100% on-device with WebGPU and WebLLM.
+- [Train Your Own LLM](/train-your-own-llm): Guide to training your own model on your dataset.
+- [Pricing](/pricing): Subscription tiers, credit packs, and pay-as-you-go pricing.
+- [Install](/install): Install Soupy as a PWA or Android app.
+- [Module Builder Demo](/demo/module-builder): Public interactive demo of the visual module builder.
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)
