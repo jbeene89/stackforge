@@ -176,8 +176,9 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { url, dataset_id, domain_hint, offload_perspective, debate_mode, synthesis_mode } = await req.json();
+    const { url, dataset_id, domain_hint, offload_perspective, debate_mode, synthesis_mode, pair_count } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
+    const requestedPairs = Math.max(5, Math.min(30, Number(pair_count) || 10));
 
     // SSRF protection: only allow http(s) public URLs and block internal/metadata IPs
     let parsedUrl: URL;
