@@ -1221,6 +1221,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         domain_hint: dataset.domain,
         provider: "file-upload",
         conversation_title: fileName || "Uploaded File",
+        pair_count: pairCount,
       });
       toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
       setFileText("");
