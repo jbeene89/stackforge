@@ -202,8 +202,11 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { conversation_text, dataset_id, domain_hint, provider, conversation_title } = await req.json();
+    const { conversation_text, dataset_id, domain_hint, provider, conversation_title, pair_count } = await req.json();
     if (!conversation_text || !dataset_id) throw new Error("conversation_text and dataset_id are required");
+
+    const requestedPairs = Math.max(5, Math.min(30, Number(pair_count) || 10));
+    const maxPairs = Math.min(requestedPairs + 5, 30);
 
     const content = conversation_text.slice(0, 12000);
     if (content.length < 50) throw new Error("Conversation too short to extract training data");
