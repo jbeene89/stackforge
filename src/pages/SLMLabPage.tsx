@@ -2288,7 +2288,7 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
                 onClick={() => {
                   setActivePipelineMode(m);
                   setPipelineResult(null);
-                  pipelineMode.mutate({ mode: m, dataset_id: dataset.id }, {
+                  pipelineMode.mutate({ mode: m, dataset_id: dataset.id, pair_count: pipelinePairCount }, {
                     onSuccess: (data) => {
                       setPipelineResult(data);
                       const count = data.pairs?.length || data.analysis?.underrepresented?.length || 0;
