@@ -77,6 +77,36 @@ function HelpTip({ children, tip }: { children: React.ReactNode; tip: string }) 
   );
 }
 
+// ── Reusable pair-count slider ──
+function PairCountSlider({ value, onChange, disabled }: { value: number; onChange: (v: number) => void; disabled?: boolean }) {
+  return (
+    <div className="rounded-lg border border-border p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <Label className="text-sm font-medium">Training pairs to generate</Label>
+          <p className="text-[10px] text-muted-foreground">How many pairs to extract (5–30)</p>
+        </div>
+        <span className="text-lg font-bold text-primary tabular-nums">{value}</span>
+      </div>
+      <input
+        type="range"
+        min={5}
+        max={30}
+        step={1}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        disabled={disabled}
+        className="w-full accent-primary"
+      />
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>5 (fastest)</span>
+        <span>15 (balanced)</span>
+        <span>30 (most coverage)</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Step indicator ──
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
