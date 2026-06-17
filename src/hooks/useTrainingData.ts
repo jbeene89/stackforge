@@ -2308,7 +2308,7 @@ export type PipelineMode = "socratic" | "contradictions" | "dream" | "epistemic"
 
 export function usePipelineMode() {
   return useMutation({
-    mutationFn: async (params: { mode: PipelineMode; dataset_id: string }) => {
+    mutationFn: async (params: { mode: PipelineMode; dataset_id: string; pair_count?: number }) => {
       const { data, error } = await supabase.functions.invoke("pipeline-modes", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
