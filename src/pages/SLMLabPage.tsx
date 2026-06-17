@@ -1754,6 +1754,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
                 {videoAnalysisText && (
                   <div className="space-y-3">
+                    <PairCountSlider value={pairCount} onChange={setPairCount} disabled={fileProcessing} />
                     <div className="bg-muted/30 rounded-lg p-3 max-h-48 overflow-y-auto">
                       <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
                         {videoAnalysisText.slice(0, 800)}{videoAnalysisText.length > 800 ? "…" : ""}
