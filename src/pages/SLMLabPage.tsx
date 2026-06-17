@@ -631,6 +631,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
           domain_hint: dataset.domain,
           provider,
           conversation_title: conv.title,
+          pair_count: pairCount,
         });
         newResults.push({ title: conv.title, pairs: data.extracted });
       } catch (err: any) {
