@@ -283,9 +283,15 @@ Full Profile: ${JSON.stringify(fingerprint.fingerprint)}
 
     const synthResult = await callAIStructured(
       LOVABLE_API_KEY,
-      SYNTHESIS_PROMPT,
+      buildSynthesisPrompt(requestedPairs, maxPairs),
       synthesisInput,
-      [TRAINING_PAIRS_TOOL],
+      [{
+        ...TRAINING_PAIRS_TOOL,
+        function: {
+          ...TRAINING_PAIRS_TOOL.function,
+          description: `Create ${requestedPairs}-${maxPairs} diverse training pairs capturing unique thinking patterns.`,
+        },
+      }],
       { type: "function", function: { name: "create_training_pairs" } }
     );
 
