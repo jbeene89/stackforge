@@ -1472,6 +1472,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         domain_hint: dataset.domain,
         provider: "video-extraction",
         conversation_title: videoFileName || "Video Upload",
+        pair_count: pairCount,
       });
       toast.success(`Extracted ${data.extracted} training pairs from video analysis!`);
       setVideoAnalysisText("");
