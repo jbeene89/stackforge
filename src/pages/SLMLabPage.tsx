@@ -2110,6 +2110,7 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
   const pipelineMode = usePipelineMode();
   const [activePipelineMode, setActivePipelineMode] = useState<PipelineMode | null>(null);
   const [pipelineResult, setPipelineResult] = useState<any>(null);
+  const [pipelinePairCount, setPipelinePairCount] = useState(10);
 
   const approved = samples?.filter(s => s.status === "approved") || [];
   const pending = samples?.filter(s => s.status === "pending") || [];
