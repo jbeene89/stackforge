@@ -52,8 +52,10 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { mode, dataset_id } = await req.json();
+    const { mode, dataset_id, pair_count } = await req.json();
     if (!dataset_id) throw new Error("dataset_id is required");
+
+    const pairCount = Math.max(5, Math.min(30, Number(pair_count) || 10));
 
     // Fetch samples
     const { data: samples, error: samplesErr } = await supabase
