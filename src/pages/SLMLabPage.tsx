@@ -2284,6 +2284,8 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
           </div>
           <p className="text-[11px] text-muted-foreground">Run advanced analysis modes on your training data to generate specialized training pairs.</p>
 
+          <PairCountSlider value={pipelinePairCount} onChange={setPipelinePairCount} disabled={pipelineMode.isPending} />
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {([
               { mode: "socratic" as PipelineMode, label: "Socratic", icon: "🏛️", desc: "Teach your model to ASK, not tell" },
