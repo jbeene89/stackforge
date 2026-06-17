@@ -327,13 +327,13 @@ Original content domain: ${domain_hint || "general"}
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: getSynthesisPrompt(synthesis_mode || "oracle") },
-          { role: "user", content: synthesisInput },
+          { role: "user", content: `${synthesisInput}\n\nGENERATE EXACTLY ${requestedPairs} TRAINING PAIRS.` },
         ],
         tools: [{
           type: "function",
           function: {
             name: "create_training_pairs",
-            description: "Create 5-10 diverse training pairs from the five-perspective analysis. Each pair should cover a different topic or angle.",
+            description: `Create exactly ${requestedPairs} diverse training pairs from the five-perspective analysis. Each pair should cover a different topic or angle.`,
             parameters: {
               type: "object",
               properties: {
