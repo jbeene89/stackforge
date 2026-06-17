@@ -77,6 +77,36 @@ function HelpTip({ children, tip }: { children: React.ReactNode; tip: string }) 
   );
 }
 
+// ── Reusable pair-count slider ──
+function PairCountSlider({ value, onChange, disabled }: { value: number; onChange: (v: number) => void; disabled?: boolean }) {
+  return (
+    <div className="rounded-lg border border-border p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <Label className="text-sm font-medium">Training pairs to generate</Label>
+          <p className="text-[10px] text-muted-foreground">How many pairs to extract (5–30)</p>
+        </div>
+        <span className="text-lg font-bold text-primary tabular-nums">{value}</span>
+      </div>
+      <input
+        type="range"
+        min={5}
+        max={30}
+        step={1}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        disabled={disabled}
+        className="w-full accent-primary"
+      />
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>5 (fastest)</span>
+        <span>15 (balanced)</span>
+        <span>30 (most coverage)</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Step indicator ──
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
@@ -540,6 +570,7 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
 // ── Import Chats Sub-component ──
 function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
   const [provider, setProvider] = useState<Provider>("openai");
+  const [pairCount, setPairCount] = useState(10);
   const [parsedConvos, setParsedConvos] = useState<ParsedConversation[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [processing, setProcessing] = useState(false);
@@ -630,6 +661,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
           domain_hint: dataset.domain,
           provider,
           conversation_title: conv.title,
+          pair_count: pairCount,
         });
         newResults.push({ title: conv.title, pairs: data.extracted });
       } catch (err: any) {
@@ -716,6 +748,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
               ))}
             </div>
           </ScrollArea>
+          <PairCountSlider value={pairCount} onChange={setPairCount} disabled={processing} />
           <Button onClick={processSelected} disabled={selectedIds.size === 0} className="w-full gradient-primary text-primary-foreground h-11">
             <Sparkles className="h-4 w-4 mr-2" /> Process {selectedIds.size} Conversations Through 5-Perspective Pipeline
           </Button>
@@ -1219,6 +1252,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         domain_hint: dataset.domain,
         provider: "file-upload",
         conversation_title: fileName || "Uploaded File",
+        pair_count: pairCount,
       });
       toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
       setFileText("");
@@ -1469,6 +1503,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         domain_hint: dataset.domain,
         provider: "video-extraction",
         conversation_title: videoFileName || "Video Upload",
+        pair_count: pairCount,
       });
       toast.success(`Extracted ${data.extracted} training pairs from video analysis!`);
       setVideoAnalysisText("");
@@ -1575,6 +1610,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
                   <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{fileText.slice(0, 500)}{fileText.length > 500 ? "…" : ""}</p>
                 </div>
+                <PairCountSlider value={pairCount} onChange={setPairCount} disabled={fileProcessing} />
                 <Button onClick={handleProcessFile} disabled={fileProcessing} className="w-full">
                   {fileProcessing ? (
                     <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
@@ -1718,6 +1754,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
                 {videoAnalysisText && (
                   <div className="space-y-3">
+                    <PairCountSlider value={pairCount} onChange={setPairCount} disabled={fileProcessing} />
                     <div className="bg-muted/30 rounded-lg p-3 max-h-48 overflow-y-auto">
                       <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
                         {videoAnalysisText.slice(0, 800)}{videoAnalysisText.length > 800 ? "…" : ""}
@@ -1757,30 +1794,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
               disabled={bulkProcessing}
             />
 
-            <div className="rounded-lg border border-border p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-sm font-medium">Training pairs per URL</Label>
-                  <p className="text-[10px] text-muted-foreground">How many Q&amp;A pairs to extract from each page (5–30)</p>
-                </div>
-                <span className="text-lg font-bold text-primary tabular-nums">{pairCount}</span>
-              </div>
-              <input
-                type="range"
-                min={5}
-                max={30}
-                step={1}
-                value={pairCount}
-                onChange={e => setPairCount(Number(e.target.value))}
-                disabled={bulkProcessing}
-                className="w-full accent-primary"
-              />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>5 (fastest)</span>
-                <span>15 (balanced)</span>
-                <span>30 (most coverage)</span>
-              </div>
-            </div>
+            <PairCountSlider value={pairCount} onChange={setPairCount} disabled={bulkProcessing} />
 
             {(() => {
               const urls = bulkUrls.split("\n").map(u => u.trim()).filter(u => u.length > 0);
@@ -2106,6 +2120,7 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
   const pipelineMode = usePipelineMode();
   const [activePipelineMode, setActivePipelineMode] = useState<PipelineMode | null>(null);
   const [pipelineResult, setPipelineResult] = useState<any>(null);
+  const [pipelinePairCount, setPipelinePairCount] = useState(10);
 
   const approved = samples?.filter(s => s.status === "approved") || [];
   const pending = samples?.filter(s => s.status === "pending") || [];
@@ -2269,6 +2284,8 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
           </div>
           <p className="text-[11px] text-muted-foreground">Run advanced analysis modes on your training data to generate specialized training pairs.</p>
 
+          <PairCountSlider value={pipelinePairCount} onChange={setPipelinePairCount} disabled={pipelineMode.isPending} />
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {([
               { mode: "socratic" as PipelineMode, label: "Socratic", icon: "🏛️", desc: "Teach your model to ASK, not tell" },
@@ -2283,7 +2300,7 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
                 onClick={() => {
                   setActivePipelineMode(m);
                   setPipelineResult(null);
-                  pipelineMode.mutate({ mode: m, dataset_id: dataset.id }, {
+                  pipelineMode.mutate({ mode: m, dataset_id: dataset.id, pair_count: pipelinePairCount }, {
                     onSuccess: (data) => {
                       setPipelineResult(data);
                       const count = data.pairs?.length || data.analysis?.underrepresented?.length || 0;

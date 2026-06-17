@@ -343,7 +343,7 @@ export function useOffloadBatchStatus() {
 export function useProcessChatExport() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { conversation_text: string; dataset_id: string; domain_hint?: string; provider: string; conversation_title?: string }) => {
+    mutationFn: async (params: { conversation_text: string; dataset_id: string; domain_hint?: string; provider: string; conversation_title?: string; pair_count?: number }) => {
       const { data, error } = await supabase.functions.invoke("process-chat-export", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -2308,7 +2308,7 @@ export type PipelineMode = "socratic" | "contradictions" | "dream" | "epistemic"
 
 export function usePipelineMode() {
   return useMutation({
-    mutationFn: async (params: { mode: PipelineMode; dataset_id: string }) => {
+    mutationFn: async (params: { mode: PipelineMode; dataset_id: string; pair_count?: number }) => {
       const { data, error } = await supabase.functions.invoke("pipeline-modes", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
