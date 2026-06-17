@@ -116,7 +116,7 @@ CROSS-DOMAIN COMPLETENESS: Each perspective identified knowledge gaps that OTHER
 
 Use cognitive tokens: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark emergent insights with <DREAM>. Mark debate-born insights with <DEBATE>. Mark cross-domain gap-fills — knowledge imported from another field that completes the picture — with <BRIDGE>.
 
-IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate. Include at least one <BRIDGE> pair that imports knowledge from an adjacent domain the original content never touched. Include at least one <FOLLOW_UP> thread.`;
+IMPORTANT: Generate the requested number of training pairs (specified per request). Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate. Include at least one <BRIDGE> pair that imports knowledge from an adjacent domain the original content never touched. Include at least one <FOLLOW_UP> thread.`;
 
 const ORACLE_SUFFIX = `
 
