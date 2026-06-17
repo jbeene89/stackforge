@@ -748,6 +748,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
               ))}
             </div>
           </ScrollArea>
+          <PairCountSlider value={pairCount} onChange={setPairCount} disabled={processing} />
           <Button onClick={processSelected} disabled={selectedIds.size === 0} className="w-full gradient-primary text-primary-foreground h-11">
             <Sparkles className="h-4 w-4 mr-2" /> Process {selectedIds.size} Conversations Through 5-Perspective Pipeline
           </Button>
