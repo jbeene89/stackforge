@@ -540,6 +540,7 @@ function Step1CreateDataset({ onCreated, onSelectExisting, existingDatasets }: {
 // ── Import Chats Sub-component ──
 function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
   const [provider, setProvider] = useState<Provider>("openai");
+  const [pairCount, setPairCount] = useState(10);
   const [parsedConvos, setParsedConvos] = useState<ParsedConversation[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [processing, setProcessing] = useState(false);
