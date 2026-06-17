@@ -29,7 +29,7 @@ const SYNTHESIS_PROMPT = `You have received five perspectives on the same conver
 
 Find the answers that NONE of the five saw on their own — the emergent insights that only exist because all five collided AND debated. Focus on capturing the UNIQUE way this person thinks and solves problems. This is about distilling their cognitive fingerprint into training data that sparks creative, multi-dimensional thinking in an SLM.
 
-IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect of the conversation — different thinking patterns, problem-solving approaches, insights, or topics discussed.`;
+IMPORTANT: Generate between {requestedPairs} and {maxPairs} training pairs. Each pair should cover a DIFFERENT aspect of the conversation — different thinking patterns, problem-solving approaches, insights, or topics discussed.`;
 
 // ── Anti-Pattern Prompt ──
 const ANTI_PATTERN_PROMPT = `For each training pair below, generate a MEDIOCRE alternative response — the kind of generic, surface-level answer that a typical AI would give. Then explain WHY the original response is better. This contrast teaches the model TASTE — what to reject, not just what to produce.
@@ -99,7 +99,7 @@ const TRAINING_PAIRS_TOOL = {
   type: "function" as const,
   function: {
     name: "create_training_pairs",
-    description: "Create 5-10 diverse training pairs capturing unique thinking patterns.",
+    description: "Create {requestedPairs}-{maxPairs} diverse training pairs capturing unique thinking patterns.",
     parameters: {
       type: "object",
       properties: {

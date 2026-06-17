@@ -77,7 +77,7 @@ serve(async (req) => {
       case "socratic": {
         const raw = await aiCall(LOVABLE_API_KEY,
           "Return ONLY valid JSON array. No markdown fences.",
-          `You are a Socratic interrogator. Given these training samples showing how a person thinks:\n\n${sampleText}\n\nGenerate 5 training pairs where the AI asks progressively deeper follow-up questions instead of giving direct answers. The AI should expose hidden assumptions, use "what if the opposite were true?" patterns, and probe for second-order effects.\n\nReturn JSON array: [{"instruction": "user statement", "response": "AI's Socratic follow-up questions (2-3 probing questions)", "depth_level": 1-5, "assumption_targeted": "the hidden assumption being exposed"}]`
+          `You are a Socratic interrogator. Given these training samples showing how a person thinks:\n\n${sampleText}\n\nGenerate ${pairCount} training pairs where the AI asks progressively deeper follow-up questions instead of giving direct answers. The AI should expose hidden assumptions, use "what if the opposite were true?" patterns, and probe for second-order effects.\n\nReturn JSON array: [{"instruction": "user statement", "response": "AI's Socratic follow-up questions (2-3 probing questions)", "depth_level": 1-5, "assumption_targeted": "the hidden assumption being exposed"}]`
         );
         const pairs = extractJson(raw);
         result = { pairs: pairs || [], mode: "socratic", samples_analyzed: samples.length };
