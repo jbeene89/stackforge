@@ -58,35 +58,24 @@ serve(async (req) => {
 
     const { targetUserId, amount, reason, sendEmail } = parsed.data;
 
-    // Get target user's current credits
-    const { data: credits, error: credErr } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", targetUserId)
-      .single();
-
-    if (credErr || !credits) {
+    // Atomic credit grant via SECURITY DEFINER RPC (logs transaction internally)
+    const { data: rpcRows, error: rpcErr } = await supabase.rpc("refund_user_credits", {
+      _user_id: targetUserId,
+      _amount: amount,
+      _description: reason,
+      _transaction_type: "bonus",
+    });
+    if (rpcErr) {
+      return new Response(JSON.stringify({ error: "Failed to grant credits" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const newBalance = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
+    if (newBalance === null || newBalance === undefined) {
       return new Response(JSON.stringify({ error: "Target user credits not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const newBalance = credits.credits_balance + amount;
-
-    // Update balance
-    await supabase
-      .from("user_credits")
-      .update({ credits_balance: newBalance })
-      .eq("user_id", targetUserId);
-
-    // Log transaction
-    await supabase.from("credit_transactions").insert({
-      user_id: targetUserId,
-      amount: amount,
-      balance_after: newBalance,
-      description: reason,
-      transaction_type: "bonus",
-    });
 
     // Optionally send notification email
     if (sendEmail) {

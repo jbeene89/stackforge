@@ -54,36 +54,26 @@ serve(async (req) => {
     const pIdx = perspectiveIndex ?? 0;
     if (pIdx < 0 || pIdx >= PERSPECTIVES.length) throw new Error("Invalid perspective index");
 
-    // Only deduct credit on the FIRST perspective call
+    // Only deduct credit on the FIRST perspective call (atomic RPC, TOCTOU-safe)
     if (pIdx === 0) {
-      const { data: credits, error: credErr } = await supabase
-        .from("user_credits")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (credErr || !credits) throw new Error("Credits not found");
-      if (credits.credits_balance < TRANSFORM_COST) {
+      const { data: rows, error: deductErr } = await supabase.rpc("deduct_user_credits", {
+        _user_id: userId,
+        _cost: TRANSFORM_COST,
+        _description: "Photo Transform (Forge Doodle)",
+        _transaction_type: "deduction",
+      });
+      if (deductErr) throw deductErr;
+      const r = Array.isArray(rows) ? rows[0] : rows;
+      if (!r?.success) {
         return new Response(JSON.stringify({
           error: "Insufficient credits",
-          balance: credits.credits_balance,
+          reason: r?.reason ?? "insufficient_credits",
           cost: TRANSFORM_COST,
         }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
-      const newBalance = credits.credits_balance - TRANSFORM_COST;
-      const newUsed = credits.credits_used + TRANSFORM_COST;
-      await supabase.from("user_credits").update({ credits_balance: newBalance, credits_used: newUsed }).eq("user_id", userId);
-      await supabase.from("credit_transactions").insert({
-        user_id: userId,
-        amount: -TRANSFORM_COST,
-        balance_after: newBalance,
-        description: "Photo Transform (Forge Doodle)",
-        transaction_type: "deduction",
-      });
     }
 
     const perspective = PERSPECTIVES[pIdx];
@@ -114,23 +104,14 @@ serve(async (req) => {
       const errText = await resp.text();
       console.error(`Perspective ${perspective.name} failed [${resp.status}]:`, errText);
 
-      // Refund if first perspective fails
+      // Atomic refund if first perspective fails
       if (pIdx === 0) {
-        const { data: credits } = await supabase.from("user_credits").select("*").eq("user_id", userId).single();
-        if (credits) {
-          const refundBalance = credits.credits_balance + TRANSFORM_COST;
-          await supabase.from("user_credits").update({
-            credits_balance: refundBalance,
-            credits_used: Math.max(0, credits.credits_used - TRANSFORM_COST),
-          }).eq("user_id", userId);
-          await supabase.from("credit_transactions").insert({
-            user_id: userId,
-            amount: TRANSFORM_COST,
-            balance_after: refundBalance,
-            description: "Refund: Photo Transform failed",
-            transaction_type: "refund",
-          });
-        }
+        await supabase.rpc("refund_user_credits", {
+          _user_id: userId,
+          _amount: TRANSFORM_COST,
+          _description: "Refund: Photo Transform failed",
+          _transaction_type: "refund",
+        });
       }
 
       if (resp.status === 429) {

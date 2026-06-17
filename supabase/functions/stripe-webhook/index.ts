@@ -65,6 +65,18 @@ serve(async (req) => {
 
   log("Event received", { type: event.type, id: event.id });
 
+  // Idempotency: skip events we've already processed (Stripe retries on 5xx/timeout)
+  const { error: dupErr } = await supabase
+    .from("processed_stripe_events")
+    .insert({ event_id: event.id });
+  if (dupErr) {
+    // Unique-violation = already processed; ack with 200 so Stripe stops retrying
+    log("Duplicate event, skipping", { id: event.id, code: (dupErr as any).code });
+    return new Response(JSON.stringify({ received: true, duplicate: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed": {
@@ -189,30 +201,18 @@ async function fulfillTopup(
     return;
   }
 
-  const { data: current } = await supabase
-    .from("user_credits")
-    .select("credits_balance")
-    .eq("user_id", userId)
-    .single();
-
-  if (!current) {
-    log("No user_credits row for topup", { userId });
-    return;
-  }
-
-  const newBalance = current.credits_balance + credits;
-  await supabase
-    .from("user_credits")
-    .update({ credits_balance: newBalance })
-    .eq("user_id", userId);
-
-  await supabase.from("credit_transactions").insert({
-    user_id: userId,
-    amount: credits,
-    balance_after: newBalance,
-    description: `Top-up: ${credits} credits purchased`,
-    transaction_type: "topup",
+  // Atomic credit grant via SECURITY DEFINER RPC (logs transaction internally)
+  const { data: newBalance, error } = await supabase.rpc("refund_user_credits", {
+    _user_id: userId,
+    _amount: credits,
+    _description: `Top-up: ${credits} credits purchased`,
+    _transaction_type: "topup",
   });
+
+  if (error) {
+    log("Topup RPC failed", { userId, error: error.message });
+    throw error;
+  }
 
   log("Topup fulfilled", { userId, credits, newBalance });
 }

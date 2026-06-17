@@ -75,59 +75,29 @@ serve(async (req) => {
       referred_user_id: newUser.id,
     });
 
-    // Grant bonus to new user
-    const { data: newUserCredits } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", newUser.id)
-      .single();
+    // Atomic bonus to new user (RPC logs transaction internally)
+    await supabase.rpc("refund_user_credits", {
+      _user_id: newUser.id,
+      _amount: REFERRAL_BONUS_NEW_USER,
+      _description: "Referral signup bonus",
+      _transaction_type: "referral_bonus",
+    });
 
-    if (newUserCredits) {
-      const newBalance = newUserCredits.credits_balance + REFERRAL_BONUS_NEW_USER;
-      await supabase
-        .from("user_credits")
-        .update({ credits_balance: newBalance })
-        .eq("user_id", newUser.id);
+    // Atomic bonus to referrer
+    await supabase.rpc("refund_user_credits", {
+      _user_id: referrerId,
+      _amount: REFERRAL_BONUS_REFERRER,
+      _description: "Referral bonus — new user signed up",
+      _transaction_type: "referral_bonus",
+    });
 
-      await supabase.from("credit_transactions").insert({
-        user_id: newUser.id,
-        amount: REFERRAL_BONUS_NEW_USER,
-        balance_after: newBalance,
-        description: "Referral signup bonus",
-        transaction_type: "referral_bonus",
-      });
-    }
-
-    // Grant bonus to referrer
-    const { data: referrerCredits } = await supabase
-      .from("user_credits")
-      .select("*")
-      .eq("user_id", referrerId)
-      .single();
-
-    if (referrerCredits) {
-      const refBalance = referrerCredits.credits_balance + REFERRAL_BONUS_REFERRER;
-      await supabase
-        .from("user_credits")
-        .update({ credits_balance: refBalance })
-        .eq("user_id", referrerId);
-
-      await supabase.from("credit_transactions").insert({
-        user_id: referrerId,
-        amount: REFERRAL_BONUS_REFERRER,
-        balance_after: refBalance,
-        description: "Referral bonus — new user signed up",
-        transaction_type: "referral_bonus",
-      });
-
-      // Log earning
-      await supabase.from("referral_earnings").insert({
-        referrer_id: referrerId,
-        referred_user_id: newUser.id,
-        amount: REFERRAL_BONUS_REFERRER,
-        source_type: "signup_bonus",
-      });
-    }
+    // Log earning (separate ledger)
+    await supabase.from("referral_earnings").insert({
+      referrer_id: referrerId,
+      referred_user_id: newUser.id,
+      amount: REFERRAL_BONUS_REFERRER,
+      source_type: "signup_bonus",
+    });
 
     return new Response(JSON.stringify({
       success: true,
