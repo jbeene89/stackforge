@@ -1779,6 +1779,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                             offload_perspective: offloadPerspective || undefined,
                             debate_mode: debateMode,
                             synthesis_mode: synthesisMode,
+                            pair_count: pairCount,
                           });
                           results.push({ url: u, pairs: data.extracted });
                         } catch (err: any) {
