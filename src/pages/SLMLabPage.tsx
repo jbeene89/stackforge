@@ -1077,6 +1077,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
    const [debateMode, setDebateMode] = useState(false);
    const [synthesisMode, setSynthesisMode] = useState<"oracle" | "teacher">("oracle");
+   const [pairCount, setPairCount] = useState(10);
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileProcessing, setFileProcessing] = useState(false);
