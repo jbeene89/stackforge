@@ -1610,6 +1610,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
                   <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{fileText.slice(0, 500)}{fileText.length > 500 ? "…" : ""}</p>
                 </div>
+                <PairCountSlider value={pairCount} onChange={setPairCount} disabled={fileProcessing} />
                 <Button onClick={handleProcessFile} disabled={fileProcessing} className="w-full">
                   {fileProcessing ? (
                     <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
