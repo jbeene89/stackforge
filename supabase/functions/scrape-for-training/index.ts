@@ -116,7 +116,7 @@ CROSS-DOMAIN COMPLETENESS: Each perspective identified knowledge gaps that OTHER
 
 Use cognitive tokens: <BUILDER>, <RED_TEAM>, <SYSTEMS>, <FRAME_BREAKER>, <EMPATH>. Mark emergent insights with <DREAM>. Mark debate-born insights with <DEBATE>. Mark cross-domain gap-fills — knowledge imported from another field that completes the picture — with <BRIDGE>.
 
-IMPORTANT: Generate between 5 and 10 training pairs. Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate. Include at least one <BRIDGE> pair that imports knowledge from an adjacent domain the original content never touched. Include at least one <FOLLOW_UP> thread.`;
+IMPORTANT: Generate the requested number of training pairs (specified per request). Each pair should cover a DIFFERENT aspect. Vary depth. Include at least one pair born purely from the debate. Include at least one <BRIDGE> pair that imports knowledge from an adjacent domain the original content never touched. Include at least one <FOLLOW_UP> thread.`;
 
 const ORACLE_SUFFIX = `
 
@@ -176,8 +176,9 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { url, dataset_id, domain_hint, offload_perspective, debate_mode, synthesis_mode } = await req.json();
+    const { url, dataset_id, domain_hint, offload_perspective, debate_mode, synthesis_mode, pair_count } = await req.json();
     if (!url || !dataset_id) throw new Error("url and dataset_id are required");
+    const requestedPairs = Math.max(5, Math.min(30, Number(pair_count) || 10));
 
     // SSRF protection: only allow http(s) public URLs and block internal/metadata IPs
     let parsedUrl: URL;
@@ -326,13 +327,13 @@ Original content domain: ${domain_hint || "general"}
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: getSynthesisPrompt(synthesis_mode || "oracle") },
-          { role: "user", content: synthesisInput },
+          { role: "user", content: `${synthesisInput}\n\nGENERATE EXACTLY ${requestedPairs} TRAINING PAIRS.` },
         ],
         tools: [{
           type: "function",
           function: {
             name: "create_training_pairs",
-            description: "Create 5-10 diverse training pairs from the five-perspective analysis. Each pair should cover a different topic or angle.",
+            description: `Create exactly ${requestedPairs} diverse training pairs from the five-perspective analysis. Each pair should cover a different topic or angle.`,
             parameters: {
               type: "object",
               properties: {

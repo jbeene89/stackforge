@@ -1077,6 +1077,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
    const [debateMode, setDebateMode] = useState(false);
    const [synthesisMode, setSynthesisMode] = useState<"oracle" | "teacher">("oracle");
+   const [pairCount, setPairCount] = useState(10);
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileProcessing, setFileProcessing] = useState(false);
@@ -1104,7 +1105,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
   const handleScrape = () => {
     if (!url.trim()) return;
-    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined, debate_mode: debateMode, synthesis_mode: synthesisMode });
+    scrape.mutate({ url, dataset_id: dataset.id, domain_hint: dataset.domain, offload_perspective: offloadPerspective || undefined, debate_mode: debateMode, synthesis_mode: synthesisMode, pair_count: pairCount });
     setUrl("");
   };
 
@@ -1755,6 +1756,32 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
               className="text-sm font-mono"
               disabled={bulkProcessing}
             />
+
+            <div className="rounded-lg border border-border p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Training pairs per URL</Label>
+                  <p className="text-[10px] text-muted-foreground">How many Q&amp;A pairs to extract from each page (5–30)</p>
+                </div>
+                <span className="text-lg font-bold text-primary tabular-nums">{pairCount}</span>
+              </div>
+              <input
+                type="range"
+                min={5}
+                max={30}
+                step={1}
+                value={pairCount}
+                onChange={e => setPairCount(Number(e.target.value))}
+                disabled={bulkProcessing}
+                className="w-full accent-primary"
+              />
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>5 (fastest)</span>
+                <span>15 (balanced)</span>
+                <span>30 (most coverage)</span>
+              </div>
+            </div>
+
             {(() => {
               const urls = bulkUrls.split("\n").map(u => u.trim()).filter(u => u.length > 0);
               return (
@@ -1778,6 +1805,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                             offload_perspective: offloadPerspective || undefined,
                             debate_mode: debateMode,
                             synthesis_mode: synthesisMode,
+                            pair_count: pairCount,
                           });
                           results.push({ url: u, pairs: data.extracted });
                         } catch (err: any) {
