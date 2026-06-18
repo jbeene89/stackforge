@@ -579,55 +579,57 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processExport = useProcessChatExport();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
+    const allConvos: ParsedConversation[] = [];
+    let failed = 0;
+
+    for (const file of files) {
       try {
-        const text = ev.target?.result as string;
-        if (!text || text.length < 10) {
-          toast.error("File appears empty or unreadable.");
-          return;
-        }
+        const text = await file.text();
+        if (!text || text.length < 10) { failed++; continue; }
         let raw: any;
         try {
           raw = JSON.parse(text);
-        } catch (parseErr) {
-          console.error("JSON parse error:", parseErr);
-          toast.error("Could not parse file. Make sure it's a valid JSON export.");
-          return;
+        } catch {
+          failed++;
+          continue;
         }
-        
         let convos: ParsedConversation[] = [];
         try {
           convos = parseExport(provider, raw);
         } catch (exportErr) {
-          console.error("parseExport error:", exportErr);
-          toast.error("Error processing conversations. Check the console for details.");
-          return;
+          console.error("parseExport error for", file.name, exportErr);
+          failed++;
+          continue;
         }
-        if (convos.length === 0) {
-          const topKeys = raw && typeof raw === 'object' && !Array.isArray(raw) ? Object.keys(raw).join(', ') : (Array.isArray(raw) ? `array of ${raw.length} items` : typeof raw);
-          toast.error(`No conversations found. File structure: ${topKeys}. Make sure you selected the right provider.`);
-          return;
-        }
-        setParsedConvos(convos);
-        setSelectedIds(new Set(convos.map((_, i) => i)));
-        setResults([]);
-        toast.success(`Found ${convos.length} conversations!`);
+        allConvos.push(...convos);
       } catch (err: any) {
-        console.error("handleFileUpload unexpected error:", err);
-        toast.error("Unexpected error reading file: " + (err?.message || "unknown"));
+        console.error("read error for", file.name, err);
+        failed++;
       }
-    };
-    reader.onerror = () => {
-      toast.error("Failed to read file.");
-    };
-    reader.readAsText(file, "utf-8");
+    }
+
+    if (allConvos.length === 0) {
+      toast.error(
+        failed > 0
+          ? `Could not extract conversations from ${failed} file${failed === 1 ? "" : "s"}. Make sure you picked the right provider.`
+          : "No conversations found."
+      );
+    } else {
+      setParsedConvos(allConvos);
+      setSelectedIds(new Set(allConvos.map((_, i) => i)));
+      setResults([]);
+      toast.success(
+        `Found ${allConvos.length} conversation${allConvos.length === 1 ? "" : "s"} from ${files.length - failed} file${files.length - failed === 1 ? "" : "s"}${failed ? ` (${failed} skipped)` : ""}`
+      );
+    }
+
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
 
   const toggleConvo = (idx: number) => {
     setSelectedIds(prev => {
@@ -712,7 +714,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
               <Button variant="outline" size="sm" asChild>
                 <span><Upload className="h-3.5 w-3.5 mr-1.5" /> Choose File</span>
               </Button>
-              <input ref={fileInputRef} type="file" accept=".json" className="sr-only" onChange={handleFileUpload} />
+              <input ref={fileInputRef} type="file" multiple accept=".json,.jsonl,.ndjson,application/json" className="sr-only" onChange={handleFileUpload} />
             </label>
           </div>
         </CardContent>
@@ -1191,61 +1193,83 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     return slides.join("\n\n");
   };
 
-  const handleRawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const ext = file.name.toLowerCase().split(".").pop();
+  const extractTextFromFile = async (file: File): Promise<{ text: string; meta: string }> => {
+    const ext = file.name.toLowerCase().split(".").pop() || "";
+    let fullText = "";
+    let meta = "";
 
-    try {
-      let fullText = "";
-      let meta = "";
-
-      if (ext === "pdf") {
-        const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
-        }
-        meta = `${pdf.numPages} pages`;
-      } else if (ext === "docx") {
-        const arrayBuffer = await file.arrayBuffer();
-        fullText = await extractDocxText(arrayBuffer);
-        meta = "DOCX";
-      } else if (ext === "pptx") {
-        const arrayBuffer = await file.arrayBuffer();
-        fullText = await extractPptxText(arrayBuffer);
-        meta = "PPTX";
-      } else {
-        // Plain text files
-        const text = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => resolve(ev.target?.result as string);
-          reader.onerror = () => reject(new Error("Failed to read file"));
-          reader.readAsText(file);
-        });
-        fullText = text;
-        meta = "text";
+    if (ext === "pdf") {
+      const pdfjsLib = await import("pdfjs-dist");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
       }
-
-      fullText = fullText.trim();
-      if (fullText.length < 50) {
-        toast.error("File has too little extractable text (need at least 50 characters).");
-        return;
-      }
-      setFileText(fullText);
-      setFileName(file.name);
-      toast.success(`Extracted text from "${file.name}" (${Math.round(fullText.length / 1000)}k chars, ${meta})`);
-    } catch (err: any) {
-      console.error("File extraction error:", err);
-      toast.error("Failed to extract text: " + (err?.message || "unknown error"));
+      meta = `${pdf.numPages}p PDF`;
+    } else if (ext === "docx") {
+      fullText = await extractDocxText(await file.arrayBuffer());
+      meta = "DOCX";
+    } else if (ext === "pptx") {
+      fullText = await extractPptxText(await file.arrayBuffer());
+      meta = "PPTX";
+    } else {
+      fullText = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target?.result as string);
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsText(file);
+      });
+      meta = ext.toUpperCase() || "text";
     }
+    return { text: fullText.trim(), meta };
+  };
+
+  const handleRawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const combined: string[] = [];
+    const summaries: string[] = [];
+    let failed = 0;
+
+    for (const file of files) {
+      try {
+        const { text, meta } = await extractTextFromFile(file);
+        if (text.length < 20) {
+          failed++;
+          continue;
+        }
+        combined.push(`===== ${file.name} (${meta}) =====\n\n${text}`);
+        summaries.push(`${file.name} (${Math.round(text.length / 1000)}k)`);
+      } catch (err: any) {
+        console.error(`Failed to extract "${file.name}":`, err);
+        failed++;
+      }
+    }
+
+    if (combined.length === 0) {
+      toast.error("Could not extract usable text from any file.");
+      if (fileUploadRef.current) fileUploadRef.current.value = "";
+      return;
+    }
+
+    const merged = combined.join("\n\n");
+    setFileText(merged);
+    setFileName(
+      files.length === 1
+        ? files[0].name
+        : `${combined.length} files (${summaries.slice(0, 3).join(", ")}${summaries.length > 3 ? `, +${summaries.length - 3} more` : ""})`
+    );
+    toast.success(
+      `Loaded ${combined.length} file${combined.length === 1 ? "" : "s"} (${Math.round(merged.length / 1000)}k chars)${failed ? ` — ${failed} skipped` : ""}`
+    );
 
     if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
+
 
   const handleProcessFile = async () => {
     if (!fileText.trim()) return;
@@ -1704,7 +1728,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button variant="outline" className="w-full" asChild>
                   <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}</span>
                 </Button>
-                <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="sr-only" onChange={handleRawFileUpload} />
+                <input ref={fileUploadRef} type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.csv,.tsv,.log,.text,.rtf,.json,.jsonl,.ndjson,.xml,.yaml,.yml,.toml,.ini,.conf,.html,.htm,.srt,.vtt,.sub,.epub,.tex,.bib,.org,.rst,.adoc,.asciidoc,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.cc,.cpp,.h,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.lua,.r,.scala,.dart,text/*,application/json,application/xml" className="sr-only" onChange={handleRawFileUpload} />
+                <p className="text-[10px] text-muted-foreground mt-1">Tip: hold Ctrl/Cmd or Shift to select multiple files</p>
               </label>
             </div>
             {fileName && (
@@ -1801,7 +1826,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button variant="outline" className="w-full" asChild disabled={videoExtracting}>
                   <span><Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}</span>
                 </Button>
-                <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="sr-only" onChange={handleVideoUpload} />
+                <input ref={videoUploadRef} type="file" accept="video/*,.mp4,.webm,.ogg,.ogv,.mov,.avi,.mkv,.m4v,.3gp,.flv,.wmv,.mpg,.mpeg" className="sr-only" onChange={handleVideoUpload} />
               </label>
             </div>
 
@@ -1898,7 +1923,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button variant="outline" className="w-full" asChild disabled={imageAnalyzing}>
                   <span><ImageIcon className="h-4 w-4 mr-2" /> {imageFileName ? "Change Images" : "Choose Images"}</span>
                 </Button>
-                <input ref={imageUploadRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" multiple className="sr-only" onChange={handleImageUpload} />
+                <input ref={imageUploadRef} type="file" accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.avif,.svg" multiple className="sr-only" onChange={handleImageUpload} />
               </label>
             </div>
 
