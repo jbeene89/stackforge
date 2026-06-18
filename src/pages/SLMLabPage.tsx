@@ -1200,6 +1200,26 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     return slides.join("\n\n");
   };
 
+  const isImageExt = (ext: string) =>
+    ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tif", "tiff", "avif"].includes(ext);
+
+  const ocrImage = async (source: File | Blob, lang: string, label: string): Promise<string> => {
+    const Tesseract = (await import("tesseract.js")).default;
+    setOcrProgress({ file: label, pct: 0 });
+    try {
+      const { data } = await Tesseract.recognize(source, lang, {
+        logger: (m: any) => {
+          if (m.status === "recognizing text" && typeof m.progress === "number") {
+            setOcrProgress({ file: label, pct: Math.round(m.progress * 100) });
+          }
+        },
+      });
+      return (data?.text || "").trim();
+    } finally {
+      setOcrProgress(null);
+    }
+  };
+
   const extractTextFromFile = async (file: File): Promise<{ text: string; meta: string }> => {
     const ext = file.name.toLowerCase().split(".").pop() || "";
     let fullText = "";
@@ -1216,12 +1236,37 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
       }
       meta = `${pdf.numPages}p PDF`;
+
+      // OCR fallback: if PDF text extraction yielded too little (scanned PDF), OCR each page
+      if (ocrEnabled && fullText.trim().length < 100) {
+        const pages: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d")!;
+          await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+          const blob: Blob = await new Promise((res) => canvas.toBlob((b) => res(b!), "image/png"));
+          const t = await ocrImage(blob, ocrLanguage, `${file.name} (page ${i}/${pdf.numPages})`);
+          pages.push(t);
+        }
+        fullText = pages.join("\n\n");
+        meta = `${pdf.numPages}p PDF (OCR ${ocrLanguage})`;
+      }
     } else if (ext === "docx") {
       fullText = await extractDocxText(await file.arrayBuffer());
       meta = "DOCX";
     } else if (ext === "pptx") {
       fullText = await extractPptxText(await file.arrayBuffer());
       meta = "PPTX";
+    } else if (isImageExt(ext)) {
+      if (!ocrEnabled) {
+        throw new Error(`"${file.name}" is an image — turn on OCR to read text from it, or use the Image tab.`);
+      }
+      fullText = await ocrImage(file, ocrLanguage, file.name);
+      meta = `IMG (OCR ${ocrLanguage})`;
     } else {
       fullText = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -1238,44 +1283,58 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const combined: string[] = [];
-    const summaries: string[] = [];
+    const parsed: Array<{ name: string; text: string; meta: string }> = [];
     let failed = 0;
+    const failures: string[] = [];
 
     for (const file of files) {
       try {
         const { text, meta } = await extractTextFromFile(file);
         if (text.length < 20) {
           failed++;
+          failures.push(`${file.name} (too little text)`);
           continue;
         }
-        combined.push(`===== ${file.name} (${meta}) =====\n\n${text}`);
-        summaries.push(`${file.name} (${Math.round(text.length / 1000)}k)`);
+        parsed.push({ name: file.name, text, meta });
       } catch (err: any) {
         console.error(`Failed to extract "${file.name}":`, err);
         failed++;
+        failures.push(`${file.name} (${err?.message || "error"})`);
       }
     }
 
-    if (combined.length === 0) {
+    if (parsed.length === 0) {
       toast.error("Could not extract usable text from any file.");
       if (fileUploadRef.current) fileUploadRef.current.value = "";
       return;
     }
 
-    const merged = combined.join("\n\n");
+    setParsedFiles(parsed);
+
+    // Build preview text using the chosen delimiter
+    const delim = (name: string, meta: string) =>
+      (fileDelimiter || "===== {filename} =====")
+        .replaceAll("{filename}", name)
+        .replaceAll("{meta}", meta);
+
+    const merged = parsed.map((p) => `${delim(p.name, p.meta)}\n\n${p.text}`).join("\n\n");
     setFileText(merged);
     setFileName(
       files.length === 1
         ? files[0].name
-        : `${combined.length} files (${summaries.slice(0, 3).join(", ")}${summaries.length > 3 ? `, +${summaries.length - 3} more` : ""})`
+        : `${parsed.length} files (${parsed.slice(0, 3).map((p) => p.name).join(", ")}${parsed.length > 3 ? `, +${parsed.length - 3} more` : ""})`
     );
     toast.success(
-      `Loaded ${combined.length} file${combined.length === 1 ? "" : "s"} (${Math.round(merged.length / 1000)}k chars)${failed ? ` — ${failed} skipped` : ""}`
+      `Loaded ${parsed.length} file${parsed.length === 1 ? "" : "s"} (${Math.round(merged.length / 1000)}k chars)${failed ? ` — ${failed} skipped` : ""}`
     );
+    if (failed > 0) {
+      console.warn("Skipped files:", failures);
+    }
 
     if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
+
+
 
 
   const handleProcessFile = async () => {
