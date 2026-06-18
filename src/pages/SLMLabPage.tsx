@@ -2293,6 +2293,163 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             )}
           </CardContent>
         </Card>
+      ) : mode === "live" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" /> Live Chat → Dataset
+            </CardTitle>
+            <CardDescription>
+              Have a real conversation with the AI. Every exchange becomes a candidate training pair — review, edit, or skip before saving. Each AI reply costs 2 credits.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Setup */}
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Persona / style guide (optional)</Label>
+                <Textarea
+                  value={livePersona}
+                  onChange={(e) => setLivePersona(e.target.value.slice(0, 2000))}
+                  placeholder="e.g. Reply like a friendly senior chef teaching a beginner. Use short paragraphs, no jargon."
+                  rows={2}
+                  className="text-xs"
+                  disabled={liveSending}
+                />
+                <p className="text-[10px] text-muted-foreground">Shapes how the AI replies — saved into every turn's context.</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Switch id="live-auto" checked={liveAutoSave} onCheckedChange={setLiveAutoSave} disabled={liveSending} />
+                  <Label htmlFor="live-auto" className="text-xs cursor-pointer">Auto-save every turn</Label>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleClearLive} disabled={liveTurns.length === 0 || liveSending} className="text-xs h-7">
+                  <RotateCcw className="h-3 w-3 mr-1" /> Clear chat
+                </Button>
+              </div>
+            </div>
+
+            {/* Conversation */}
+            <div ref={liveScrollRef} className="rounded-lg border border-border/60 bg-background/40 p-3 max-h-[60vh] overflow-y-auto space-y-4">
+              {liveTurns.length === 0 ? (
+                <div className="text-center py-8 text-xs text-muted-foreground">
+                  <MessageSquare className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                  Send your first message below to start the conversation.
+                </div>
+              ) : (
+                liveTurns.map((t, idx) => (
+                  <div
+                    key={t.id}
+                    className={`rounded-lg border p-3 space-y-2 ${
+                      t.status === "saved" ? "border-emerald-500/40 bg-emerald-500/5"
+                      : t.status === "skipped" ? "border-border/40 bg-muted/20 opacity-60"
+                      : "border-border/60 bg-card"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                        Pair #{idx + 1}
+                      </span>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                        t.status === "saved" ? "bg-emerald-500/15 text-emerald-600"
+                        : t.status === "skipped" ? "bg-muted text-muted-foreground"
+                        : "bg-amber-500/15 text-amber-600"
+                      }`}>
+                        {t.status === "saved" ? "✓ Saved" : t.status === "skipped" ? "Skipped" : "Pending review"}
+                      </span>
+                    </div>
+
+                    {/* User side */}
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <User className="h-3 w-3" /> Your message (input)
+                      </Label>
+                      <Textarea
+                        value={t.editedUser ?? t.userText}
+                        onChange={(e) => updateLiveTurn(t.id, { editedUser: e.target.value })}
+                        rows={2}
+                        className="text-xs"
+                        disabled={t.status !== "pending"}
+                      />
+                    </div>
+
+                    {/* Assistant side */}
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Bot className="h-3 w-3" /> AI reply (output)
+                      </Label>
+                      <Textarea
+                        value={t.editedAssistant ?? t.assistantText}
+                        onChange={(e) => updateLiveTurn(t.id, { editedAssistant: e.target.value })}
+                        rows={4}
+                        className="text-xs"
+                        disabled={t.status !== "pending"}
+                      />
+                    </div>
+
+                    {/* Quality + actions */}
+                    {t.status === "pending" && (
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => updateLiveTurn(t.id, { quality: n })}
+                              className="p-0.5"
+                              aria-label={`Quality ${n} of 5`}
+                            >
+                              <Star className={`h-3.5 w-3.5 ${n <= t.quality ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
+                            </button>
+                          ))}
+                          <span className="text-[10px] text-muted-foreground ml-1">{t.quality}/5</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Button variant="outline" size="sm" onClick={() => skipLiveTurn(t.id)} className="h-7 text-xs">
+                            <X className="h-3 w-3 mr-1" /> Skip
+                          </Button>
+                          <Button size="sm" onClick={() => saveLiveTurn(t)} disabled={createSample.isPending} className="h-7 text-xs">
+                            <Check className="h-3 w-3 mr-1" /> Save to dataset
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Composer */}
+            <div className="space-y-2">
+              <Textarea
+                value={liveInput}
+                onChange={(e) => setLiveInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault();
+                    handleSendLive();
+                  }
+                }}
+                placeholder="Type a question or prompt… (Ctrl/⌘+Enter to send)"
+                rows={3}
+                className="text-sm"
+                disabled={liveSending}
+              />
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-muted-foreground">
+                  {liveTurns.filter((t) => t.status === "saved").length} saved · {liveTurns.filter((t) => t.status === "pending").length} pending · {liveTurns.filter((t) => t.status === "skipped").length} skipped
+                </p>
+                <Button onClick={handleSendLive} disabled={liveSending || !liveInput.trim()} size="sm">
+                  {liveSending ? (
+                    <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Waiting for AI…</>
+                  ) : (
+                    <><Send className="h-4 w-4 mr-2" /> Send</>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       ) : mode === "scrape" ? (
         <Card>
           <CardHeader>
