@@ -107,6 +107,7 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/install" element={<InstallPage />} />
                 <Route path="/terms" element={<TermsOfServicePage />} />
+                <Route path="/trust" element={<TrustPage />} />
                 <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/quick-slm" element={<QuickSLMPage />} />
