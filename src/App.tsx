@@ -49,6 +49,7 @@ const EdgeTrainingPage = lazy(() => import("./pages/EdgeTrainingPage"));
 const ExportStudioPage = lazy(() => import("./pages/ExportStudioPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const TrustPage = lazy(() => import("./pages/TrustPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
 const SubscriptionSuccessPage = lazy(() => import("./pages/SubscriptionSuccessPage"));
 const InstallPage = lazy(() => import("./pages/InstallPage"));
@@ -106,6 +107,7 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/install" element={<InstallPage />} />
                 <Route path="/terms" element={<TermsOfServicePage />} />
+                <Route path="/trust" element={<TrustPage />} />
                 <Route path="/demo/module-builder" element={<DemoModuleBuilderPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/quick-slm" element={<QuickSLMPage />} />

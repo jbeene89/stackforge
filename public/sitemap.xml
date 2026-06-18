@@ -67,6 +67,11 @@
   </url>
   <url>
     <loc>https://www.soupylab.com/terms</loc>
+  </url>
+  <url>
+    <loc>https://www.soupylab.com/trust</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
