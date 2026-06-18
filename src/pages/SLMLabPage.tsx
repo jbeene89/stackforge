@@ -1132,6 +1132,11 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const processExport = useProcessChatExport();
   const { data: samples } = useSamples(dataset.id);
   const fileUploadRef = useRef<HTMLInputElement>(null);
+  const [imageDataUrls, setImageDataUrls] = useState<string[]>([]);
+  const [imageFileName, setImageFileName] = useState("");
+  const [imageAnalyzing, setImageAnalyzing] = useState(false);
+  const [imageAnalysisText, setImageAnalysisText] = useState("");
+  const imageUploadRef = useRef<HTMLInputElement>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
