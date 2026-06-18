@@ -1753,6 +1753,107 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
+  // --- Live Chat dataset mode helpers ---
+  const saveLiveTurn = (turn: LiveTurn) => {
+    const input = (turn.editedUser ?? turn.userText).trim();
+    const output = (turn.editedAssistant ?? turn.assistantText).trim();
+    if (!input || !output) {
+      toast.error("Both sides of the turn need text before saving.");
+      return;
+    }
+    createSample.mutate(
+      { dataset_id: dataset.id, input, output, quality_score: turn.quality || 4 },
+      {
+        onSuccess: () => {
+          setLiveTurns((prev) => prev.map((t) => (t.id === turn.id ? { ...t, status: "saved" } : t)));
+          toast.success("Saved to dataset");
+        },
+        onError: (err: any) => toast.error(err?.message || "Could not save turn"),
+      }
+    );
+  };
+
+  const skipLiveTurn = (id: string) => {
+    setLiveTurns((prev) => prev.map((t) => (t.id === id ? { ...t, status: "skipped" } : t)));
+  };
+
+  const updateLiveTurn = (id: string, patch: Partial<LiveTurn>) => {
+    setLiveTurns((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  };
+
+  const handleSendLive = async () => {
+    const text = liveInput.trim();
+    if (!text || liveSending) return;
+    setLiveSending(true);
+
+    const history: Array<{ role: "user" | "assistant"; content: string }> = [];
+    for (const t of liveTurns) {
+      if (t.status === "skipped") continue;
+      history.push({ role: "user", content: t.editedUser ?? t.userText });
+      history.push({ role: "assistant", content: t.editedAssistant ?? t.assistantText });
+    }
+    history.push({ role: "user", content: text });
+
+    const turnId = crypto.randomUUID();
+    setLiveInput("");
+
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) throw new Error("Please sign in first.");
+
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dataset-live-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          messages: history,
+          domain_hint: dataset.domain,
+          persona: livePersona || undefined,
+        }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: `Server error ${resp.status}` }));
+        throw new Error(err.error || `Server error ${resp.status}`);
+      }
+      const data = await resp.json();
+      const reply = (data?.reply || "").trim();
+      if (!reply) throw new Error("AI returned no reply.");
+
+      const newTurn: LiveTurn = {
+        id: turnId,
+        userText: text,
+        assistantText: reply,
+        status: "pending",
+        quality: 4,
+      };
+      setLiveTurns((prev) => [...prev, newTurn]);
+
+      if (liveAutoSave) {
+        saveLiveTurn(newTurn);
+      }
+
+      setTimeout(() => {
+        liveScrollRef.current?.scrollTo({ top: liveScrollRef.current.scrollHeight, behavior: "smooth" });
+      }, 50);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to get AI reply");
+      setLiveInput(text);
+    } finally {
+      setLiveSending(false);
+    }
+  };
+
+  const handleClearLive = () => {
+    if (liveTurns.length === 0) return;
+    if (!confirm("Clear the entire live conversation? Saved turns stay in the dataset.")) return;
+    setLiveTurns([]);
+  };
+
+
+
 
 
   const handleAddManual = () => {
