@@ -1778,7 +1778,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </Card>
 
       {/* Mode toggle */}
-      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
           <Upload className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Import</span>
         </Button>
@@ -1799,6 +1799,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         </Button>
         <Button variant={mode === "image" ? "default" : "outline"} onClick={() => setMode("image")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
           <ImageIcon className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Image</span>
+        </Button>
+        <Button variant={mode === "live" ? "default" : "outline"} onClick={() => setMode("live")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <MessageSquare className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Live</span>
         </Button>
       </div>
 
