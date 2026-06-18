@@ -1817,15 +1817,105 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Per-file parsing options */}
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
+              <p className="text-xs font-medium text-foreground/80 flex items-center gap-1.5">
+                <Wrench className="h-3.5 w-3.5" /> Parsing options
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">When uploading several files</Label>
+                  <Select value={mergeMode} onValueChange={(v) => setMergeMode(v as any)} disabled={fileProcessing}>
+                    <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="combine">Combine into one big text</SelectItem>
+                      <SelectItem value="separate">Process each file separately</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-muted-foreground">
+                    {mergeMode === "combine"
+                      ? "All files glued together, sent through the pipeline once."
+                      : "Each file goes through the pipeline on its own — slower but cleaner per source."}
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">OCR (read text from images / scanned PDFs)</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch id="ocr-enabled" checked={ocrEnabled} onCheckedChange={setOcrEnabled} disabled={fileProcessing} />
+                    <Select value={ocrLanguage} onValueChange={setOcrLanguage} disabled={!ocrEnabled || fileProcessing}>
+                      <SelectTrigger className="h-9 text-xs flex-1"><SelectValue /></SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectItem value="eng">English</SelectItem>
+                        <SelectItem value="spa">Spanish</SelectItem>
+                        <SelectItem value="fra">French</SelectItem>
+                        <SelectItem value="deu">German</SelectItem>
+                        <SelectItem value="ita">Italian</SelectItem>
+                        <SelectItem value="por">Portuguese</SelectItem>
+                        <SelectItem value="nld">Dutch</SelectItem>
+                        <SelectItem value="rus">Russian</SelectItem>
+                        <SelectItem value="ukr">Ukrainian</SelectItem>
+                        <SelectItem value="pol">Polish</SelectItem>
+                        <SelectItem value="tur">Turkish</SelectItem>
+                        <SelectItem value="ara">Arabic</SelectItem>
+                        <SelectItem value="heb">Hebrew</SelectItem>
+                        <SelectItem value="hin">Hindi</SelectItem>
+                        <SelectItem value="ben">Bengali</SelectItem>
+                        <SelectItem value="chi_sim">Chinese (Simplified)</SelectItem>
+                        <SelectItem value="chi_tra">Chinese (Traditional)</SelectItem>
+                        <SelectItem value="jpn">Japanese</SelectItem>
+                        <SelectItem value="kor">Korean</SelectItem>
+                        <SelectItem value="vie">Vietnamese</SelectItem>
+                        <SelectItem value="tha">Thai</SelectItem>
+                        <SelectItem value="ind">Indonesian</SelectItem>
+                        <SelectItem value="msa">Malay</SelectItem>
+                        <SelectItem value="ell">Greek</SelectItem>
+                        <SelectItem value="ces">Czech</SelectItem>
+                        <SelectItem value="swe">Swedish</SelectItem>
+                        <SelectItem value="nor">Norwegian</SelectItem>
+                        <SelectItem value="dan">Danish</SelectItem>
+                        <SelectItem value="fin">Finnish</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Only used for image files or scanned PDFs that have no real text.</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Separator between files (combine mode)</Label>
+                <Input
+                  value={fileDelimiter}
+                  onChange={(e) => setFileDelimiter(e.target.value)}
+                  placeholder="===== {filename} ====="
+                  className="h-9 text-xs font-mono"
+                  disabled={fileProcessing || mergeMode === "separate"}
+                />
+                <p className="text-[10px] text-muted-foreground">Use <code className="bg-muted px-1 rounded">{"{filename}"}</code> and <code className="bg-muted px-1 rounded">{"{meta}"}</code> to insert the file name and type.</p>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3">
               <label className="flex-1 cursor-pointer">
                 <Button variant="outline" className="w-full" asChild>
-                  <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}</span>
+                  <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change Files` : `Choose Files`}</span>
                 </Button>
-                <input ref={fileUploadRef} type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.csv,.tsv,.log,.text,.rtf,.json,.jsonl,.ndjson,.xml,.yaml,.yml,.toml,.ini,.conf,.html,.htm,.srt,.vtt,.sub,.epub,.tex,.bib,.org,.rst,.adoc,.asciidoc,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.cc,.cpp,.h,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.lua,.r,.scala,.dart,text/*,application/json,application/xml" className="sr-only" onChange={handleRawFileUpload} />
+                <input ref={fileUploadRef} type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.csv,.tsv,.log,.text,.rtf,.json,.jsonl,.ndjson,.xml,.yaml,.yml,.toml,.ini,.conf,.html,.htm,.srt,.vtt,.sub,.epub,.tex,.bib,.org,.rst,.adoc,.asciidoc,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.cc,.cpp,.h,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.lua,.r,.scala,.dart,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.avif,text/*,application/json,application/xml" className="sr-only" onChange={handleRawFileUpload} />
                 <p className="text-[10px] text-muted-foreground mt-1">Tip: hold Ctrl/Cmd or Shift to select multiple files</p>
               </label>
             </div>
+
+            {ocrProgress && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-1.5">
+                <p className="text-xs font-medium flex items-center gap-2">
+                  <ScanEye className="h-3.5 w-3.5 animate-pulse" /> Reading text from {ocrProgress.file}…
+                </p>
+                <Progress value={ocrProgress.pct} className="h-1.5" />
+                <p className="text-[10px] text-muted-foreground">{ocrProgress.pct}%</p>
+              </div>
+            )}
+
             {fileName && (
               <div className="space-y-3">
                 <div className="bg-muted/50 rounded-lg p-3 space-y-1">
@@ -1834,6 +1924,18 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   </p>
                   <p className="text-xs text-muted-foreground">{Math.round(fileText.length / 1000)}k characters loaded</p>
                 </div>
+
+                {parsedFiles.length > 1 && (
+                  <div className="rounded-lg border border-border/60 bg-muted/20 p-2 max-h-32 overflow-y-auto space-y-1">
+                    {parsedFiles.map((p) => (
+                      <div key={p.name} className="flex items-center justify-between text-[11px]">
+                        <span className="truncate flex-1 mr-2">{p.name}</span>
+                        <span className="text-muted-foreground shrink-0">{p.meta} · {Math.round(p.text.length / 1000)}k</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
                   <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{fileText.slice(0, 500)}{fileText.length > 500 ? "…" : ""}</p>
                 </div>
@@ -1841,6 +1943,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button onClick={handleProcessFile} disabled={fileProcessing} className="w-full">
                   {fileProcessing ? (
                     <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
+                  ) : mergeMode === "separate" && parsedFiles.length > 1 ? (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Process {parsedFiles.length} Files Separately</>
                   ) : (
                     <><Sparkles className="h-4 w-4 mr-2" /> Process Through Pipeline</>
                   )}
