@@ -31,7 +31,7 @@ import {
   CheckCircle2, Circle, ArrowRight, ArrowLeft, Package,
   Zap, BookOpen, ChevronRight, ChevronDown, Info, ThumbsUp, ThumbsDown,
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
-  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye, RefreshCw
+  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye, RefreshCw, Image as ImageIcon
 } from "lucide-react";
 import { TerminalPanel } from "@/components/TerminalPanel";
 import { CreditCostEstimator } from "@/components/CreditCostEstimator";
@@ -1105,7 +1105,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; currentUrl: string; results: { url: string; pairs: number; error?: string }[] }>({ current: 0, total: 0, currentUrl: "", results: [] });
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
-  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface" | "video">("import");
+  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface" | "video" | "image">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
    const [debateMode, setDebateMode] = useState(false);
@@ -1132,6 +1132,11 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const processExport = useProcessChatExport();
   const { data: samples } = useSamples(dataset.id);
   const fileUploadRef = useRef<HTMLInputElement>(null);
+  const [imageDataUrls, setImageDataUrls] = useState<string[]>([]);
+  const [imageFileName, setImageFileName] = useState("");
+  const [imageAnalyzing, setImageAnalyzing] = useState(false);
+  const [imageAnalysisText, setImageAnalysisText] = useState("");
+  const imageUploadRef = useRef<HTMLInputElement>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -1516,6 +1521,106 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    if (files.length > 30) {
+      toast.error("Maximum 30 images allowed at once");
+      return;
+    }
+    for (const f of files) {
+      if (f.size > 8 * 1024 * 1024) {
+        toast.error(`"${f.name}" is over 8MB. Please use smaller images.`);
+        return;
+      }
+    }
+    try {
+      const urls = await Promise.all(
+        files.map(
+          (f) =>
+            new Promise<string>((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () => resolve(r.result as string);
+              r.onerror = () => reject(new Error(`Could not read ${f.name}`));
+              r.readAsDataURL(f);
+            })
+        )
+      );
+      setImageDataUrls(urls);
+      setImageFileName(files.length === 1 ? files[0].name : `${files.length} images`);
+      setImageAnalysisText("");
+      toast.success(`${files.length} image${files.length === 1 ? "" : "s"} loaded`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to read images");
+    } finally {
+      if (imageUploadRef.current) imageUploadRef.current.value = "";
+    }
+  };
+
+  const handleAnalyzeImages = async () => {
+    if (imageDataUrls.length === 0) return;
+    setImageAnalyzing(true);
+    setImageAnalysisText("");
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) throw new Error("Not signed in. Please log in and try again.");
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-video-frames`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          frames: imageDataUrls,
+          domain_hint: dataset.domain,
+          dataset_id: dataset.id,
+        }),
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `Server error ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.text || data.text.trim().length < 20) {
+        toast.error("AI could not extract meaningful content from these images.");
+        return;
+      }
+      setImageAnalysisText(data.text);
+      toast.success(`AI extracted content from ${imageDataUrls.length} image${imageDataUrls.length === 1 ? "" : "s"}!`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to analyze images");
+    } finally {
+      setImageAnalyzing(false);
+    }
+  };
+
+  const handleProcessImageText = async () => {
+    if (!imageAnalysisText.trim()) return;
+    setFileProcessing(true);
+    try {
+      const data = await processExport.mutateAsync({
+        conversation_text: imageAnalysisText,
+        dataset_id: dataset.id,
+        domain_hint: dataset.domain,
+        provider: "image-extraction",
+        conversation_title: imageFileName || "Image Upload",
+        pair_count: pairCount,
+      });
+      toast.success(`Extracted ${data.extracted} training pairs from images!`);
+      setImageAnalysisText("");
+      setImageDataUrls([]);
+      setImageFileName("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process image content");
+    } finally {
+      setFileProcessing(false);
+    }
+  };
+
+
+
   const handleAddManual = () => {
     if (!manualInput.trim() || !manualOutput.trim()) return;
     createSample.mutate(
@@ -1555,7 +1660,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </Card>
 
       {/* Mode toggle */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2">
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
           <Upload className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Import</span>
         </Button>
@@ -1573,6 +1678,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         </Button>
         <Button variant={mode === "video" ? "default" : "outline"} onClick={() => setMode("video")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
           <Video className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Video</span>
+        </Button>
+        <Button variant={mode === "image" ? "default" : "outline"} onClick={() => setMode("image")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <ImageIcon className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Image</span>
         </Button>
       </div>
 
@@ -1769,6 +1877,74 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                       )}
                     </Button>
                   </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ) : mode === "image" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-primary" /> Image Analysis
+            </CardTitle>
+            <CardDescription>
+              Upload one or more images (screenshots, diagrams, handwritten notes, photos of pages). Gemini vision reads them, then the content is turned into training pairs. Max 30 images per batch, 8MB each.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <label className="flex-1 cursor-pointer">
+                <Button variant="outline" className="w-full" asChild disabled={imageAnalyzing}>
+                  <span><ImageIcon className="h-4 w-4 mr-2" /> {imageFileName ? "Change Images" : "Choose Images"}</span>
+                </Button>
+                <input ref={imageUploadRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" multiple className="sr-only" onChange={handleImageUpload} />
+              </label>
+            </div>
+
+            {imageDataUrls.length > 0 && (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" /> {imageFileName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{imageDataUrls.length} image{imageDataUrls.length === 1 ? "" : "s"} loaded</p>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                  {imageDataUrls.map((url, i) => (
+                    <div key={i} className="aspect-square rounded-md overflow-hidden border border-border/50 bg-muted/30">
+                      <img src={url} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+
+                {!imageAnalysisText && (
+                  <Button onClick={handleAnalyzeImages} disabled={imageAnalyzing} className="w-full">
+                    {imageAnalyzing ? (
+                      <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Reading images with AI vision…</>
+                    ) : (
+                      <><ScanEye className="h-4 w-4 mr-2" /> Analyze Images with AI</>
+                    )}
+                  </Button>
+                )}
+
+                {imageAnalysisText && (
+                  <>
+                    <div className="bg-muted/30 rounded-lg p-3 max-h-40 overflow-y-auto">
+                      <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
+                        {imageAnalysisText.slice(0, 800)}{imageAnalysisText.length > 800 ? "…" : ""}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{Math.round(imageAnalysisText.length / 1000)}k characters extracted from images</p>
+                    <PairCountSlider value={pairCount} onChange={setPairCount} disabled={fileProcessing} />
+                    <Button onClick={handleProcessImageText} disabled={fileProcessing} className="w-full">
+                      {fileProcessing ? (
+                        <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running pipeline…</>
+                      ) : (
+                        <><Sparkles className="h-4 w-4 mr-2" /> Extract Training Pairs</>
+                      )}
+                    </Button>
+                  </>
                 )}
               </div>
             )}
