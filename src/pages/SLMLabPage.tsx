@@ -1314,8 +1314,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     // Build preview text using the chosen delimiter
     const delim = (name: string, meta: string) =>
       (fileDelimiter || "===== {filename} =====")
-        .replaceAll("{filename}", name)
-        .replaceAll("{meta}", meta);
+        .split("{filename}").join(name)
+        .split("{meta}").join(meta);
 
     const merged = parsed.map((p) => `${delim(p.name, p.meta)}\n\n${p.text}`).join("\n\n");
     setFileText(merged);
