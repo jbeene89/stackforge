@@ -1107,7 +1107,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; currentUrl: string; results: { url: string; pairs: number; error?: string }[] }>({ current: 0, total: 0, currentUrl: "", results: [] });
   const [manualInput, setManualInput] = useState("");
   const [manualOutput, setManualOutput] = useState("");
-  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface" | "video" | "image">("import");
+  const [mode, setMode] = useState<"scrape" | "import" | "manual" | "file" | "huggingface" | "video" | "image" | "live">("import");
   const [offloadPerspective, setOffloadPerspective] = useState<string>("");
   const [showOffloadSetup, setShowOffloadSetup] = useState(false);
    const [debateMode, setDebateMode] = useState(false);
@@ -1146,6 +1146,22 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [ocrLanguage, setOcrLanguage] = useState("eng");
   const [ocrEnabled, setOcrEnabled] = useState(false);
   const [ocrProgress, setOcrProgress] = useState<{ file: string; pct: number } | null>(null);
+  // Live Chat dataset mode
+  type LiveTurn = {
+    id: string;
+    userText: string;
+    assistantText: string;
+    editedUser?: string;
+    editedAssistant?: string;
+    status: "pending" | "saved" | "skipped";
+    quality: number;
+  };
+  const [liveTurns, setLiveTurns] = useState<LiveTurn[]>([]);
+  const [liveInput, setLiveInput] = useState("");
+  const [liveSending, setLiveSending] = useState(false);
+  const [livePersona, setLivePersona] = useState("");
+  const [liveAutoSave, setLiveAutoSave] = useState(false);
+  const liveScrollRef = useRef<HTMLDivElement>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -1737,6 +1753,107 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
+  // --- Live Chat dataset mode helpers ---
+  const saveLiveTurn = (turn: LiveTurn) => {
+    const input = (turn.editedUser ?? turn.userText).trim();
+    const output = (turn.editedAssistant ?? turn.assistantText).trim();
+    if (!input || !output) {
+      toast.error("Both sides of the turn need text before saving.");
+      return;
+    }
+    createSample.mutate(
+      { dataset_id: dataset.id, input, output, quality_score: turn.quality || 4 },
+      {
+        onSuccess: () => {
+          setLiveTurns((prev) => prev.map((t) => (t.id === turn.id ? { ...t, status: "saved" } : t)));
+          toast.success("Saved to dataset");
+        },
+        onError: (err: any) => toast.error(err?.message || "Could not save turn"),
+      }
+    );
+  };
+
+  const skipLiveTurn = (id: string) => {
+    setLiveTurns((prev) => prev.map((t) => (t.id === id ? { ...t, status: "skipped" } : t)));
+  };
+
+  const updateLiveTurn = (id: string, patch: Partial<LiveTurn>) => {
+    setLiveTurns((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  };
+
+  const handleSendLive = async () => {
+    const text = liveInput.trim();
+    if (!text || liveSending) return;
+    setLiveSending(true);
+
+    const history: Array<{ role: "user" | "assistant"; content: string }> = [];
+    for (const t of liveTurns) {
+      if (t.status === "skipped") continue;
+      history.push({ role: "user", content: t.editedUser ?? t.userText });
+      history.push({ role: "assistant", content: t.editedAssistant ?? t.assistantText });
+    }
+    history.push({ role: "user", content: text });
+
+    const turnId = crypto.randomUUID();
+    setLiveInput("");
+
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) throw new Error("Please sign in first.");
+
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dataset-live-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          messages: history,
+          domain_hint: dataset.domain,
+          persona: livePersona || undefined,
+        }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: `Server error ${resp.status}` }));
+        throw new Error(err.error || `Server error ${resp.status}`);
+      }
+      const data = await resp.json();
+      const reply = (data?.reply || "").trim();
+      if (!reply) throw new Error("AI returned no reply.");
+
+      const newTurn: LiveTurn = {
+        id: turnId,
+        userText: text,
+        assistantText: reply,
+        status: "pending",
+        quality: 4,
+      };
+      setLiveTurns((prev) => [...prev, newTurn]);
+
+      if (liveAutoSave) {
+        saveLiveTurn(newTurn);
+      }
+
+      setTimeout(() => {
+        liveScrollRef.current?.scrollTo({ top: liveScrollRef.current.scrollHeight, behavior: "smooth" });
+      }, 50);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to get AI reply");
+      setLiveInput(text);
+    } finally {
+      setLiveSending(false);
+    }
+  };
+
+  const handleClearLive = () => {
+    if (liveTurns.length === 0) return;
+    if (!confirm("Clear the entire live conversation? Saved turns stay in the dataset.")) return;
+    setLiveTurns([]);
+  };
+
+
+
 
 
   const handleAddManual = () => {
@@ -1778,7 +1895,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
       </Card>
 
       {/* Mode toggle */}
-      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
         <Button variant={mode === "import" ? "default" : "outline"} onClick={() => setMode("import")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
           <Upload className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Import</span>
         </Button>
@@ -1799,6 +1916,9 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         </Button>
         <Button variant={mode === "image" ? "default" : "outline"} onClick={() => setMode("image")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
           <ImageIcon className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Image</span>
+        </Button>
+        <Button variant={mode === "live" ? "default" : "outline"} onClick={() => setMode("live")} className="h-9 sm:h-10 text-xs sm:text-sm px-2 sm:px-4">
+          <MessageSquare className="h-3.5 w-3.5 sm:mr-2 mr-1" /> <span className="truncate">Live</span>
         </Button>
       </div>
 
@@ -2171,6 +2291,163 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 )}
               </div>
             )}
+          </CardContent>
+        </Card>
+      ) : mode === "live" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" /> Live Chat → Dataset
+            </CardTitle>
+            <CardDescription>
+              Have a real conversation with the AI. Every exchange becomes a candidate training pair — review, edit, or skip before saving. Each AI reply costs 2 credits.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Setup */}
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Persona / style guide (optional)</Label>
+                <Textarea
+                  value={livePersona}
+                  onChange={(e) => setLivePersona(e.target.value.slice(0, 2000))}
+                  placeholder="e.g. Reply like a friendly senior chef teaching a beginner. Use short paragraphs, no jargon."
+                  rows={2}
+                  className="text-xs"
+                  disabled={liveSending}
+                />
+                <p className="text-[10px] text-muted-foreground">Shapes how the AI replies — saved into every turn's context.</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Switch id="live-auto" checked={liveAutoSave} onCheckedChange={setLiveAutoSave} disabled={liveSending} />
+                  <Label htmlFor="live-auto" className="text-xs cursor-pointer">Auto-save every turn</Label>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleClearLive} disabled={liveTurns.length === 0 || liveSending} className="text-xs h-7">
+                  <RotateCcw className="h-3 w-3 mr-1" /> Clear chat
+                </Button>
+              </div>
+            </div>
+
+            {/* Conversation */}
+            <div ref={liveScrollRef} className="rounded-lg border border-border/60 bg-background/40 p-3 max-h-[60vh] overflow-y-auto space-y-4">
+              {liveTurns.length === 0 ? (
+                <div className="text-center py-8 text-xs text-muted-foreground">
+                  <MessageSquare className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                  Send your first message below to start the conversation.
+                </div>
+              ) : (
+                liveTurns.map((t, idx) => (
+                  <div
+                    key={t.id}
+                    className={`rounded-lg border p-3 space-y-2 ${
+                      t.status === "saved" ? "border-emerald-500/40 bg-emerald-500/5"
+                      : t.status === "skipped" ? "border-border/40 bg-muted/20 opacity-60"
+                      : "border-border/60 bg-card"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                        Pair #{idx + 1}
+                      </span>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                        t.status === "saved" ? "bg-emerald-500/15 text-emerald-600"
+                        : t.status === "skipped" ? "bg-muted text-muted-foreground"
+                        : "bg-amber-500/15 text-amber-600"
+                      }`}>
+                        {t.status === "saved" ? "✓ Saved" : t.status === "skipped" ? "Skipped" : "Pending review"}
+                      </span>
+                    </div>
+
+                    {/* User side */}
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <User className="h-3 w-3" /> Your message (input)
+                      </Label>
+                      <Textarea
+                        value={t.editedUser ?? t.userText}
+                        onChange={(e) => updateLiveTurn(t.id, { editedUser: e.target.value })}
+                        rows={2}
+                        className="text-xs"
+                        disabled={t.status !== "pending"}
+                      />
+                    </div>
+
+                    {/* Assistant side */}
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Bot className="h-3 w-3" /> AI reply (output)
+                      </Label>
+                      <Textarea
+                        value={t.editedAssistant ?? t.assistantText}
+                        onChange={(e) => updateLiveTurn(t.id, { editedAssistant: e.target.value })}
+                        rows={4}
+                        className="text-xs"
+                        disabled={t.status !== "pending"}
+                      />
+                    </div>
+
+                    {/* Quality + actions */}
+                    {t.status === "pending" && (
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => updateLiveTurn(t.id, { quality: n })}
+                              className="p-0.5"
+                              aria-label={`Quality ${n} of 5`}
+                            >
+                              <Star className={`h-3.5 w-3.5 ${n <= t.quality ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
+                            </button>
+                          ))}
+                          <span className="text-[10px] text-muted-foreground ml-1">{t.quality}/5</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Button variant="outline" size="sm" onClick={() => skipLiveTurn(t.id)} className="h-7 text-xs">
+                            <X className="h-3 w-3 mr-1" /> Skip
+                          </Button>
+                          <Button size="sm" onClick={() => saveLiveTurn(t)} disabled={createSample.isPending} className="h-7 text-xs">
+                            <Check className="h-3 w-3 mr-1" /> Save to dataset
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Composer */}
+            <div className="space-y-2">
+              <Textarea
+                value={liveInput}
+                onChange={(e) => setLiveInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault();
+                    handleSendLive();
+                  }
+                }}
+                placeholder="Type a question or prompt… (Ctrl/⌘+Enter to send)"
+                rows={3}
+                className="text-sm"
+                disabled={liveSending}
+              />
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-muted-foreground">
+                  {liveTurns.filter((t) => t.status === "saved").length} saved · {liveTurns.filter((t) => t.status === "pending").length} pending · {liveTurns.filter((t) => t.status === "skipped").length} skipped
+                </p>
+                <Button onClick={handleSendLive} disabled={liveSending || !liveInput.trim()} size="sm">
+                  {liveSending ? (
+                    <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Waiting for AI…</>
+                  ) : (
+                    <><Send className="h-4 w-4 mr-2" /> Send</>
+                  )}
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       ) : mode === "scrape" ? (
