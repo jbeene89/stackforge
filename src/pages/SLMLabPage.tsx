@@ -1882,6 +1882,74 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             )}
           </CardContent>
         </Card>
+      ) : mode === "image" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-primary" /> Image Analysis
+            </CardTitle>
+            <CardDescription>
+              Upload one or more images (screenshots, diagrams, handwritten notes, photos of pages). Gemini vision reads them, then the content is turned into training pairs. Max 30 images per batch, 8MB each.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <label className="flex-1 cursor-pointer">
+                <Button variant="outline" className="w-full" asChild disabled={imageAnalyzing}>
+                  <span><ImageIcon className="h-4 w-4 mr-2" /> {imageFileName ? "Change Images" : "Choose Images"}</span>
+                </Button>
+                <input ref={imageUploadRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" multiple className="sr-only" onChange={handleImageUpload} />
+              </label>
+            </div>
+
+            {imageDataUrls.length > 0 && (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" /> {imageFileName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{imageDataUrls.length} image{imageDataUrls.length === 1 ? "" : "s"} loaded</p>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                  {imageDataUrls.map((url, i) => (
+                    <div key={i} className="aspect-square rounded-md overflow-hidden border border-border/50 bg-muted/30">
+                      <img src={url} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+
+                {!imageAnalysisText && (
+                  <Button onClick={handleAnalyzeImages} disabled={imageAnalyzing} className="w-full">
+                    {imageAnalyzing ? (
+                      <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Reading images with AI vision…</>
+                    ) : (
+                      <><ScanEye className="h-4 w-4 mr-2" /> Analyze Images with AI</>
+                    )}
+                  </Button>
+                )}
+
+                {imageAnalysisText && (
+                  <>
+                    <div className="bg-muted/30 rounded-lg p-3 max-h-40 overflow-y-auto">
+                      <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
+                        {imageAnalysisText.slice(0, 800)}{imageAnalysisText.length > 800 ? "…" : ""}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{Math.round(imageAnalysisText.length / 1000)}k characters extracted from images</p>
+                    <PairCountSlider value={pairCount} onChange={setPairCount} disabled={fileProcessing} />
+                    <Button onClick={handleProcessImageText} disabled={fileProcessing} className="w-full">
+                      {fileProcessing ? (
+                        <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running pipeline…</>
+                      ) : (
+                        <><Sparkles className="h-4 w-4 mr-2" /> Extract Training Pairs</>
+                      )}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ) : mode === "scrape" ? (
         <Card>
           <CardHeader>
