@@ -714,7 +714,7 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
               <Button variant="outline" size="sm" asChild>
                 <span><Upload className="h-3.5 w-3.5 mr-1.5" /> Choose File</span>
               </Button>
-              <input ref={fileInputRef} type="file" accept=".json" className="sr-only" onChange={handleFileUpload} />
+              <input ref={fileInputRef} type="file" multiple accept=".json,.jsonl,.ndjson,application/json" className="sr-only" onChange={handleFileUpload} />
             </label>
           </div>
         </CardContent>
