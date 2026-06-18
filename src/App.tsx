@@ -49,6 +49,7 @@ const EdgeTrainingPage = lazy(() => import("./pages/EdgeTrainingPage"));
 const ExportStudioPage = lazy(() => import("./pages/ExportStudioPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const TrustPage = lazy(() => import("./pages/TrustPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
 const SubscriptionSuccessPage = lazy(() => import("./pages/SubscriptionSuccessPage"));
 const InstallPage = lazy(() => import("./pages/InstallPage"));
