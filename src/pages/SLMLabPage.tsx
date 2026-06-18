@@ -1921,7 +1921,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button variant="outline" className="w-full" asChild disabled={imageAnalyzing}>
                   <span><ImageIcon className="h-4 w-4 mr-2" /> {imageFileName ? "Change Images" : "Choose Images"}</span>
                 </Button>
-                <input ref={imageUploadRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" multiple className="sr-only" onChange={handleImageUpload} />
+                <input ref={imageUploadRef} type="file" accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.avif,.svg" multiple className="sr-only" onChange={handleImageUpload} />
               </label>
             </div>
 
