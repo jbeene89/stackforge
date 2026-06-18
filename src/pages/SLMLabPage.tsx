@@ -1191,61 +1191,83 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     return slides.join("\n\n");
   };
 
-  const handleRawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const ext = file.name.toLowerCase().split(".").pop();
+  const extractTextFromFile = async (file: File): Promise<{ text: string; meta: string }> => {
+    const ext = file.name.toLowerCase().split(".").pop() || "";
+    let fullText = "";
+    let meta = "";
 
-    try {
-      let fullText = "";
-      let meta = "";
-
-      if (ext === "pdf") {
-        const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
-        }
-        meta = `${pdf.numPages} pages`;
-      } else if (ext === "docx") {
-        const arrayBuffer = await file.arrayBuffer();
-        fullText = await extractDocxText(arrayBuffer);
-        meta = "DOCX";
-      } else if (ext === "pptx") {
-        const arrayBuffer = await file.arrayBuffer();
-        fullText = await extractPptxText(arrayBuffer);
-        meta = "PPTX";
-      } else {
-        // Plain text files
-        const text = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => resolve(ev.target?.result as string);
-          reader.onerror = () => reject(new Error("Failed to read file"));
-          reader.readAsText(file);
-        });
-        fullText = text;
-        meta = "text";
+    if (ext === "pdf") {
+      const pdfjsLib = await import("pdfjs-dist");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
       }
-
-      fullText = fullText.trim();
-      if (fullText.length < 50) {
-        toast.error("File has too little extractable text (need at least 50 characters).");
-        return;
-      }
-      setFileText(fullText);
-      setFileName(file.name);
-      toast.success(`Extracted text from "${file.name}" (${Math.round(fullText.length / 1000)}k chars, ${meta})`);
-    } catch (err: any) {
-      console.error("File extraction error:", err);
-      toast.error("Failed to extract text: " + (err?.message || "unknown error"));
+      meta = `${pdf.numPages}p PDF`;
+    } else if (ext === "docx") {
+      fullText = await extractDocxText(await file.arrayBuffer());
+      meta = "DOCX";
+    } else if (ext === "pptx") {
+      fullText = await extractPptxText(await file.arrayBuffer());
+      meta = "PPTX";
+    } else {
+      fullText = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target?.result as string);
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsText(file);
+      });
+      meta = ext.toUpperCase() || "text";
     }
+    return { text: fullText.trim(), meta };
+  };
+
+  const handleRawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const combined: string[] = [];
+    const summaries: string[] = [];
+    let failed = 0;
+
+    for (const file of files) {
+      try {
+        const { text, meta } = await extractTextFromFile(file);
+        if (text.length < 20) {
+          failed++;
+          continue;
+        }
+        combined.push(`===== ${file.name} (${meta}) =====\n\n${text}`);
+        summaries.push(`${file.name} (${Math.round(text.length / 1000)}k)`);
+      } catch (err: any) {
+        console.error(`Failed to extract "${file.name}":`, err);
+        failed++;
+      }
+    }
+
+    if (combined.length === 0) {
+      toast.error("Could not extract usable text from any file.");
+      if (fileUploadRef.current) fileUploadRef.current.value = "";
+      return;
+    }
+
+    const merged = combined.join("\n\n");
+    setFileText(merged);
+    setFileName(
+      files.length === 1
+        ? files[0].name
+        : `${combined.length} files (${summaries.slice(0, 3).join(", ")}${summaries.length > 3 ? `, +${summaries.length - 3} more` : ""})`
+    );
+    toast.success(
+      `Loaded ${combined.length} file${combined.length === 1 ? "" : "s"} (${Math.round(merged.length / 1000)}k chars)${failed ? ` — ${failed} skipped` : ""}`
+    );
 
     if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
+
 
   const handleProcessFile = async () => {
     if (!fileText.trim()) return;
