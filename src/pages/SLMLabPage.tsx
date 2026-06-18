@@ -1824,7 +1824,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button variant="outline" className="w-full" asChild disabled={videoExtracting}>
                   <span><Video className="h-4 w-4 mr-2" /> {videoFileName ? "Change Video" : "Choose Video"}</span>
                 </Button>
-                <input ref={videoUploadRef} type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" className="sr-only" onChange={handleVideoUpload} />
+                <input ref={videoUploadRef} type="file" accept="video/*,.mp4,.webm,.ogg,.ogv,.mov,.avi,.mkv,.m4v,.3gp,.flv,.wmv,.mpg,.mpeg" className="sr-only" onChange={handleVideoUpload} />
               </label>
             </div>
 
