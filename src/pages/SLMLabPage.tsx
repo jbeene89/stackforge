@@ -1116,6 +1116,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileProcessing, setFileProcessing] = useState(false);
+  const [parsedFiles, setParsedFiles] = useState<Array<{ name: string; text: string; meta: string }>>([]);
   const [videoFrames, setVideoFrames] = useState<string[]>([]);
   const [videoFileName, setVideoFileName] = useState("");
   const [videoExtracting, setVideoExtracting] = useState(false);
