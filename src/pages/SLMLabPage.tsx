@@ -1146,6 +1146,22 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [ocrLanguage, setOcrLanguage] = useState("eng");
   const [ocrEnabled, setOcrEnabled] = useState(false);
   const [ocrProgress, setOcrProgress] = useState<{ file: string; pct: number } | null>(null);
+  // Live Chat dataset mode
+  type LiveTurn = {
+    id: string;
+    userText: string;
+    assistantText: string;
+    editedUser?: string;
+    editedAssistant?: string;
+    status: "pending" | "saved" | "skipped";
+    quality: number;
+  };
+  const [liveTurns, setLiveTurns] = useState<LiveTurn[]>([]);
+  const [liveInput, setLiveInput] = useState("");
+  const [liveSending, setLiveSending] = useState(false);
+  const [livePersona, setLivePersona] = useState("");
+  const [liveAutoSave, setLiveAutoSave] = useState(false);
+  const liveScrollRef = useRef<HTMLDivElement>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
