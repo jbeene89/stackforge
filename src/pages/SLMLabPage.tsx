@@ -1116,6 +1116,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileProcessing, setFileProcessing] = useState(false);
+  const [parsedFiles, setParsedFiles] = useState<Array<{ name: string; text: string; meta: string }>>([]);
   const [videoFrames, setVideoFrames] = useState<string[]>([]);
   const [videoFileName, setVideoFileName] = useState("");
   const [videoExtracting, setVideoExtracting] = useState(false);
@@ -1139,6 +1140,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [imageAnalyzing, setImageAnalyzing] = useState(false);
   const [imageAnalysisText, setImageAnalysisText] = useState("");
   const imageUploadRef = useRef<HTMLInputElement>(null);
+  // Per-file parsing options
+  const [mergeMode, setMergeMode] = useState<"combine" | "separate">("combine");
+  const [fileDelimiter, setFileDelimiter] = useState("===== {filename} =====");
+  const [ocrLanguage, setOcrLanguage] = useState("eng");
+  const [ocrEnabled, setOcrEnabled] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<{ file: string; pct: number } | null>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -1193,6 +1200,26 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     return slides.join("\n\n");
   };
 
+  const isImageExt = (ext: string) =>
+    ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tif", "tiff", "avif"].includes(ext);
+
+  const ocrImage = async (source: File | Blob, lang: string, label: string): Promise<string> => {
+    const Tesseract = (await import("tesseract.js")).default;
+    setOcrProgress({ file: label, pct: 0 });
+    try {
+      const { data } = await Tesseract.recognize(source, lang, {
+        logger: (m: any) => {
+          if (m.status === "recognizing text" && typeof m.progress === "number") {
+            setOcrProgress({ file: label, pct: Math.round(m.progress * 100) });
+          }
+        },
+      });
+      return (data?.text || "").trim();
+    } finally {
+      setOcrProgress(null);
+    }
+  };
+
   const extractTextFromFile = async (file: File): Promise<{ text: string; meta: string }> => {
     const ext = file.name.toLowerCase().split(".").pop() || "";
     let fullText = "";
@@ -1209,12 +1236,37 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
         fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
       }
       meta = `${pdf.numPages}p PDF`;
+
+      // OCR fallback: if PDF text extraction yielded too little (scanned PDF), OCR each page
+      if (ocrEnabled && fullText.trim().length < 100) {
+        const pages: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d")!;
+          await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+          const blob: Blob = await new Promise((res) => canvas.toBlob((b) => res(b!), "image/png"));
+          const t = await ocrImage(blob, ocrLanguage, `${file.name} (page ${i}/${pdf.numPages})`);
+          pages.push(t);
+        }
+        fullText = pages.join("\n\n");
+        meta = `${pdf.numPages}p PDF (OCR ${ocrLanguage})`;
+      }
     } else if (ext === "docx") {
       fullText = await extractDocxText(await file.arrayBuffer());
       meta = "DOCX";
     } else if (ext === "pptx") {
       fullText = await extractPptxText(await file.arrayBuffer());
       meta = "PPTX";
+    } else if (isImageExt(ext)) {
+      if (!ocrEnabled) {
+        throw new Error(`"${file.name}" is an image — turn on OCR to read text from it, or use the Image tab.`);
+      }
+      fullText = await ocrImage(file, ocrLanguage, file.name);
+      meta = `IMG (OCR ${ocrLanguage})`;
     } else {
       fullText = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -1231,61 +1283,103 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const combined: string[] = [];
-    const summaries: string[] = [];
+    const parsed: Array<{ name: string; text: string; meta: string }> = [];
     let failed = 0;
+    const failures: string[] = [];
 
     for (const file of files) {
       try {
         const { text, meta } = await extractTextFromFile(file);
         if (text.length < 20) {
           failed++;
+          failures.push(`${file.name} (too little text)`);
           continue;
         }
-        combined.push(`===== ${file.name} (${meta}) =====\n\n${text}`);
-        summaries.push(`${file.name} (${Math.round(text.length / 1000)}k)`);
+        parsed.push({ name: file.name, text, meta });
       } catch (err: any) {
         console.error(`Failed to extract "${file.name}":`, err);
         failed++;
+        failures.push(`${file.name} (${err?.message || "error"})`);
       }
     }
 
-    if (combined.length === 0) {
+    if (parsed.length === 0) {
       toast.error("Could not extract usable text from any file.");
       if (fileUploadRef.current) fileUploadRef.current.value = "";
       return;
     }
 
-    const merged = combined.join("\n\n");
+    setParsedFiles(parsed);
+
+    // Build preview text using the chosen delimiter
+    const delim = (name: string, meta: string) =>
+      (fileDelimiter || "===== {filename} =====")
+        .split("{filename}").join(name)
+        .split("{meta}").join(meta);
+
+    const merged = parsed.map((p) => `${delim(p.name, p.meta)}\n\n${p.text}`).join("\n\n");
     setFileText(merged);
     setFileName(
       files.length === 1
         ? files[0].name
-        : `${combined.length} files (${summaries.slice(0, 3).join(", ")}${summaries.length > 3 ? `, +${summaries.length - 3} more` : ""})`
+        : `${parsed.length} files (${parsed.slice(0, 3).map((p) => p.name).join(", ")}${parsed.length > 3 ? `, +${parsed.length - 3} more` : ""})`
     );
     toast.success(
-      `Loaded ${combined.length} file${combined.length === 1 ? "" : "s"} (${Math.round(merged.length / 1000)}k chars)${failed ? ` — ${failed} skipped` : ""}`
+      `Loaded ${parsed.length} file${parsed.length === 1 ? "" : "s"} (${Math.round(merged.length / 1000)}k chars)${failed ? ` — ${failed} skipped` : ""}`
     );
+    if (failed > 0) {
+      console.warn("Skipped files:", failures);
+    }
 
     if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
 
 
+
+
   const handleProcessFile = async () => {
-    if (!fileText.trim()) return;
+    if (!fileText.trim() && parsedFiles.length === 0) return;
     setFileProcessing(true);
     try {
-      const data = await processExport.mutateAsync({
-        conversation_text: fileText,
-        dataset_id: dataset.id,
-        domain_hint: dataset.domain,
-        provider: "file-upload",
-        conversation_title: fileName || "Uploaded File",
-        pair_count: pairCount,
-      });
-      toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
+      if (mergeMode === "separate" && parsedFiles.length > 1) {
+        let totalPairs = 0;
+        let okCount = 0;
+        let failCount = 0;
+        for (let i = 0; i < parsedFiles.length; i++) {
+          const p = parsedFiles[i];
+          try {
+            toast.info(`Processing ${i + 1}/${parsedFiles.length}: ${p.name}`);
+            const data = await processExport.mutateAsync({
+              conversation_text: p.text,
+              dataset_id: dataset.id,
+              domain_hint: dataset.domain,
+              provider: "file-upload",
+              conversation_title: p.name,
+              pair_count: pairCount,
+            });
+            totalPairs += data.extracted || 0;
+            okCount++;
+          } catch (err: any) {
+            console.error(`Failed on ${p.name}:`, err);
+            failCount++;
+            toast.error(`"${p.name}" failed: ${err?.message || "unknown"}`);
+          }
+        }
+        toast.success(`Extracted ${totalPairs} training pairs from ${okCount}/${parsedFiles.length} files${failCount ? ` (${failCount} failed)` : ""}!`);
+      } else {
+        const data = await processExport.mutateAsync({
+          conversation_text: fileText,
+          dataset_id: dataset.id,
+          domain_hint: dataset.domain,
+          provider: "file-upload",
+          conversation_title: fileName || "Uploaded File",
+          pair_count: pairCount,
+        });
+        toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
+      }
       setFileText("");
       setFileName("");
+      setParsedFiles([]);
     } catch (err: any) {
       toast.error(err.message || "Failed to process file");
     } finally {
@@ -1723,15 +1817,105 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Per-file parsing options */}
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
+              <p className="text-xs font-medium text-foreground/80 flex items-center gap-1.5">
+                <Wrench className="h-3.5 w-3.5" /> Parsing options
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">When uploading several files</Label>
+                  <Select value={mergeMode} onValueChange={(v) => setMergeMode(v as any)} disabled={fileProcessing}>
+                    <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="combine">Combine into one big text</SelectItem>
+                      <SelectItem value="separate">Process each file separately</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-muted-foreground">
+                    {mergeMode === "combine"
+                      ? "All files glued together, sent through the pipeline once."
+                      : "Each file goes through the pipeline on its own — slower but cleaner per source."}
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">OCR (read text from images / scanned PDFs)</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch id="ocr-enabled" checked={ocrEnabled} onCheckedChange={setOcrEnabled} disabled={fileProcessing} />
+                    <Select value={ocrLanguage} onValueChange={setOcrLanguage} disabled={!ocrEnabled || fileProcessing}>
+                      <SelectTrigger className="h-9 text-xs flex-1"><SelectValue /></SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectItem value="eng">English</SelectItem>
+                        <SelectItem value="spa">Spanish</SelectItem>
+                        <SelectItem value="fra">French</SelectItem>
+                        <SelectItem value="deu">German</SelectItem>
+                        <SelectItem value="ita">Italian</SelectItem>
+                        <SelectItem value="por">Portuguese</SelectItem>
+                        <SelectItem value="nld">Dutch</SelectItem>
+                        <SelectItem value="rus">Russian</SelectItem>
+                        <SelectItem value="ukr">Ukrainian</SelectItem>
+                        <SelectItem value="pol">Polish</SelectItem>
+                        <SelectItem value="tur">Turkish</SelectItem>
+                        <SelectItem value="ara">Arabic</SelectItem>
+                        <SelectItem value="heb">Hebrew</SelectItem>
+                        <SelectItem value="hin">Hindi</SelectItem>
+                        <SelectItem value="ben">Bengali</SelectItem>
+                        <SelectItem value="chi_sim">Chinese (Simplified)</SelectItem>
+                        <SelectItem value="chi_tra">Chinese (Traditional)</SelectItem>
+                        <SelectItem value="jpn">Japanese</SelectItem>
+                        <SelectItem value="kor">Korean</SelectItem>
+                        <SelectItem value="vie">Vietnamese</SelectItem>
+                        <SelectItem value="tha">Thai</SelectItem>
+                        <SelectItem value="ind">Indonesian</SelectItem>
+                        <SelectItem value="msa">Malay</SelectItem>
+                        <SelectItem value="ell">Greek</SelectItem>
+                        <SelectItem value="ces">Czech</SelectItem>
+                        <SelectItem value="swe">Swedish</SelectItem>
+                        <SelectItem value="nor">Norwegian</SelectItem>
+                        <SelectItem value="dan">Danish</SelectItem>
+                        <SelectItem value="fin">Finnish</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Only used for image files or scanned PDFs that have no real text.</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Separator between files (combine mode)</Label>
+                <Input
+                  value={fileDelimiter}
+                  onChange={(e) => setFileDelimiter(e.target.value)}
+                  placeholder="===== {filename} ====="
+                  className="h-9 text-xs font-mono"
+                  disabled={fileProcessing || mergeMode === "separate"}
+                />
+                <p className="text-[10px] text-muted-foreground">Use <code className="bg-muted px-1 rounded">{"{filename}"}</code> and <code className="bg-muted px-1 rounded">{"{meta}"}</code> to insert the file name and type.</p>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3">
               <label className="flex-1 cursor-pointer">
                 <Button variant="outline" className="w-full" asChild>
-                  <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}</span>
+                  <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change Files` : `Choose Files`}</span>
                 </Button>
-                <input ref={fileUploadRef} type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.csv,.tsv,.log,.text,.rtf,.json,.jsonl,.ndjson,.xml,.yaml,.yml,.toml,.ini,.conf,.html,.htm,.srt,.vtt,.sub,.epub,.tex,.bib,.org,.rst,.adoc,.asciidoc,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.cc,.cpp,.h,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.lua,.r,.scala,.dart,text/*,application/json,application/xml" className="sr-only" onChange={handleRawFileUpload} />
+                <input ref={fileUploadRef} type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.csv,.tsv,.log,.text,.rtf,.json,.jsonl,.ndjson,.xml,.yaml,.yml,.toml,.ini,.conf,.html,.htm,.srt,.vtt,.sub,.epub,.tex,.bib,.org,.rst,.adoc,.asciidoc,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.cc,.cpp,.h,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.lua,.r,.scala,.dart,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.avif,text/*,application/json,application/xml" className="sr-only" onChange={handleRawFileUpload} />
                 <p className="text-[10px] text-muted-foreground mt-1">Tip: hold Ctrl/Cmd or Shift to select multiple files</p>
               </label>
             </div>
+
+            {ocrProgress && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-1.5">
+                <p className="text-xs font-medium flex items-center gap-2">
+                  <ScanEye className="h-3.5 w-3.5 animate-pulse" /> Reading text from {ocrProgress.file}…
+                </p>
+                <Progress value={ocrProgress.pct} className="h-1.5" />
+                <p className="text-[10px] text-muted-foreground">{ocrProgress.pct}%</p>
+              </div>
+            )}
+
             {fileName && (
               <div className="space-y-3">
                 <div className="bg-muted/50 rounded-lg p-3 space-y-1">
@@ -1740,6 +1924,18 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   </p>
                   <p className="text-xs text-muted-foreground">{Math.round(fileText.length / 1000)}k characters loaded</p>
                 </div>
+
+                {parsedFiles.length > 1 && (
+                  <div className="rounded-lg border border-border/60 bg-muted/20 p-2 max-h-32 overflow-y-auto space-y-1">
+                    {parsedFiles.map((p) => (
+                      <div key={p.name} className="flex items-center justify-between text-[11px]">
+                        <span className="truncate flex-1 mr-2">{p.name}</span>
+                        <span className="text-muted-foreground shrink-0">{p.meta} · {Math.round(p.text.length / 1000)}k</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
                   <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">{fileText.slice(0, 500)}{fileText.length > 500 ? "…" : ""}</p>
                 </div>
@@ -1747,6 +1943,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button onClick={handleProcessFile} disabled={fileProcessing} className="w-full">
                   {fileProcessing ? (
                     <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Running Five Perspective Pipeline…</>
+                  ) : mergeMode === "separate" && parsedFiles.length > 1 ? (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Process {parsedFiles.length} Files Separately</>
                   ) : (
                     <><Sparkles className="h-4 w-4 mr-2" /> Process Through Pipeline</>
                   )}
