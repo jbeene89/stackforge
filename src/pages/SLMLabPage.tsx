@@ -1521,6 +1521,106 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    if (files.length > 30) {
+      toast.error("Maximum 30 images allowed at once");
+      return;
+    }
+    for (const f of files) {
+      if (f.size > 8 * 1024 * 1024) {
+        toast.error(`"${f.name}" is over 8MB. Please use smaller images.`);
+        return;
+      }
+    }
+    try {
+      const urls = await Promise.all(
+        files.map(
+          (f) =>
+            new Promise<string>((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () => resolve(r.result as string);
+              r.onerror = () => reject(new Error(`Could not read ${f.name}`));
+              r.readAsDataURL(f);
+            })
+        )
+      );
+      setImageDataUrls(urls);
+      setImageFileName(files.length === 1 ? files[0].name : `${files.length} images`);
+      setImageAnalysisText("");
+      toast.success(`${files.length} image${files.length === 1 ? "" : "s"} loaded`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to read images");
+    } finally {
+      if (imageUploadRef.current) imageUploadRef.current.value = "";
+    }
+  };
+
+  const handleAnalyzeImages = async () => {
+    if (imageDataUrls.length === 0) return;
+    setImageAnalyzing(true);
+    setImageAnalysisText("");
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) throw new Error("Not signed in. Please log in and try again.");
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-video-frames`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          frames: imageDataUrls,
+          domain_hint: dataset.domain,
+          dataset_id: dataset.id,
+        }),
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `Server error ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.text || data.text.trim().length < 20) {
+        toast.error("AI could not extract meaningful content from these images.");
+        return;
+      }
+      setImageAnalysisText(data.text);
+      toast.success(`AI extracted content from ${imageDataUrls.length} image${imageDataUrls.length === 1 ? "" : "s"}!`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to analyze images");
+    } finally {
+      setImageAnalyzing(false);
+    }
+  };
+
+  const handleProcessImageText = async () => {
+    if (!imageAnalysisText.trim()) return;
+    setFileProcessing(true);
+    try {
+      const data = await processExport.mutateAsync({
+        conversation_text: imageAnalysisText,
+        dataset_id: dataset.id,
+        domain_hint: dataset.domain,
+        provider: "image-extraction",
+        conversation_title: imageFileName || "Image Upload",
+        pair_count: pairCount,
+      });
+      toast.success(`Extracted ${data.extracted} training pairs from images!`);
+      setImageAnalysisText("");
+      setImageDataUrls([]);
+      setImageFileName("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process image content");
+    } finally {
+      setFileProcessing(false);
+    }
+  };
+
+
+
   const handleAddManual = () => {
     if (!manualInput.trim() || !manualOutput.trim()) return;
     createSample.mutate(
