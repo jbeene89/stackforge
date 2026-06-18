@@ -579,55 +579,57 @@ function ImportChatsPanel({ dataset }: { dataset: TrainingDataset }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processExport = useProcessChatExport();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
+    const allConvos: ParsedConversation[] = [];
+    let failed = 0;
+
+    for (const file of files) {
       try {
-        const text = ev.target?.result as string;
-        if (!text || text.length < 10) {
-          toast.error("File appears empty or unreadable.");
-          return;
-        }
+        const text = await file.text();
+        if (!text || text.length < 10) { failed++; continue; }
         let raw: any;
         try {
           raw = JSON.parse(text);
-        } catch (parseErr) {
-          console.error("JSON parse error:", parseErr);
-          toast.error("Could not parse file. Make sure it's a valid JSON export.");
-          return;
+        } catch {
+          failed++;
+          continue;
         }
-        
         let convos: ParsedConversation[] = [];
         try {
           convos = parseExport(provider, raw);
         } catch (exportErr) {
-          console.error("parseExport error:", exportErr);
-          toast.error("Error processing conversations. Check the console for details.");
-          return;
+          console.error("parseExport error for", file.name, exportErr);
+          failed++;
+          continue;
         }
-        if (convos.length === 0) {
-          const topKeys = raw && typeof raw === 'object' && !Array.isArray(raw) ? Object.keys(raw).join(', ') : (Array.isArray(raw) ? `array of ${raw.length} items` : typeof raw);
-          toast.error(`No conversations found. File structure: ${topKeys}. Make sure you selected the right provider.`);
-          return;
-        }
-        setParsedConvos(convos);
-        setSelectedIds(new Set(convos.map((_, i) => i)));
-        setResults([]);
-        toast.success(`Found ${convos.length} conversations!`);
+        allConvos.push(...convos);
       } catch (err: any) {
-        console.error("handleFileUpload unexpected error:", err);
-        toast.error("Unexpected error reading file: " + (err?.message || "unknown"));
+        console.error("read error for", file.name, err);
+        failed++;
       }
-    };
-    reader.onerror = () => {
-      toast.error("Failed to read file.");
-    };
-    reader.readAsText(file, "utf-8");
+    }
+
+    if (allConvos.length === 0) {
+      toast.error(
+        failed > 0
+          ? `Could not extract conversations from ${failed} file${failed === 1 ? "" : "s"}. Make sure you picked the right provider.`
+          : "No conversations found."
+      );
+    } else {
+      setParsedConvos(allConvos);
+      setSelectedIds(new Set(allConvos.map((_, i) => i)));
+      setResults([]);
+      toast.success(
+        `Found ${allConvos.length} conversation${allConvos.length === 1 ? "" : "s"} from ${files.length - failed} file${files.length - failed === 1 ? "" : "s"}${failed ? ` (${failed} skipped)` : ""}`
+      );
+    }
+
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
 
   const toggleConvo = (idx: number) => {
     setSelectedIds(prev => {
