@@ -1139,6 +1139,12 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [imageAnalyzing, setImageAnalyzing] = useState(false);
   const [imageAnalysisText, setImageAnalysisText] = useState("");
   const imageUploadRef = useRef<HTMLInputElement>(null);
+  // Per-file parsing options
+  const [mergeMode, setMergeMode] = useState<"combine" | "separate">("combine");
+  const [fileDelimiter, setFileDelimiter] = useState("===== {filename} =====");
+  const [ocrLanguage, setOcrLanguage] = useState("eng");
+  const [ocrEnabled, setOcrEnabled] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<{ file: string; pct: number } | null>(null);
 
   const workerUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/perspective-worker`;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
