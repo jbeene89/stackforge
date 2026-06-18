@@ -1004,6 +1004,7 @@ export default function LandingPage() {
                 <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
                   <div><Link to="/privacy" className="hover:text-primary transition-colors duration-300">Privacy</Link></div>
                   <div><Link to="/terms" className="hover:text-primary transition-colors duration-300">Terms</Link></div>
+                  <div><Link to="/trust" className="hover:text-primary transition-colors duration-300">Trust & Security</Link></div>
                   <div><a href="mailto:support@soupy.com" className="hover:text-primary transition-colors duration-300">Contact</a></div>
                 </div>
               </div>
