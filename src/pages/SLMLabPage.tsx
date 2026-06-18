@@ -31,7 +31,7 @@ import {
   CheckCircle2, Circle, ArrowRight, ArrowLeft, Package,
   Zap, BookOpen, ChevronRight, ChevronDown, Info, ThumbsUp, ThumbsDown,
   FolderDown, Terminal, MessageSquare, Send, User, Bot, Eye,
-  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye, RefreshCw
+  Shield, Lightbulb, Heart, Layers, Wrench, Upload, FileUp, Tablet, Copy, Wifi, Video, Subtitles, ScanEye, RefreshCw, Image as ImageIcon
 } from "lucide-react";
 import { TerminalPanel } from "@/components/TerminalPanel";
 import { CreditCostEstimator } from "@/components/CreditCostEstimator";
