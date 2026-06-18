@@ -1726,7 +1726,8 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 <Button variant="outline" className="w-full" asChild>
                   <span><Upload className="h-4 w-4 mr-2" /> {fileName ? `Change File` : `Choose File`}</span>
                 </Button>
-                <input ref={fileUploadRef} type="file" accept=".pdf,.docx,.pptx,.txt,.md,.csv,.log,.text,.markdown" className="sr-only" onChange={handleRawFileUpload} />
+                <input ref={fileUploadRef} type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.markdown,.csv,.tsv,.log,.text,.rtf,.json,.jsonl,.ndjson,.xml,.yaml,.yml,.toml,.ini,.conf,.html,.htm,.srt,.vtt,.sub,.epub,.tex,.bib,.org,.rst,.adoc,.asciidoc,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.cc,.cpp,.h,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.lua,.r,.scala,.dart,text/*,application/json,application/xml" className="sr-only" onChange={handleRawFileUpload} />
+                <p className="text-[10px] text-muted-foreground mt-1">Tip: hold Ctrl/Cmd or Shift to select multiple files</p>
               </label>
             </div>
             {fileName && (
