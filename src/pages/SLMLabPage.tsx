@@ -1338,20 +1338,48 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
 
   const handleProcessFile = async () => {
-    if (!fileText.trim()) return;
+    if (!fileText.trim() && parsedFiles.length === 0) return;
     setFileProcessing(true);
     try {
-      const data = await processExport.mutateAsync({
-        conversation_text: fileText,
-        dataset_id: dataset.id,
-        domain_hint: dataset.domain,
-        provider: "file-upload",
-        conversation_title: fileName || "Uploaded File",
-        pair_count: pairCount,
-      });
-      toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
+      if (mergeMode === "separate" && parsedFiles.length > 1) {
+        let totalPairs = 0;
+        let okCount = 0;
+        let failCount = 0;
+        for (let i = 0; i < parsedFiles.length; i++) {
+          const p = parsedFiles[i];
+          try {
+            toast.info(`Processing ${i + 1}/${parsedFiles.length}: ${p.name}`);
+            const data = await processExport.mutateAsync({
+              conversation_text: p.text,
+              dataset_id: dataset.id,
+              domain_hint: dataset.domain,
+              provider: "file-upload",
+              conversation_title: p.name,
+              pair_count: pairCount,
+            });
+            totalPairs += data.extracted || 0;
+            okCount++;
+          } catch (err: any) {
+            console.error(`Failed on ${p.name}:`, err);
+            failCount++;
+            toast.error(`"${p.name}" failed: ${err?.message || "unknown"}`);
+          }
+        }
+        toast.success(`Extracted ${totalPairs} training pairs from ${okCount}/${parsedFiles.length} files${failCount ? ` (${failCount} failed)` : ""}!`);
+      } else {
+        const data = await processExport.mutateAsync({
+          conversation_text: fileText,
+          dataset_id: dataset.id,
+          domain_hint: dataset.domain,
+          provider: "file-upload",
+          conversation_title: fileName || "Uploaded File",
+          pair_count: pairCount,
+        });
+        toast.success(`Extracted ${data.extracted} training pairs from "${fileName}"!`);
+      }
       setFileText("");
       setFileName("");
+      setParsedFiles([]);
     } catch (err: any) {
       toast.error(err.message || "Failed to process file");
     } finally {
