@@ -212,7 +212,7 @@ interface GPUSetupWizardProps {
 }
 
 export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSetupWizardProps) {
-  const [selectedGPU, setSelectedGPU] = useState<string>("rx580");
+  const [selectedGPU, setSelectedGPU] = useState<string>("rx580-win");
   const [selectedModel, setSelectedModel] = useState<string>("llama3.2:3b");
   const [detecting, setDetecting] = useState(false);
   const [detectedName, setDetectedName] = useState<string | null>(null);
