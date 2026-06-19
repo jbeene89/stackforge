@@ -273,7 +273,7 @@ const Scene2: React.FC = () => {
           opacity: spring({ frame, fps, config: { damping: 20 } }),
         }}
       >
-        WHAT YOU GET
+        NO STRINGS.
       </div>
       {items.map((t, i) => {
         const delay = i * 12;
