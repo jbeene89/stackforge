@@ -24,21 +24,50 @@ export interface GPUProfile {
 
 const GPU_PROFILES: GPUProfile[] = [
   {
-    id: "rx580",
-    name: "AMD RX 580 8GB",
+    id: "rx580-win",
+    name: "AMD RX 580 8GB (Windows · Vulkan)",
     vendor: "amd",
     vram_gb: 8,
-    backend: "ROCm",
+    backend: "Vulkan (llama.cpp)",
+    ollamaTag: "vulkan",
+    setupCommands: [
+      "# RX 580 (Polaris / gfx803) is NOT supported by ROCm or AMD HIP SDK on Windows.",
+      "# Use the Vulkan backend instead — it's fully supported and fast on Polaris.",
+      "",
+      "# Option A — LM Studio (easiest, GUI):",
+      "#   1. Download: https://lmstudio.ai",
+      "#   2. Settings → Hardware → pick 'Vulkan' runtime",
+      "#   3. Load any GGUF model, offload all layers to GPU",
+      "",
+      "# Option B — Ollama Vulkan fork (CLI, drop-in compatible):",
+      "winget install ollama.ollama-vulkan",
+      "ollama serve",
+      "",
+      "# Option C — llama.cpp Vulkan build (most control):",
+      "#   Download from: https://github.com/ggerganov/llama.cpp/releases",
+      "#   Pick the 'llama-bXXXX-bin-win-vulkan-x64.zip' asset",
+    ],
+    dockerFlags: [],
+    envVars: {
+      GGML_VULKAN_DEVICE: "0",
+    },
+    notes: "Polaris/gfx803 has no ROCm or HIP support on Windows — Vulkan is the right path. Runs 7B Q4 at ~10-15 tok/s, 13B Q4 at ~5-7 tok/s. Full 8GB VRAM usable.",
+  },
+  {
+    id: "rx580",
+    name: "AMD RX 580 8GB (Linux · ROCm override)",
+    vendor: "amd",
+    vram_gb: 8,
+    backend: "ROCm (gfx803 override)",
     ollamaTag: "rocm",
     setupCommands: [
-      "# Install ROCm-compatible Ollama",
+      "# Linux only — ROCm dropped Polaris officially, but the gfx803 override still works.",
       "curl -fsSL https://ollama.com/install.sh | sh",
       "",
-      "# Set AMD overrides (RX 580 = gfx803)",
+      "# Force ROCm to treat RX 580 as gfx803",
       "export HSA_OVERRIDE_GFX_VERSION=8.0.3",
       "export OLLAMA_GPU_LAYERS=999",
       "",
-      "# Start Ollama with ROCm",
       "ollama serve",
     ],
     dockerFlags: [
@@ -53,7 +82,7 @@ const GPU_PROFILES: GPUProfile[] = [
       OLLAMA_GPU_LAYERS: "999",
       HIP_VISIBLE_DEVICES: "0",
     },
-    notes: "GCN 4th gen — needs HSA_OVERRIDE for ROCm. Runs 7B Q4 models at ~8-12 tok/s.",
+    notes: "Linux only. GCN 4th gen — needs HSA_OVERRIDE for ROCm. Runs 7B Q4 at ~8-12 tok/s. On Windows, use the Vulkan profile instead.",
   },
   {
     id: "rx6600",
@@ -183,7 +212,7 @@ interface GPUSetupWizardProps {
 }
 
 export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSetupWizardProps) {
-  const [selectedGPU, setSelectedGPU] = useState<string>("rx580");
+  const [selectedGPU, setSelectedGPU] = useState<string>("rx580-win");
   const [selectedModel, setSelectedModel] = useState<string>("llama3.2:3b");
   const [detecting, setDetecting] = useState(false);
   const [detectedName, setDetectedName] = useState<string | null>(null);
@@ -231,9 +260,11 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
       setDetectedName(fullName);
 
       // Match against known profiles
+      const isWindows = typeof navigator !== "undefined" && /win/i.test(navigator.platform || navigator.userAgent || "");
       const match = GPU_PROFILES.find((p) => {
-        const pName = p.name.toLowerCase();
-        if (desc.includes("rx 580") || desc.includes("rx580") || desc.includes("polaris")) return p.id === "rx580";
+        if (desc.includes("rx 580") || desc.includes("rx580") || desc.includes("polaris")) {
+          return p.id === (isWindows ? "rx580-win" : "rx580");
+        }
         if (desc.includes("rx 6600") || desc.includes("rx6600") || desc.includes("navi 23")) return p.id === "rx6600";
         if (desc.includes("7900") || desc.includes("navi 31")) return p.id === "rx7900xtx";
         if (desc.includes("3060") || desc.includes("ga106")) return p.id === "rtx3060";
@@ -245,9 +276,9 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
         handleGPUChange(match.id);
         toast.success(`Detected: ${fullName} → matched to ${match.name}`);
       } else if (vendor.includes("amd") || vendor.includes("ati") || desc.includes("radeon")) {
-        // Generic AMD fallback — pick RX 580 as conservative default
-        handleGPUChange("rx580");
-        toast.info(`Detected AMD GPU: ${fullName}. Defaulted to RX 580 profile — adjust if needed.`);
+        const fallback = isWindows ? "rx580-win" : "rx580";
+        handleGPUChange(fallback);
+        toast.info(`Detected AMD GPU: ${fullName}. Defaulted to ${isWindows ? "Windows/Vulkan" : "Linux/ROCm"} profile — adjust if needed.`);
       } else if (vendor.includes("nvidia") || desc.includes("geforce") || desc.includes("rtx") || desc.includes("gtx")) {
         handleGPUChange("rtx3060");
         toast.info(`Detected NVIDIA GPU: ${fullName}. Defaulted to RTX 3060 profile — adjust if needed.`);
