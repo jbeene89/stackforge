@@ -2,6 +2,7 @@ import { Composition } from "remotion";
 import { MainVideo } from "./MainVideo";
 import { CascadeVideo } from "./CascadeVideo";
 import { HighlightsVideo } from "./HighlightsVideo";
+import { MobileAdVideo } from "./MobileAdVideo";
 
 export const RemotionRoot: React.FC = () => (
   <>
