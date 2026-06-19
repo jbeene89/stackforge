@@ -38,5 +38,13 @@ export const RemotionRoot: React.FC = () => (
       width={1080}
       height={1080}
     />
+    <Composition
+      id="mobile-ad-vertical"
+      component={MobileAdVideo}
+      durationInFrames={720}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
   </>
 );
