@@ -260,9 +260,11 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
       setDetectedName(fullName);
 
       // Match against known profiles
+      const isWindows = typeof navigator !== "undefined" && /win/i.test(navigator.platform || navigator.userAgent || "");
       const match = GPU_PROFILES.find((p) => {
-        const pName = p.name.toLowerCase();
-        if (desc.includes("rx 580") || desc.includes("rx580") || desc.includes("polaris")) return p.id === "rx580";
+        if (desc.includes("rx 580") || desc.includes("rx580") || desc.includes("polaris")) {
+          return p.id === (isWindows ? "rx580-win" : "rx580");
+        }
         if (desc.includes("rx 6600") || desc.includes("rx6600") || desc.includes("navi 23")) return p.id === "rx6600";
         if (desc.includes("7900") || desc.includes("navi 31")) return p.id === "rx7900xtx";
         if (desc.includes("3060") || desc.includes("ga106")) return p.id === "rtx3060";
@@ -274,9 +276,9 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
         handleGPUChange(match.id);
         toast.success(`Detected: ${fullName} → matched to ${match.name}`);
       } else if (vendor.includes("amd") || vendor.includes("ati") || desc.includes("radeon")) {
-        // Generic AMD fallback — pick RX 580 as conservative default
-        handleGPUChange("rx580");
-        toast.info(`Detected AMD GPU: ${fullName}. Defaulted to RX 580 profile — adjust if needed.`);
+        const fallback = isWindows ? "rx580-win" : "rx580";
+        handleGPUChange(fallback);
+        toast.info(`Detected AMD GPU: ${fullName}. Defaulted to ${isWindows ? "Windows/Vulkan" : "Linux/ROCm"} profile — adjust if needed.`);
       } else if (vendor.includes("nvidia") || desc.includes("geforce") || desc.includes("rtx") || desc.includes("gtx")) {
         handleGPUChange("rtx3060");
         toast.info(`Detected NVIDIA GPU: ${fullName}. Defaulted to RTX 3060 profile — adjust if needed.`);
