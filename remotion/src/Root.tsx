@@ -3,6 +3,7 @@ import { MainVideo } from "./MainVideo";
 import { CascadeVideo } from "./CascadeVideo";
 import { HighlightsVideo } from "./HighlightsVideo";
 import { MobileAdVideo } from "./MobileAdVideo";
+import { WildAdVideoSquare, WildAdVideoVertical } from "./WildAdVideo";
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -42,6 +43,22 @@ export const RemotionRoot: React.FC = () => (
       id="mobile-ad-vertical"
       component={MobileAdVideo}
       durationInFrames={720}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="wild-ad-square"
+      component={WildAdVideoSquare}
+      durationInFrames={540}
+      fps={30}
+      width={1080}
+      height={1080}
+    />
+    <Composition
+      id="wild-ad-vertical"
+      component={WildAdVideoVertical}
+      durationInFrames={540}
       fps={30}
       width={1080}
       height={1920}
