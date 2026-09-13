@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { useNavigate } from "react-router-dom";
+import { isNativeApp } from "@/lib/native-navigation";
 import { toast } from "sonner";
 
 interface AuthContextType {
@@ -25,7 +25,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+    let authEventReceived = false;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      authEventReceived = true;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -53,26 +57,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        // A newer auth event takes precedence over the initial session lookup.
+        if (!active || authEventReceived) return;
+        if (error) console.error("Session restore failed", error.message);
+        setSession(error ? null : session);
+        setUser(error ? null : session?.user ?? null);
+      })
+      .catch((error: unknown) => {
+        console.error("Session restore failed", error instanceof Error ? error.message : "Unknown error");
+        if (active && !authEventReceived) {
+          setSession(null);
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, name?: string) => {
+    const native = isNativeApp();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { name: name || email },
-        emailRedirectTo: window.location.origin,
+        // The Android shell's localhost origin is not an email destination.
+        emailRedirectTo: native ? "https://www.soupylab.com/" : window.location.origin,
       },
     });
     if (error) throw error;
-    toast.success("Account created! Check your email to confirm.");
+    toast.success(native
+      ? "Check your email and confirm your account in your browser, then return to this app to sign in."
+      : "Account created! Check your email to confirm.");
   };
 
   const signIn = async (email: string, password: string) => {
@@ -81,6 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    if (isNativeApp()) {
+      throw new Error("Google sign-in is not configured for this Android app yet. Use email and password.");
+    }
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
@@ -88,6 +115,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithApple = async () => {
+    if (isNativeApp()) {
+      throw new Error("Apple sign-in is not configured for this Android app yet. Use email and password.");
+    }
     const result = await lovable.auth.signInWithOAuth("apple", {
       redirect_uri: window.location.origin,
     });
@@ -101,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${isNativeApp() ? "https://www.soupylab.com" : window.location.origin}/reset-password`,
     });
     if (error) throw error;
   };

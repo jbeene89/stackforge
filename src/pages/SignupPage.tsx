@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { getSignInDestination, isNativeApp } from "@/lib/native-navigation";
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = useMemo(() => ({
@@ -72,11 +73,26 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [offline, setOffline] = useState(!navigator.onLine);
+  const native = isNativeApp();
+  const location = useLocation();
+  const destination = getSignInDestination(location.state?.from);
   const [searchParams] = useSearchParams();
   const referralCodeFromUrl = searchParams.get("ref") || "";
   const navigate = useNavigate();
 
   const { user, loading, signUp, signInWithGoogle, signInWithApple } = useAuth();
+
+  useEffect(() => {
+    const onOnline = () => setOffline(false);
+    const onOffline = () => setOffline(true);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
 
   // Persist referral code so it survives email confirmation redirect
   useEffect(() => {
@@ -89,12 +105,16 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate("/dashboard", { replace: true });
+      navigate(destination, { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, destination]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (offline) {
+      toast.error("Connect to create an account, or continue in the offline workbench.");
+      return;
+    }
     setIsLoading(true);
     try {
       await signUp(email, password);
@@ -106,20 +126,25 @@ export default function SignupPage() {
       }
       // GTM custom event
       (window as any).dataLayer?.push({ event: 'signup_complete', method: 'email' });
-    } catch (err: any) {
-      toast.error(err.message || "Signup failed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Signup failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSocialLogin = async (provider: string) => {
+    if (offline || isLoading) return;
+    setIsLoading(true);
     // GTM custom event for social signup attempt
     (window as any).dataLayer?.push({ event: 'signup_attempt', method: provider });
-    if (provider === "google") {
-      await signInWithGoogle();
-    } else if (provider === "apple") {
-      await signInWithApple();
+    try {
+      if (provider === "google") await signInWithGoogle();
+      else if (provider === "apple") await signInWithApple();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Sign-up failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -167,7 +192,7 @@ export default function SignupPage() {
       </div>
 
       {/* Right: Signup Form */}
-      <div className="flex-1 flex items-center justify-center px-6 bg-background">
+      <div className="flex-1 flex items-center justify-center px-6 py-8 bg-background">
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -184,6 +209,20 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold">Create your free account</h1>
             <p className="text-sm text-muted-foreground mt-1">Get 50 free credits — no card needed</p>
           </div>
+
+          {native && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">Create an account with email on Android. You can also explore the lab before signing up.</p>
+              <Button asChild variant="outline" className="w-full"><Link to="/slm-lab?step=1">Try public builder</Link></Button>
+              <Button asChild variant="ghost" className="w-full"><Link to="/offline-workbench">Use offline workbench</Link></Button>
+            </div>
+          )}
+          {offline && (
+            <div role="status" className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+              <p className="text-sm">You're offline. Account creation needs a connection.</p>
+              <Button asChild variant="outline" className="w-full"><Link to="/offline-workbench">Open offline workbench</Link></Button>
+            </div>
+          )}
 
           {/* Value prop badges - visible on all screens */}
           <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
@@ -210,12 +249,14 @@ export default function SignupPage() {
             </motion.div>
           )}
 
-          {/* Social Signup */}
+          {/* Social providers are configured for the website only. */}
+          {!native && <>
           <div className="space-y-3">
             <Button
               variant="outline"
               className="w-full justify-center gap-2"
               onClick={() => handleSocialLogin("google")}
+              disabled={offline || isLoading}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -229,6 +270,7 @@ export default function SignupPage() {
               variant="outline"
               className="w-full justify-center gap-2"
               onClick={() => handleSocialLogin("apple")}
+              disabled={offline || isLoading}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
@@ -246,6 +288,8 @@ export default function SignupPage() {
             </div>
           </div>
 
+          </>}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -254,6 +298,9 @@ export default function SignupPage() {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  required
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -267,6 +314,8 @@ export default function SignupPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
                   placeholder="Create a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -287,7 +336,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               className="w-full gradient-primary text-primary-foreground"
-              disabled={isLoading}
+              disabled={isLoading || offline}
             >
               {isLoading ? (
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -299,13 +348,13 @@ export default function SignupPage() {
 
           <p className="text-center text-xs text-muted-foreground">
             By signing up, you agree to our{" "}
-            <a href="#" className="text-primary hover:underline">Terms</a> and{" "}
-            <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
+            <Link to="/terms" className="text-primary hover:underline">Terms</Link> and{" "}
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
           </p>
 
           <div className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline font-medium">
+            <Link to="/login" state={{ from: destination }} className="text-primary hover:underline font-medium">
               Log in
             </Link>
           </div>

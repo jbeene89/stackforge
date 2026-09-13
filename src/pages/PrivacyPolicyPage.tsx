@@ -4,7 +4,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-const LAST_UPDATED = "March 22, 2026";
+const LAST_UPDATED = "September 13, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -26,6 +26,13 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-lg font-semibold text-foreground">1. Information We Collect</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               We collect information you provide directly: your name, email address, and payment information when you create an account or subscribe to a plan. We also collect usage data automatically, including pages visited, features used, AI module interactions, and credit consumption patterns.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold text-foreground">Local training notebook</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Training examples in the offline notebook are saved on your device when you choose Save. They are separate from your cloud account and are not automatically uploaded or sent to an AI provider. Anyone with access to this app on the device may be able to view them. You can delete saved examples or export a copy. On Android, Export creates a temporary file in the app cache and opens the system sharing chooser; you choose where the file goes. Signing out does not delete this device-local notebook. Favorites and recent tools also stay on the device and contain tool names and routes, not your prompts.
             </p>
           </section>
 

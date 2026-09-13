@@ -4,18 +4,24 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, HashRouter, Navigate, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 
 import { AuthProvider } from "@/hooks/useAuth";
 import { ModelContextProvider } from "@/hooks/useModelContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TierProtectedRoute } from "@/components/TierProtectedRoute";
-import { AppLayout } from "@/components/layout/AppLayout";
+const AppLayout = lazy(() => import("@/components/layout/AppLayout").then(module => ({ default: module.AppLayout })));
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
-// Eagerly load the landing page (critical path)
-import LandingPage from "./pages/LandingPage";
+// Keep the mobile launchpad independent of the marketing page bundle.
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+import { isNativeApp } from "@/lib/native-navigation";
+import { AppLoadingScreen } from "@/components/native/AppLoadingScreen";
+import { MobileNavigation, RouteActivity } from "@/components/native/MobileNavigation";
+import NativeLaunchpadPage from "./pages/NativeLaunchpadPage";
+const OfflineWorkbenchPage = lazy(() => import("./pages/OfflineWorkbenchPage"));
+const AppRouter = isNativeApp() ? HashRouter : BrowserRouter;
 
 // Lazy-load all other pages for code splitting
 const PricingPage = lazy(() => import("./pages/PricingPage"));
@@ -89,14 +95,17 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <AppRouter>
           <AuthProvider>
             <ModelContextProvider>
+            <RouteActivity />
             <ChunkErrorBoundary>
-            <Suspense fallback={null}>
+            <Suspense fallback={<AppLoadingScreen />}>
               <Routes>
                 {/* Public routes */}
-                <Route path="/" element={<LandingPage />} />
+                <Route path="/" element={isNativeApp() ? <Navigate to="/launchpad" replace /> : <LandingPage />} />
+                <Route path="/launchpad" element={<NativeLaunchpadPage />} />
+                <Route path="/offline-workbench" element={<OfflineWorkbenchPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
@@ -171,10 +180,11 @@ const App = () => (
               </Routes>
             </Suspense>
             </ChunkErrorBoundary>
+            <MobileNavigation />
             </ModelContextProvider>
           </AuthProvider>
           <CookieConsentBanner />
-        </BrowserRouter>
+        </AppRouter>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

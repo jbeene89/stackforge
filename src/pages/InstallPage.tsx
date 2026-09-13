@@ -1,3 +1,4 @@
+import { navigateApp } from "@/lib/native-navigation";
 import { useState, useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ export default function InstallPage() {
           <p className="text-muted-foreground">
             Soupy is installed on your device. Open it from your home screen anytime.
           </p>
-          <Button onClick={() => window.location.href = "/dashboard"} className="gradient-primary text-primary-foreground">
+          <Button onClick={() => navigateApp("/dashboard")} className="gradient-primary text-primary-foreground">
             Open Soupy
           </Button>
         </motion.div>
@@ -205,7 +206,7 @@ export default function InstallPage() {
           <p className="text-xs text-muted-foreground mb-3">
             Or continue in your browser
           </p>
-          <Button variant="ghost" onClick={() => window.location.href = "/"}>
+          <Button variant="ghost" onClick={() => navigateApp("/")}>
             Go to Soupy <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>

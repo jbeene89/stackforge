@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,39 +8,64 @@ import { Sparkles, Mail, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { getSignInDestination, isNativeApp } from "@/lib/native-navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [offline, setOffline] = useState(!navigator.onLine);
+  const native = isNativeApp();
+  const location = useLocation();
+  const destination = getSignInDestination(location.state?.from);
   const navigate = useNavigate();
   const { user, loading, signIn, signInWithGoogle, signInWithApple } = useAuth();
 
   useEffect(() => {
     if (!loading && user) {
-      navigate("/dashboard", { replace: true });
+      navigate(destination, { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, destination]);
+
+  useEffect(() => {
+    const onOnline = () => setOffline(false);
+    const onOffline = () => setOffline(true);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (offline) {
+      toast.error("Login needs a connection. You can still use the offline workbench.");
+      return;
+    }
     setIsLoading(true);
     try {
       await signIn(email, password);
-      navigate("/dashboard");
-    } catch (err: any) {
-      toast.error(err.message || "Login failed");
+      navigate(destination, { replace: true });
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Login failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSocialLogin = async (provider: string) => {
-    if (provider === "google") {
-      await signInWithGoogle();
-    } else if (provider === "apple") {
-      await signInWithApple();
+    if (offline || isLoading) return;
+    setIsLoading(true);
+    try {
+      if (provider === "google") await signInWithGoogle();
+      else if (provider === "apple") await signInWithApple();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Sign-in failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,7 +114,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right: Login Form */}
-      <div className="flex-1 flex items-center justify-center px-6 bg-background">
+      <div className="flex-1 flex items-center justify-center px-6 py-8 bg-background">
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -107,12 +132,30 @@ export default function LoginPage() {
             <p className="text-sm text-muted-foreground mt-1">Enter your credentials to continue</p>
           </div>
 
-          {/* Social Login */}
+          {native && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">Use email and password to sign in on Android, or keep exploring without an account.</p>
+              <div className="grid gap-2">
+                <Button asChild variant="outline"><Link to="/slm-lab?step=1">Open public SLM Lab</Link></Button>
+                <Button asChild variant="ghost"><Link to="/launchpad">Back to your launchpad</Link></Button>
+              </div>
+            </div>
+          )}
+          {offline && (
+            <div role="status" className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+              <p className="text-sm">You're offline. Connect to sign in, or continue in your local workbench.</p>
+              <Button asChild variant="outline" className="w-full"><Link to="/offline-workbench">Open offline workbench</Link></Button>
+            </div>
+          )}
+
+          {/* Social providers are configured for the website only. */}
+          {!native && <>
           <div className="space-y-3">
             <Button
               variant="outline"
               className="w-full justify-center gap-2"
               onClick={() => handleSocialLogin("google")}
+              disabled={offline || isLoading}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -126,6 +169,7 @@ export default function LoginPage() {
               variant="outline"
               className="w-full justify-center gap-2"
               onClick={() => handleSocialLogin("apple")}
+              disabled={offline || isLoading}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
@@ -143,6 +187,8 @@ export default function LoginPage() {
             </div>
           </div>
 
+          </>}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -151,6 +197,9 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  required
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -169,6 +218,8 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -188,7 +239,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full gradient-primary text-primary-foreground"
-              disabled={isLoading}
+              disabled={isLoading || offline}
             >
               {isLoading ? (
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -200,17 +251,17 @@ export default function LoginPage() {
 
           <div className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
+            <Link to="/signup" state={{ from: destination }} className="text-primary hover:underline font-medium">
               Sign up free
             </Link>
           </div>
 
-          <div className="text-center">
+          {!native && <div className="text-center">
             <kbd className="px-2 py-1 rounded bg-secondary text-xs font-mono text-muted-foreground">
               ⌘K
             </kbd>
             <span className="text-xs text-muted-foreground ml-2">to open command palette</span>
-          </div>
+          </div>}
         </motion.div>
       </div>
     </div>

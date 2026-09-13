@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
 import { WheelNavigator } from "./WheelNavigator";
 import { CreditBumpBanner } from "@/components/CreditBumpBanner";
@@ -15,7 +15,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/providers/ThemeProvider";
-import { LogOut, Settings, Search, Command } from "lucide-react";
+import { LogOut, Settings, Search, Command, Home } from "lucide-react";
+
+import { isNativeApp } from "@/lib/native-navigation";
 
 const LayoutFonts = () => (
   <style>{`
@@ -61,7 +63,7 @@ export function AppLayout() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
+    navigate(isNativeApp() ? "/launchpad" : "/login");
   };
 
   return (
@@ -80,13 +82,13 @@ export function AppLayout() {
         <div className="absolute inset-0 bg-background/55 dark:bg-background/50 pointer-events-none" />
         <div className="relative z-10 flex w-full min-h-screen">
           {/* Wheel Navigator replaces sidebar */}
-          <WheelNavigator />
+          <div className={isNativeApp() ? "hidden md:block" : undefined}><WheelNavigator /></div>
 
           <div className="flex-1 flex flex-col min-w-0">
             <CreditBumpBanner />
             {/* ── HEADER ── */}
             <header
-              className="sl-header flex items-center h-12 px-4 gap-3"
+              className="sl-header flex items-center min-h-14 px-3 py-1 gap-2"
               style={{
                 background: "hsl(var(--background) / 0.95)",
                 borderBottom: "1px solid hsl(var(--border))",
@@ -94,8 +96,9 @@ export function AppLayout() {
                 flexShrink: 0,
               }}
             >
+              {isNativeApp() && <Link to="/launchpad" aria-label="SoupyLab home" className="min-w-11 min-h-11 inline-flex items-center justify-center rounded-lg text-primary"><Home size={21} /></Link>}
               {/* Search bar */}
-              <button className="sl-search" onClick={() => setOpen(true)}>
+              <button className="sl-search" style={{ minHeight: 44 }} aria-label="Search all tools" onClick={() => setOpen(true)}>
                 <Search style={{ width: 12, height: 12, flexShrink: 0 }} />
                 <span style={{ flex: 1, textAlign: "left" }}>SEARCH…</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 2, opacity: 0.4, fontSize: 9 }}>
@@ -106,12 +109,13 @@ export function AppLayout() {
               <div style={{ flex: 1 }} />
 
               {/* User menu */}
-              <DropdownMenu>
+              {user ? (<DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
+                    aria-label="Account menu"
                     style={{
-                      width: 32,
-                      height: 32,
+                      width: 44,
+                      height: 44,
                       borderRadius: "50%",
                       border: "1px solid rgba(0,229,255,0.2)",
                       padding: 0,
@@ -202,7 +206,9 @@ export function AppLayout() {
                     <LogOut style={{ width: 12, height: 12, marginRight: 8 }} /> SIGN OUT
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu>) : (
+                <Link to="/login" state={{ from: "/slm-lab" }} className="inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-semibold text-primary">Sign in</Link>
+              )}
             </header>
 
             {/* ── MAIN CONTENT ── */}
