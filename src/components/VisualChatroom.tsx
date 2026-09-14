@@ -1,3 +1,4 @@
+import { navigateApp } from "@/lib/native-navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { saveToGallery } from "@/lib/forgeGallery";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,7 +75,7 @@ export default function VisualChatroom() {
         if (error) {
           if (error.message?.includes("402") || error.message?.includes("Insufficient")) {
             toast.error("Out of credits! Upgrade your plan to continue.", {
-              action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+              action: { label: "Upgrade", onClick: () => navigateApp("/pricing") },
             });
             abortRef.current = true;
             queryClient.invalidateQueries({ queryKey: ["user-credits"] });
@@ -85,7 +86,7 @@ export default function VisualChatroom() {
         if (data?.error) {
           if (data.error.includes("Insufficient")) {
             toast.error("Out of credits!", {
-              action: { label: "Upgrade", onClick: () => window.location.href = "/pricing" },
+              action: { label: "Upgrade", onClick: () => navigateApp("/pricing") },
             });
             abortRef.current = true;
             queryClient.invalidateQueries({ queryKey: ["user-credits"] });

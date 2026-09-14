@@ -1,0 +1,12 @@
+.soupy-mobile-nav-spacer { height: calc(76px + var(--safe-area-bottom, 0px)); }
+.soupy-mobile-nav {
+  position: fixed; z-index: 40; inset: auto 0 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px; padding: 8px max(12px, var(--safe-area-right, 0px)) max(8px, var(--safe-area-bottom, 0px)) max(12px, var(--safe-area-left, 0px));
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--background) / .98); color: hsl(var(--muted-foreground));
+}
+.soupy-mobile-nav a { min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border-radius: 12px; font: 600 12px/1.2 system-ui, sans-serif; }
+.soupy-mobile-nav a[aria-current="page"] { color: hsl(var(--primary)); background: hsl(var(--primary) / .12); }
+.soupy-mobile-nav a:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .soupy-mobile-nav * { transition: none !important; } }

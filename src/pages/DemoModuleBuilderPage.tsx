@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 
+import { navigateApp } from "@/lib/native-navigation";
+
+const PRESET_IDS = ["email-classifier", "scope-summarizer", "tone-rewriter"];
 const DEMO_PRESETS = [
   {
     name: "Email Classifier",
@@ -109,6 +112,8 @@ async function streamDemoAI({
 }
 
 export default function DemoModuleBuilderPage() {
+  const [searchParams] = useSearchParams();
+  const presetId = searchParams.get("preset");
   const [name, setName] = useState(DEMO_PRESETS[0].name);
   const [role, setRole] = useState(DEMO_PRESETS[0].role);
   const [type, setType] = useState(DEMO_PRESETS[0].type);
@@ -135,12 +140,21 @@ export default function DemoModuleBuilderPage() {
     setTestOutput(null);
   };
 
+  useEffect(() => {
+    const index = PRESET_IDS.indexOf(presetId ?? "");
+    if (index >= 0) loadPreset(index);
+  }, [presetId]);
+
   const runTest = async () => {
     if (!testInput.trim()) return;
+    if (!navigator.onLine) {
+      toast.error("Connect to the internet to run this demo. Your input is still here.");
+      return;
+    }
     if (runsUsed >= 5) {
       toast.error("Demo limit reached!", {
         description: "Sign up free for unlimited module testing.",
-        action: { label: "Sign Up", onClick: () => window.location.href = "/signup" },
+        action: { label: "Sign Up", onClick: () => navigateApp("/signup") },
       });
       return;
     }
@@ -165,7 +179,7 @@ export default function DemoModuleBuilderPage() {
         setRunsUsed(5);
         toast.error("Demo limit reached!", {
           description: "Sign up free for unlimited module testing.",
-          action: { label: "Sign Up", onClick: () => window.location.href = "/signup" },
+          action: { label: "Sign Up", onClick: () => navigateApp("/signup") },
         });
       } else {
         setTestOutput(`Error: ${err.message}`);

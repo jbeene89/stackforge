@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,7 +78,14 @@ export const useModelContext = () => useContext(Ctx);
 /* ── Provider ────────────────────────────────────────────────────── */
 export function ModelContextProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [selectedDataset, setSelectedDataset] = useState<{ id: string; name: string } | null>(null);
+  const userId = user?.id ?? null;
+  const [selectedDataset, setSelectedDataset] = useState<{ id: string; name: string; userId: string } | null>(null);
+  // The owner check also applies during the render before identity-change effects run.
+  const ownedDataset = userId && selectedDataset?.userId === userId ? selectedDataset : null;
+
+  useEffect(() => {
+    setSelectedDataset(current => current?.userId === userId ? current : null);
+  }, [userId]);
 
   // Persistent base model selection — survives navigation across SLM Lab sections
   const [selectedBaseModel, setSelectedBaseModelRaw] = useState(() => {
@@ -106,11 +113,11 @@ export function ModelContextProvider({ children }: { children: ReactNode }) {
 
   // Query pipeline progress for the selected dataset
   const { data: stages } = useQuery({
-    queryKey: ["pipeline-progress", selectedDataset?.id],
-    enabled: !!selectedDataset && !!user,
+    queryKey: ["pipeline-progress", userId, ownedDataset?.id],
+    enabled: !!ownedDataset,
     queryFn: async () => {
-      const datasetId = selectedDataset!.id;
-      const userId = user!.id;
+      if (!ownedDataset || !userId) return [];
+      const datasetId = ownedDataset.id;
 
       // Parallel queries
       const [samplesRes, jobsRes, deployRes] = await Promise.all([
@@ -206,16 +213,16 @@ export function ModelContextProvider({ children }: { children: ReactNode }) {
   });
 
   const setActiveDataset = useCallback((id: string, name: string) => {
-    setSelectedDataset({ id, name });
-  }, []);
+    if (userId) setSelectedDataset({ id, name, userId });
+  }, [userId]);
 
   const clearActiveModel = useCallback(() => {
     setSelectedDataset(null);
   }, []);
 
   const activeModel: ModelContext | null =
-    selectedDataset && stages
-      ? { datasetId: selectedDataset.id, datasetName: selectedDataset.name, stages }
+    ownedDataset && stages
+      ? { datasetId: ownedDataset.id, datasetName: ownedDataset.name, stages }
       : null;
 
   return (

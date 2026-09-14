@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Android tools, transfer payloads and build outputs
+.build-tools/
+.native-transfer/
+release-artifacts/
