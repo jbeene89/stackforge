@@ -17,6 +17,7 @@ import {
 import VisualChatroom from "@/components/VisualChatroom";
 import ImageAnimator from "@/components/ImageAnimator";
 import ForgeGallery from "@/components/ForgeGallery";
+import { shareOrSaveImage } from "@/lib/share-image";
 import { saveToGallery } from "@/lib/forgeGallery";
 
 // ─── The 5 Perspective Characters ───
@@ -268,12 +269,14 @@ export default function ImageForgePage() {
     }
   };
 
-  const downloadImage = () => {
+  const [sharingImage, setSharingImage] = useState(false);
+  const downloadImage = async () => {
     if (!result?.image) return;
-    const link = document.createElement("a");
-    link.href = result.image;
-    link.download = `forge-${Date.now()}.png`;
-    link.click();
+    setSharingImage(true);
+    try { await shareOrSaveImage(result.image); }
+    catch (error) {
+      if (!(error instanceof Error && /cancel|dismiss|abort/i.test(error.name + error.message))) toast.error(error instanceof Error ? error.message : "Could not share this image.");
+    } finally { setSharingImage(false); }
   };
 
   return (
@@ -576,9 +579,9 @@ export default function ImageForgePage() {
                   className="w-full object-contain max-h-[600px] bg-black/5 dark:bg-white/5"
                 />
                 {/* Overlay actions */}
-                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="secondary" onClick={downloadImage} className="backdrop-blur bg-background/80">
-                    <Download className="h-4 w-4 mr-1" /> Save
+                <div className="relative flex flex-wrap gap-2 p-3 bg-background/95">
+                  <Button size="sm" variant="secondary" onClick={downloadImage} disabled={sharingImage} className="min-h-12 backdrop-blur bg-background/80">
+                    <Download className="h-4 w-4 mr-1" /> {sharingImage ? "Opening…" : "Share / save"}
                   </Button>
                   <Button
                     size="sm"

@@ -1,11 +1,12 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, MicOff, Camera, StickyNote, Send, Trash2, Clock, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useMobileCaptures, CaptureType } from "@/hooks/useMobileCaptures";
+import { useMobileCaptures } from "@/hooks/useMobileCaptures";
+import { prepareImage } from "@/lib/image-import";
 import { cn } from "@/lib/utils";
 
 type ActiveMode = "text" | "voice" | "photo" | null;
@@ -20,6 +21,15 @@ export default function CapturePage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [photoNote, setPhotoNote] = useState("");
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [photoError, setPhotoError] = useState("");
+  const photoRequest = useRef(0);
+  useEffect(() => () => {
+    photoRequest.current++;
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    mediaRecorderRef.current?.stream.getTracks().forEach(track => track.stop());
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -97,7 +107,7 @@ export default function CapturePage() {
 
   const takePhoto = useCallback(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !video.videoWidth || !video.videoHeight) return;
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -111,26 +121,39 @@ export default function CapturePage() {
     }, "image/jpeg", 0.85);
   }, []);
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setPhotoBlob(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    const request = ++photoRequest.current;
+    setPhotoLoading(true); setPhotoError("");
+    try {
+      const preview = await prepareImage(file);
+      const blob = await (await fetch(preview)).blob();
+      if (request !== photoRequest.current) return;
+      streamRef.current?.getTracks().forEach(track => track.stop());
+      setPhotoBlob(blob);
+      setPhotoPreview(preview);
+    } catch (error) {
+      if (request === photoRequest.current) setPhotoError(error instanceof Error ? error.message : "Could not open this photo.");
+    } finally {
+      if (request === photoRequest.current) setPhotoLoading(false);
+    }
   }, []);
 
   const handlePhotoSubmit = useCallback(() => {
-    if (!photoBlob) return;
+    if (!photoBlob || addCapture.isPending) return;
+    setPhotoError("");
     addCapture.mutate({
       type: "photo",
       title: photoNote || `Photo capture — ${new Date().toLocaleTimeString()}`,
       content: photoNote || "Photo capture",
       file: photoBlob,
       fileName: "photo.jpg",
+    }, {
+      onSuccess: () => { setActiveMode(null); setPhotoPreview(null); setPhotoBlob(null); setPhotoNote(""); },
+      onError: () => setPhotoError("Upload failed. Your photo and note are still here. Check your connection and retry."),
     });
-    setActiveMode(null);
-    setPhotoPreview(null);
-    setPhotoBlob(null);
-    setPhotoNote("");
   }, [photoBlob, photoNote, addCapture]);
 
   // ── Text Note ──
@@ -279,35 +302,20 @@ export default function CapturePage() {
       {activeMode === "photo" && (
         <Card className="border-accent/30">
           <CardContent className="p-4 space-y-3">
-            {!photoPreview ? (
-              <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full rounded-lg bg-black aspect-[4/3] object-cover"
-                />
-                <Button className="w-full gap-2" onClick={takePhoto}>
-                  <Camera className="h-4 w-4" />
-                  Take Photo
-                </Button>
-              </>
-            ) : (
-              <>
-                <img src={photoPreview} alt="Captured" className="w-full rounded-lg" />
-                <Input
-                  placeholder="Add a note about this photo..."
-                  value={photoNote}
-                  onChange={(e) => setPhotoNote(e.target.value)}
-                />
-              </>
-            )}
+            <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+              {photoPreview ? <img src={photoPreview} alt="Selected photo preview" className="absolute inset-0 w-full h-full object-contain" /> : <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-contain" />}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" className="min-h-12" onClick={takePhoto} disabled={Boolean(photoPreview) || photoLoading || addCapture.isPending}><Camera aria-hidden="true" />Take photo</Button>
+              <Button variant="outline" className="min-h-12" onClick={() => fileInputRef.current?.click()} disabled={photoLoading || addCapture.isPending}>{photoPreview ? "Change photo" : "Choose photo"}</Button>
+            </div>
+            <Input aria-label="Photo note" placeholder="Add a note about this photo…" value={photoNote} onChange={event => setPhotoNote(event.target.value)} disabled={addCapture.isPending} />
+            <p role="status" className="text-sm min-h-10 text-muted-foreground">{photoLoading ? "Opening photo…" : photoError || "JPEG, PNG or WebP recommended. Up to 8 MB; photos are resized locally for upload."}</p>
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
-              capture="environment"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif"
+              disabled={photoLoading || addCapture.isPending}
               className="hidden"
               onChange={handleFileSelect}
             />
@@ -316,6 +324,8 @@ export default function CapturePage() {
                 variant="ghost"
                 className="flex-1"
                 onClick={() => {
+                  photoRequest.current++;
+                  setPhotoLoading(false); setPhotoError("");
                   streamRef.current?.getTracks().forEach((t) => t.stop());
                   setActiveMode(null);
                   setPhotoPreview(null);
@@ -325,16 +335,14 @@ export default function CapturePage() {
               >
                 Cancel
               </Button>
-              {photoPreview && (
-                <Button
+              <Button
                   className="flex-1 gap-2"
                   onClick={handlePhotoSubmit}
-                  disabled={addCapture.isPending}
+                  disabled={!photoPreview || photoLoading || addCapture.isPending}
                 >
                   <Send className="h-4 w-4" />
-                  Queue
+                  {addCapture.isPending ? "Uploading…" : "Queue"}
                 </Button>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -379,7 +387,8 @@ export default function CapturePage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  className="h-12 w-12 shrink-0 text-muted-foreground hover:text-destructive"
+                  aria-label={`Delete capture: ${c.title}`}
                   onClick={() => deleteCapture.mutate(c.id)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

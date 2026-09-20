@@ -71,13 +71,8 @@ export function AppLayout() {
       <LayoutFonts />
       <div
         className="sl-layout min-h-screen flex w-full relative"
-        style={{
-          backgroundImage: `url(${bgImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
       >
+        <div className="sl-viewport-backdrop" aria-hidden="true" style={{ backgroundImage: `url(${bgImage})` }} />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-background/55 dark:bg-background/50 pointer-events-none" />
         <div className="relative z-10 flex w-full min-h-screen">

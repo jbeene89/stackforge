@@ -1,0 +1,31 @@
+import { afterEach, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import CapturePage from "./CapturePage";
+const mocks = vi.hoisted(() => ({ prepare: vi.fn(), mutate: vi.fn() }));
+vi.mock("@/lib/image-import", () => ({ prepareImage: mocks.prepare }));
+vi.mock("@/hooks/useMobileCaptures", () => ({ useMobileCaptures: () => ({ captures: [], isLoading: false, addCapture: { mutate: mocks.mutate, isPending: false }, deleteCapture: { mutate: vi.fn() } }) }));
+afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals(); });
+it("retains the selected photo and note when its upload fails", async () => {
+  mocks.prepare.mockResolvedValue("data:image/jpeg;base64,ZmFrZQ==");
+  vi.stubGlobal("fetch", vi.fn(async () => ({ blob: async () => new Blob(["photo"], { type: "image/jpeg" }) })));
+  mocks.mutate.mockImplementation((_data, callbacks) => callbacks.onError(new Error("Offline")));
+  const { container } = render(<CapturePage />);
+  fireEvent.click(screen.getByRole("button", { name: "Photo" }));
+  fireEvent.change(container.querySelector('input[type="file"]')!, { target: { files: [new File(["photo"], "sample.jpg", { type: "image/jpeg" })] } });
+  await screen.findByAltText("Selected photo preview");
+  fireEvent.change(screen.getByRole("textbox", { name: "Photo note" }), { target: { value: "Inspection notes to preserve" } });
+  fireEvent.click(screen.getByRole("button", { name: "Queue" }));
+  expect(screen.getByAltText("Selected photo preview")).toBeInTheDocument();
+  expect(screen.getByRole("textbox", { name: "Photo note" })).toHaveValue("Inspection notes to preserve");
+  expect(screen.getByRole("status")).toHaveTextContent("Your photo and note are still here");
+});
+it("shows an unreadable-image error and enables the picker for retry", async () => {
+  mocks.prepare.mockRejectedValue(new Error("This image could not be opened."));
+  const { container } = render(<CapturePage />);
+  fireEvent.click(screen.getByRole("button", { name: "Photo" }));
+  fireEvent.change(container.querySelector('input[type="file"]')!, { target: { files: [new File(["bad"], "bad.jpg", { type: "image/jpeg" })] } });
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("could not be opened"));
+  expect(screen.getByRole("button", { name: "Choose photo" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Queue" })).toBeDisabled();
+  expect(mocks.mutate).not.toHaveBeenCalled();
+});

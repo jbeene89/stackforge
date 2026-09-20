@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useUpdateProfile } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Key, Plus, Trash2, Shield, Megaphone, AlertTriangle, Info } from "lucide-react";
 import { TwoFactorSetup } from "@/components/TwoFactorSetup";
 import ReferralSection from "@/components/ReferralSection";
@@ -129,6 +129,7 @@ export default function AccountPage() {
     <div className="p-6 space-y-6 animate-fade-in max-w-2xl">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold">Account Settings</h1>
+        <Button variant="outline" asChild className="min-h-12"><Link to="/app-settings">App help & feedback</Link></Button>
         {credits && <TierBadge tier={credits.tier} size="md" />}
       </div>
 

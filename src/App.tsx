@@ -1,3 +1,4 @@
+import { MotionConfig } from "framer-motion";
 import { lazy, Suspense } from "react";
 import ChunkErrorBoundary from "@/components/ChunkErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
@@ -85,11 +86,13 @@ const QuickPairsPage = lazy(() => import("./pages/QuickPairsPage"));
 const OfflineLLMPage = lazy(() => import("./pages/OfflineLLMPage"));
 const TrainYourOwnLLMPage = lazy(() => import("./pages/TrainYourOwnLLMPage"));
 const PrivateAIModelPage = lazy(() => import("./pages/PrivateAIModelPage"));
+const AppSettingsPage = lazy(() => import("./pages/AppSettingsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <MotionConfig reducedMotion="user">
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
@@ -105,6 +108,7 @@ const App = () => (
                 {/* Public routes */}
                 <Route path="/" element={isNativeApp() ? <Navigate to="/launchpad" replace /> : <LandingPage />} />
                 <Route path="/launchpad" element={<NativeLaunchpadPage />} />
+                <Route path="/app-settings" element={<AppSettingsPage />} />
                 <Route path="/offline-workbench" element={<OfflineWorkbenchPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -188,6 +192,7 @@ const App = () => (
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
+  </MotionConfig>
 );
 
 export default App;

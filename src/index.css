@@ -349,3 +349,11 @@ html[data-native-app] #root { padding-top: var(--safe-area-top); }
 
 /* Keep scrolling content below the native status icons. */
 html[data-native-app] #root::before { content: ""; position: fixed; inset: 0 0 auto; height: var(--safe-area-top); background: hsl(var(--background)); pointer-events: none; z-index: 100; }
+
+/* Image uploads change document content, never the decorative viewport background. */
+.sl-viewport-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100lvh; background-size: cover; background-position: center; pointer-events: none; }
+.sl-layout { isolation: isolate; }
+.sl-image-preview { height: 11rem; overflow-y: auto; overscroll-behavior: contain; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -324,3 +324,12 @@
 
 /* Native root owns the top inset; website headers retain their own inset. */
 html[data-native-app] .slp-header { padding-top: 0; }
+
+.slp-settings { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px; color: inherit; }
+.slp-settings svg { width: 21px; height: 21px; }
+.slp-settings:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.slp-guide-card { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; border: 1px solid #3c4147; border-radius: 16px; padding: 20px; margin: 24px 0; }
+.slp-guide-card > div { flex: 1 1 240px; }
+.slp-guide-card h2 { font: 650 20px/1.4 system-ui, sans-serif; color: #f4f4f5; }
+.slp-guide-card p { color: #b7bac2; margin-top: 6px; line-height: 1.6; }
+@media (max-width: 400px) { .slp-header-actions { gap: 4px; } .slp-connection { display: none; } }

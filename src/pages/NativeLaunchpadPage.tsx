@@ -5,7 +5,7 @@ import {
   ChevronRight, Cloud, Cpu, Database, Download, FlaskConical, Flame,
   Grid2X2, Hammer, History, House, Image, Layers3, LockKeyhole, Mail,
   NotebookPen, Rocket, Search, Smartphone, Sparkles, Star, Terminal,
-  UserRound, Wifi, WifiOff, Workflow, X,
+  UserRound, Wifi, WifiOff, Workflow, X, Settings,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,7 @@ import {
   toggleWorkspaceFavorite, WORKSPACE_PREFERENCES_KEY, type WorkspacePreferences,
 } from "@/lib/workspace-preferences";
 import "@/components/native/NativeLaunchpad.css";
+import { WelcomeGuideCard } from "@/components/native/QuickStartGuide";
 
 const TOOL_ICONS: Record<WorkspaceIcon, LucideIcon> = {
   brain: BrainCircuit, notebook: NotebookPen, blocks: Blocks, cloud: Cloud,
@@ -129,6 +130,7 @@ export default function NativeLaunchpadPage() {
             <span>Soupy<span className="slp-brand-light">Lab</span><span className="slp-brand-dot">.</span></span>
           </Link>
           <div className="slp-header-actions">
+            <Link className="slp-settings" to="/app-settings" aria-label="App settings"><Settings aria-hidden="true" /></Link>
             <span className={`slp-connection ${online ? "" : "slp-connection--offline"}`} role="status">
               <span className="slp-connection-dot" />{online ? "Online" : "Offline"}
             </span>
@@ -169,6 +171,8 @@ export default function NativeLaunchpadPage() {
           </div>
           <span className="slp-hero-corner" aria-hidden="true">01 / THE LAUNCHPAD</span>
         </section>
+
+        <WelcomeGuideCard />
 
         <section className="slp-quick-grid" aria-label="Quick starts">
           <Link className="slp-quick-card" to={OFFLINE_WORKBENCH.path}>

@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
+import { prepareImageBatch } from "@/lib/image-import";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -1140,6 +1141,10 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
   const [imageAnalyzing, setImageAnalyzing] = useState(false);
   const [imageAnalysisText, setImageAnalysisText] = useState("");
   const imageUploadRef = useRef<HTMLInputElement>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageLoadStatus, setImageLoadStatus] = useState("");
+  const imageLoadSequence = useRef(0);
+  useEffect(() => () => { imageLoadSequence.current++; }, []);
   // Per-file parsing options
   const [mergeMode, setMergeMode] = useState<"combine" | "separate">("combine");
   const [fileDelimiter, setFileDelimiter] = useState("===== {filename} =====");
@@ -1657,37 +1662,24 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    if (files.length > 30) {
-      toast.error("Maximum 30 images allowed at once");
-      return;
-    }
-    for (const f of files) {
-      if (f.size > 8 * 1024 * 1024) {
-        toast.error(`"${f.name}" is over 8MB. Please use smaller images.`);
-        return;
-      }
-    }
+    e.target.value = "";
+    if (!files.length || imageLoading || imageAnalyzing) return;
+    const request = ++imageLoadSequence.current;
+    setImageLoading(true);
+    setImageLoadStatus(`Opening 0 of ${files.length} images…`);
     try {
-      const urls = await Promise.all(
-        files.map(
-          (f) =>
-            new Promise<string>((resolve, reject) => {
-              const r = new FileReader();
-              r.onload = () => resolve(r.result as string);
-              r.onerror = () => reject(new Error(`Could not read ${f.name}`));
-              r.readAsDataURL(f);
-            })
-        )
-      );
+      const urls = await prepareImageBatch(files, completed => {
+        if (request === imageLoadSequence.current) setImageLoadStatus(`Opening ${completed} of ${files.length} images…`);
+      });
+      if (request !== imageLoadSequence.current) return;
       setImageDataUrls(urls);
       setImageFileName(files.length === 1 ? files[0].name : `${files.length} images`);
       setImageAnalysisText("");
-      toast.success(`${files.length} image${files.length === 1 ? "" : "s"} loaded`);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to read images");
+      setImageLoadStatus(`${files.length} images ready. Nothing is uploaded until you choose Analyze.`);
+    } catch (error) {
+      if (request === imageLoadSequence.current) setImageLoadStatus(error instanceof Error ? error.message : "Failed to open images.");
     } finally {
-      if (imageUploadRef.current) imageUploadRef.current.value = "";
+      if (request === imageLoadSequence.current) setImageLoading(false);
     }
   };
 
@@ -2232,19 +2224,19 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
               <ImageIcon className="h-4 w-4 text-primary" /> Image Analysis
             </CardTitle>
             <CardDescription>
-              Upload one or more images (screenshots, diagrams, handwritten notes, photos of pages). Gemini vision reads them, then the content is turned into training pairs. Max 30 images per batch, 8MB each.
+              Upload one or more images (screenshots, diagrams, handwritten notes, photos of pages). Gemini vision reads them, then the content is turned into training pairs. Max 30 images per batch, 8MB each, 40MB total. Photos are prepared locally at up to 2048 pixels on the longest edge.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <label className="flex-1 cursor-pointer">
-                <Button variant="outline" className="w-full" asChild disabled={imageAnalyzing}>
-                  <span><ImageIcon className="h-4 w-4 mr-2" /> {imageFileName ? "Change Images" : "Choose Images"}</span>
-                </Button>
-                <input ref={imageUploadRef} type="file" accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.heic,.heif,.avif,.svg" multiple className="sr-only" onChange={handleImageUpload} />
-              </label>
+              <Button variant="outline" className="w-full min-h-12" disabled={imageAnalyzing || imageLoading} onClick={() => imageUploadRef.current?.click()}>
+                <ImageIcon className="h-4 w-4 mr-2" /> {imageLoading ? "Opening images…" : imageFileName ? "Change Images" : "Choose Images"}
+              </Button>
+              <input ref={imageUploadRef} aria-label="Choose images for analysis" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif" multiple className="hidden" disabled={imageAnalyzing || imageLoading} onChange={handleImageUpload} />
             </div>
 
+            <p role="status" className="text-sm text-muted-foreground min-h-12">{imageLoadStatus || "Choose images to preview. Existing images stay in place if a new file cannot be opened."}</p>
+            {imageDataUrls.length === 0 && <div className="sl-image-preview rounded-lg border border-dashed flex items-center justify-center text-sm text-muted-foreground">Your image previews appear here</div>}
             {imageDataUrls.length > 0 && (
               <div className="space-y-3">
                 <div className="bg-muted/50 rounded-lg p-3 space-y-1">
@@ -2253,7 +2245,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                   </p>
                   <p className="text-xs text-muted-foreground">{imageDataUrls.length} image{imageDataUrls.length === 1 ? "" : "s"} loaded</p>
                 </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                <div className="sl-image-preview grid grid-cols-4 sm:grid-cols-6 auto-rows-max gap-2">
                   {imageDataUrls.map((url, i) => (
                     <div key={i} className="aspect-square rounded-md overflow-hidden border border-border/50 bg-muted/30">
                       <img src={url} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
@@ -2262,7 +2254,7 @@ function Step2AddData({ dataset, onNext }: { dataset: TrainingDataset; onNext: (
                 </div>
 
                 {!imageAnalysisText && (
-                  <Button onClick={handleAnalyzeImages} disabled={imageAnalyzing} className="w-full">
+                  <Button onClick={handleAnalyzeImages} disabled={imageAnalyzing || imageLoading} className="w-full">
                     {imageAnalyzing ? (
                       <><RotateCcw className="h-4 w-4 mr-2 animate-spin" /> Reading images with AI vision…</>
                     ) : (

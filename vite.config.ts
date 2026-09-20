@@ -60,9 +60,9 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['framer-motion', 'recharts', '@tanstack/react-query'],
-          'vendor-radix': [
+          'vendor-ui': [
+            'react', 'react-dom', 'react-router-dom',
+            'framer-motion', 'recharts', '@tanstack/react-query',
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
             '@radix-ui/react-tabs',
