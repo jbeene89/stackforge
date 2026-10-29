@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Cpu, Zap, Monitor, Copy, AlertTriangle, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { OLLAMA_LOCAL_MODELS } from "@/lib/localModels";
 
 // ─── GPU Database ────────────────────────────────────────────
 export interface GPUProfile {
@@ -180,16 +181,12 @@ export interface OllamaModel {
   recommended?: boolean;
 }
 
-const OLLAMA_MODELS: OllamaModel[] = [
-  { id: "llama3.2:1b", name: "Llama 3.2 1B", params: "1B", sizeGB: 0.7, vramNeeded: 2, speed: "Very fast", quality: "Good for simple tasks", pullCommand: "ollama pull llama3.2:1b", recommended: false },
-  { id: "llama3.2:3b", name: "Llama 3.2 3B", params: "3B", sizeGB: 2.0, vramNeeded: 4, speed: "Fast", quality: "Solid general use", pullCommand: "ollama pull llama3.2:3b", recommended: false },
-  { id: "llama3.1:8b", name: "Llama 3.1 8B", params: "8B", sizeGB: 4.7, vramNeeded: 6, speed: "Moderate", quality: "High quality reasoning", pullCommand: "ollama pull llama3.1:8b", recommended: false },
-  { id: "gemma2:9b", name: "Gemma 2 9B", params: "9B", sizeGB: 5.4, vramNeeded: 7, speed: "Moderate", quality: "Strong coding & reasoning", pullCommand: "ollama pull gemma2:9b", recommended: false },
-  { id: "mistral:7b", name: "Mistral 7B", params: "7B", sizeGB: 4.1, vramNeeded: 6, speed: "Moderate", quality: "Great all-rounder", pullCommand: "ollama pull mistral:7b", recommended: false },
-  { id: "phi3:mini", name: "Phi-3 Mini 3.8B", params: "3.8B", sizeGB: 2.3, vramNeeded: 4, speed: "Fast", quality: "Excellent for size", pullCommand: "ollama pull phi3:mini", recommended: false },
-  { id: "qwen2.5:7b", name: "Qwen 2.5 7B", params: "7B", sizeGB: 4.4, vramNeeded: 6, speed: "Moderate", quality: "Multilingual powerhouse", pullCommand: "ollama pull qwen2.5:7b", recommended: false },
-  { id: "llama3.1:70b-q4_K_M", name: "Llama 3.1 70B (Q4)", params: "70B", sizeGB: 40, vramNeeded: 42, speed: "Slow", quality: "Near-frontier", pullCommand: "ollama pull llama3.1:70b", recommended: false },
-];
+const OLLAMA_MODELS: OllamaModel[] = OLLAMA_LOCAL_MODELS.flatMap(model => model.ollama ? [{
+  id: model.ollama, name: model.label, params: model.params,
+  sizeGB: model.downloadGB ?? 0, vramNeeded: model.memoryGB ?? 0,
+  speed: "Hardware-dependent", quality: model.kind === "vision" ? "Text + images" : "Text",
+  pullCommand: `ollama pull ${model.ollama}`,
+}] : []);
 
 function getModelsForGPU(gpu: GPUProfile): OllamaModel[] {
   return OLLAMA_MODELS.map((m) => ({

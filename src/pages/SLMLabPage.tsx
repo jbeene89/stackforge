@@ -52,6 +52,7 @@ import { ForgeRing } from "@/components/ForgeRing";
 import { SLMModePicker, type SLMMode } from "@/components/SLMModePicker";
 import { EasyModeWizard } from "@/components/EasyModeWizard";
 import { useStarterDataset } from "@/hooks/useStarterDataset";
+import { TRAINING_MODELS } from "@/lib/localModels";
 
 const ComparativeProbe = lazy(() => import("@/components/slm-lab/ComparativeProbe").then(m => ({ default: m.ComparativeProbe })));
 import { DPOPairGenerator } from "@/components/slm-lab/DPOPairGenerator";
@@ -3246,20 +3247,17 @@ function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: ()
     setGradientCheckpoint(d.gradientCheckpoint);
     // Auto-select best model for the profile
     if (profile === "cpu_only" || profile === "low_vram") {
-      setBaseModel("qwen2.5-1.5b");
+      setBaseModel("Qwen/Qwen3-0.6B");
     } else if (profile === "mid_vram" || profile === "amd_rocm") {
-      setBaseModel("qwen2.5-1.5b");
+      setBaseModel("Qwen/Qwen3-1.7B");
     }
   };
 
-  const models = [
-    { value: "llama-3.2-1b", label: "Llama 3.2 (1B)", desc: "Best for limited hardware", vram: "~3 GB", rec: ["cpu_only", "low_vram", "amd_rocm"] },
-    { value: "qwen2.5-1.5b", label: "Qwen 2.5 (1.5B)", desc: "Excellent for code", vram: "~3 GB", rec: ["low_vram", "mid_vram", "amd_rocm"] },
-    { value: "gemma-2-2b", label: "Gemma 2 (2B)", desc: "Strong reasoning", vram: "~4 GB", rec: ["mid_vram", "amd_rocm"] },
-    { value: "phi-3-mini", label: "Phi-3 Mini (3.8B)", desc: "Great all-rounder", vram: "~6 GB", rec: ["mid_vram", "good_gpu", "amd_rocm"] },
-    { value: "llama-3.2-3b", label: "Llama 3.2 (3B)", desc: "Good balance", vram: "~5 GB", rec: ["mid_vram", "good_gpu", "amd_rocm"] },
-    { value: "mistral-7b", label: "Mistral (7B)", desc: "Most capable", vram: "~10 GB", rec: ["good_gpu"] },
-  ];
+  const models = TRAINING_MODELS.map(model => ({
+    value: model.id, label: model.label, desc: model.description,
+    vram: "Depends on training settings",
+    rec: model.id === "Qwen/Qwen3-0.6B" ? ["cpu_only", "low_vram"] : model.id === "Qwen/Qwen3-1.7B" ? ["mid_vram", "amd_rocm"] : [],
+  }));
 
   const downloadTrainingKit = () => {
     if (approvedSamples.length === 0) return;

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { resolveTrainingModelId } from "@/lib/localModels";
 import {
   cacheGetAll,
   cacheGetByIndex,
@@ -697,7 +698,7 @@ export function generateTrainingScript(job: TrainingJob, dataset: TrainingDatase
   const hwProfile = hp.hw_profile || "cpu_only";
   const maxSeqLen = hp.max_seq_length || 1024;
   const isCpuOnly = hwProfile === "cpu_only";
-  const hfModelId = HF_MODEL_MAP[job.base_model] || job.base_model;
+  const hfModelId = resolveTrainingModelId(job.base_model);
   const layerStrategy = hp.layer_strategy || "all";
 
   return `#!/usr/bin/env python3
