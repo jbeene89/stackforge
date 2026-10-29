@@ -6,7 +6,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'SoupyLab'
-const SITE_URL = 'https://soupylab.lovable.app'
+const SITE_URL = 'https://www.soupylab.com'
 
 interface WelcomeProps {
   name?: string
@@ -15,7 +15,7 @@ interface WelcomeProps {
 const WelcomeEmail = ({ name }: WelcomeProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to {SITE_NAME} — let's build something extraordinary</Preview>
+    <Preview>Your {SITE_NAME} account is ready — start with 10 sample training pairs.</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>
@@ -26,16 +26,16 @@ const WelcomeEmail = ({ name }: WelcomeProps) => (
           forge, train, and deploy intelligent modules without big-cloud lock-in.
         </Text>
         <Text style={text}>
-          Here's what you can do right away:
+          Your first dataset is ready to start:
         </Text>
         <Section style={list}>
-          <Text style={listItem}>🔧 Build your first AI module in the Module Builder</Text>
-          <Text style={listItem}>🧪 Experiment in the SLM Lab with on-device models</Text>
-          <Text style={listItem}>📦 Browse community templates in the Marketplace</Text>
+          <Text style={listItem}>Open SLM Lab and choose Load Sample Dataset.</Text>
+          <Text style={listItem}>Review 10 ready-made question-and-answer pairs.</Text>
+          <Text style={listItem}>Edit the examples or export your training kit. Loading the sample uses no credits.</Text>
         </Section>
         <Section style={buttonSection}>
-          <Button style={button} href={`${SITE_URL}/dashboard`}>
-            Go to Dashboard
+          <Button style={button} href={`${SITE_URL}/slm-lab`}>
+            Start My First Dataset
           </Button>
         </Section>
         <Text style={footer}>

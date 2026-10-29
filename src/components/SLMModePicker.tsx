@@ -8,9 +8,11 @@ export type SLMMode = "easy" | "expert";
 
 interface SLMModePickerProps {
   onSelect: (mode: SLMMode) => void;
+  onLoadSample?: () => void;
+  sampleLoading?: boolean;
 }
 
-export function SLMModePicker({ onSelect }: SLMModePickerProps) {
+export function SLMModePicker({ onSelect, onLoadSample, sampleLoading }: SLMModePickerProps) {
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
       <motion.div
@@ -28,6 +30,12 @@ export function SLMModePicker({ onSelect }: SLMModePickerProps) {
           </p>
         </div>
 
+        {onLoadSample && <div className="text-center space-y-2">
+          <Button onClick={onLoadSample} disabled={sampleLoading} className="max-w-full whitespace-normal h-auto min-h-11 py-3">
+            <Sparkles className="h-4 w-4 mr-2 shrink-0" />{sampleLoading ? "Loading sample…" : "Load Sample Dataset"}
+          </Button>
+          <p className="text-xs text-muted-foreground">10 ready-made pairs · No credits used</p>
+        </div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Easy Mode */}
           <Card

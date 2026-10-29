@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -15,12 +16,6 @@ const SENDER_DOMAIN = "notify.soupylab.com"
 // even though actual sending uses the subdomain above.
 const FROM_DOMAIN = "soupylab.com"
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
-}
-
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
   const bytes = new Uint8Array(32)
@@ -29,10 +24,6 @@ function generateToken(): string {
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
-
-// Auth note: this function uses verify_jwt = true in config.toml, so Supabase's
-// gateway validates the caller's JWT (anon or service_role) before the request
-// reaches this code. No in-function auth check is needed.
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -110,6 +101,10 @@ Deno.serve(async (req) => {
   // to always send to a fixed address (e.g., site owner from env var).
   const effectiveRecipient = template.to || recipientEmail
 
+  if (typeof effectiveRecipient !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(effectiveRecipient) || effectiveRecipient.length > 254 || typeof idempotencyKey !== 'string' || idempotencyKey.length > 200) {
+    return new Response(JSON.stringify({ error: 'Invalid recipient or event key' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+
   if (!effectiveRecipient) {
     return new Response(
       JSON.stringify({
@@ -124,6 +119,41 @@ Deno.serve(async (req) => {
 
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '').trim()
+  if (!token) {
+    return new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+  // Internal event senders use the actual server secret, not decoded JWT claims.
+  if (token !== supabaseServiceKey) {
+    const { data: auth, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !auth.user) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const user = auth.user
+    const age = Date.now() - Date.parse(user.created_at)
+    if (templateName !== 'welcome' || !user.email_confirmed_at || !user.email ||
+        user.email.toLowerCase() !== effectiveRecipient.toLowerCase() ||
+        !Number.isFinite(age) || age < 0 || age > 86400000) {
+      return new Response(JSON.stringify({ error: 'Only new-account welcome emails are allowed' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    idempotencyKey = `welcome-${user.id}`
+    templateData = { name: typeof user.user_metadata?.name === 'string' ? user.user_metadata.name.slice(0, 100) : undefined }
+  }
+
+  if (typeof effectiveRecipient !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(effectiveRecipient) || effectiveRecipient.length > 254) {
+    return new Response(JSON.stringify({ error: 'Invalid recipient' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+  // Stable welcome message IDs also prevent repeat queue jobs from becoming repeat sends.
+  if (templateName === 'welcome') {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(idempotencyKey))
+    const hex = Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('')
+    messageId = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`
+    const { data: existing, error } = await supabase.from('email_send_log')
+      .select('id').eq('message_id', messageId).in('status', ['pending', 'sent']).limit(1)
+    if (error) return new Response(JSON.stringify({ error: 'Cannot verify email history' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    if (existing?.length) return new Response(JSON.stringify({ success: true, alreadyQueued: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
 
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
