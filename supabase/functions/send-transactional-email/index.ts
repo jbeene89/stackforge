@@ -101,6 +101,10 @@ Deno.serve(async (req) => {
   // to always send to a fixed address (e.g., site owner from env var).
   const effectiveRecipient = template.to || recipientEmail
 
+  if (typeof effectiveRecipient !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(effectiveRecipient) || effectiveRecipient.length > 254 || typeof idempotencyKey !== 'string' || idempotencyKey.length > 200) {
+    return new Response(JSON.stringify({ error: 'Invalid recipient or event key' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+
   if (!effectiveRecipient) {
     return new Response(
       JSON.stringify({
@@ -142,7 +146,9 @@ Deno.serve(async (req) => {
   }
   // Stable welcome message IDs also prevent repeat queue jobs from becoming repeat sends.
   if (templateName === 'welcome') {
-    messageId = idempotencyKey
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(idempotencyKey))
+    const hex = Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('')
+    messageId = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`
     const { data: existing, error } = await supabase.from('email_send_log')
       .select('id').eq('message_id', messageId).in('status', ['pending', 'sent']).limit(1)
     if (error) return new Response(JSON.stringify({ error: 'Cannot verify email history' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

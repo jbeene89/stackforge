@@ -4502,7 +4502,7 @@ export default function SLMLabPage() {
   };
 
   const handleLoadSample = () => {
-    if (!user) { navigate("/login?redirect=/slm-lab"); return; }
+    if (!user) { navigate("/login", { state: { from: { pathname: "/slm-lab" } } }); return; }
     if (starterDataset.isPending) return;
     starterDataset.mutate(undefined, { onSuccess: dataset => {
       cachedDatasetRef.current = dataset;
