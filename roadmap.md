@@ -10,3 +10,6 @@
 - [x] Simplify mode selection and local AI page; replace pretend model deployment controls with real selection and source links.
 - [x] Pass 12 focused tests and check signed-in selection persistence, vision filtering, and all browser model IDs.
 - [ ] Actual on-device generation and training: blocked; sandbox has no compatible GPU or local Ollama service.
+# What's New and own inference
+- [x] Add 8 recent updates to the What's New panel; hide the expired Easter sale entry.
+- [ ] Own SoupyLab inference engine: waiting on the user's choice of direction.
