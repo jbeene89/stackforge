@@ -4,6 +4,7 @@ import { DownloadFallbackDialog } from "@/components/DownloadFallbackDialog";
 import { SEOHead } from "@/components/SEOHead";
 import { useSearchParams } from "react-router-dom";
 import { generateInjectionScript } from "@/hooks/useTrainingData";
+import { OLLAMA_LOCAL_MODELS } from "@/lib/localModels";
 import { useDatasets } from "@/hooks/useTrainingData";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -184,13 +185,7 @@ const CATEGORIES = [
 ];
 
 const PRESET_MODELS = [
-  "llama3.2:1b",
-  "llama3.2:3b",
-  "qwen2.5:0.5b",
-  "qwen2.5:1.5b",
-  "phi3.5:latest",
-  "gemma2:2b",
-  "tinyllama:latest",
+  ...OLLAMA_LOCAL_MODELS.flatMap(model => model.ollama ? [model.ollama] : []),
   "custom",
 ];
 

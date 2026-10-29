@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useTrainingData";
 import ImportModelDialog from "@/components/ImportModelDialog";
 import { TRAINING_MODELS } from "@/lib/localModels";
+import { useModelContext } from "@/hooks/useModelContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -329,6 +330,7 @@ function JobCard({
 }
 
 export default function TrainingProgressPage() {
+  const { resolvedBaseModel } = useModelContext();
   const { data: jobs, isLoading } = useTrainingJobs();
   const { data: datasets } = useDatasets();
   const { data: customModels } = useCustomModels();
@@ -340,7 +342,7 @@ export default function TrainingProgressPage() {
   const [showImport, setShowImport] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDatasetId, setNewDatasetId] = useState("");
-  const [newModel, setNewModel] = useState("Qwen/Qwen3-0.6B");
+  const [newModel, setNewModel] = useState(resolvedBaseModel);
   const [newMethod, setNewMethod] = useState("lora");
 
   const datasetMap = new Map((datasets ?? []).map((d) => [d.id, d.name]));

@@ -53,6 +53,7 @@ import { SLMModePicker, type SLMMode } from "@/components/SLMModePicker";
 import { EasyModeWizard } from "@/components/EasyModeWizard";
 import { useStarterDataset } from "@/hooks/useStarterDataset";
 import { TRAINING_MODELS } from "@/lib/localModels";
+import { useModelContext } from "@/hooks/useModelContext";
 
 const ComparativeProbe = lazy(() => import("@/components/slm-lab/ComparativeProbe").then(m => ({ default: m.ComparativeProbe })));
 import { DPOPairGenerator } from "@/components/slm-lab/DPOPairGenerator";
@@ -3197,7 +3198,7 @@ function Step3Review({ dataset, onNext, onBack }: { dataset: TrainingDataset; on
 const HARDWARE_PROFILES = {
   low_vram: { label: "🪶 Low VRAM (2-4 GB)", desc: "Integrated GPU or old card", defaults: { batchSize: 1, loraRank: 8, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: true } },
   mid_vram: { label: "⚡ Mid VRAM (4-8 GB)", desc: "GTX 1060/1070, RTX 2060", defaults: { batchSize: 2, loraRank: 16, maxSeqLen: 2048, gradientCheckpoint: true, cpuOffload: false } },
-  amd_rocm: { label: "🔴 AMD ROCm (RX 580, etc.)", desc: "AMD GPU with ROCm support", defaults: { batchSize: 2, loraRank: 16, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: false } },
+  amd_rocm: { label: "🔴 AMD ROCm (supported GPUs)", desc: "Requires an officially supported ROCm GPU; RX 580 Vulkan is inference-only", defaults: { batchSize: 2, loraRank: 16, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: false } },
   cpu_only: { label: "🖥️ CPU Only (16GB+ RAM)", desc: "No GPU — uses RAM instead", defaults: { batchSize: 1, loraRank: 8, maxSeqLen: 1024, gradientCheckpoint: true, cpuOffload: true } },
   good_gpu: { label: "🔥 Good GPU (8+ GB)", desc: "RTX 3060+, A100, etc.", defaults: { batchSize: 4, loraRank: 32, maxSeqLen: 2048, gradientCheckpoint: false, cpuOffload: false } },
 } as const;
@@ -3205,9 +3206,10 @@ type HardwareProfile = keyof typeof HARDWARE_PROFILES;
 
 // ── Step 4: Export & Train ──
 function Step4Export({ dataset, onBack }: { dataset: TrainingDataset; onBack: () => void }) {
+  const { resolvedBaseModel } = useModelContext();
   const { data: samples } = useSamples(dataset.id);
   const [hwProfile, setHwProfile] = useState<HardwareProfile>("cpu_only");
-  const [baseModel, setBaseModel] = useState("Qwen/Qwen3-0.6B");
+  const [baseModel, setBaseModel] = useState(resolvedBaseModel);
   const [epochs, setEpochs] = useState(3);
   const [lr, setLr] = useState(0.0002);
   const [batchSize, setBatchSize] = useState(1);
