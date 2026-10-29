@@ -24,7 +24,7 @@ export const BROWSER_MODELS: WebLLMModel[] = [
   { model_id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen 2.5 1.5B", size: "~1 GB", vram: "~2 GB" },
   { model_id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B", size: "~700 MB", vram: "~1.5 GB" },
   { model_id: "Llama-3.2-3B-Instruct-q4f16_1-MLC", label: "Llama 3.2 3B", size: "~1.8 GB", vram: "~3 GB" },
-  { model_id: "Phi-3.5-mini-instruct-q4f16_1-MLC", label: "Phi 3.5 Mini", size: "~2 GB", vram: "~4 GB" },
+  { model_id: "Phi-4-mini-instruct-q4f16_1-MLC", label: "Phi 4 Mini", size: "~2.3 GB", vram: "~4 GB" },
 ];
 
 let engineInstance: MLCEngineInterface | null = null;
@@ -78,7 +78,7 @@ export async function loadModel(
     if (!(await checkWebGPU())) throw new Error("No compatible GPU found. Try Ollama instead.");
     const engine = await CreateMLCEngine(modelId, {
       initProgressCallback: onProgress,
-      appConfig: { ...prebuiltAppConfig, useIndexedDBCache: true },
+      appConfig: { ...prebuiltAppConfig, cacheBackend: "indexeddb" },
     });
     engineInstance = engine;
     currentModelId = modelId;
@@ -115,7 +115,7 @@ export async function streamBrowserInference(
   const startTime = performance.now();
   let totalTokens = 0;
   if (signal?.aborted) return;
-  const interrupt = () => { void engine.interruptGenerate().catch(() => undefined); };
+  const interrupt = () => { engine.interruptGenerate(); };
   signal?.addEventListener("abort", interrupt, { once: true });
 
   try {

@@ -687,14 +687,7 @@ export function validatePythonScript(script: string): string[] {
   return errors;
 }
 
-const HF_MODEL_MAP: Record<string, string> = {
-  "llama-3.2-1b": "meta-llama/Llama-3.2-1B",
-  "llama-3.2-3b": "meta-llama/Llama-3.2-3B",
-  "qwen2.5-1.5b": "Qwen/Qwen2.5-1.5B",
-  "gemma-2-2b": "google/gemma-2-2b",
-  "phi-3-mini": "microsoft/phi-3-mini-4k-instruct",
-  "mistral-7b": "mistralai/Mistral-7B-v0.3",
-};
+// Preserve old job aliases while all new selections use full repository IDs.
 
 // Generate Python training script
 export function generateTrainingScript(job: TrainingJob, dataset: TrainingDataset): string {
