@@ -5,7 +5,8 @@
 - [ ] Existing-user launch email: blocked; requires a dedicated marketing service, not app emails.
 
 # Model and interface refresh
-- [ ] Refresh supported local text and vision models across shared choices.
-- [ ] Update browser inference compatibility, loading, and stop handling.
-- [ ] Remove duplicated interface clutter while retaining useful workflows.
-- [ ] Run focused tests and check signed-in model selection and interface changes.
+- [x] Refresh shared training, model library, GPU setup, and self-host model choices; retain old job aliases.
+- [x] Update WebLLM to 0.2.86, validate GPU adapters, and improve loading, stop handling, and Ollama streaming.
+- [x] Simplify mode selection and local AI page; replace pretend model deployment controls with real selection and source links.
+- [x] Pass 12 focused tests and check signed-in selection persistence, vision filtering, and all browser model IDs.
+- [ ] Actual on-device generation and training: blocked; sandbox has no compatible GPU or local Ollama service.

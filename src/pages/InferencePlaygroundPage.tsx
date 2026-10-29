@@ -427,13 +427,12 @@ export default function InferencePlaygroundPage() {
             )}
             {connection.status === "disconnected" && (
               <p className="mt-2 text-[10px] text-muted-foreground">
-                💡 Run <code className="px-1 py-0.5 rounded bg-secondary text-foreground/70">ollama serve</code> on
-                your phone (via Termux) or PC, then enter the IP address above.
+                Start Ollama on your computer, then connect to its local address.
               </p>
             )}
           </CardContent>
         </Card>
-      ) : (
+      ) : webGPUSupported ? (
         <Card>
           <CardContent className="py-3 space-y-3">
             {!webGPUSupported ? null : (
@@ -509,7 +508,7 @@ export default function InferencePlaygroundPage() {
             )}
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       {/* Main layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
