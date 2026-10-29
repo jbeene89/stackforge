@@ -39,8 +39,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { readOllamaStream } from "@/lib/ollamaStream";
 import {
   isWebGPUAvailable,
+  checkWebGPU,
+  resolveBrowserModelId,
   loadModel,
   unloadModel,
   streamBrowserInference,
@@ -102,7 +105,7 @@ export default function InferencePlaygroundPage() {
   const [mode, setMode] = useState<InferenceMode>(
     isWebGPUAvailable() ? "browser" : "ollama"
   );
-  const webGPUSupported = isWebGPUAvailable();
+  const [webGPUSupported, setWebGPUSupported] = useState(isWebGPUAvailable());
 
   // Ollama state
   const [connection, setConnection] = useState<ConnectionState>({
@@ -114,7 +117,7 @@ export default function InferencePlaygroundPage() {
 
   // Browser (WebLLM) state
   const [browserModelId, setBrowserModelId] = useState(
-    localStorage.getItem("webllm-model") || BROWSER_MODELS[0].model_id
+    resolveBrowserModelId(localStorage.getItem("webllm-model"))
   );
   const [browserEngine, setBrowserEngine] = useState<MLCEngineInterface | null>(null);
   const [browserLoadProgress, setBrowserLoadProgress] = useState<{ text: string; progress: number } | null>(null);
@@ -134,7 +137,17 @@ export default function InferencePlaygroundPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const isReady = mode === "ollama" ? connection.status === "connected" : browserReady;
+  const isReady = mode === "ollama" ? connection.status === "connected" && !!selectedOllamaModel : browserReady && getLoadedModelId() === browserModelId;
+
+  useEffect(() => {
+    let mounted = true;
+    void checkWebGPU().then(supported => {
+      if (!mounted) return;
+      setWebGPUSupported(supported);
+      if (!supported) setMode("ollama");
+    });
+    return () => { mounted = false; abortRef.current?.abort(); };
+  }, []);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -279,22 +292,10 @@ export default function InferencePlaygroundPage() {
 
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
 
-        const reader = res.body?.getReader();
-        if (!reader) throw new Error("No response body");
-
-        const decoder = new TextDecoder();
+        if (!res.body) throw new Error("No response body");
         let accumulated = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n").filter(Boolean);
-
-          for (const line of lines) {
-            try {
-              const json = JSON.parse(line);
+        for await (const json of readOllamaStream(res.body)) {
+              if (json.error) throw new Error(json.error);
               if (json.message?.content) {
                 accumulated += json.message.content;
                 setMessages((prev) => {
@@ -303,15 +304,13 @@ export default function InferencePlaygroundPage() {
                   return copy;
                 });
               }
-              if (json.done && json.eval_count) {
+              if (json.done && json.eval_count && json.eval_duration) {
                 setStats({
                   tokens_per_second: json.eval_count / (json.eval_duration / 1e9),
                   total_tokens: json.eval_count,
                   eval_duration_ms: json.eval_duration / 1e6,
                 });
               }
-            } catch { /* skip */ }
-          }
         }
       }
     } catch (e: any) {
@@ -345,34 +344,15 @@ export default function InferencePlaygroundPage() {
         ogDescription="Load open-source models (360M–3.5B) directly in your browser. Works offline, no API keys, no data leaves your device. Powered by WebGPU."
         canonicalPath="/inference"
       />
-      {/* Hero — landing-ready context for cold visitors */}
-      <div className="space-y-4">
-        <div className="space-y-2">
+      <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Terminal className="h-7 w-7 text-[hsl(var(--forge-cyan))]" />
-            <h1 className="text-3xl font-bold font-display tracking-tight">Run AI Models in Your Browser</h1>
+            <Terminal className="h-7 w-7 text-primary shrink-0" />
+            <h1 className="text-3xl font-bold font-display">Local AI</h1>
           </div>
-          <p className="text-base text-muted-foreground max-w-2xl leading-relaxed">
-            No servers. No API keys. No data leaves your device.{" "}
-            <span className="text-foreground font-medium">Load an open-source model directly in your browser</span>{" "}
-            and chat with it — even offline. Powered by WebGPU, everything runs 100% on your hardware.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--forge-emerald))]/10 text-[hsl(var(--forge-emerald))] px-2.5 py-1 font-medium">
-            <WifiOff className="h-3 w-3" /> Works offline
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--forge-cyan))]/10 text-[hsl(var(--forge-cyan))] px-2.5 py-1 font-medium">
-            <Cpu className="h-3 w-3" /> On-device inference
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--forge-amber))]/10 text-[hsl(var(--forge-amber))] px-2.5 py-1 font-medium">
-            <Zap className="h-3 w-3" /> 7 models, 360M–3.5B
-          </span>
-        </div>
       </div>
 
       {/* Mode Selector */}
-      <Tabs value={mode} onValueChange={(v) => setMode(v as InferenceMode)} className="w-full">
+      <Tabs value={mode} onValueChange={(v) => { if (!streaming && !browserLoadProgress) setMode(v as InferenceMode); }} className="w-full">
         <TabsList className="grid w-full max-w-sm grid-cols-2">
           <TabsTrigger value="browser" className="gap-1.5 text-xs">
             <Globe className="h-3 w-3" />
@@ -394,8 +374,7 @@ export default function InferencePlaygroundPage() {
               WebGPU is not available in your browser
             </div>
             <p className="text-xs text-muted-foreground">
-              Browser-based inference requires WebGPU, which is supported in <strong>Chrome 113+</strong>, <strong>Edge 113+</strong>, and <strong>Opera 99+</strong>.
-              Firefox and Safari don't fully support it yet.
+              No compatible GPU was detected. Try an updated browser with hardware acceleration enabled, or connect to Ollama.
             </p>
             <div className="flex items-center gap-2 pt-1">
               <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setMode("ollama")}>
@@ -466,7 +445,7 @@ export default function InferencePlaygroundPage() {
                       {browserReady ? "Ready" : browserLoadProgress ? "Loading…" : "Not loaded"}
                     </span>
                   </div>
-                  <Select value={browserModelId} onValueChange={setBrowserModelId} disabled={!!browserLoadProgress}>
+                  <Select value={browserModelId} onValueChange={setBrowserModelId} disabled={!!browserLoadProgress || browserReady || streaming}>
                     <SelectTrigger className="h-8 text-xs flex-1">
                       <SelectValue />
                     </SelectTrigger>
@@ -482,7 +461,7 @@ export default function InferencePlaygroundPage() {
                     </SelectContent>
                   </Select>
                   {browserReady ? (
-                    <Button size="sm" variant="outline" className="h-8 gap-1.5 shrink-0" onClick={unloadBrowserModel}>
+                    <Button size="sm" variant="outline" className="h-8 gap-1.5 shrink-0" onClick={unloadBrowserModel} disabled={streaming}>
                       <X className="h-3 w-3" /> Unload
                     </Button>
                   ) : (
@@ -504,15 +483,13 @@ export default function InferencePlaygroundPage() {
 
                 {/* Pre-download warning */}
                 {!browserReady && !browserLoadProgress && selectedBrowserModel && (
-                  <div className="rounded-lg border border-[hsl(var(--forge-amber))]/20 bg-[hsl(var(--forge-amber))]/5 p-3 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[hsl(var(--forge-amber))]">
+                  <div className="border-t border-border pt-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-forge-amber">
                       <Download className="h-3.5 w-3.5" />
                       One-time download: {selectedBrowserModel.size}
                     </div>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">
-                      This model downloads <strong>{selectedBrowserModel.size}</strong> once and is permanently cached in your browser.
-                      After loading, it runs <strong>100% offline forever</strong> — no server, no internet, no data leaves your device.
-                      Requires a GPU with ~{selectedBrowserModel.vram} VRAM.
+                      Approximate GPU memory: {selectedBrowserModel.vram}. Downloads are cached for offline use; clearing browser data removes them.
                     </p>
                   </div>
                 )}
@@ -555,7 +532,7 @@ export default function InferencePlaygroundPage() {
               )}
             </div>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={clearChat}>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={clearChat} disabled={streaming} aria-label="Clear chat" title="Clear chat">
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -596,7 +573,7 @@ export default function InferencePlaygroundPage() {
                           : "bg-secondary/60 border border-border/40"
                       )}
                     >
-                      <pre className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed">
+                      <pre className="whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed">
                         {msg.content}
                         {streaming && i === messages.length - 1 && msg.role === "assistant" && (
                           <span className="inline-block w-1.5 h-4 bg-foreground/60 animate-pulse ml-0.5 align-text-bottom" />
@@ -632,6 +609,8 @@ export default function InferencePlaygroundPage() {
                 <Button
                   size="sm"
                   className="h-9 gap-1 shrink-0"
+                  aria-label="Send message"
+                  title="Send message"
                   onClick={sendMessage}
                   disabled={!input.trim() || !isReady}
                 >
@@ -670,7 +649,7 @@ export default function InferencePlaygroundPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {connection.models.length > 0 ? (
-                  <Select value={selectedOllamaModel} onValueChange={setSelectedOllamaModel}>
+                  <Select value={selectedOllamaModel} onValueChange={setSelectedOllamaModel} disabled={streaming}>
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue placeholder="Select model" />
                     </SelectTrigger>
@@ -700,11 +679,8 @@ export default function InferencePlaygroundPage() {
 
           {/* Parameters */}
           <Card>
-            <CardHeader
-              className="pb-2 cursor-pointer"
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              <CardTitle className="text-xs flex items-center justify-between">
+            <CardHeader className="pb-2">
+              <Button variant="ghost" className="h-8 w-full justify-between text-xs px-0" onClick={() => setShowSettings(!showSettings)} aria-expanded={showSettings}>
                 <span className="flex items-center gap-1.5">
                   <Settings className="h-3.5 w-3.5" /> Parameters
                 </span>
@@ -713,7 +689,7 @@ export default function InferencePlaygroundPage() {
                 ) : (
                   <ChevronDown className="h-3 w-3 text-muted-foreground" />
                 )}
-              </CardTitle>
+              </Button>
             </CardHeader>
             {showSettings && (
               <CardContent className="space-y-4">
@@ -763,39 +739,9 @@ export default function InferencePlaygroundPage() {
                 placeholder="You are the Builder perspective. Analyze the following capture..."
                 className="text-xs min-h-[80px] resize-y"
               />
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Persisted locally — paste your SLM's system prompt from the template.
-              </p>
             </CardContent>
           </Card>
 
-          {/* Quick tips */}
-          {mode === "ollama" ? (
-            <div className="rounded-lg border border-[hsl(var(--forge-cyan))]/20 bg-[hsl(var(--forge-cyan))]/5 p-3 space-y-1.5">
-              <p className="text-[10px] font-semibold text-[hsl(var(--forge-cyan))]">
-                💡 Quick Setup
-              </p>
-              <ul className="text-[10px] text-foreground/70 space-y-1 list-disc pl-3">
-                <li>On phone: <code className="px-1 rounded bg-secondary">ollama serve</code> in Termux</li>
-                <li>Find phone IP: <code className="px-1 rounded bg-secondary">ifconfig wlan0</code></li>
-                <li>Enter <code className="px-1 rounded bg-secondary">http://PHONE_IP:11434</code> above</li>
-                <li>Same Wi-Fi network required</li>
-              </ul>
-            </div>
-          ) : (
-            <div className="rounded-lg border border-[hsl(var(--forge-emerald))]/20 bg-[hsl(var(--forge-emerald))]/5 p-3 space-y-1.5">
-              <p className="text-[10px] font-semibold text-[hsl(var(--forge-emerald))]">
-                🧠 Browser Inference
-              </p>
-              <ul className="text-[10px] text-foreground/70 space-y-1 list-disc pl-3">
-                <li>Models download once and are <strong>cached in your browser</strong></li>
-                <li>All inference runs via WebGPU — <strong>no server, no internet</strong></li>
-                <li>Works in Chrome 113+, Edge 113+, or any WebGPU-enabled browser</li>
-                <li>Smaller models (360M–1.7B) work well on most devices</li>
-                <li>Larger models (3B+) need a dedicated GPU with sufficient VRAM</li>
-              </ul>
-            </div>
-          )}
         </div>
       </div>
     </div>
