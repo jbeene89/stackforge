@@ -51,6 +51,7 @@ import { parseExport, PROVIDER_INFO, type Provider, type ParsedConversation } fr
 import { ForgeRing } from "@/components/ForgeRing";
 import { SLMModePicker, type SLMMode } from "@/components/SLMModePicker";
 import { EasyModeWizard } from "@/components/EasyModeWizard";
+import { useStarterDataset } from "@/hooks/useStarterDataset";
 
 const ComparativeProbe = lazy(() => import("@/components/slm-lab/ComparativeProbe").then(m => ({ default: m.ComparativeProbe })));
 import { DPOPairGenerator } from "@/components/slm-lab/DPOPairGenerator";
@@ -4387,6 +4388,8 @@ function SignupBanner() {
 
 export default function SLMLabPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const starterDataset = useStarterDataset();
   const { data: datasets, isLoading: dsLoading } = useDatasets();
   const createDataset = useCreateDataset();
 
@@ -4498,11 +4501,29 @@ export default function SLMLabPage() {
     });
   };
 
+  const handleLoadSample = () => {
+    if (!user) { navigate("/login?redirect=/slm-lab"); return; }
+    if (starterDataset.isPending) return;
+    starterDataset.mutate(undefined, { onSuccess: dataset => {
+      cachedDatasetRef.current = dataset;
+      setActiveDatasetId(dataset.id);
+      setShowInterview(false);
+      handleModeSelect("easy");
+      setStep(3);
+    } });
+  };
+  const sampleStart = <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-6 py-4 border-b border-border">
+    <div><h2 className="text-base font-semibold">Your first dataset</h2><p className="text-xs text-muted-foreground">10 ready-made pairs · No credits used</p></div>
+    <Button onClick={handleLoadSample} disabled={starterDataset.isPending} className="max-w-full whitespace-normal h-auto min-h-11 py-3">
+      <Sparkles className="h-4 w-4 mr-2 shrink-0" />{starterDataset.isPending ? "Loading sample…" : "Load Sample Dataset"}
+    </Button>
+  </div>;
+
   if (dsLoading) return <div className="p-8 space-y-4"><Skeleton className="h-16 w-64 mx-auto" /><Skeleton className="h-[400px] max-w-lg mx-auto" /></div>;
 
   // Mode picker popup (first visit)
   if (!slmMode) {
-    return <SLMModePicker onSelect={handleModeSelect} />;
+    return <SLMModePicker onSelect={handleModeSelect} onLoadSample={handleLoadSample} sampleLoading={starterDataset.isPending} />;
   }
 
   // Interview mode — full screen chat
@@ -4523,6 +4544,7 @@ export default function SLMLabPage() {
   if (slmMode === "easy" && step === -1) {
     return (
       <div className="h-[calc(100vh-3.5rem)] flex flex-col animate-fade-in">
+        {sampleStart}
         <EasyModeWizard
           onCreateDataset={handleEasyCreate}
           onStartInterview={() => {}}
@@ -4540,6 +4562,7 @@ export default function SLMLabPage() {
     return (
       <>
         {!user && <SignupBanner />}
+        {sampleStart}
         <ForgeRing />
       </>
     );
@@ -4575,6 +4598,8 @@ export default function SLMLabPage() {
       {showModePicker && <SLMModePicker onSelect={(m) => { handleModeSelect(m); setShowModePicker(false); }} />}
 
       <StepIndicator currentStep={step} />
+
+      {step === 1 && sampleStart}
 
       <div className="flex-1 overflow-auto">
         {step === 1 && <Step1CreateDataset onCreated={handleDatasetCreated} onSelectExisting={handleSelectExisting} existingDatasets={datasets || []} />}
