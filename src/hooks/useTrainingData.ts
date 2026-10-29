@@ -1493,7 +1493,7 @@ export function generateInjectionScript(
   domain: string = "general",
   weights: Record<string, number> = {}
 ): string {
-  const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
+  const hfModelId = resolveTrainingModelId(baseModel);
   const zonesJson = JSON.stringify(zones);
   const perspectsJson = JSON.stringify(perspectives);
   const weightsJson = JSON.stringify(weights);
@@ -1991,7 +1991,7 @@ export function generateUnlearnScript(
   baseModel: string,
   ollamaModel: string = "llama3.2:1b"
 ): string {
-  const hfModelId = HF_MODEL_MAP[baseModel] || baseModel;
+  const hfModelId = resolveTrainingModelId(baseModel);
   const targetsJson = JSON.stringify(targets.map(t => t.replace(/"/g, '\\"')));
 
   return `#!/usr/bin/env python3
