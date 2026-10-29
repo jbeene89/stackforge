@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { isNativeApp } from "@/lib/native-navigation";
 import { toast } from "sonner";
+import { welcomeRequest } from "@/lib/welcomeEmail";
 
 interface AuthContextType {
   user: User | null;
@@ -34,27 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Send welcome email on first sign-in (after email verification)
-      if (event === "SIGNED_IN" && session?.user) {
-        const welcomeKey = `welcome_sent_${session.user.id}`;
-        if (!localStorage.getItem(welcomeKey)) {
-          localStorage.setItem(welcomeKey, "1");
-          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-transactional-email`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            },
-            body: JSON.stringify({
-              templateName: "welcome",
-              recipientEmail: session.user.email,
-              idempotencyKey: `welcome-${session.user.id}`,
-              templateData: { name: session.user.user_metadata?.name || undefined },
-            }),
-          }).catch((err) => console.error("Welcome email failed", err));
-        }
-      }
     });
 
     supabase.auth.getSession()
@@ -81,6 +61,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const request = welcomeRequest(session.user);
+    if (!request) return;
+    const key = `welcome_sent_${session.user.id}`;
+    try { if (localStorage.getItem(key)) return; } catch { /* Server still deduplicates. */ }
+    // Run outside the auth callback to avoid locking session hydration.
+    supabase.functions.invoke("send-transactional-email", { body: request })
+      .then(({ data, error }) => {
+        if (error || data?.error) throw error || new Error(data.error);
+        if (data?.success || data?.reason === "email_suppressed") {
+          try { localStorage.setItem(key, "1"); } catch { /* Storage may be unavailable. */ }
+        }
+      })
+      .catch(() => console.error("Welcome email was not queued; it will retry on the next session."));
+  }, [session]);
 
   const signUp = async (email: string, password: string, name?: string) => {
     const native = isNativeApp();
