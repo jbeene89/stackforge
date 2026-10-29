@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Cpu, Zap, Monitor, Copy, AlertTriangle, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { OLLAMA_LOCAL_MODELS } from "@/lib/localModels";
 
 // ─── GPU Database ────────────────────────────────────────────
 export interface GPUProfile {
@@ -28,20 +29,23 @@ const GPU_PROFILES: GPUProfile[] = [
     name: "AMD RX 580 8GB (Windows · Vulkan)",
     vendor: "amd",
     vram_gb: 8,
-    backend: "Vulkan (llama.cpp)",
-    ollamaTag: "vulkan",
+    backend: "Vulkan (Ollama)",
+    ollamaTag: "latest",
     setupCommands: [
       "# RX 580 (Polaris / gfx803) is NOT supported by ROCm or AMD HIP SDK on Windows.",
-      "# Use the Vulkan backend instead — it's fully supported and fast on Polaris.",
+      "# Use current official Ollama with Vulkan; verify GPU use with ollama ps.",
       "",
       "# Option A — LM Studio (easiest, GUI):",
       "#   1. Download: https://lmstudio.ai",
       "#   2. Settings → Hardware → pick 'Vulkan' runtime",
       "#   3. Load any GGUF model, offload all layers to GPU",
       "",
-      "# Option B — Ollama Vulkan fork (CLI, drop-in compatible):",
-      "winget install ollama.ollama-vulkan",
+      "# Option B — Official Ollama (PowerShell):",
+      "winget install --id Ollama.Ollama -e",
       "ollama serve",
+      "# In another PowerShell window:",
+      "ollama run qwen3:1.7b",
+      "ollama ps",
       "",
       "# Option C — llama.cpp Vulkan build (most control):",
       "#   Download from: https://github.com/ggerganov/llama.cpp/releases",
@@ -49,40 +53,35 @@ const GPU_PROFILES: GPUProfile[] = [
     ],
     dockerFlags: [],
     envVars: {
-      GGML_VULKAN_DEVICE: "0",
+      GGML_VK_VISIBLE_DEVICES: "0",
     },
-    notes: "Polaris/gfx803 has no ROCm or HIP support on Windows — Vulkan is the right path. Runs 7B Q4 at ~10-15 tok/s, 13B Q4 at ~5-7 tok/s. Full 8GB VRAM usable.",
+    notes: "RX 580 is not officially supported by ROCm on Windows. Current Ollama includes Vulkan support; update your AMD driver, start with a small model, and check GPU use with ollama ps. Performance depends on your driver and card.",
   },
   {
     id: "rx580",
-    name: "AMD RX 580 8GB (Linux · ROCm override)",
+    name: "AMD RX 580 8GB (Linux · Vulkan)",
     vendor: "amd",
     vram_gb: 8,
-    backend: "ROCm (gfx803 override)",
-    ollamaTag: "rocm",
+    backend: "Vulkan (Ollama)",
+    ollamaTag: "latest",
     setupCommands: [
-      "# Linux only — ROCm dropped Polaris officially, but the gfx803 override still works.",
+      "# Install a Vulkan-capable AMD driver for your Linux distribution first.",
       "curl -fsSL https://ollama.com/install.sh | sh",
       "",
-      "# Force ROCm to treat RX 580 as gfx803",
-      "export HSA_OVERRIDE_GFX_VERSION=8.0.3",
-      "export OLLAMA_GPU_LAYERS=999",
+      "# Current Ollama enables installed Vulkan backends by default.",
       "",
       "ollama serve",
+      "# In another terminal: ollama run qwen3:1.7b",
+      "# Check GPU use: ollama ps",
     ],
     dockerFlags: [
-      "--device=/dev/kfd",
       "--device=/dev/dri",
-      "--group-add video",
-      "-e HSA_OVERRIDE_GFX_VERSION=8.0.3",
-      "-e OLLAMA_GPU_LAYERS=999",
+      "--group-add render",
     ],
     envVars: {
-      HSA_OVERRIDE_GFX_VERSION: "8.0.3",
-      OLLAMA_GPU_LAYERS: "999",
-      HIP_VISIBLE_DEVICES: "0",
+      GGML_VK_VISIBLE_DEVICES: "0",
     },
-    notes: "Linux only. GCN 4th gen — needs HSA_OVERRIDE for ROCm. Runs 7B Q4 at ~8-12 tok/s. On Windows, use the Vulkan profile instead.",
+    notes: "Polaris is not an officially supported ROCm target. Use current Ollama with a Vulkan driver; GPU availability depends on your Linux driver and permissions. No ROCm override is required for Vulkan.",
   },
   {
     id: "rx6600",
@@ -180,16 +179,12 @@ export interface OllamaModel {
   recommended?: boolean;
 }
 
-const OLLAMA_MODELS: OllamaModel[] = [
-  { id: "llama3.2:1b", name: "Llama 3.2 1B", params: "1B", sizeGB: 0.7, vramNeeded: 2, speed: "Very fast", quality: "Good for simple tasks", pullCommand: "ollama pull llama3.2:1b", recommended: false },
-  { id: "llama3.2:3b", name: "Llama 3.2 3B", params: "3B", sizeGB: 2.0, vramNeeded: 4, speed: "Fast", quality: "Solid general use", pullCommand: "ollama pull llama3.2:3b", recommended: false },
-  { id: "llama3.1:8b", name: "Llama 3.1 8B", params: "8B", sizeGB: 4.7, vramNeeded: 6, speed: "Moderate", quality: "High quality reasoning", pullCommand: "ollama pull llama3.1:8b", recommended: false },
-  { id: "gemma2:9b", name: "Gemma 2 9B", params: "9B", sizeGB: 5.4, vramNeeded: 7, speed: "Moderate", quality: "Strong coding & reasoning", pullCommand: "ollama pull gemma2:9b", recommended: false },
-  { id: "mistral:7b", name: "Mistral 7B", params: "7B", sizeGB: 4.1, vramNeeded: 6, speed: "Moderate", quality: "Great all-rounder", pullCommand: "ollama pull mistral:7b", recommended: false },
-  { id: "phi3:mini", name: "Phi-3 Mini 3.8B", params: "3.8B", sizeGB: 2.3, vramNeeded: 4, speed: "Fast", quality: "Excellent for size", pullCommand: "ollama pull phi3:mini", recommended: false },
-  { id: "qwen2.5:7b", name: "Qwen 2.5 7B", params: "7B", sizeGB: 4.4, vramNeeded: 6, speed: "Moderate", quality: "Multilingual powerhouse", pullCommand: "ollama pull qwen2.5:7b", recommended: false },
-  { id: "llama3.1:70b-q4_K_M", name: "Llama 3.1 70B (Q4)", params: "70B", sizeGB: 40, vramNeeded: 42, speed: "Slow", quality: "Near-frontier", pullCommand: "ollama pull llama3.1:70b", recommended: false },
-];
+const OLLAMA_MODELS: OllamaModel[] = OLLAMA_LOCAL_MODELS.flatMap(model => model.ollama ? [{
+  id: model.ollama, name: model.label, params: model.params,
+  sizeGB: model.downloadGB ?? 0, vramNeeded: model.memoryGB ?? 0,
+  speed: "Hardware-dependent", quality: model.kind === "vision" ? "Text + images" : "Text",
+  pullCommand: `ollama pull ${model.ollama}`,
+}] : []);
 
 function getModelsForGPU(gpu: GPUProfile): OllamaModel[] {
   return OLLAMA_MODELS.map((m) => ({
@@ -217,14 +212,15 @@ export default function GPUSetupWizard({ onGPUSelected, onModelSelected }: GPUSe
   const [detecting, setDetecting] = useState(false);
   const [detectedName, setDetectedName] = useState<string | null>(null);
 
-  const gpu = GPU_PROFILES.find((g) => g.id === selectedGPU)!;
+  const gpu = GPU_PROFILES.find((g) => g.id === selectedGPU) ?? GPU_PROFILES[0];
   const models = getModelsForGPU(gpu);
   const model = models.find((m) => m.id === selectedModel) || models[0];
   const verdict = getVramVerdict(model, gpu);
 
   const handleGPUChange = (id: string) => {
     setSelectedGPU(id);
-    const g = GPU_PROFILES.find((p) => p.id === id)!;
+    const g = GPU_PROFILES.find((p) => p.id === id);
+    if (!g) return;
     onGPUSelected?.(g);
     const best = getModelsForGPU(g).filter((m) => m.recommended);
     if (best.length > 0) {

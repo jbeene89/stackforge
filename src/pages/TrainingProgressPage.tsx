@@ -10,6 +10,8 @@ import {
   type TrainingJob,
 } from "@/hooks/useTrainingData";
 import ImportModelDialog from "@/components/ImportModelDialog";
+import { TRAINING_MODELS } from "@/lib/localModels";
+import { useModelContext } from "@/hooks/useModelContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -328,6 +330,7 @@ function JobCard({
 }
 
 export default function TrainingProgressPage() {
+  const { resolvedBaseModel } = useModelContext();
   const { data: jobs, isLoading } = useTrainingJobs();
   const { data: datasets } = useDatasets();
   const { data: customModels } = useCustomModels();
@@ -339,7 +342,7 @@ export default function TrainingProgressPage() {
   const [showImport, setShowImport] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDatasetId, setNewDatasetId] = useState("");
-  const [newModel, setNewModel] = useState("phi-3-mini");
+  const [newModel, setNewModel] = useState(resolvedBaseModel);
   const [newMethod, setNewMethod] = useState("lora");
 
   const datasetMap = new Map((datasets ?? []).map((d) => [d.id, d.name]));
@@ -473,17 +476,13 @@ export default function TrainingProgressPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="phi-3-mini">Phi-3 Mini</SelectItem>
-                    <SelectItem value="llama-3.2-1b">Llama 3.2 1B</SelectItem>
-                    <SelectItem value="llama-3.2-3b">Llama 3.2 3B</SelectItem>
-                    <SelectItem value="qwen2.5-1.5b">Qwen 2.5 1.5B</SelectItem>
-                    <SelectItem value="qwen2.5-0.5b">Qwen 2.5 0.5B</SelectItem>
+                    {TRAINING_MODELS.map(model => <SelectItem key={model.id} value={model.id}>{model.label}</SelectItem>)}
                     {(customModels ?? []).length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground border-t mt-1 pt-2">
                           Your Imported Models
                         </div>
-                        {customModels!.map((m) => {
+                        {(customModels ?? []).map((m) => {
                           // Use the real HF path / source URL so train.py & all downstream
                           // scripts receive a valid model identifier — never the row id.
                           const value = (m.source_url?.trim() || m.name).trim();

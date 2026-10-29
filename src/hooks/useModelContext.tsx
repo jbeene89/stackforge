@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { TRAINING_MODELS } from "@/lib/localModels";
 
 /* ── Shared base model catalog ───────────────────────────────────── */
 export interface BaseModelEntry {
@@ -11,24 +12,7 @@ export interface BaseModelEntry {
   family: string;   // e.g. "llama", "qwen", "gemma"
 }
 
-export const BASE_MODEL_CATALOG: BaseModelEntry[] = [
-  { id: "TinyLlama/TinyLlama-1.1B-Chat-v1.0", label: "TinyLlama 1.1B", params: "1.1B", family: "tinyllama" },
-  { id: "meta-llama/Llama-3.2-1B-Instruct", label: "Llama 3.2 1B", params: "1B", family: "llama" },
-  { id: "meta-llama/Llama-3.2-3B-Instruct", label: "Llama 3.2 3B", params: "3B", family: "llama" },
-  { id: "google/gemma-2-2b-it", label: "Gemma 2 2B", params: "2B", family: "gemma" },
-  { id: "google/gemma-2-9b-it", label: "Gemma 2 9B", params: "9B", family: "gemma" },
-  { id: "google/gemma-3-1b-it", label: "Gemma 3 1B", params: "1B", family: "gemma" },
-  { id: "google/gemma-3-4b-it", label: "Gemma 3 4B", params: "4B", family: "gemma" },
-  { id: "Qwen/Qwen2.5-0.5B-Instruct", label: "Qwen 2.5 0.5B", params: "0.5B", family: "qwen" },
-  { id: "Qwen/Qwen2.5-1.5B-Instruct", label: "Qwen 2.5 1.5B", params: "1.5B", family: "qwen" },
-  { id: "Qwen/Qwen2.5-3B-Instruct", label: "Qwen 2.5 3B", params: "3B", family: "qwen" },
-  { id: "Qwen/Qwen3-0.6B", label: "Qwen 3 0.6B", params: "0.6B", family: "qwen" },
-  { id: "Qwen/Qwen3-1.7B", label: "Qwen 3 1.7B", params: "1.7B", family: "qwen" },
-  { id: "Qwen/Qwen3-4B", label: "Qwen 3 4B", params: "4B", family: "qwen" },
-  { id: "microsoft/Phi-3-mini-4k-instruct", label: "Phi-3 Mini (3.8B)", params: "3.8B", family: "phi" },
-  { id: "microsoft/Phi-4-mini-instruct", label: "Phi-4 Mini (3.8B)", params: "3.8B", family: "phi" },
-  { id: "mistralai/Mistral-7B-Instruct-v0.3", label: "Mistral 7B", params: "7B", family: "mistral" },
-];
+export const BASE_MODEL_CATALOG: BaseModelEntry[] = TRAINING_MODELS;
 
 export const CUSTOM_MODEL_ID = "__custom__";
 
