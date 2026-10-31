@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,10 +44,10 @@ function Dot({ status }: { status: Status }) {
     status === "ready" ? "bg-[hsl(var(--forge-emerald))]" : status === "checking" ? "bg-[hsl(var(--forge-amber))] animate-pulse" : status === "error" ? "bg-destructive" : "bg-muted-foreground/50")} />;
 }
 
-function EngineRow({ kind, status, detail, children }: { kind: EngineKind; status: Status; detail: string; children?: React.ReactNode }) {
+const EngineRow = forwardRef<HTMLDivElement, { kind: EngineKind; status: Status; detail: string; children?: React.ReactNode }>(function EngineRow({ kind, status, detail, children }, ref) {
   const Icon = ENGINE_ICONS[kind];
   return (
-    <div className="py-3 space-y-2">
+    <div ref={ref} className="py-3 space-y-2">
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4 text-primary shrink-0" />
         <span className="text-sm font-semibold">{ENGINE_LABELS[kind]}</span>
@@ -57,7 +57,7 @@ function EngineRow({ kind, status, detail, children }: { kind: EngineKind; statu
       {children && <div className="pl-6 space-y-2">{children}</div>}
     </div>
   );
-}
+});
 
 export default function InferencePlaygroundPage() {
   const { user } = useAuth();
