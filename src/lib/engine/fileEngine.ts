@@ -1,7 +1,6 @@
 // Runs the user's own GGUF model file in the browser (llama.cpp compiled to WebAssembly).
 // Uses the graphics chip when available, otherwise the processor.
 import type { Wllama } from "@wllama/wllama";
-import wasmUrl from "@wllama/wllama/esm/wasm/wllama.wasm?url";
 import type { GenerateRequest, GenerateStats } from "./run";
 import { sortModelParts } from "./label";
 
@@ -15,7 +14,8 @@ export function getLoadedFileModel(): string | null {
 export async function loadFileModel(name: string, parts: Blob[] | File[]): Promise<void> {
   await unloadFileModel();
   const { Wllama, LoggerWithoutDebug } = await import("@wllama/wllama");
-  const w = new Wllama({ default: wasmUrl }, { logger: LoggerWithoutDebug, suppressNativeLog: true });
+  // Served from public/ so the binary is never bundled; version-pinned to the installed package.
+  const w = new Wllama({ default: "/wasm/wllama-3.8.1.wasm" }, { logger: LoggerWithoutDebug, suppressNativeLog: true });
   const ordered = parts.every(p => "name" in p) ? sortModelParts(parts as File[]) : parts;
   await w.loadModel(ordered as Blob[], { n_ctx: 2048 });
   instance = w;
