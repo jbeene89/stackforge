@@ -12,4 +12,7 @@
 - [ ] Actual on-device generation and training: blocked; sandbox has no compatible GPU or local Ollama service.
 # What's New and own inference
 - [x] Add 8 recent updates to the What's New panel; hide the expired Easter sale entry.
-- [ ] Own SoupyLab inference engine: waiting on the user's choice of direction.
+- [x] Smart Switch engine (home computer > device chip > own file > cloud) with offline lock and mid-answer fallback on Local AI.
+- [x] Run your own model file in the browser, keep it saved on the device, label card + Modelfile + auto-split in training kits.
+- [x] Lab model-comparison tools left on home computer on purpose (they test one specific model).
+- [ ] Real-speed test of own model files and Ollama: needs the user's RX 580 at home.
