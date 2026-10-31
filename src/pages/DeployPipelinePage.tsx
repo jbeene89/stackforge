@@ -206,11 +206,19 @@ echo "Quantizing to Q4_K_M..."
 # Cleanup
 rm -f "${slug}.f16.gguf"
 
+# Browsers can't hold one file over 2 GB, so split big models into parts
+SIZE=$(stat -c%s "$OUTPUT_GGUF" 2>/dev/null || stat -f%z "$OUTPUT_GGUF")
+if [ "$SIZE" -gt 1900000000 ]; then
+  echo "Model is over 1.9 GB — splitting into browser-friendly parts..."
+  "$LLAMA_CPP_DIR/build/bin/llama-gguf-split" --split --split-max-size 512M "$OUTPUT_GGUF" "${slug}"
+fi
+
 echo ""
-echo "Done! Phone-ready model: $OUTPUT_GGUF"
-echo "Transfer this file to your phone and load it in:"
-echo "  - iOS: LM Studio / MLC Chat"  
-echo "  - Android: MLC Chat / Ollama (Termux)"
+echo "Done! Your SoupyLab model file: $OUTPUT_GGUF"
+echo "Run it anywhere with the same file:"
+echo "  - Browser: SoupyLab > Local AI > Load my model file (pick the .gguf + ${slug}.soupy.json)"
+echo "  - Home computer: ollama create ${slug} -f Modelfile"
+echo "  - Phone: open the .gguf in an app that reads GGUF files"
 `;
 }
 
@@ -255,6 +263,11 @@ async function downloadTrainingKit(
 
   // convert.sh
   zip.file("convert.sh", generateConvertScript(datasetName));
+
+  // Label card: travels with the model file so it behaves the same in the browser, Ollama and phones
+  const label = buildModelLabel({ name: datasetName, baseModel, systemPrompt, temperature: 0.4 });
+  zip.file(`${slug}.soupy.json`, JSON.stringify(label, null, 2));
+  if (!fullOffline) zip.file("Modelfile", buildModelfile(label));
 
   if (fullOffline) {
     // config.json — full manifest
