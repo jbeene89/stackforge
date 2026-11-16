@@ -1,7 +1,6 @@
-# Welcome and first dataset
 # SEO review
-- [ ] Verify collapsed sidebar names and correct duplicate sitemap fields.
-- [ ] Optional SLM-versus-LLM guide: requires approval before adding suggested content.
+- [x] Correct legacy sidebar names (active layout uses the wheel navigator) and duplicate sitemap fields; current foundations scan passes.
+- [x] Add the approved SLM-versus-LLM guide with homepage link and sitemap entry; verify desktop/mobile rendering, canonical, and navigation.
 
 # Welcome and first dataset
 - [x] Update welcome links and retry handling; deploy sender. Actual new-account inbox delivery remains unverified.

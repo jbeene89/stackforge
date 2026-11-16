@@ -996,6 +996,7 @@ export default function LandingPage() {
                 <div className="space-y-1.5 sm:space-y-2 text-muted-foreground text-[11px] sm:text-sm font-medium">
                   <div><Link to="/white-paper" className="hover:text-primary transition-colors duration-300">White Paper</Link></div>
                   <div><Link to="/self-host" className="hover:text-primary transition-colors duration-300">Self-Host</Link></div>
+                  <div><Link to="/slm-vs-llm" className="hover:text-primary transition-colors duration-300">SLM vs LLM</Link></div>
                   <div><Link to="/deploy/phone" className="hover:text-primary transition-colors duration-300">Phone Deploy</Link></div>
                 </div>
               </div>
