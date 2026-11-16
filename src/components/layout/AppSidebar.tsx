@@ -24,6 +24,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // ── FONT INJECTION ──────────────────────────────────────────────────────────
 const SidebarFonts = () => (
@@ -352,7 +353,7 @@ export function AppSidebar() {
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarMenuButton asChild isActive={active} tooltip={collapsed ? item.title : undefined}>
-              <NavLink to={item.url} style={{ position: "relative", overflow: "hidden" }}>
+              <NavLink to={item.url} aria-label={item.title} style={{ position: "relative", overflow: "hidden" }}>
                 {active && (
                   <span
                     style={{
@@ -420,7 +421,7 @@ export function AppSidebar() {
     // In simple mode, render collapsible submenus
     return (
       <Collapsible key={submenu.title} defaultOpen={active} className="group/submenu">
-        <CollapsibleTrigger className={cn(
+        <CollapsibleTrigger aria-label={submenu.title} className={cn(
           "flex items-center gap-2.5 w-full px-3 py-2 rounded transition-colors",
           "hover:bg-muted/50",
           active && "bg-muted/50"
@@ -472,7 +473,7 @@ export function AppSidebar() {
 
       {/* HEADER */}
       <SidebarHeader style={{ padding: "16px 12px 12px", borderBottom: "1px solid hsl(var(--border))" }}>
-        <NavLink to="/" className="flex items-center gap-2.5">
+        <NavLink to="/" aria-label="SoupyLab home" className="flex items-center gap-2.5">
           <HexMark size={collapsed ? 24 : 28} />
           {!collapsed && (
             <span className="sl-logo font-black tracking-widest" style={{ fontSize: 13, color: "hsl(var(--foreground))" }}>
@@ -551,12 +552,11 @@ export function AppSidebar() {
         <OfflineIndicator collapsed={collapsed} />
         <CreditsBadge collapsed={collapsed} />
 
-        <button
+        <Button
+          variant="ghost"
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="flex items-center gap-2.5 w-full px-3 py-2 transition-colors rounded"
-          style={{ color: "hsl(var(--muted-foreground))" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--foreground))")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
+          className="flex justify-start items-center gap-2.5 w-full px-3 py-2 text-muted-foreground hover:text-foreground"
         >
           {theme === "dark" ? (
             <Sun style={{ width: 14, height: 14, flexShrink: 0 }} />
@@ -568,14 +568,13 @@ export function AppSidebar() {
               {theme === "dark" ? "LIGHT MODE" : "DARK MODE"}
             </span>
           )}
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="ghost"
+          aria-label="Sign out"
           onClick={handleSignOut}
-          className="flex items-center gap-2.5 w-full px-3 py-2 transition-colors rounded"
-          style={{ color: "#FF6B35" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#FF4500")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#FF6B35")}
+          className="flex justify-start items-center gap-2.5 w-full px-3 py-2 text-destructive hover:text-destructive"
         >
           <LogOut style={{ width: 14, height: 14, flexShrink: 0 }} />
           {!collapsed && (
@@ -583,7 +582,7 @@ export function AppSidebar() {
               SIGN OUT
             </span>
           )}
-        </button>
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );

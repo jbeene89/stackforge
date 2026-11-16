@@ -1,4 +1,9 @@
 # Welcome and first dataset
+# SEO review
+- [ ] Verify collapsed sidebar names and correct duplicate sitemap fields.
+- [ ] Optional SLM-versus-LLM guide: requires approval before adding suggested content.
+
+# Welcome and first dataset
 - [x] Update welcome links and retry handling; deploy sender. Actual new-account inbox delivery remains unverified.
 - [x] Add a one-click starter dataset with 10 curated training pairs.
 - [x] Verify 13 tests, saved pairs after reload, and deployed rejection of existing-account welcome sends.
