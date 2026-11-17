@@ -199,7 +199,7 @@ export default function SignupPage() {
           className="w-full max-w-sm space-y-6"
         >
           <div className="text-center lg:hidden">
-            <Link to="/" className="inline-flex items-center gap-2 mb-6">
+            <Link to="/" aria-label="SoupyLab home" className="inline-flex items-center gap-2 mb-6">
               <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-primary-foreground" />
               </div>
