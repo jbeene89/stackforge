@@ -39,17 +39,42 @@ serve(async (req) => {
     if (!authHeader) throw new Error("No authorization header");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
-    const user = userData.user;
-    if (!user) throw new Error("Not authenticated");
+    let userId: string;
+    if (token.startsWith("sk_")) {
+      const encoded = new TextEncoder().encode(token);
+      const digest = await crypto.subtle.digest("SHA-256", encoded);
+      const hash = Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      const { data: key } = await supabase
+        .from("developer_api_keys")
+        .select("user_id, revoked")
+        .eq("key_hash", hash)
+        .single();
+      if (!key || key.revoked) throw new Error("Invalid API key");
+      userId = key.user_id;
+      try {
+        await supabase
+          .from("developer_api_keys")
+          .update({ last_used_at: new Date().toISOString() })
+          .eq("key_hash", hash);
+      } catch {
+        // Usage tracking must not prevent credit deduction.
+      }
+    } else {
+      const { data: userData, error: userError } = await supabase.auth.getUser(token);
+      if (userError) throw userError;
+      const user = userData.user;
+      if (!user) throw new Error("Not authenticated");
+      userId = user.id;
+    }
 
     const { model, description } = await req.json();
     const cost = MODEL_COSTS[model] || MODEL_COSTS["default"];
 
     // Atomic credit deduction (TOCTOU-safe)
     const { data: rows, error: rpcErr } = await supabase.rpc("deduct_user_credits", {
-      _user_id: user.id,
+      _user_id: userId,
       _cost: cost,
       _description: description || `AI run (${model || "default"})`,
       _transaction_type: "deduction",
