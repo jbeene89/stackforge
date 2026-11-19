@@ -20,6 +20,7 @@ const MODEL_COSTS: Record<string, number> = {
   "gemini-3.1-pro-preview": 5,
   "gpt-5": 8,
   "gpt-5.2": 10,
+  "byok": 1,
   "default": 2,
 };
 
