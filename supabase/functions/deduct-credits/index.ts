@@ -96,6 +96,7 @@ serve(async (req) => {
       success: true,
       cost,
       balance: r.new_balance,
+      user_id: userId,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
